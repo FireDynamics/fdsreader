@@ -378,7 +378,7 @@ def combineSlices(slices):
             cn1 -= 1
             cn2 -= 1
 
-        print(s.sm.extent[0], s.sm.extent[1], s.sm.extent[2], off1, off2, n1, n2, cn1)
+        #print(s.sm.extent[0], s.sm.extent[1], s.sm.extent[2], off1, off2, n1, n2, cn1)
 
         # TODO: fix index order?
         data[:,off2:off2+cn2, off1:off1+cn1] = s.sd
