@@ -188,6 +188,9 @@ class SliceCollection:
         for s in range(len(self.slices)):
             print("index {:03d}: {:s}".format(s, self.slices[s].infoString()))
 
+    def __getitem__(self, item):
+        return self.slices[item]
+
 class Slice:
     def __init__(self, quantity, label, units, filename, mesh_id, index_ranges, centered):
         self.quantity = quantity
