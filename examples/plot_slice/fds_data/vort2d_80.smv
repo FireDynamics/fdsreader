@@ -21,15 +21,11 @@ CSVF
  hrr
  vort2d_80_hrr.csv
 
-CSVF
- devc
- vort2d_80_devc.csv
-
 NMESHES
   1
 
 VIEWTIMES
-      0.00      0.04  1000
+      0.00      0.01  1000
 
 ALBEDO
       0.30000
@@ -145,70 +141,6 @@ PROP
   1
  sensor
   0
-
-DEVICE
- Profile % U-VELOCITY
-    -0.00194     0.00000    -0.02917     0.00000     0.00000    -1.00000  0  0 % null
-
-DEVICE
- Profile % U-VELOCITY
-    -0.00194     0.00000    -0.02528     0.00000     0.00000    -1.00000  0  0 % null
-
-DEVICE
- Profile % U-VELOCITY
-    -0.00194     0.00000    -0.02140     0.00000     0.00000    -1.00000  0  0 % null
-
-DEVICE
- Profile % U-VELOCITY
-    -0.00194     0.00000    -0.01750     0.00000     0.00000    -1.00000  0  0 % null
-
-DEVICE
- Profile % U-VELOCITY
-    -0.00194     0.00000    -0.01362     0.00000     0.00000    -1.00000  0  0 % null
-
-DEVICE
- Profile % U-VELOCITY
-    -0.00194     0.00000    -0.00972     0.00000     0.00000    -1.00000  0  0 % null
-
-DEVICE
- Profile % U-VELOCITY
-    -0.00194     0.00000    -0.00583     0.00000     0.00000    -1.00000  0  0 % null
-
-DEVICE
- Profile % U-VELOCITY
-    -0.00194     0.00000    -0.00194     0.00000     0.00000    -1.00000  0  0 % null
-
-DEVICE
- Profile % U-VELOCITY
-    -0.00194     0.00000     0.00194     0.00000     0.00000    -1.00000  0  0 % null
-
-DEVICE
- Profile % U-VELOCITY
-    -0.00194     0.00000     0.00583     0.00000     0.00000    -1.00000  0  0 % null
-
-DEVICE
- Profile % U-VELOCITY
-    -0.00194     0.00000     0.00972     0.00000     0.00000    -1.00000  0  0 % null
-
-DEVICE
- Profile % U-VELOCITY
-    -0.00194     0.00000     0.01362     0.00000     0.00000    -1.00000  0  0 % null
-
-DEVICE
- Profile % U-VELOCITY
-    -0.00194     0.00000     0.01750     0.00000     0.00000    -1.00000  0  0 % null
-
-DEVICE
- Profile % U-VELOCITY
-    -0.00194     0.00000     0.02140     0.00000     0.00000    -1.00000  0  0 % null
-
-DEVICE
- Profile % U-VELOCITY
-    -0.00194     0.00000     0.02528     0.00000     0.00000    -1.00000  0  0 % null
-
-DEVICE
- Profile % U-VELOCITY
-    -0.00194     0.00000     0.02917     0.00000     0.00000    -1.00000  0  0 % null
 
 VERT
        0
@@ -454,35 +386,3 @@ SLCC     1 &     0    80     1     1     0    80
  W-VELOCITY
  W-VEL
  m/s
-DEVICE_ACT     Profile
-     1      0.00     0
-DEVICE_ACT     Profile
-     2      0.00     0
-DEVICE_ACT     Profile
-     3      0.00     0
-DEVICE_ACT     Profile
-     4      0.00     0
-DEVICE_ACT     Profile
-     5      0.00     0
-DEVICE_ACT     Profile
-     6      0.00     0
-DEVICE_ACT     Profile
-     7      0.00     0
-DEVICE_ACT     Profile
-     8      0.00     0
-DEVICE_ACT     Profile
-     9      0.00     0
-DEVICE_ACT     Profile
-    10      0.00     0
-DEVICE_ACT     Profile
-    11      0.00     0
-DEVICE_ACT     Profile
-    12      0.00     0
-DEVICE_ACT     Profile
-    13      0.00     0
-DEVICE_ACT     Profile
-    14      0.00     0
-DEVICE_ACT     Profile
-    15      0.00     0
-DEVICE_ACT     Profile
-    16      0.00     0
