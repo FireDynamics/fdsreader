@@ -201,7 +201,9 @@ class Slice:
         self.index_ranges = index_ranges
         self.centered = centered
 
-        self.readSize = (index_ranges[0][1] - index_ranges[0][0] + 1) * (index_ranges[1][1] - index_ranges[1][0] + 1) * (index_ranges[2][1] - index_ranges[2][0] + 1)
+        self.readSize = (index_ranges[0][1] - index_ranges[0][0] + 1) * \
+                        (index_ranges[1][1] - index_ranges[1][0] + 1) * \
+                        (index_ranges[2][1] - index_ranges[2][0] + 1)
 
         if self.centered:
             self.nSize = 1
@@ -226,8 +228,9 @@ class Slice:
 
         self.data_raw = None
         self.times = None
+        self.all_times = None
 
-    def readTimes(self, root='.'):
+    def readAllTimes(self, root='.'):
         slcf = open(os.path.join(root, self.filename), 'r')
 
         offset = 3 * getSliceType('header').itemsize + getSliceType('index').itemsize
@@ -252,11 +255,68 @@ class Slice:
             times.append(slice_time)
             count += 1
 
-        self.times = np.array(times)
+        self.all_times = np.array(times)
+
+    def readTimeSelection(self, root='.', dt=None, average_dt=None):
+
+        if self.all_times is None:
+            logging.error("read in slice times first")
+            return
+
+        if dt is None:
+            logging.error("provide a dt for slice selection")
+            return
+
+        infile = open(os.path.join(root, self.filename), 'r')
+        infile.seek(0, 0)
+
+        slice_header = np.fromfile(infile, dtype=getSliceType('header'),
+                                   count=3)
+        print("slice header: ", slice_header)
+        slice_index = np.fromfile(infile, dtype=getSliceType('index'),
+                                  count=1)[0]
+        print("slice index: ", slice_index)
+
+        type_time = getSliceType('time')
+        type_data = getSliceType('data', self.readSize)
+        stride = type_time.itemsize + type_data.itemsize
+
+        offset = 3 * getSliceType('header').itemsize \
+                 + getSliceType('index').itemsize
+
+        nSlices = int(self.all_times[-1] / dt)
+
+        self.times = np.zeros(nSlices)
+
+        self.data_raw = np.zeros((nSlices, self.readSize))
+
+        for t in range(nSlices):
+
+            central_time_index = np.where(self.all_times > t*dt)[0][0]
+
+            print("central index, time: {}, {}".format(central_time_index,
+                                                       self.all_times[central_time_index]))
+
+            self.times[t] = self.all_times[central_time_index]
+            time_indices = central_time_index
+
+            if average_dt:
+                time_indices = np.where((self.all_times > t*dt-average_dt/2.0) &
+                                        (self.all_times < t*dt+average_dt/2.0 ))[0]
+
+            print("using time indices: {}".format(time_indices))
+
+            for st in time_indices:
+                infile.seek(offset + st * stride)
+                slice_time = np.fromfile(infile, dtype=type_time, count=1)
+                slice_data = np.fromfile(infile, dtype=type_data, count=1)
+                self.data_raw[t, :] += slice_data[0][1]
+
+            self.data_raw[t, :] /= len(time_indices)
 
     def readData(self, root='.'):
 
-        if self.times is None:
+        if self.all_times is None:
             logging.error("read in slice times first")
             return
 
@@ -274,10 +334,12 @@ class Slice:
 
         offset = 3 * getSliceType('header').itemsize + getSliceType('index').itemsize
 
-        self.data_raw = np.zeros((self.times.size, self.readSize))
-        print("self size: ", self.nSize)
+        self.data_raw = np.zeros((self.all_times.size, self.readSize))
+        # print("time size: ", self.all_times.size)
+        # print("self size: ", self.nSize)
+        # print("read size: ", self.readSize)
 
-        for t in range(self.times.size):
+        for t in range(self.all_times.size):
             infile.seek(offset + t * stride)
             slice_time = np.fromfile(infile, dtype=type_time, count=1)
             # print("slice time: ", slice_time)
@@ -286,7 +348,10 @@ class Slice:
             # print("slice data: ", slice_data[0][0], slice_data[0][1][0:2], slice_data[0][2])
             self.data_raw[t,:] = slice_data[0][1]
 
+
         infile.close()
+
+        self.times = np.copy(self.all_times)
 
     def mapData(self, meshes: MeshCollection):
 
@@ -423,6 +488,8 @@ def readSliceInfos(filename):
             u = s.readline().decode().strip()
 
             sc.slices.append(Slice(q, l, u, fn, mesh_id, [[x1, x2], [y1, y2], [z1, z2]], centered))
+
+            logging.debug("slice info: ", mesh_id, [[x1, x2], [y1, y2], [z1, z2]])
 
             cpos = s.find(b'SLC', cpos + 1)
 
