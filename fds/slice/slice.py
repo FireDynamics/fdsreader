@@ -489,7 +489,7 @@ def readSliceInfos(filename):
 
             sc.slices.append(Slice(q, l, u, fn, mesh_id, [[x1, x2], [y1, y2], [z1, z2]], centered))
 
-            logging.debug("slice info: ", mesh_id, [[x1, x2], [y1, y2], [z1, z2]])
+            logging.debug("slice info: {} {}".format(mesh_id, [[x1, x2], [y1, y2], [z1, z2]]))
 
             cpos = s.find(b'SLC', cpos + 1)
 
