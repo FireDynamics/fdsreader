@@ -429,9 +429,9 @@ def combineSlices(slices):
     x1 = np.linspace(min_x1, max_x1, n1)
     x2 = np.linspace(min_x2, max_x2, n2)
 
-    mesh = np.meshgrid(x1, x2)
-    data = np.ones((slices[0].times.size, n1, n2))
-    mask = np.zeros((n1, n2))
+    mesh = np.meshgrid(x2, x1)
+    data = np.ones((slices[0].times.size, n2, n1))
+    mask = np.zeros((n2, n1))
     mask[:] = True
 
     for s in slices:
@@ -445,8 +445,6 @@ def combineSlices(slices):
         if s.centered:
             cn1 -= 1
             cn2 -= 1
-
-        #print(s.sm.extent[0], s.sm.extent[1], s.sm.extent[2], off1, off2, n1, n2, cn1)
 
         # TODO: fix index order?
         data[:,off2:off2+cn2, off1:off1+cn1] = s.sd
