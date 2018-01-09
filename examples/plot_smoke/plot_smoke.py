@@ -36,7 +36,7 @@ if sid == -1:
 slice = sc[sid]
 
 # read in time information
-slice.readTimes(root_dir)
+slice.readAllTimes(root_dir)
 
 # read in slice data
 slice.readData(root_dir)
