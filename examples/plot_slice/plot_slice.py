@@ -33,7 +33,8 @@ if sid == -1:
     sys.exit()
 
 # read in time information
-sc[sid].readTimes(root_dir)
+# sc[sid].readTimes(root_dir)
+sc.slices[sid].readAllTimes(root_dir)
 
 # read in slice data
 sc.slices[sid].readData(root_dir)
