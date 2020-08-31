@@ -38,9 +38,9 @@ class SliceMesh:
 
         if norm_dir == 'x' or norm_dir == 0:
             self.directions = [1,2]
-        if norm_dir == 'y' or norm_dir == 1:
+        elif norm_dir == 'y' or norm_dir == 1:
             self.directions = [0,2]
-        if norm_dir == 'z' or norm_dir == 2:
+        elif norm_dir == 'z' or norm_dir == 2:
             self.directions = [0,1]
 
         self.norm_direction = norm_dir
