@@ -18,28 +18,20 @@ fds_data_type_char    = "a"  # a  ->  8 bit character
 fds_fortran_backward  = True # sets weather the blocks are ended with the size of the block
 
 def getSliceType(name: str, n_size=0):
-
+    type_slice_str = fds_data_type_integer + ", "
     if name == 'header':
-        type_slice_header_str = "{0}, 30{1}".format(fds_data_type_integer, fds_data_type_char)
-        if fds_fortran_backward: type_slice_header_str += ", {0}".format(fds_data_type_integer)
-        return np.dtype(type_slice_header_str)
-
-    if name == 'index':
-        type_slice_index_str = "{0}, 6{0}".format(fds_data_type_integer)
-        if fds_fortran_backward: type_slice_index_str += ", {0}".format(fds_data_type_integer)
-        return np.dtype(type_slice_index_str)
-
-    if name == 'time':
-        type_slice_time_str = "{0}, {1}".format(fds_data_type_integer, fds_data_type_float)
-        if fds_fortran_backward: type_slice_time_str += ", {0}".format(fds_data_type_integer)
-        return np.dtype(type_slice_time_str)
-
-    if name == 'data':
-        type_slice_data_str = "{0}, ({1}){2}".format(fds_data_type_integer, n_size, fds_data_type_float)
-        if fds_fortran_backward: type_slice_data_str += ", {0}".format(fds_data_type_integer)
-        return np.dtype(type_slice_data_str)
-
-    return None
+        type_slice_str += "30" + fds_data_type_char
+    elif name == 'index':
+        type_slice_str += "6" + fds_data_type_integer
+    elif name == 'time':
+        type_slice_str += fds_data_type_float
+    elif name == 'data':
+        type_slice_str += "({1}){2}".format(n_size, fds_data_type_float)
+    else:
+        return None
+    if fds_fortran_backward:
+        type_slice_data_str += ", "  + fds_data_type_integer
+    return np.dtype(type_slice_data_str)
 
 class SliceMesh:
     def __init__(self, x1, x2, norm_dir:str, norm_offset:float):
