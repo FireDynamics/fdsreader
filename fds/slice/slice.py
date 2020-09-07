@@ -11,12 +11,12 @@ import matplotlib.animation as animation
 import logging
 logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 
-# as the binary representation of raw data is compiler dependent, this information must be provided by the user
+# as the binary representation of raw data is compiler dependent, this
+# information must be provided by the user
 fds_data_type_integer = "i4" # i4 -> 32 bit integer (native endiannes, probably little-endian)
-fds_data_type_float   = "f4" # f4 -> 32 bit floating point (native endiannes, probably little-endian)
-fds_data_type_char    = "a"  # a  ->  8 bit character
-fds_fortran_backward  = True # sets weather the blocks are ended with the size of the block
-
+fds_data_type_float = "f4" # f4 -> 32 bit floating point (native endiannes, probably little-endian)
+fds_data_type_char = "a"  # a -> 8 bit character
+fds_fortran_backward = True # sets weather the blocks are ended with the size of the block
 def getSliceType(name: str, n_size=0):
     type_slice_str = fds_data_type_integer + ", "
     if name == 'header':
@@ -30,7 +30,7 @@ def getSliceType(name: str, n_size=0):
     else:
         return None
     if fds_fortran_backward:
-        type_slice_data_str += ", "  + fds_data_type_integer
+        type_slice_data_str += ", " + fds_data_type_integer
     return np.dtype(type_slice_data_str)
 
 class SliceMesh:
@@ -65,7 +65,7 @@ class SliceMeshCollection:
 class Mesh:
     def __init__(self, x1, x2, x3, label):
         self.axes = [x1, x2, x3]
-        self.ranges = [ [x1[0], x1[-1] ] , [ x2[0], x2[-1] ] , [ x3[0], x3[-1] ] ]
+        self.ranges = [[x1[0], x1[-1]] , [x2[0], x2[-1]] , [x3[0], x3[-1]]]
         self.mesh = np.meshgrid(self.axes)
 
         self.n = [x1.size, x2.size, x3.size]
@@ -74,15 +74,12 @@ class Mesh:
         self.label = label
 
     def infoString(self):
-        return "{}, {} x {} x {}, [{}, {}] x [{}, {}] x [{}, {}]".format(
-            self.label,
+        return "{}, {} x {} x {}, [{}, {}] x [{}, {}] x [{}, {}]".format(self.label,
             self.n[0], self.n[1], self.n[2],
             self.ranges[0][0], self.ranges[0][1], self.ranges[1][0], self.ranges[1][1],
             self.ranges[2][0], self.ranges[2][1])
 
     def extractSliceMesh(self, norm_dir:str, norm_index:int) -> SliceMesh:
-
-
         if norm_dir == 'x' or norm_dir == 0:
             offset = self.axes[0][norm_index]
             return SliceMesh(self.axes[1], self.axes[2], norm_dir, offset)
@@ -130,7 +127,7 @@ def readMeshes(filename):
             nz = int(grid_numbers[2]) + 1
             # if nz == 2: nz = 1
 
-            logging.debug("number of cells: {} x {} x {}".format( nx, ny, nz ))
+            logging.debug("number of cells: {} x {} x {}".format(nx, ny, nz))
 
             cpos = s.find(b'TRNX', cpos + 1)
             s.seek(cpos)
@@ -156,7 +153,7 @@ def readMeshes(filename):
             for iz in range(nz):
                 z_coor[iz] = float(s.readline().split()[1])
 
-            mc.meshes.append( Mesh(x_coor, y_coor, z_coor, label) )
+            mc.meshes.append(Mesh(x_coor, y_coor, z_coor, label))
 
             cpos = s.find(b'GRID', cpos + 1)
 
@@ -273,8 +270,7 @@ class Slice:
         type_data = getSliceType('data', self.readSize)
         stride = type_time.itemsize + type_data.itemsize
 
-        offset = 3 * getSliceType('header').itemsize \
-                 + getSliceType('index').itemsize
+        offset = 3 * getSliceType('header').itemsize + getSliceType('index').itemsize
 
         nSlices = int(self.all_times[-1] / dt)
 
@@ -284,7 +280,7 @@ class Slice:
 
         for t in range(nSlices):
 
-            central_time_index = np.where(self.all_times > t*dt)[0][0]
+            central_time_index = np.where(self.all_times > t * dt)[0][0]
 
             print("central index, time: {}, {}".format(central_time_index,
                                                        self.all_times[central_time_index]))
@@ -293,8 +289,7 @@ class Slice:
             time_indices = central_time_index
 
             if average_dt:
-                time_indices = np.where((self.all_times > t*dt-average_dt/2.0) &
-                                        (self.all_times < t*dt+average_dt/2.0 ))[0]
+                time_indices = np.where((self.all_times > t * dt - average_dt / 2.0) & (self.all_times < t * dt + average_dt / 2.0))[0]
 
             print("using time indices: {}".format(time_indices))
 
@@ -337,7 +332,8 @@ class Slice:
             # print("slice time: ", slice_time)
             slice_data = np.fromfile(infile, dtype=type_data, count=1)
             # print(slice_data)
-            # print("slice data: ", slice_data[0][0], slice_data[0][1][0:2], slice_data[0][2])
+            # print("slice data: ", slice_data[0][0], slice_data[0][1][0:2],
+            # slice_data[0][2])
             self.data_raw[t,:] = slice_data[0][1]
 
 
@@ -369,8 +365,7 @@ class Slice:
 
     def infoString(self):
 
-        str_general =  "{}, {}, {}, mesh_id: {}, [{}, {}] x [{}, {}] x [{}, {}]".format(
-            self.label, self.quantity, self.units, self.mesh_id,
+        str_general = "{}, {}, {}, mesh_id: {}, [{}, {}] x [{}, {}] x [{}, {}]".format(self.label, self.quantity, self.units, self.mesh_id,
             self.index_ranges[0][0], self.index_ranges[0][1], self.index_ranges[1][0], self.index_ranges[1][1],
             self.index_ranges[2][0], self.index_ranges[2][1])
 
@@ -388,8 +383,7 @@ def findSlices(slices, quantity, normal_direction, offset):
     res = []
 
     for s in slices:
-        if s.quantity == quantity and s.norm_direction == normal_direction \
-            and np.abs(s.sm.norm_offset - offset) < 0.01:
+        if s.quantity == quantity and s.norm_direction == normal_direction and np.abs(s.sm.norm_offset - offset) < 0.01:
             res.append(s)
 
     return res
@@ -439,8 +433,8 @@ def combineSlices(slices):
             cn2 -= 1
 
         # TODO: fix index order?
-        data[:,off2:off2+cn2, off1:off1+cn1] = s.sd
-        mask[  off2:off2+cn2, off1:off1+cn1] = False
+        data[:,off2:off2 + cn2, off1:off1 + cn1] = s.sd
+        mask[off2:off2 + cn2, off1:off1 + cn1] = False
 
     return mesh, [min_x1, max_x1, min_x2, max_x2], data, mask
 
