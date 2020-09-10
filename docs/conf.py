@@ -13,7 +13,7 @@
 # import os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
-
+from .._version import __version__
 
 # -- Project information -----------------------------------------------------
 
@@ -22,8 +22,7 @@ copyright = '2020, FZJ IAS-7 (Prof. Dr. Lukas Arnold, Jan Vogelsang)'
 author = 'FZJ IAS-7 (Prof. Dr. Lukas Arnold, Jan Vogelsang)'
 
 # The full version, including alpha/beta/rc tags
-with open("../VERSION", "r") as version:
-    release = version.read()
+release = str(__version__)
 
 
 # -- General configuration ---------------------------------------------------
