@@ -5,26 +5,26 @@ import os.path
 import matplotlib.pyplot as plt
 import numpy as np
 
-import fds.slice
+import fds
 
 # locate smokeview file
 root_dir = "./fds_smoke_data"
-smv_fn = fds.slice.scanDirectory(root_dir)
+smv_fn = fds.utils.scan_directory_smv(root_dir)
 print("smv file found: ", smv_fn)
 
 # parse smokeview file for slice information
-sc = fds.slice.readSliceInfos(os.path.join(root_dir, smv_fn))
+slc_col = fds.slices.read_slice_information(os.path.join(root_dir, smv_fn))
 # print all found information
-sc.print()
+slc_col.print()
 
 # read in meshes
-meshes = fds.slice.readMeshes(os.path.join(root_dir,smv_fn))
+meshes = fds.slices.read_meshes(os.path.join(root_dir,smv_fn))
 
 # select matching slice
 slice_label = 'ext_coef_C0.9H0.1'
 sids = []
-for iis in range(len(sc.slices)):
-    if sc[iis].label == slice_label:
+for iis in range(len(slc_col.slices)):
+    if slc_col[iis].label == slice_label:
         sids.append(iis)
         print("found matching slice with id: {}".format(iis))
 
@@ -35,24 +35,24 @@ if sids == []:
 #gather all slice data
 slices = []
 for iis in sids:
-    slice = sc[iis]
+    slc = slc_col[iis]
 
     # read in time information
-    slice.readAllTimes(root_dir)
+    slc.readAllTimes(root_dir)
 
     # read in slice data
-    slice.readData(root_dir)
+    slc.readData(root_dir)
 
     # map data on mesh
-    slice.mapData(meshes)
+    slc.mapData(meshes)
 
-    slices.append(sc[iis])
+    slices.append(slc_col[iis])
 
-mesh, extent, data, mask = fds.slice.combineSlices(slices)
+mesh, extent, data, mask = fds.slices.combine_slices(slices)
 
 # get max value
 max_coefficient = 0
-times = sc[sids[0]].times.size
+times = slc_col[sids[0]].times.size
 for it in range(0, times):
     cmax = np.max(data[it])
     max_coefficient = max(cmax, max_coefficient)
