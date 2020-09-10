@@ -1,0 +1,22 @@
+language: python
+python:
+- '3.7'
+- '3.8'
+- 3.8-dev
+- nightly
+install:
+- pip install -r requirements.txt
+script:
+- sphinx-build -b html .. build -C
+- touch docs/build/html/.nojekyll
+deploy:
+  - provider: pypi
+    user: "__token__"
+    password: $PYPI_TOKEN
+    skip_existing: true
+  - provider: pages:git
+    verbose: true
+    token: $GITHUB_TOKEN
+    edge: true
+    local_dir: ./docs/build/html/
+    keep_history: true
