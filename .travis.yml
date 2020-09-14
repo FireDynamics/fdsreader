@@ -5,8 +5,9 @@ install:
 - pip install -r requirements.txt
 script:
 - cd $TRAVIS_BUILD_DIR
-- sphinx-build -b html .. build -C
+- sphinx-build -b html . build -C
 - touch docs/build/html/.nojekyll
+- python setup.py sdist bdist_wheel
 deploy:
   - provider: pypi
     user: "__token__"
