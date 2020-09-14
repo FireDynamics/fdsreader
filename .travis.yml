@@ -5,7 +5,6 @@ install:
 - pip install -r requirements.txt
 script:
 - cd $TRAVIS_BUILD_DIR
-- python -m incremental.update fds --patch
 - sphinx-build -b html docs docs/build -C
 - touch docs/build/.nojekyll
 - python setup.py sdist bdist_wheel

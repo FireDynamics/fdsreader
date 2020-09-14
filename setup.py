@@ -4,7 +4,7 @@ with open("README.md", "r") as rf:
     long_description = rf.read()
 
 setuptools.setup(
-    name="fdsreader-ias7", # Replace with your own username
+    name="fdsreader", # Replace with your own username
     use_incremental=True,
     setup_requires=['incremental'],
     install_requires=['incremental'],
