@@ -11,7 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-import fds
+import fds.utils
 
 # as the binary representation of raw data is compiler dependent, this
 # information must be provided by the user
@@ -200,133 +200,13 @@ class MeshCollection:
         return self.meshes[item]
 
 
-class SliceCollection:
-    """
-
-    """
-
-    def __init__(self, filename: str, meshes: MeshCollection = None):
-        """
-
-        :param filename:
-        :param meshes:
-        """
-        if meshes is None:
-            self.meshes = MeshCollection(filename)
-        else:
-            self.meshes = meshes
-        self.slices = list()
-
-        logging.debug("scanning smv file for slcf: %s", filename)
-
-        with open(filename, 'r') as infile, mmap.mmap(infile.fileno(), 0,
-                                                      access=mmap.ACCESS_READ) as s:
-            pos = s.find(b'SLC')
-            while pos > 0:
-                s.seek(pos)
-                line = s.readline()
-                centered = False
-                if line.find(b'SLCC') >= 0:
-                    centered = True
-
-                logging.debug("slice centered: %s", centered)
-
-                mesh_id = int(line.split(b'&')[0].split()[1].decode()) - 1
-
-                index_range = line.split(b'&')[1].split()
-                x1 = int(index_range[0])
-                x2 = int(index_range[1])
-                y1 = int(index_range[2])
-                y2 = int(index_range[3])
-                z1 = int(index_range[4])
-                z2 = int(index_range[5])
-
-                fn = s.readline().decode().strip()
-                # Todo: Check if quantity is actually an int
-                q = int(s.readline().decode().strip())
-                l = s.readline().decode().strip()
-                u = s.readline().decode().strip()
-
-                self.slices.append(
-                    Slice(q, l, u, fn, mesh_id, [[x1, x2], [y1, y2], [z1, z2]], centered))
-
-                logging.debug("slice info: %i %s", mesh_id, [[x1, x2], [y1, y2], [z1, z2]])
-
-                pos = s.find(b'SLC', pos + 1)
-
-    def combine_slices(self, slice_indices: typing.Iterable[int]):
-        """
-
-        :param slice_indices: Indices of slices to combine.
-        :return:
-        """
-        slices = [self.slices[idx] for idx in slice_indices]
-
-        base_extent = slices[0].slice_mesh.extent
-        min_x1 = base_extent[0]
-        max_x1 = base_extent[1]
-        min_x2 = base_extent[2]
-        max_x2 = base_extent[3]
-
-        for slc in slices:
-            min_x1 = min(slc.slice_mesh.extent[0], min_x1)
-            max_x1 = max(slc.slice_mesh.extent[1], max_x1)
-            min_x2 = min(slc.slice_mesh.extent[2], min_x2)
-            max_x2 = max(slc.slice_mesh.extent[3], max_x2)
-
-        dx1 = (base_extent[1] - base_extent[0]) / (slices[0].slice_mesh.n[0] - 1)
-        dx2 = (base_extent[3] - base_extent[2]) / (slices[0].slice_mesh.n[1] - 1)
-
-        n1 = int((max_x1 - min_x1) / dx1)
-        n2 = int((max_x2 - min_x2) / dx2)
-
-        if not slices[0].centered:
-            n1 += 1
-            n2 += 1
-
-        x1 = np.linspace(min_x1, max_x1, n1)
-        x2 = np.linspace(min_x2, max_x2, n2)
-
-        mesh = np.meshgrid(x2, x1)
-        data = np.ones((slices[0].times.size, n2, n1))
-        mask = np.zeros((n2, n1))
-        mask[:] = True
-
-        for slc in slices:
-
-            off1 = int((slc.slice_mesh.extent[0] - min_x1) / dx1)
-            off2 = int((slc.slice_mesh.extent[2] - min_x2) / dx2)
-
-            cn1 = slc.slice_mesh.n[0]
-            cn2 = slc.slice_mesh.n[1]
-
-            if slc.centered:
-                cn1 -= 1
-                cn2 -= 1
-
-            # TODO: fix index order?
-            data[:, off2:off2 + cn2, off1:off1 + cn1] = slc.sd
-            mask[off2:off2 + cn2, off1:off1 + cn1] = False
-
-        return mesh, [min_x1, max_x1, min_x2, max_x2], data, mask
-
-    def __str__(self, *args, **kwargs):
-        lines = list()
-        for s in range(len(self.slices)):
-            lines.append("index %d-03: %s" % (s, self.slices[s]))
-        return '\n'.join(lines)
-
-    def __getitem__(self, item: int):
-        return self.slices[item]
-
-
 class Slice:
     """
 
     """
     offset = 3 * get_slice_type('header').itemsize + get_slice_type('index').itemsize
 
-    def __init__(self, quantity: int, label: str, units: str, filename: str, mesh_id: int,
+    def __init__(self, quantity: str, label: str, units: str, filename: str, mesh_id: int,
                  index_ranges: typing.Union[
                      typing.List[typing.Union[typing.List[int], typing.Tuple[int]]], typing.Tuple[
                          typing.Union[typing.List[int], typing.Tuple[int]]]],
@@ -484,7 +364,7 @@ class Slice:
                                         (self.slice_mesh.n[1], self.slice_mesh.n[0]))
 
     def __str__(self, *args, **kwargs):
-        str_general = "%s, %i, %s, mesh_id: %i, [%i, %i] x [%i, %i] x [%i, %i]" % (
+        str_general = "%s, %s, %s, mesh_id: %i, [%i, %i] x [%i, %i] x [%i, %i]" % (
             self.label, self.quantity, self.units, self.mesh_id, self.index_ranges[0][0],
             self.index_ranges[0][1], self.index_ranges[1][0], self.index_ranges[1][1],
             self.index_ranges[2][0], self.index_ranges[2][1])
@@ -502,22 +382,156 @@ class Slice:
         return str_general + str_times + str_data
 
 
-def find_slices(slices: SliceCollection, quantity: int, normal_direction: int, offset: float):
-    res = list()
+class SliceCollection:
+    """
 
-    for slc in slices:
-        if slc.quantity == quantity and slc.norm_direction == normal_direction and np.abs(
-                slc.slice_mesh.norm_offset - offset) < 0.01:
-            res.append(slc)
+    """
 
-    return res
+    def __init__(self, filename: str, meshes: MeshCollection = None):
+        """
+
+        :param filename:
+        :param meshes:
+        """
+        if meshes is None:
+            self.meshes = MeshCollection(filename)
+        else:
+            self.meshes = meshes
+        self.slices = list()
+
+        logging.debug("scanning smv file for slcf: %s", filename)
+
+        with open(filename, 'r') as infile, mmap.mmap(infile.fileno(), 0,
+                                                      access=mmap.ACCESS_READ) as s:
+            pos = s.find(b'SLC')
+            while pos > 0:
+                s.seek(pos)
+                line = s.readline()
+                centered = False
+                if line.find(b'SLCC') >= 0:
+                    centered = True
+
+                logging.debug("slice centered: %s", centered)
+
+                mesh_id = int(line.split(b'&')[0].split()[1].decode()) - 1
+
+                index_range = line.split(b'&')[1].split()
+                x1 = int(index_range[0])
+                x2 = int(index_range[1])
+                y1 = int(index_range[2])
+                y2 = int(index_range[3])
+                z1 = int(index_range[4])
+                z2 = int(index_range[5])
+
+                fn = s.readline().decode().strip()
+                q = s.readline().decode().strip()
+                l = s.readline().decode().strip()
+                u = s.readline().decode().strip()
+
+                self.slices.append(
+                    Slice(q, l, u, fn, mesh_id, [[x1, x2], [y1, y2], [z1, z2]], centered, root=os.path.dirname(filename)))
+
+                logging.debug("slice info: %i %s", mesh_id, [[x1, x2], [y1, y2], [z1, z2]])
+
+                pos = s.find(b'SLC', pos + 1)
+
+    def combine_slices(self, slices: typing.Iterable[Slice]):
+        """
+
+        :param slice_indices: Indices of slices to combine.
+        :return:
+        """
+        base_extent = slices[0].slice_mesh.extent
+        min_x1 = base_extent[0]
+        max_x1 = base_extent[1]
+        min_x2 = base_extent[2]
+        max_x2 = base_extent[3]
+
+        for slc in slices:
+            min_x1 = min(slc.slice_mesh.extent[0], min_x1)
+            max_x1 = max(slc.slice_mesh.extent[1], max_x1)
+            min_x2 = min(slc.slice_mesh.extent[2], min_x2)
+            max_x2 = max(slc.slice_mesh.extent[3], max_x2)
+
+        dx1 = (base_extent[1] - base_extent[0]) / (slices[0].slice_mesh.n[0] - 1)
+        dx2 = (base_extent[3] - base_extent[2]) / (slices[0].slice_mesh.n[1] - 1)
+
+        n1 = int((max_x1 - min_x1) / dx1)
+        n2 = int((max_x2 - min_x2) / dx2)
+
+        if not slices[0].centered:
+            n1 += 1
+            n2 += 1
+
+        x1 = np.linspace(min_x1, max_x1, n1)
+        x2 = np.linspace(min_x2, max_x2, n2)
+
+        mesh = np.meshgrid(x2, x1)
+        data = np.ones((slices[0].times.size, n2, n1))
+        mask = np.zeros((n2, n1))
+        mask[:] = True
+
+        for slc in slices:
+
+            off1 = int((slc.slice_mesh.extent[0] - min_x1) / dx1)
+            off2 = int((slc.slice_mesh.extent[2] - min_x2) / dx2)
+
+            cn1 = slc.slice_mesh.n[0]
+            cn2 = slc.slice_mesh.n[1]
+
+            if slc.centered:
+                cn1 -= 1
+                cn2 -= 1
+
+            # TODO: fix index order?
+            data[:, off2:off2 + cn2, off1:off1 + cn1] = slc.sd
+            mask[off2:off2 + cn2, off1:off1 + cn1] = False
+
+        return mesh, [min_x1, max_x1, min_x2, max_x2], data, mask
+
+    def find_slice_by_label(self, label: str) -> Slice:
+        """
+
+        :param label:
+        :return:
+        """
+        for slc in self:
+            if slc.label == label:
+                return slc
+        logging.warning("no slice matching label: " + label)
+
+    def find_slices(self, quantity: str, normal_direction: int, offset: float):
+        """
+
+        :param quantity:
+        :param normal_direction:
+        :param offset:
+        :return:
+        """
+        slices = list()
+
+        for slc in self:
+            if slc.quantity == quantity and slc.norm_direction == normal_direction and np.abs(
+                    slc.slice_mesh.norm_offset - offset) < 0.01:
+                slices.append(slc)
+
+        return slices
+
+    def __str__(self, *args, **kwargs):
+        lines = list()
+        for s in range(len(self.slices)):
+            lines.append("index %d-03: %s" % (s, self.slices[s]))
+        return '\n'.join(lines)
+
+    def __getitem__(self, item: int):
+        return self.slices[item]
 
 
 def main():
     logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 
     root_dir = sys.argv[1]
-    smv_fn, _ = fds.utils.scan_directory_smv(root_dir)
+    smv_fn, _ = fds.utils.scan_directory_smv(root_dir)[0]
 
     meshes = MeshCollection(smv_fn)
 
@@ -541,9 +555,11 @@ def main():
     cmin = min(np.amin(slice1.sd[-1]), np.amin(slice2.sd[-1]))
     cmax = max(np.amax(slice1.sd[-1]), np.amax(slice2.sd[-1]))
 
-    im1 = axis.imshow(slice1.sd[-1], extent=slice1.slice_mesh.extent, origin='lower', vmax=cmax, vmin=cmin,
+    im1 = axis.imshow(slice1.sd[-1], extent=slice1.slice_mesh.extent, origin='lower', vmax=cmax,
+                      vmin=cmin,
                       animated=True)
-    im2 = axis.imshow(slice2.sd[-1], extent=slice2.slice_mesh.extent, origin='lower', vmax=cmax, vmin=cmin,
+    im2 = axis.imshow(slice2.sd[-1], extent=slice2.slice_mesh.extent, origin='lower', vmax=cmax,
+                      vmin=cmin,
                       animated=True)
 
     axis.autoscale()

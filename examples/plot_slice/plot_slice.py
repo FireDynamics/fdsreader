@@ -1,50 +1,34 @@
-import sys
-sys.path.append("../..")
-
-import os.path
 import matplotlib.pyplot as plt
 
-import fds
+import fds.slcf
+import fds.utils
 
 # locate smokeview file
 root_dir = "./fds_data"
-smv_fn = fds.utils.scan_directory_smv(root_dir)
-print("smv file found: ", smv_fn)
+smv_files = fds.utils.scan_directory_smv(root_dir)
+print("smv files found: ", smv_files)
 
 # parse smokeview file for slice information
-slc_col = fds.slices.read_slice_information(os.path.join(root_dir, smv_fn))
+slc_col = fds.slcf.SliceCollection(smv_files[0])
 # print all found information
-slc_col.print()
+print(slc_col)
 
 # read in meshes
-meshes = fds.slices.read_meshes(os.path.join(root_dir,smv_fn))
+meshes = fds.slcf.MeshCollection(smv_files[0])
 
 # select matching slice
 slice_label = 'vort_y'
-sid = -1
-for iis in range(len(slc_col.slices)):
-    if slc_col[iis].label == slice_label:
-        sid = iis
-        print("found matching slice")
-        break
-
-if sid == -1:
-    print("no slice matching label: {}".format(slice_label))
-    sys.exit()
-
-# read in time information
-# sc[sid].readTimes(root_dir)
-slc_col.slices[sid].readAllTimes(root_dir)
+slc = slc_col.find_slice_by_label(slice_label)
 
 # read in slice data
-slc_col.slices[sid].readData(root_dir)
+slc.read_data()
 
 # map data on mesh
-slc_col.slices[sid].mapData(meshes)
+slc.map_data(meshes)
 
 # plot slice data
-for it in range(0, slc_col.slices[sid].times.size, 10):
-    plt.imshow(slc_col.slices[sid].sd[it], origin='lower')
+for it in range(0, slc.times.size, 10):
+    plt.imshow(slc.sd[it], origin='lower')
     plt.colorbar()
     plt.grid(True)
     plt.savefig("single_slice_{:06d}.pdf".format(it))

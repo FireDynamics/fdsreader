@@ -1,4 +1,3 @@
-#
 # Default excludes
 
 # Binaries
@@ -502,3 +501,6 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 *.pyproj
+
+# CUSTOM
+examples/**/*.pdf

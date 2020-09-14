@@ -1,1 +1,1 @@
-from .slice import find_slices
+from .slice import Slice, SliceCollection, SliceMesh, MeshCollection, Mesh

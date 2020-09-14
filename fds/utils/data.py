@@ -1,14 +1,14 @@
 import os
-import glob
-import logging
 
 def scan_directory_smv(directory: str):
-    list_fn_smv_abs = glob.glob(directory + "/*.smv")
+    """
+    Scanning a directory non-recursively for smv-files.
+    :param directory: The directory that will be scanned for smv files.
+    :return: A list containing all smv-files found in the directory.
+    """
+    smv_files = list()
+    for file in os.listdir(directory):
+        if file.endswith(".smv"):
+            smv_files.append(os.path.join(directory, file))
+    return smv_files
 
-    if len(list_fn_smv_abs) == 0:
-        return None
-
-    if len(list_fn_smv_abs) > 1:
-        logging.warning("multiple smv files found, choosing an arbitrary file")
-
-    return os.path.basename(list_fn_smv_abs[0])
