@@ -5,8 +5,8 @@ install:
 - pip install -r requirements.txt
 script:
 - cd $TRAVIS_BUILD_DIR
-- sphinx-build -b html . build -C
-- touch docs/build/html/.nojekyll
+- sphinx-build -b html docs docs/build -C
+- touch docs/build/.nojekyll
 - python setup.py sdist bdist_wheel
 deploy:
   - provider: pypi
@@ -17,5 +17,5 @@ deploy:
     verbose: true
     token: $GITHUB_TOKEN
     edge: true
-    local_dir: ./docs/build/html/
+    local_dir: ./docs/build/
     keep_history: true
