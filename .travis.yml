@@ -5,7 +5,7 @@ install:
 - pip install -r requirements.txt
 script:
 - cd $TRAVIS_BUILD_DIR
-- sphinx-build -b html docs docs/build -C
+- sphinx-build -b html docs docs/build
 - touch docs/build/.nojekyll
 - python setup.py sdist bdist_wheel
 deploy:
