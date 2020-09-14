@@ -13,6 +13,7 @@ deploy:
   - provider: pypi
     user: "__token__"
     password: $PYPI_TOKEN
+    repository: testpypi
     skip_existing: true
   - provider: pages:git
     verbose: true
