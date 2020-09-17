@@ -1,3 +1,7 @@
+"""
+Collection of utilities (convenience functions) for data.
+"""
+
 import os
 
 def scan_directory_smv(directory: str):
@@ -11,4 +15,3 @@ def scan_directory_smv(directory: str):
         if file.endswith(".smv"):
             smv_files.append(os.path.join(directory, file))
     return smv_files
-

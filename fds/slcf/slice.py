@@ -11,8 +11,8 @@ import numpy as np
 
 # As the binary representation of raw data is compiler dependent, this information must be provided
 # by the user
-FDS_DATA_TYPE_INTEGER = "i4"  # i4 -> 32 bit integer (native endiannes, probably little-endian)
-FDS_DATA_TYPE_FLOAT = "f4"  # f4 -> 32 bit floating point (native endiannes, probably little-endian)
+FDS_DATA_TYPE_INTEGER = "i4"  # i4 -> 32 bit integer (native endianness, probably little-endian)
+FDS_DATA_TYPE_FLOAT = "f4"  # f4 -> 32 bit floating point (native endianness, probably little-endian)
 FDS_DATA_TYPE_CHAR = "a"  # a -> 8 bit character
 FDS_FORTRAN_BACKWARD = True  # sets weather the blocks are ended with the size of the block
 
@@ -36,7 +36,7 @@ def get_slice_type(name: Literal['header', 'index', 'time', 'data'],
         type_slice_str += "(%i)%s" % (n_size, FDS_DATA_TYPE_FLOAT)
     else:
         raise ValueError("Parameter name (" + str(
-            name) + ") has to be one of ('header', 'index', 'time', 'data')!")
+            name) + ") has to be one of ['header', 'index', 'time', 'data']!")
     if FDS_FORTRAN_BACKWARD:
         type_slice_str += ", " + FDS_DATA_TYPE_INTEGER
     return np.dtype(type_slice_str)
@@ -44,31 +44,35 @@ def get_slice_type(name: Literal['header', 'index', 'time', 'data'],
 
 class SliceMesh:
     """
+    slice of a mesh in a given direction.
+    :param x1:
+    :param x2:
+    :param normal_direction: Direction of the normal (parallel to one axis).
+    :param normal_offset: Offset value in normal direction.
+    :ivar normal_direction: Direction of the normal, defines which axes the slice mesh has.
+    :ivar normal_offset: Offset value in normal direction.
+    :ivar directions: Labels for axes directions.
+    :ivar axes: Coordinate values for the two axes the slice mesh expands on.
+    :ivar mesh: Numpy meshgrid along both axes.
+    :ivar n: Number of elements for both of the 2 dimensions.
+    :ivar n_size: Total number of blocks in this mesh slice.
 
     """
 
-    def __init__(self, x1, x2, normal_direction: Literal['x', 'y', 'z', 0, 1, 2],
-                 norm_offset: float):
-        """
-
-        :param x1:
-        :param x2:
-        :param normal_direction:
-        :param norm_offset:
-        """
-
-        if normal_direction in ('x', 0):
-            self.directions = [1, 2]
-        elif normal_direction in ('y', 1):
-            self.directions = [0, 2]
-        elif normal_direction in ('z', 2):
-            self.directions = [0, 1]
+    def __init__(self, x1, x2, normal_direction: Literal[0, 1, 2], normal_offset: float):
+        if normal_direction == 0:
+            self.directions = ['y', 'z']
+        elif normal_direction == 1:
+            self.directions = ['x', 'z']
+        elif normal_direction == 2:
+            self.directions = ['x', 'y']
         else:
             raise ValueError("Parameter normal_direction  (" + str(
-                normal_direction) + ") has to be one of (x,y,z,0,1,2)!")
+                normal_direction) + ") has to be one of [0,1,2]!")
 
         self.normal_direction = normal_direction
-        self.norm_offset = norm_offset
+
+        self.normal_offset = normal_offset
 
         self.axes = [x1, x2]
         self.mesh = np.meshgrid(x1, x2)
@@ -81,57 +85,65 @@ class SliceMesh:
 
 class Mesh:
     """
-
+    3-dimensional Mesh of fixed, defined size.
+    :param x_coordinates: Coordinate values of x-axis.
+    :param y_coordinates: Coordinate values of y-axis.
+    :param z_coordinates: Coordinate values of z-axis.
+    :param label: Label associated with this mesh.
+    :ivar coordinates: Coordinate values for each of the 3 dimension.
+    :ivar extent: Tuple with three tuples containing minimum and maximum coordinate value on the
+    corresponding dimension.
+    :ivar mesh:
+    :ivar n: Number of elements for each of the 3 dimensions.
+    :ivar n_size: Total number of blocks in this mesh.
+    :ivar label: Label associated with this mesh.
     """
 
-    def __init__(self, x1, x2, x3, label):
-        """
+    def __init__(self, x_coordinates, y_coordinates, z_coordinates, label):
+        self.coordinates = [x_coordinates, y_coordinates, z_coordinates]
+        self.extent = ((x_coordinates[0], x_coordinates[-1]),
+                       (y_coordinates[0], y_coordinates[-1]),
+                       (z_coordinates[0], z_coordinates[-1]))
+        # Todo: Does this really do what it is supposed to do? What is it even supposed to do?
+        self.mesh = np.meshgrid(self.coordinates)
 
-        :param x1:
-        :param x2:
-        :param x3:
-        :param label:
-        """
-        self.axes = [x1, x2, x3]
-        self.ranges = [[x1[0], x1[-1]], [x2[0], x2[-1]], [x3[0], x3[-1]]]
-        self.mesh = np.meshgrid(self.axes)
-
-        self.n = [x1.size, x2.size, x3.size]
+        self.n = [x_coordinates.size, y_coordinates.size, z_coordinates.size]
         self.n_size = self.n[0] * self.n[1] * self.n[2]
 
         self.label = label
+
+    def extract_slice_mesh(self,
+                           normal_direction: Literal['x', 'y', 'z', 0, 1, 2],
+                           normal_offset_index: int) -> SliceMesh:
+        """
+        Extracts a slice of the mesh for a given direction and offset in that direction.
+        :param normal_direction: Direction of the normal (parallel to one axis).
+        :param normal_offset_index: Index in normal direction defining the offset.
+        :returns: A SliceMesh created by slicing this mesh.
+        """
+        if normal_direction in ('x', 0):
+            offset = self.coordinates[0][normal_offset_index]
+            return SliceMesh(self.coordinates[1], self.coordinates[2], 0, offset)
+        if normal_direction in ('y', 1):
+            offset = self.coordinates[1][normal_offset_index]
+            return SliceMesh(self.coordinates[0], self.coordinates[2], 1, offset)
+        if normal_direction in ('z', 2):
+            offset = self.coordinates[2][normal_offset_index]
+            return SliceMesh(self.coordinates[0], self.coordinates[1], 2, offset)
+        raise ValueError("Parameter normal_direction  (" + str(
+            normal_direction) + ") has to be one of [x,y,z,0,1,2]!")
+        # Todo: Centered/Nicht-centered
 
     def __str__(self, *args, **kwargs):
         return "{}, {} x {} x {}, [{}, {}] x [{}, {}] x [{}, {}]".format(self.label,
                                                                          self.n[0], self.n[1],
                                                                          self.n[2],
-                                                                         self.ranges[0][0],
-                                                                         self.ranges[0][1],
-                                                                         self.ranges[1][0],
-                                                                         self.ranges[1][1],
-                                                                         self.ranges[2][0],
-                                                                         self.ranges[2][1])
-
-    def extract_slice_mesh(self,
-                           normal_direction: Literal['x', 'y', 'z', 0, 1, 2],
-                           norm_index: int) -> SliceMesh:
-        """
-
-        :param normal_direction :
-        :param norm_index:
-        :return:
-        """
-        if normal_direction in ('x', 0):
-            offset = self.axes[0][norm_index]
-            return SliceMesh(self.axes[1], self.axes[2], normal_direction, offset)
-        if normal_direction in ('y', 1):
-            offset = self.axes[1][norm_index]
-            return SliceMesh(self.axes[0], self.axes[2], normal_direction, offset)
-        if normal_direction in ('z', 2):
-            offset = self.axes[2][norm_index]
-            return SliceMesh(self.axes[0], self.axes[1], normal_direction, offset)
-        raise ValueError("Parameter normal_direction  (" + str(
-            normal_direction) + ") has to be one of (x,y,z,0,1,2)!")
+                                                                         self.extent[0][0],
+                                                                         self.extent[0][1],
+                                                                         self.extent[1][0],
+                                                                         self.extent[1][1],
+                                                                         self.extent[2][0],
+                                                                         self.extent[2][1])
 
 
 class MeshCollection:
@@ -147,6 +159,7 @@ class MeshCollection:
 
         with open(file_path, 'r') as infile, mmap.mmap(infile.fileno(), 0,
                                                        access=mmap.ACCESS_READ) as smv_file:
+            float_dtype = np.dtype(FDS_DATA_TYPE_FLOAT)
             pos = smv_file.find(b'GRID')
 
             while pos > 0:
@@ -170,27 +183,27 @@ class MeshCollection:
                 smv_file.seek(pos)
                 smv_file.readline()
                 smv_file.readline()
-                x_coordinate = np.empty(nx, dtype=np.dtype(FDS_DATA_TYPE_FLOAT))
+                x_coordinates = np.empty(nx, dtype=float_dtype)
                 for ix in range(nx):
-                    x_coordinate[ix] = float(smv_file.readline().split()[1])
+                    x_coordinates[ix] = smv_file.readline().split()[1]
 
                 pos = smv_file.find(b'TRNY', pos + 1)
                 smv_file.seek(pos)
                 smv_file.readline()
                 smv_file.readline()
-                y_coordinate = np.empty(ny, dtype=np.dtype(FDS_DATA_TYPE_FLOAT))
+                y_coordinates = np.empty(ny, dtype=float_dtype)
                 for iy in range(ny):
-                    y_coordinate[iy] = float(smv_file.readline().split()[1])
+                    y_coordinates[iy] = smv_file.readline().split()[1]
 
                 pos = smv_file.find(b'TRNZ', pos + 1)
                 smv_file.seek(pos)
                 smv_file.readline()
                 smv_file.readline()
-                z_coordinate = np.empty(nz, dtype=np.dtype(FDS_DATA_TYPE_FLOAT))
+                z_coordinates = np.empty(nz, dtype=float_dtype)
                 for iz in range(nz):
-                    z_coordinate[iz] = float(smv_file.readline().split()[1])
+                    z_coordinates[iz] = smv_file.readline().split()[1]
 
-                self._meshes.append(Mesh(x_coordinate, y_coordinate, z_coordinate, label))
+                self._meshes.append(Mesh(x_coordinates, y_coordinates, z_coordinates, label))
 
                 pos = smv_file.find(b'GRID', pos + 1)
 
@@ -228,16 +241,6 @@ class Slice:
 
         self.stride = get_slice_type('time').itemsize + get_slice_type('data',
                                                                        self.read_size).itemsize
-        # Numpy 2D-array with time on the first and all data values on the second axis
-        self.data_raw = None
-        # Numpy array with all times for which data has been loaded
-        self.times = None
-        # Numpy array with all times in this slice file
-        self._all_times = None
-        # The SliceMesh
-        self.slice_mesh = None
-        #
-        self.sd = None
 
         infile = open(os.path.join(self.root, self.filename), 'r')
         infile.seek(0, 0)
@@ -270,7 +273,10 @@ class Slice:
 
     @property
     def all_times(self):
-        if self._all_times is None:
+        """
+        Numpy array with all times in this slice file
+        """
+        if not hasattr(self, "_all_times"):
             self._initialize_times()
         return self._all_times
 
@@ -312,8 +318,10 @@ class Slice:
         else:
             n_slices = self.all_times.size
 
+        # Numpy array with all times for which data has been loaded
         self.times = np.zeros(n_slices)
 
+        # Numpy 2D-array with time on the first and all data values on the second axis
         self.data_raw = np.zeros((n_slices, self.read_size))
 
         with open(os.path.join(self.root, self.filename), 'r') as infile:
@@ -369,15 +377,23 @@ class Slice:
             self.index_ranges[0][1], self.index_ranges[1][0], self.index_ranges[1][1],
             self.index_ranges[2][0], self.index_ranges[2][1])
 
-        if self.times is not None:
+        if hasattr(self, "times"):
             ret_str += ", times: {}, [{}, {}]".format(self.times.size, self.times[0],
-                                                       self.times[-1])
+                                                      self.times[-1])
 
-        if self.data_raw is not None:
+        if hasattr(self, "data_raw"):
             # Todo: Implement
             ret_str += "TO BE IMPLEMENTED"
 
         return ret_str
+
+    def equals(self, quantity: str, normal_direction: Literal[0, 1, 2], normal_offset: float):
+        return quantity == self.quantity and normal_direction == self.normal_direction \
+               and np.abs(normal_offset - self.slice_mesh.normal_offset) < 0.01
+
+    def __eq__(self, other):
+        return other.quantity == self.quantity and other.normal_direction == self.normal_direction \
+               and np.abs(other.slice_mesh.normal_offset - self.slice_mesh.normal_offset) < 0.01
 
 
 class SliceCollection:
@@ -405,31 +421,34 @@ class SliceCollection:
 
                 mesh_id = int(line.split(b'&')[0].split()[1].decode()) - 1
 
+                # Read in index ranges for x, y and z
                 index_range = line.split(b'&')[1].split()
-                x1 = int(index_range[0])
-                x2 = int(index_range[1])
-                y1 = int(index_range[2])
-                y2 = int(index_range[3])
-                z1 = int(index_range[4])
-                z2 = int(index_range[5])
+                x_start = int(index_range[0])
+                x_end = int(index_range[1])
+                y_start = int(index_range[2])
+                y_end = int(index_range[3])
+                z_start = int(index_range[4])
+                z_end = int(index_range[5])
 
-                fn = smv_file.readline().decode().strip()
-                q = smv_file.readline().decode().strip()
-                l = smv_file.readline().decode().strip()
-                u = smv_file.readline().decode().strip()
+                filename = smv_file.readline().decode().strip()
+                quantity = smv_file.readline().decode().strip()
+                label = smv_file.readline().decode().strip()
+                units = smv_file.readline().decode().strip()
 
-                self._slices.append(
-                    Slice(q, l, u, fn, mesh_id, ((x1, x2), (y1, y2), (z1, z2)), centered,
-                          root=os.path.dirname(file_path)))
+                self._slices.append(Slice(quantity, label, units, filename, mesh_id,
+                                          ((x_start, x_end), (y_start, y_end), (z_start, z_end)),
+                                          centered, root=os.path.dirname(file_path)))
 
-                logging.debug("slice info: %i %s", mesh_id, [[x1, x2], [y1, y2], [z1, z2]])
+                logging.debug("slice info: %i %s", mesh_id,
+                              [[x_start, x_end], [y_start, y_end], [z_start, z_end]])
 
                 pos = smv_file.find(b'SLC', pos + 1)
 
-    def combine_slices(self, slices: Union[List[Slice], Tuple[Slice]]):
+    @staticmethod
+    def combine_slices(slices: Union[List[Slice], Tuple[Slice]]):
         """
 
-        :param slice_indices: Indices of slices to combine.
+        :param slices: Slices to combine.
         :return:
         """
         base_extent = slices[0].slice_mesh.extent
@@ -491,20 +510,18 @@ class SliceCollection:
                 return slc
         raise ValueError("no slice matching label: " + label)
 
-    def find_slices(self, quantity: str, normal_direction: Literal['x', 'y', 'z', 0, 1, 2],
-                    offset: float):
+    def find_slices(self, quantity: str, normal_direction: Literal[0, 1, 2], normal_offset: float):
         """
 
         :param quantity:
-        :param normal_direction:
+        :param normal_direction: Direction of the normal (parallel to one axis).
         :param offset:
         :return:
         """
         slices = list()
 
         for slc in self:
-            if slc.quantity == quantity and slc.normal_direction == normal_direction and np.abs(
-                    slc.slice_mesh.norm_offset - offset) < 0.01:
+            if slc.equals(quantity, normal_direction, normal_offset):
                 slices.append(slc)
 
         return slices
