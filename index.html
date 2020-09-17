@@ -157,7 +157,149 @@
 </div>
 <div class="section" id="slice-files">
 <h2>Slice files<a class="headerlink" href="#slice-files" title="Permalink to this headline">¶</a></h2>
-<span class="target" id="apireference"></span></div>
+<span class="target" id="module-fds.slcf.slice"><span id="apireference"></span></span><dl class="py class">
+<dt id="fds.slcf.slice.Mesh">
+<em class="property">class </em><code class="sig-prename descclassname">fds.slcf.slice.</code><code class="sig-name descname">Mesh</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x1</span></em>, <em class="sig-param"><span class="n">x2</span></em>, <em class="sig-param"><span class="n">x3</span></em>, <em class="sig-param"><span class="n">label</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fds/slcf/slice.html#Mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fds.slcf.slice.Mesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt id="fds.slcf.slice.Mesh.extract_slice_mesh">
+<code class="sig-name descname">extract_slice_mesh</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">norm_dir</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>str<span class="p">, </span>int<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">norm_index</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="slcf.html#fds.slcf.slice.SliceMesh" title="fds.slcf.slice.SliceMesh">fds.slcf.slice.SliceMesh</a><a class="reference internal" href="_modules/fds/slcf/slice.html#Mesh.extract_slice_mesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fds.slcf.slice.Mesh.extract_slice_mesh" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>norm_dir</strong> – </p></li>
+<li><p><strong>norm_index</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="fds.slcf.slice.MeshCollection">
+<em class="property">class </em><code class="sig-prename descclassname">fds.slcf.slice.</code><code class="sig-name descname">MeshCollection</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fds/slcf/slice.html#MeshCollection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fds.slcf.slice.MeshCollection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="fds.slcf.slice.Slice">
+<em class="property">class </em><code class="sig-prename descclassname">fds.slcf.slice.</code><code class="sig-name descname">Slice</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">quantity</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">label</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">units</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">filename</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">mesh_id</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">index_ranges</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>List<span class="p">[</span>Union<span class="p">[</span>List<span class="p">[</span>int<span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>int<span class="p">]</span><span class="p">]</span><span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>Union<span class="p">[</span>List<span class="p">[</span>int<span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>int<span class="p">]</span><span class="p">]</span><span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">centered</span><span class="p">:</span> <span class="n">bool</span></em>, <em class="sig-param"><span class="n">root</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'.'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fds/slcf/slice.html#Slice"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fds.slcf.slice.Slice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt id="fds.slcf.slice.Slice.all_times">
+<em class="property">property </em><code class="sig-name descname">all_times</code><a class="headerlink" href="#fds.slcf.slice.Slice.all_times" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="fds.slcf.slice.Slice.map_data">
+<code class="sig-name descname">map_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mesh_col</span><span class="p">:</span> <span class="n"><a class="reference internal" href="slcf.html#fds.slcf.slice.MeshCollection" title="fds.slcf.slice.MeshCollection">fds.slcf.slice.MeshCollection</a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fds/slcf/slice.html#Slice.map_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fds.slcf.slice.Slice.map_data" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>mesh_col</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="fds.slcf.slice.Slice.offset">
+<code class="sig-name descname">offset</code><em class="property"> = 146</em><a class="headerlink" href="#fds.slcf.slice.Slice.offset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="fds.slcf.slice.Slice.read_data">
+<code class="sig-name descname">read_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dt</span><span class="o">=</span><span class="default_value">- 1</span></em>, <em class="sig-param"><span class="n">average_dt</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fds/slcf/slice.html#Slice.read_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fds.slcf.slice.Slice.read_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reading in the slice’s data, optionally only for a specific selection.
+:param dt:
+:param average_dt:
+:return:</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="fds.slcf.slice.SliceCollection">
+<em class="property">class </em><code class="sig-prename descclassname">fds.slcf.slice.</code><code class="sig-name descname">SliceCollection</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">meshes</span><span class="p">:</span> <span class="n"><a class="reference internal" href="slcf.html#fds.slcf.slice.MeshCollection" title="fds.slcf.slice.MeshCollection">fds.slcf.slice.MeshCollection</a></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fds/slcf/slice.html#SliceCollection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fds.slcf.slice.SliceCollection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt id="fds.slcf.slice.SliceCollection.combine_slices">
+<code class="sig-name descname">combine_slices</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">slices</span><span class="p">:</span> <span class="n">Iterable<span class="p">[</span><a class="reference internal" href="slcf.html#fds.slcf.slice.Slice" title="fds.slcf.slice.Slice">fds.slcf.slice.Slice</a><span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fds/slcf/slice.html#SliceCollection.combine_slices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fds.slcf.slice.SliceCollection.combine_slices" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>slice_indices</strong> – Indices of slices to combine.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fds.slcf.slice.SliceCollection.find_slice_by_label">
+<code class="sig-name descname">find_slice_by_label</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">label</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="slcf.html#fds.slcf.slice.Slice" title="fds.slcf.slice.Slice">fds.slcf.slice.Slice</a><a class="reference internal" href="_modules/fds/slcf/slice.html#SliceCollection.find_slice_by_label"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fds.slcf.slice.SliceCollection.find_slice_by_label" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>label</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="fds.slcf.slice.SliceCollection.find_slices">
+<code class="sig-name descname">find_slices</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">quantity</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">normal_direction</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">offset</span><span class="p">:</span> <span class="n">float</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fds/slcf/slice.html#SliceCollection.find_slices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fds.slcf.slice.SliceCollection.find_slices" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>quantity</strong> – </p></li>
+<li><p><strong>normal_direction</strong> – </p></li>
+<li><p><strong>offset</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="fds.slcf.slice.SliceMesh">
+<em class="property">class </em><code class="sig-prename descclassname">fds.slcf.slice.</code><code class="sig-name descname">SliceMesh</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x1</span></em>, <em class="sig-param"><span class="n">x2</span></em>, <em class="sig-param"><span class="n">norm_dir</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>str<span class="p">, </span>int<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">norm_offset</span><span class="p">:</span> <span class="n">float</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fds/slcf/slice.html#SliceMesh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fds.slcf.slice.SliceMesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="fds.slcf.slice.get_slice_type">
+<code class="sig-prename descclassname">fds.slcf.slice.</code><code class="sig-name descname">get_slice_type</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">n_size</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fds/slcf/slice.html#get_slice_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fds.slcf.slice.get_slice_type" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – </p></li>
+<li><p><strong>n_size</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="fds.slcf.slice.main">
+<code class="sig-prename descclassname">fds.slcf.slice.</code><code class="sig-name descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fds/slcf/slice.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fds.slcf.slice.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
 </div>
 
 
