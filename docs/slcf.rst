@@ -3,7 +3,7 @@ ___________
 
 .. _APIReference:
 
-.. automodule:: slcf.slice
+.. automodule:: fds.slcf.slice
     :members:
     :undoc-members:
     :inherited-members:
