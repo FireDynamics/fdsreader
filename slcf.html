@@ -153,39 +153,6 @@
 <p id="apireference">Defines classes and methods to load slice-files and work with sliced data.</p>
 <dl class="py class">
 <dt>
-<em class="property">class </em><code class="sig-prename descclassname">fds.slcf.slice.</code><code class="sig-name descname">Mesh</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x_coordinates</span></em>, <em class="sig-param"><span class="n">y_coordinates</span></em>, <em class="sig-param"><span class="n">z_coordinates</span></em>, <em class="sig-param"><span class="n">label</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fds/slcf/slice.html#Mesh"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>3-dimensional Mesh of fixed, defined size.
-:param x_coordinates: Coordinate values of x-axis.
-:param y_coordinates: Coordinate values of y-axis.
-:param z_coordinates: Coordinate values of z-axis.
-:param label: Label associated with this mesh.
-:ivar coordinates: Coordinate values for each of the 3 dimension.
-:ivar extent: Tuple with three tuples containing minimum and maximum coordinate value on the
-corresponding dimension.
-:ivar mesh:
-:ivar n: Number of elements for each of the 3 dimensions.
-:ivar n_size: Total number of blocks in this mesh.
-:ivar label: Label associated with this mesh.</p>
-<dl class="py method">
-<dt>
-<code class="sig-name descname">extract_slice_mesh</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">normal_direction</span><span class="p">:</span> <span class="n">typing_extensions.Literal[x, y, z, 0, 1, 2]</span></em>, <em class="sig-param"><span class="n">normal_offset_index</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span> &#x2192; fds.slcf.slice.SliceMesh<a class="reference internal" href="_modules/fds/slcf/slice.html#Mesh.extract_slice_mesh"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Extracts a slice of the mesh for a given direction and offset in that direction.
-:param normal_direction: Direction of the normal (parallel to one axis).
-:param normal_offset_index: Index in normal direction defining the offset.
-:returns: A SliceMesh created by slicing this mesh.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt>
-<em class="property">class </em><code class="sig-prename descclassname">fds.slcf.slice.</code><code class="sig-name descname">MeshCollection</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_path</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fds/slcf/slice.html#MeshCollection"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Creates a collection of slices by collecting all mesh (GRID) information in a given .smv file.
-:param file_path: Path to the .smv file containing information about the meshes.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt>
 <em class="property">class </em><code class="sig-prename descclassname">fds.slcf.slice.</code><code class="sig-name descname">Slice</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">quantity</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">label</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">units</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">filename</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">mesh_id</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">index_ranges</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">centered</span><span class="p">:</span> <span class="n">bool</span></em>, <em class="sig-param"><span class="n">root</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'.'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fds/slcf/slice.html#Slice"><span class="viewcode-link">[source]</span></a></dt>
 <dd><dl class="py method">
 <dt>
@@ -200,7 +167,7 @@ corresponding dimension.
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname">map_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mesh_col</span><span class="p">:</span> <span class="n">fds.slcf.slice.MeshCollection</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fds/slcf/slice.html#Slice.map_data"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-name descname">map_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mesh_col</span><span class="p">:</span> <span class="n">fds.mesh.MeshCollection</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fds/slcf/slice.html#Slice.map_data"><span class="viewcode-link">[source]</span></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>mesh_col</strong> – </p>
@@ -266,7 +233,7 @@ corresponding dimension.
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>quantity</strong> – </p></li>
 <li><p><strong>normal_direction</strong> – Direction of the normal (parallel to one axis).</p></li>
-<li><p><strong>offset</strong> – </p></li>
+<li><p><strong>normal_offset</strong> – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -279,12 +246,8 @@ corresponding dimension.
 
 <dl class="py class">
 <dt>
-<em class="property">class </em><code class="sig-prename descclassname">fds.slcf.slice.</code><code class="sig-name descname">SliceMesh</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x1</span></em>, <em class="sig-param"><span class="n">x2</span></em>, <em class="sig-param"><span class="n">normal_direction</span><span class="p">:</span> <span class="n">typing_extensions.Literal[0, 1, 2]</span></em>, <em class="sig-param"><span class="n">normal_offset</span><span class="p">:</span> <span class="n">float</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fds/slcf/slice.html#SliceMesh"><span class="viewcode-link">[source]</span></a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">fds.slcf.slice.</code><code class="sig-name descname">SliceMesh</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mesh</span></em>, <em class="sig-param"><span class="n">normal_direction</span><span class="p">:</span> <span class="n">typing_extensions.Literal[0, 1, 2]</span></em>, <em class="sig-param"><span class="n">normal_offset_index</span><span class="p">:</span> <span class="n">float</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fds/slcf/slice.html#SliceMesh"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>slice of a mesh in a given direction.
-:param x1:
-:param x2:
-:param normal_direction: Direction of the normal (parallel to one axis).
-:param normal_offset: Offset value in normal direction.
 :ivar normal_direction: Direction of the normal, defines which axes the slice mesh has.
 :ivar normal_offset: Offset value in normal direction.
 :ivar directions: Labels for axes directions.
@@ -292,6 +255,15 @@ corresponding dimension.
 :ivar mesh: Numpy meshgrid along both axes.
 :ivar n: Number of elements for both of the 2 dimensions.
 :ivar n_size: Total number of blocks in this mesh slice.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mesh</strong> – The mesh to extract a slice from.</p></li>
+<li><p><strong>normal_direction</strong> – Direction of the normal (parallel to one axis).</p></li>
+<li><p><strong>normal_offset_index</strong> – Offset index in normal direction.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">

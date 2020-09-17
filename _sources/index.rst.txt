@@ -10,4 +10,6 @@ Welcome to fdsreader's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+.. include::  mesh.rst
 .. include::  slcf.rst
+.. include::  utils.rst

@@ -150,6 +150,14 @@
 
 <span class="kn">import</span> <span class="nn">os</span>
 
+<span class="c1"># As the binary representation of raw data is compiler dependent, this information must be provided</span>
+<span class="c1"># by the user</span>
+<span class="n">FDS_DATA_TYPE_INTEGER</span> <span class="o">=</span> <span class="s2">&quot;i4&quot;</span>  <span class="c1"># i4 -&gt; 32 bit integer (native endianness, probably little-endian)</span>
+<span class="n">FDS_DATA_TYPE_FLOAT</span> <span class="o">=</span> <span class="s2">&quot;f4&quot;</span>  <span class="c1"># f4 -&gt; 32 bit floating point (native endianness, probably little-endian)</span>
+<span class="n">FDS_DATA_TYPE_CHAR</span> <span class="o">=</span> <span class="s2">&quot;a&quot;</span>  <span class="c1"># a -&gt; 8 bit character</span>
+<span class="n">FDS_FORTRAN_BACKWARD</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># sets weather the blocks are ended with the size of the block</span>
+
+
 <div class="viewcode-block" id="scan_directory_smv"><a class="viewcode-back" href="../../../utils.html#fds.utils.data.scan_directory_smv">[docs]</a><span class="k">def</span> <span class="nf">scan_directory_smv</span><span class="p">(</span><span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Scanning a directory non-recursively for smv-files.</span>
