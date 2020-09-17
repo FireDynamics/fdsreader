@@ -187,25 +187,52 @@
 
 <div class="viewcode-block" id="Slice"><a class="viewcode-back" href="../../../slcf.html#fds.slcf.slice.Slice">[docs]</a><span class="k">class</span> <span class="nc">Slice</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-
+<span class="sd">    Slice file data container including metadata.</span>
+<span class="sd">    :ivar root_path: Path containing the corresponding slice file (.sf).</span>
+<span class="sd">    :ivar quantity: Quantity string as defined in .fds file.</span>
+<span class="sd">    :ivar label: Label assigned by fds in .smv file.</span>
+<span class="sd">    :ivar units: Units string assigned by fds in .smv file.</span>
+<span class="sd">    :ivar filename: Name of the corresponding slice file (.sf).</span>
+<span class="sd">    :ivar mesh_id: ID of the mesh containing this slice.</span>
+<span class="sd">    :ivar extent: Tuple with three tuples containing minimum and maximum coordinate value on the</span>
+<span class="sd">                  corresponding dimension.</span>
+<span class="sd">    :ivar centered: Indicates whether centered positioning for data is used.</span>
+<span class="sd">    :ivar read_size:</span>
+<span class="sd">    :ivar stride:</span>
+<span class="sd">    :ivar header:</span>
+<span class="sd">    :ivar index:</span>
+<span class="sd">    :ivar n_size:</span>
+<span class="sd">    :ivar Literal[0,1,2] normal_direction:</span>
+<span class="sd">    :ivar normal_offset:</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">offset</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">get_slice_type</span><span class="p">(</span><span class="s1">&#39;header&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">+</span> <span class="n">get_slice_type</span><span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">itemsize</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">units</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mesh_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                 <span class="n">index_ranges</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span>
-                 <span class="n">centered</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">root</span>
+                 <span class="n">extent</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span>
+                 <span class="n">centered</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">root_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param quantity: Quantity string as defined in .fds file.</span>
+<span class="sd">        :param label: Label assigned by fds in .smv file.</span>
+<span class="sd">        :param units: Units string assigned by fds in .smv file.</span>
+<span class="sd">        :param filename: Name of the corresponding slice file (.sf).</span>
+<span class="sd">        :param mesh_id: ID of the mesh containing this slice.</span>
+<span class="sd">        :param extent: Tuple with three tuples containing minimum and maximum coordinate value on</span>
+<span class="sd">                       the corresponding dimension.</span>
+<span class="sd">        :param centered: Indicates whether centered positioning for data is used.</span>
+<span class="sd">        :param root_path: Path containing the corresponding slice file (.sf).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">root_path</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">quantity</span> <span class="o">=</span> <span class="n">quantity</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">label</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="n">units</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mesh_id</span> <span class="o">=</span> <span class="n">mesh_id</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">index_ranges</span> <span class="o">=</span> <span class="n">index_ranges</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extent</span> <span class="o">=</span> <span class="n">extent</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">centered</span> <span class="o">=</span> <span class="n">centered</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">read_size</span> <span class="o">=</span> <span class="p">(</span><span class="n">index_ranges</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">index_ranges</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> \
-                         <span class="p">(</span><span class="n">index_ranges</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">index_ranges</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> \
-                         <span class="p">(</span><span class="n">index_ranges</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">index_ranges</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_size</span> <span class="o">=</span> <span class="p">(</span><span class="n">extent</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">extent</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> \
+                         <span class="p">(</span><span class="n">extent</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">extent</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> \
+                         <span class="p">(</span><span class="n">extent</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">extent</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">stride</span> <span class="o">=</span> <span class="n">get_slice_type</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">+</span> <span class="n">get_slice_type</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">,</span>
                                                                        <span class="bp">self</span><span class="o">.</span><span class="n">read_size</span><span class="p">)</span><span class="o">.</span><span class="n">itemsize</span>
@@ -220,24 +247,25 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">centered</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">n_size</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">index_ranges</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">index_ranges</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">n_size</span> <span class="o">*=</span> <span class="n">index_ranges</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">index_ranges</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">index_ranges</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">index_ranges</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">n_size</span> <span class="o">*=</span> <span class="n">index_ranges</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">index_ranges</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">index_ranges</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">index_ranges</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">n_size</span> <span class="o">*=</span> <span class="n">index_ranges</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">index_ranges</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="c1"># Todo: +1 missing here?</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">extent</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">extent</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">n_size</span> <span class="o">*=</span> <span class="n">extent</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">extent</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">extent</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">extent</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">n_size</span> <span class="o">*=</span> <span class="n">extent</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">extent</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">extent</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">extent</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">n_size</span> <span class="o">*=</span> <span class="n">extent</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">extent</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">n_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_size</span>
 
-        <span class="k">if</span> <span class="n">index_ranges</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">index_ranges</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">extent</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">extent</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">normal_direction</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">norm_offset</span> <span class="o">=</span> <span class="n">index_ranges</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">index_ranges</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">index_ranges</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">normal_offset</span> <span class="o">=</span> <span class="n">extent</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">extent</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">extent</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">normal_direction</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">norm_offset</span> <span class="o">=</span> <span class="n">index_ranges</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">index_ranges</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">index_ranges</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">normal_offset</span> <span class="o">=</span> <span class="n">extent</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">extent</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">extent</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">normal_direction</span> <span class="o">=</span> <span class="mi">2</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">norm_offset</span> <span class="o">=</span> <span class="n">index_ranges</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">normal_offset</span> <span class="o">=</span> <span class="n">extent</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">all_times</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -251,7 +279,6 @@
     <span class="k">def</span> <span class="nf">_initialize_times</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Reads in all time information.</span>
-<span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">times</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
@@ -275,8 +302,9 @@
 <span class="sd">        Reading in the slice&#39;s data, optionally only for a specific selection.</span>
 <span class="sd">        :param dt:</span>
 <span class="sd">        :param average_dt:</span>
-<span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Todo: Instead of single datetime, make it a selection. What is average_dt?</span>
+
         <span class="n">type_time</span> <span class="o">=</span> <span class="n">get_slice_type</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">)</span>
         <span class="n">type_data</span> <span class="o">=</span> <span class="n">get_slice_type</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_size</span><span class="p">)</span>
         <span class="n">stride</span> <span class="o">=</span> <span class="n">type_time</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">+</span> <span class="n">type_data</span><span class="o">.</span><span class="n">itemsize</span>
@@ -317,14 +345,14 @@
 
                 <span class="bp">self</span><span class="o">.</span><span class="n">data_raw</span><span class="p">[</span><span class="n">t</span><span class="p">,</span> <span class="p">:]</span> <span class="o">/=</span> <span class="nb">len</span><span class="p">(</span><span class="n">time_indices</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Slice.map_data"><a class="viewcode-back" href="../../../slcf.html#fds.slcf.slice.Slice.map_data">[docs]</a>    <span class="k">def</span> <span class="nf">map_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh_col</span><span class="p">:</span> <span class="n">MeshCollection</span><span class="p">):</span>
+<div class="viewcode-block" id="Slice.map_data_onto_mesh"><a class="viewcode-back" href="../../../slcf.html#fds.slcf.slice.Slice.map_data_onto_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">map_data_onto_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh_col</span><span class="p">:</span> <span class="n">MeshCollection</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :param mesh_col:</span>
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">mesh</span> <span class="o">=</span> <span class="n">mesh_col</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh_id</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">slice_mesh</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">extract_slice_mesh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">normal_direction</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm_offset</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slice_mesh</span> <span class="o">=</span> <span class="n">SliceMesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">normal_direction</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">normal_offset</span><span class="p">)</span>
 
         <span class="n">n1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">slice_mesh</span><span class="o">.</span><span class="n">n</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">n2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">slice_mesh</span><span class="o">.</span><span class="n">n</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -341,9 +369,9 @@
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">ret_str</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">, mesh_id: </span><span class="si">%i</span><span class="s2">, [</span><span class="si">%i</span><span class="s2">, </span><span class="si">%i</span><span class="s2">] x [</span><span class="si">%i</span><span class="s2">, </span><span class="si">%i</span><span class="s2">] x [</span><span class="si">%i</span><span class="s2">, </span><span class="si">%i</span><span class="s2">]&quot;</span> <span class="o">%</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">quantity</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">index_ranges</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">index_ranges</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">index_ranges</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">index_ranges</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">index_ranges</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">index_ranges</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">quantity</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
 
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;times&quot;</span><span class="p">):</span>
             <span class="n">ret_str</span> <span class="o">+=</span> <span class="s2">&quot;, times: </span><span class="si">{}</span><span class="s2">, [</span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2">]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
@@ -355,9 +383,9 @@
 
         <span class="k">return</span> <span class="n">ret_str</span>
 
-<div class="viewcode-block" id="Slice.equals"><a class="viewcode-back" href="../../../slcf.html#fds.slcf.slice.Slice.equals">[docs]</a>    <span class="k">def</span> <span class="nf">equals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">normal_direction</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">normal_offset</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">quantity</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">quantity</span> <span class="ow">and</span> <span class="n">normal_direction</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">normal_direction</span> \
-               <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">normal_offset</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">slice_mesh</span><span class="o">.</span><span class="n">normal_offset</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.01</span></div>
+<div class="viewcode-block" id="Slice.in_close_proximity"><a class="viewcode-back" href="../../../slcf.html#fds.slcf.slice.Slice.in_close_proximity">[docs]</a>    <span class="k">def</span> <span class="nf">in_close_proximity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">normal_direction</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">normal_offset</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">normal_direction</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">normal_direction</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span>
+            <span class="n">normal_offset</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">slice_mesh</span><span class="o">.</span><span class="n">normal_offset</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.01</span></div>
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">other</span><span class="o">.</span><span class="n">quantity</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">quantity</span> <span class="ow">and</span> <span class="n">other</span><span class="o">.</span><span class="n">normal_direction</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">normal_direction</span> \
@@ -367,10 +395,12 @@
 <div class="viewcode-block" id="SliceCollection"><a class="viewcode-back" href="../../../slcf.html#fds.slcf.slice.SliceCollection">[docs]</a><span class="k">class</span> <span class="nc">SliceCollection</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a collection of slices by collecting all slice (SLC) information in a given .smv file.</span>
-<span class="sd">    :param file_path: Path to the .smv file containing information about the slices.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param file_path: Path to the .smv file containing information about the slices.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_slices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
 
         <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;scanning smv file for slcf: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
@@ -405,7 +435,7 @@
 
                 <span class="bp">self</span><span class="o">.</span><span class="n">_slices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Slice</span><span class="p">(</span><span class="n">quantity</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">units</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">mesh_id</span><span class="p">,</span>
                                           <span class="p">((</span><span class="n">x_start</span><span class="p">,</span> <span class="n">x_end</span><span class="p">),</span> <span class="p">(</span><span class="n">y_start</span><span class="p">,</span> <span class="n">y_end</span><span class="p">),</span> <span class="p">(</span><span class="n">z_start</span><span class="p">,</span> <span class="n">z_end</span><span class="p">)),</span>
-                                          <span class="n">centered</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">file_path</span><span class="p">)))</span>
+                                          <span class="n">centered</span><span class="p">,</span> <span class="n">root_path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">file_path</span><span class="p">)))</span>
 
                 <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;slice info: </span><span class="si">%i</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">mesh_id</span><span class="p">,</span>
                               <span class="p">[[</span><span class="n">x_start</span><span class="p">,</span> <span class="n">x_end</span><span class="p">],</span> <span class="p">[</span><span class="n">y_start</span><span class="p">,</span> <span class="n">y_end</span><span class="p">],</span> <span class="p">[</span><span class="n">z_start</span><span class="p">,</span> <span class="n">z_end</span><span class="p">]])</span>
@@ -467,31 +497,57 @@
 
         <span class="k">return</span> <span class="n">mesh</span><span class="p">,</span> <span class="p">[</span><span class="n">min_x1</span><span class="p">,</span> <span class="n">max_x1</span><span class="p">,</span> <span class="n">min_x2</span><span class="p">,</span> <span class="n">max_x2</span><span class="p">],</span> <span class="n">data</span><span class="p">,</span> <span class="n">mask</span></div>
 
-<div class="viewcode-block" id="SliceCollection.find_slice_by_label"><a class="viewcode-back" href="../../../slcf.html#fds.slcf.slice.SliceCollection.find_slice_by_label">[docs]</a>    <span class="k">def</span> <span class="nf">find_slice_by_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Slice</span><span class="p">:</span>
+<div class="viewcode-block" id="SliceCollection.find_slices_by_label"><a class="viewcode-back" href="../../../slcf.html#fds.slcf.slice.SliceCollection.find_slices_by_label">[docs]</a>    <span class="k">def</span> <span class="nf">find_slices_by_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Slice</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">        :param label:</span>
-<span class="sd">        :return:</span>
+<span class="sd">        Finds all slices with a specific label.</span>
+<span class="sd">        :param label: Label assigned by fds in .smv file.</span>
+<span class="sd">        :return: List containing all found slices.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">slices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">slc</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">slc</span><span class="o">.</span><span class="n">label</span> <span class="o">==</span> <span class="n">label</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">slc</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;no slice matching label: &quot;</span> <span class="o">+</span> <span class="n">label</span><span class="p">)</span></div>
+                <span class="n">slices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">slc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">slices</span></div>
+
+<div class="viewcode-block" id="SliceCollection.find_slices_by_quantity"><a class="viewcode-back" href="../../../slcf.html#fds.slcf.slice.SliceCollection.find_slices_by_quantity">[docs]</a>    <span class="k">def</span> <span class="nf">find_slices_by_quantity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Slice</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Finds all slices with a specific quantity.</span>
+<span class="sd">        :param quantity: Quantity string as defined in .fds file.</span>
+<span class="sd">        :return: List containing all found slices.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">slices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">slc</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">slc</span><span class="o">.</span><span class="n">quantity</span> <span class="o">==</span> <span class="n">quantity</span><span class="p">:</span>
+                <span class="n">slices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">slc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">slices</span></div>
+
+<div class="viewcode-block" id="SliceCollection.find_slices_by_position"><a class="viewcode-back" href="../../../slcf.html#fds.slcf.slice.SliceCollection.find_slices_by_position">[docs]</a>    <span class="k">def</span> <span class="nf">find_slices_by_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">normal_direction</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">normal_offset</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> \
+            <span class="n">List</span><span class="p">[</span><span class="n">Slice</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Finds all slices with a specific position.</span>
+<span class="sd">        :param normal_direction: Direction of the normal (parallel to one axis).</span>
+<span class="sd">        :param normal_offset: Offset value in normal direction.</span>
+<span class="sd">        :return: List containing all found slices.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">slices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">slc</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">slc</span><span class="o">.</span><span class="n">in_close_proximity</span><span class="p">(</span><span class="n">normal_direction</span><span class="p">,</span> <span class="n">normal_offset</span><span class="p">):</span>
+                <span class="n">slices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">slc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">slices</span></div>
 
 <div class="viewcode-block" id="SliceCollection.find_slices"><a class="viewcode-back" href="../../../slcf.html#fds.slcf.slice.SliceCollection.find_slices">[docs]</a>    <span class="k">def</span> <span class="nf">find_slices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">normal_direction</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">normal_offset</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">        :param quantity:</span>
+<span class="sd">        Finds all slices with a specific quantity and position.</span>
+<span class="sd">        :param quantity: Quantity string as defined in .fds file.</span>
 <span class="sd">        :param normal_direction: Direction of the normal (parallel to one axis).</span>
-<span class="sd">        :param normal_offset:</span>
-<span class="sd">        :return:</span>
+<span class="sd">        :param normal_offset: Offset value in normal direction.</span>
+<span class="sd">        :return: List containing all found slices.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">slices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-
         <span class="k">for</span> <span class="n">slc</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">slc</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">quantity</span><span class="p">,</span> <span class="n">normal_direction</span><span class="p">,</span> <span class="n">normal_offset</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">slc</span><span class="o">.</span><span class="n">quantity</span> <span class="o">==</span> <span class="n">quantity</span> <span class="ow">and</span> <span class="n">slc</span><span class="o">.</span><span class="n">in_close_proximity</span><span class="p">(</span><span class="n">normal_direction</span><span class="p">,</span>
+                                                                   <span class="n">normal_offset</span><span class="p">):</span>
                 <span class="n">slices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">slc</span><span class="p">)</span>
-
         <span class="k">return</span> <span class="n">slices</span></div>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>

@@ -156,13 +156,9 @@
 <div class="viewcode-block" id="Mesh"><a class="viewcode-back" href="../../mesh.html#fds.mesh.Mesh">[docs]</a><span class="k">class</span> <span class="nc">Mesh</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    3-dimensional Mesh of fixed, defined size.</span>
-<span class="sd">    :param x_coordinates: Coordinate values of x-axis.</span>
-<span class="sd">    :param y_coordinates: Coordinate values of y-axis.</span>
-<span class="sd">    :param z_coordinates: Coordinate values of z-axis.</span>
-<span class="sd">    :param label: Label associated with this mesh.</span>
 <span class="sd">    :ivar coordinates: Coordinate values for each of the 3 dimension.</span>
 <span class="sd">    :ivar extent: Tuple with three tuples containing minimum and maximum coordinate value on the</span>
-<span class="sd">    corresponding dimension.</span>
+<span class="sd">                  corresponding dimension.</span>
 <span class="sd">    :ivar mesh:</span>
 <span class="sd">    :ivar n: Number of elements for each of the 3 dimensions.</span>
 <span class="sd">    :ivar n_size: Total number of blocks in this mesh.</span>
@@ -170,6 +166,12 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_coordinates</span><span class="p">,</span> <span class="n">y_coordinates</span><span class="p">,</span> <span class="n">z_coordinates</span><span class="p">,</span> <span class="n">label</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param x_coordinates: Coordinate values of x-axis.</span>
+<span class="sd">        :param y_coordinates: Coordinate values of y-axis.</span>
+<span class="sd">        :param z_coordinates: Coordinate values of z-axis.</span>
+<span class="sd">        :param label: Label associated with this mesh.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="p">[</span><span class="n">x_coordinates</span><span class="p">,</span> <span class="n">y_coordinates</span><span class="p">,</span> <span class="n">z_coordinates</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">extent</span> <span class="o">=</span> <span class="p">((</span><span class="n">x_coordinates</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x_coordinates</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span>
                        <span class="p">(</span><span class="n">y_coordinates</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">y_coordinates</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span>
@@ -197,10 +199,12 @@
 <div class="viewcode-block" id="MeshCollection"><a class="viewcode-back" href="../../mesh.html#fds.mesh.MeshCollection">[docs]</a><span class="k">class</span> <span class="nc">MeshCollection</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a collection of slices by collecting all mesh (GRID) information in a given .smv file.</span>
-<span class="sd">    :param file_path: Path to the .smv file containing information about the meshes.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param file_path: Path to the .smv file containing information about the meshes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_meshes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
 
         <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;scanning smv file for meshes: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>

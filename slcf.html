@@ -153,8 +153,46 @@
 <p id="apireference">Defines classes and methods to load slice-files and work with sliced data.</p>
 <dl class="py class">
 <dt>
-<em class="property">class </em><code class="sig-prename descclassname">fds.slcf.slice.</code><code class="sig-name descname">Slice</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">quantity</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">label</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">units</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">filename</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">mesh_id</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">index_ranges</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">centered</span><span class="p">:</span> <span class="n">bool</span></em>, <em class="sig-param"><span class="n">root</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'.'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fds/slcf/slice.html#Slice"><span class="viewcode-link">[source]</span></a></dt>
-<dd><dl class="py method">
+<em class="property">class </em><code class="sig-prename descclassname">fds.slcf.slice.</code><code class="sig-name descname">Slice</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">quantity</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">label</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">units</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">filename</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">mesh_id</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">extent</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">centered</span><span class="p">:</span> <span class="n">bool</span></em>, <em class="sig-param"><span class="n">root_path</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'.'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fds/slcf/slice.html#Slice"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Slice file data container including metadata.
+:ivar root_path: Path containing the corresponding slice file (.sf).
+:ivar quantity: Quantity string as defined in .fds file.
+:ivar label: Label assigned by fds in .smv file.
+:ivar units: Units string assigned by fds in .smv file.
+:ivar filename: Name of the corresponding slice file (.sf).
+:ivar mesh_id: ID of the mesh containing this slice.
+:ivar extent: Tuple with three tuples containing minimum and maximum coordinate value on the</p>
+<blockquote>
+<div><p>corresponding dimension.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>centered</strong> – Indicates whether centered positioning for data is used.</p></li>
+<li><p><strong>read_size</strong> – </p></li>
+<li><p><strong>stride</strong> – </p></li>
+<li><p><strong>header</strong> – </p></li>
+<li><p><strong>index</strong> – </p></li>
+<li><p><strong>n_size</strong> – </p></li>
+<li><p><strong>normal_direction</strong> (<em>Literal</em><em>[</em><em>0</em><em>,</em><em>1</em><em>,</em><em>2</em><em>]</em>) – </p></li>
+<li><p><strong>normal_offset</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>quantity</strong> – Quantity string as defined in .fds file.</p></li>
+<li><p><strong>label</strong> – Label assigned by fds in .smv file.</p></li>
+<li><p><strong>units</strong> – Units string assigned by fds in .smv file.</p></li>
+<li><p><strong>filename</strong> – Name of the corresponding slice file (.sf).</p></li>
+<li><p><strong>mesh_id</strong> – ID of the mesh containing this slice.</p></li>
+<li><p><strong>extent</strong> – Tuple with three tuples containing minimum and maximum coordinate value on
+the corresponding dimension.</p></li>
+<li><p><strong>centered</strong> – Indicates whether centered positioning for data is used.</p></li>
+<li><p><strong>root_path</strong> – Path containing the corresponding slice file (.sf).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
 <dt>
 <em class="property">property </em><code class="sig-name descname">all_times</code></dt>
 <dd><p>Numpy array with all times in this slice file</p>
@@ -162,12 +200,12 @@
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname">equals</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">quantity</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">normal_direction</span><span class="p">:</span> <span class="n">typing_extensions.Literal[0, 1, 2]</span></em>, <em class="sig-param"><span class="n">normal_offset</span><span class="p">:</span> <span class="n">float</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fds/slcf/slice.html#Slice.equals"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-name descname">in_close_proximity</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">normal_direction</span><span class="p">:</span> <span class="n">typing_extensions.Literal[0, 1, 2]</span></em>, <em class="sig-param"><span class="n">normal_offset</span><span class="p">:</span> <span class="n">float</span></em><span class="sig-paren">)</span> &#x2192; bool<a class="reference internal" href="_modules/fds/slcf/slice.html#Slice.in_close_proximity"><span class="viewcode-link">[source]</span></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname">map_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mesh_col</span><span class="p">:</span> <span class="n">fds.mesh.MeshCollection</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fds/slcf/slice.html#Slice.map_data"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-name descname">map_data_onto_mesh</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mesh_col</span><span class="p">:</span> <span class="n">fds.mesh.MeshCollection</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fds/slcf/slice.html#Slice.map_data_onto_mesh"><span class="viewcode-link">[source]</span></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>mesh_col</strong> – </p>
@@ -188,8 +226,7 @@
 <code class="sig-name descname">read_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dt</span><span class="o">=</span><span class="default_value">- 1</span></em>, <em class="sig-param"><span class="n">average_dt</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fds/slcf/slice.html#Slice.read_data"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Reading in the slice’s data, optionally only for a specific selection.
 :param dt:
-:param average_dt:
-:return:</p>
+:param average_dt:</p>
 </dd></dl>
 
 </dd></dl>
@@ -197,8 +234,12 @@
 <dl class="py class">
 <dt>
 <em class="property">class </em><code class="sig-prename descclassname">fds.slcf.slice.</code><code class="sig-name descname">SliceCollection</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_path</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fds/slcf/slice.html#SliceCollection"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Creates a collection of slices by collecting all slice (SLC) information in a given .smv file.
-:param file_path: Path to the .smv file containing information about the slices.</p>
+<dd><p>Creates a collection of slices by collecting all slice (SLC) information in a given .smv file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>file_path</strong> – Path to the .smv file containing information about the slices.</p>
+</dd>
+</dl>
 <dl class="py method">
 <dt>
 <em class="property">static </em><code class="sig-name descname">combine_slices</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">slices</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>List<span class="p">[</span>fds.slcf.slice.Slice<span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>fds.slcf.slice.Slice<span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fds/slcf/slice.html#SliceCollection.combine_slices"><span class="viewcode-link">[source]</span></a></dt>
@@ -214,32 +255,37 @@
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname">find_slice_by_label</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">label</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; fds.slcf.slice.Slice<a class="reference internal" href="_modules/fds/slcf/slice.html#SliceCollection.find_slice_by_label"><span class="viewcode-link">[source]</span></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>label</strong> – </p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
+<code class="sig-name descname">find_slices</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">quantity</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">normal_direction</span><span class="p">:</span> <span class="n">typing_extensions.Literal[0, 1, 2]</span></em>, <em class="sig-param"><span class="n">normal_offset</span><span class="p">:</span> <span class="n">float</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fds/slcf/slice.html#SliceCollection.find_slices"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Finds all slices with a specific quantity and position.
+:param quantity: Quantity string as defined in .fds file.
+:param normal_direction: Direction of the normal (parallel to one axis).
+:param normal_offset: Offset value in normal direction.
+:return: List containing all found slices.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname">find_slices</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">quantity</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">normal_direction</span><span class="p">:</span> <span class="n">typing_extensions.Literal[0, 1, 2]</span></em>, <em class="sig-param"><span class="n">normal_offset</span><span class="p">:</span> <span class="n">float</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fds/slcf/slice.html#SliceCollection.find_slices"><span class="viewcode-link">[source]</span></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>quantity</strong> – </p></li>
-<li><p><strong>normal_direction</strong> – Direction of the normal (parallel to one axis).</p></li>
-<li><p><strong>normal_offset</strong> – </p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
+<code class="sig-name descname">find_slices_by_label</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">label</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; List<span class="p">[</span>fds.slcf.slice.Slice<span class="p">]</span><a class="reference internal" href="_modules/fds/slcf/slice.html#SliceCollection.find_slices_by_label"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Finds all slices with a specific label.
+:param label: Label assigned by fds in .smv file.
+:return: List containing all found slices.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">find_slices_by_position</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">normal_direction</span><span class="p">:</span> <span class="n">typing_extensions.Literal[0, 1, 2]</span></em>, <em class="sig-param"><span class="n">normal_offset</span><span class="p">:</span> <span class="n">float</span></em><span class="sig-paren">)</span> &#x2192; List<span class="p">[</span>fds.slcf.slice.Slice<span class="p">]</span><a class="reference internal" href="_modules/fds/slcf/slice.html#SliceCollection.find_slices_by_position"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Finds all slices with a specific position.
+:param normal_direction: Direction of the normal (parallel to one axis).
+:param normal_offset: Offset value in normal direction.
+:return: List containing all found slices.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">find_slices_by_quantity</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">quantity</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; List<span class="p">[</span>fds.slcf.slice.Slice<span class="p">]</span><a class="reference internal" href="_modules/fds/slcf/slice.html#SliceCollection.find_slices_by_quantity"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Finds all slices with a specific quantity.
+:param quantity: Quantity string as defined in .fds file.
+:return: List containing all found slices.</p>
 </dd></dl>
 
 </dd></dl>

@@ -154,24 +154,40 @@
 <dt>
 <em class="property">class </em><code class="sig-prename descclassname">fds.mesh.</code><code class="sig-name descname">Mesh</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x_coordinates</span></em>, <em class="sig-param"><span class="n">y_coordinates</span></em>, <em class="sig-param"><span class="n">z_coordinates</span></em>, <em class="sig-param"><span class="n">label</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fds/mesh.html#Mesh"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>3-dimensional Mesh of fixed, defined size.
-:param x_coordinates: Coordinate values of x-axis.
-:param y_coordinates: Coordinate values of y-axis.
-:param z_coordinates: Coordinate values of z-axis.
-:param label: Label associated with this mesh.
 :ivar coordinates: Coordinate values for each of the 3 dimension.
-:ivar extent: Tuple with three tuples containing minimum and maximum coordinate value on the
-corresponding dimension.
-:ivar mesh:
-:ivar n: Number of elements for each of the 3 dimensions.
-:ivar n_size: Total number of blocks in this mesh.
-:ivar label: Label associated with this mesh.</p>
+:ivar extent: Tuple with three tuples containing minimum and maximum coordinate value on the</p>
+<blockquote>
+<div><p>corresponding dimension.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mesh</strong> – </p></li>
+<li><p><strong>n</strong> – Number of elements for each of the 3 dimensions.</p></li>
+<li><p><strong>n_size</strong> – Total number of blocks in this mesh.</p></li>
+<li><p><strong>label</strong> – Label associated with this mesh.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>x_coordinates</strong> – Coordinate values of x-axis.</p></li>
+<li><p><strong>y_coordinates</strong> – Coordinate values of y-axis.</p></li>
+<li><p><strong>z_coordinates</strong> – Coordinate values of z-axis.</p></li>
+<li><p><strong>label</strong> – Label associated with this mesh.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py class">
 <dt>
 <em class="property">class </em><code class="sig-prename descclassname">fds.mesh.</code><code class="sig-name descname">MeshCollection</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_path</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fds/mesh.html#MeshCollection"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Creates a collection of slices by collecting all mesh (GRID) information in a given .smv file.
-:param file_path: Path to the .smv file containing information about the meshes.</p>
+<dd><p>Creates a collection of slices by collecting all mesh (GRID) information in a given .smv file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>file_path</strong> – Path to the .smv file containing information about the meshes.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
