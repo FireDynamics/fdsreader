@@ -26,8 +26,8 @@ def main():
     slice1.read_data()
     slice2.read_data()
 
-    slice1.map_data(meshes)
-    slice2.map_data(meshes)
+    slice1.map_data_onto_mesh(meshes)
+    slice2.map_data_onto_mesh(meshes)
 
     logging.debug(slice1.slice_mesh.extent + " " + slice2.slice_mesh.extent)
 

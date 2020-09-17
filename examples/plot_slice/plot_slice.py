@@ -24,7 +24,7 @@ slc = slc_col.find_slice_by_label(slice_label)
 slc.read_data()
 
 # map data on mesh
-slc.map_data(meshes)
+slc.map_data_onto_mesh(meshes)
 
 # plot slice data
 for it in range(0, slc.times.size, 10):

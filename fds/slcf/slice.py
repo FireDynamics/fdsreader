@@ -41,25 +41,52 @@ def get_slice_type(name: Literal['header', 'index', 'time', 'data'],
 
 class Slice:
     """
-
+    Slice file data container including metadata.
+    :ivar root_path: Path containing the corresponding slice file (.sf).
+    :ivar quantity: Quantity string as defined in .fds file.
+    :ivar label: Label assigned by fds in .smv file.
+    :ivar units: Units string assigned by fds in .smv file.
+    :ivar filename: Name of the corresponding slice file (.sf).
+    :ivar mesh_id: ID of the mesh containing this slice.
+    :ivar extent: Tuple with three tuples containing minimum and maximum coordinate value on the
+                  corresponding dimension.
+    :ivar centered: Indicates whether centered positioning for data is used.
+    :ivar read_size:
+    :ivar stride:
+    :ivar header:
+    :ivar index:
+    :ivar n_size:
+    :ivar Literal[0,1,2] normal_direction:
+    :ivar normal_offset:
     """
     offset = 3 * get_slice_type('header').itemsize + get_slice_type('index').itemsize
 
     def __init__(self, quantity: str, label: str, units: str, filename: str, mesh_id: int,
-                 index_ranges: Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int]],
-                 centered: bool, root: str = '.'):
-        self.root = root
+                 extent: Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int]],
+                 centered: bool, root_path: str = '.'):
+        """
+        :param quantity: Quantity string as defined in .fds file.
+        :param label: Label assigned by fds in .smv file.
+        :param units: Units string assigned by fds in .smv file.
+        :param filename: Name of the corresponding slice file (.sf).
+        :param mesh_id: ID of the mesh containing this slice.
+        :param extent: Tuple with three tuples containing minimum and maximum coordinate value on
+                       the corresponding dimension.
+        :param centered: Indicates whether centered positioning for data is used.
+        :param root_path: Path containing the corresponding slice file (.sf).
+        """
+        self.root = root_path
         self.quantity = quantity
         self.label = label
         self.units = units
         self.filename = filename
         self.mesh_id = mesh_id
-        self.index_ranges = index_ranges
+        self.extent = extent
         self.centered = centered
 
-        self.read_size = (index_ranges[0][1] - index_ranges[0][0] + 1) * \
-                         (index_ranges[1][1] - index_ranges[1][0] + 1) * \
-                         (index_ranges[2][1] - index_ranges[2][0] + 1)
+        self.read_size = (extent[0][1] - extent[0][0] + 1) * \
+                         (extent[1][1] - extent[1][0] + 1) * \
+                         (extent[2][1] - extent[2][0] + 1)
 
         self.stride = get_slice_type('time').itemsize + get_slice_type('data',
                                                                        self.read_size).itemsize
@@ -74,24 +101,25 @@ class Slice:
 
         if self.centered:
             self.n_size = 1
-            if (index_ranges[0][1] - index_ranges[0][0]) > 0:
-                self.n_size *= index_ranges[0][1] - index_ranges[0][0]
-            if (index_ranges[1][1] - index_ranges[1][0]) > 0:
-                self.n_size *= index_ranges[1][1] - index_ranges[1][0]
-            if (index_ranges[2][1] - index_ranges[2][0]) > 0:
-                self.n_size *= index_ranges[2][1] - index_ranges[2][0]
+            # Todo: +1 missing here?
+            if (extent[0][1] - extent[0][0]) > 0:
+                self.n_size *= extent[0][1] - extent[0][0]
+            if (extent[1][1] - extent[1][0]) > 0:
+                self.n_size *= extent[1][1] - extent[1][0]
+            if (extent[2][1] - extent[2][0]) > 0:
+                self.n_size *= extent[2][1] - extent[2][0]
         else:
             self.n_size = self.read_size
 
-        if index_ranges[0][0] == index_ranges[0][1]:
+        if extent[0][0] == extent[0][1]:
             self.normal_direction = 0
-            self.norm_offset = index_ranges[0][0]
-        if index_ranges[1][0] == index_ranges[1][1]:
+            self.normal_offset = extent[0][0]
+        if extent[1][0] == extent[1][1]:
             self.normal_direction = 1
-            self.norm_offset = index_ranges[1][0]
-        if index_ranges[2][0] == index_ranges[2][1]:
+            self.normal_offset = extent[1][0]
+        if extent[2][0] == extent[2][1]:
             self.normal_direction = 2
-            self.norm_offset = index_ranges[2][0]
+            self.normal_offset = extent[2][0]
 
     @property
     def all_times(self):
@@ -105,7 +133,6 @@ class Slice:
     def _initialize_times(self):
         """
         Reads in all time information.
-        :return:
         """
         count = 0
         times = list()
@@ -129,8 +156,9 @@ class Slice:
         Reading in the slice's data, optionally only for a specific selection.
         :param dt:
         :param average_dt:
-        :return:
         """
+        # Todo: Instead of single datetime, make it a selection. What is average_dt?
+
         type_time = get_slice_type('time')
         type_data = get_slice_type('data', self.read_size)
         stride = type_time.itemsize + type_data.itemsize
@@ -171,14 +199,14 @@ class Slice:
 
                 self.data_raw[t, :] /= len(time_indices)
 
-    def map_data(self, mesh_col: MeshCollection):
+    def map_data_onto_mesh(self, mesh_col: MeshCollection):
         """
 
         :param mesh_col:
         :return:
         """
         mesh = mesh_col[self.mesh_id]
-        self.slice_mesh = mesh.extract_slice_mesh(self.normal_direction, self.norm_offset)
+        self.slice_mesh = SliceMesh(mesh, self.normal_direction, self.normal_offset)
 
         n1 = self.slice_mesh.n[0]
         n2 = self.slice_mesh.n[1]
@@ -195,9 +223,9 @@ class Slice:
 
     def __str__(self, *args, **kwargs):
         ret_str = "%s, %s, %s, mesh_id: %i, [%i, %i] x [%i, %i] x [%i, %i]" % (
-            self.label, self.quantity, self.units, self.mesh_id, self.index_ranges[0][0],
-            self.index_ranges[0][1], self.index_ranges[1][0], self.index_ranges[1][1],
-            self.index_ranges[2][0], self.index_ranges[2][1])
+            self.label, self.quantity, self.units, self.mesh_id, self.extent[0][0],
+            self.extent[0][1], self.extent[1][0], self.extent[1][1],
+            self.extent[2][0], self.extent[2][1])
 
         if hasattr(self, "times"):
             ret_str += ", times: {}, [{}, {}]".format(self.times.size, self.times[0],
@@ -209,9 +237,9 @@ class Slice:
 
         return ret_str
 
-    def equals(self, quantity: str, normal_direction: Literal[0, 1, 2], normal_offset: float):
-        return quantity == self.quantity and normal_direction == self.normal_direction \
-               and np.abs(normal_offset - self.slice_mesh.normal_offset) < 0.01
+    def in_close_proximity(self, normal_direction: Literal[0, 1, 2], normal_offset: float) -> bool:
+        return normal_direction == self.normal_direction and np.abs(
+            normal_offset - self.slice_mesh.normal_offset) < 0.01
 
     def __eq__(self, other):
         return other.quantity == self.quantity and other.normal_direction == self.normal_direction \
@@ -221,10 +249,12 @@ class Slice:
 class SliceCollection:
     """
     Creates a collection of slices by collecting all slice (SLC) information in a given .smv file.
-    :param file_path: Path to the .smv file containing information about the slices.
     """
 
     def __init__(self, file_path: str):
+        """
+        :param file_path: Path to the .smv file containing information about the slices.
+        """
         self._slices = list()
 
         logging.debug("scanning smv file for slcf: %s", file_path)
@@ -259,7 +289,7 @@ class SliceCollection:
 
                 self._slices.append(Slice(quantity, label, units, filename, mesh_id,
                                           ((x_start, x_end), (y_start, y_end), (z_start, z_end)),
-                                          centered, root=os.path.dirname(file_path)))
+                                          centered, root_path=os.path.dirname(file_path)))
 
                 logging.debug("slice info: %i %s", mesh_id,
                               [[x_start, x_end], [y_start, y_end], [z_start, z_end]])
@@ -321,31 +351,57 @@ class SliceCollection:
 
         return mesh, [min_x1, max_x1, min_x2, max_x2], data, mask
 
-    def find_slice_by_label(self, label: str) -> Slice:
+    def find_slices_by_label(self, label: str) -> List[Slice]:
         """
-
-        :param label:
-        :return:
+        Finds all slices with a specific label.
+        :param label: Label assigned by fds in .smv file.
+        :return: List containing all found slices.
         """
+        slices = list()
         for slc in self:
             if slc.label == label:
-                return slc
-        raise ValueError("no slice matching label: " + label)
+                slices.append(slc)
+        return slices
+
+    def find_slices_by_quantity(self, quantity: str) -> List[Slice]:
+        """
+        Finds all slices with a specific quantity.
+        :param quantity: Quantity string as defined in .fds file.
+        :return: List containing all found slices.
+        """
+        slices = list()
+        for slc in self:
+            if slc.quantity == quantity:
+                slices.append(slc)
+        return slices
+
+    def find_slices_by_position(self, normal_direction: Literal[0, 1, 2], normal_offset: float) -> \
+            List[Slice]:
+        """
+        Finds all slices with a specific position.
+        :param normal_direction: Direction of the normal (parallel to one axis).
+        :param normal_offset: Offset value in normal direction.
+        :return: List containing all found slices.
+        """
+        slices = list()
+        for slc in self:
+            if slc.in_close_proximity(normal_direction, normal_offset):
+                slices.append(slc)
+        return slices
 
     def find_slices(self, quantity: str, normal_direction: Literal[0, 1, 2], normal_offset: float):
         """
-
-        :param quantity:
+        Finds all slices with a specific quantity and position.
+        :param quantity: Quantity string as defined in .fds file.
         :param normal_direction: Direction of the normal (parallel to one axis).
-        :param normal_offset:
-        :return:
+        :param normal_offset: Offset value in normal direction.
+        :return: List containing all found slices.
         """
         slices = list()
-
         for slc in self:
-            if slc.equals(quantity, normal_direction, normal_offset):
+            if slc.quantity == quantity and slc.in_close_proximity(normal_direction,
+                                                                   normal_offset):
                 slices.append(slc)
-
         return slices
 
     def __str__(self, *args, **kwargs):

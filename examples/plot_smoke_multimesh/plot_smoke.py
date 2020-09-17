@@ -28,7 +28,7 @@ for slc in slc_col:
         slc.read_data()
 
         # map data on mesh
-        slc.map_data(meshes)
+        slc.map_data_onto_mesh(meshes)
 
         slices.append(slc)
 

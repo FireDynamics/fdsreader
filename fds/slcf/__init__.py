@@ -1,1 +1,1 @@
-from .slice import Slice, SliceCollection, SliceMesh, MeshCollection, Mesh
+from .slice import Slice, SliceCollection, SliceMesh

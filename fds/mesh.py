@@ -10,13 +10,9 @@ from fds.utils import FDS_DATA_TYPE_FLOAT
 class Mesh:
     """
     3-dimensional Mesh of fixed, defined size.
-    :param x_coordinates: Coordinate values of x-axis.
-    :param y_coordinates: Coordinate values of y-axis.
-    :param z_coordinates: Coordinate values of z-axis.
-    :param label: Label associated with this mesh.
     :ivar coordinates: Coordinate values for each of the 3 dimension.
     :ivar extent: Tuple with three tuples containing minimum and maximum coordinate value on the
-    corresponding dimension.
+                  corresponding dimension.
     :ivar mesh:
     :ivar n: Number of elements for each of the 3 dimensions.
     :ivar n_size: Total number of blocks in this mesh.
@@ -24,6 +20,12 @@ class Mesh:
     """
 
     def __init__(self, x_coordinates, y_coordinates, z_coordinates, label):
+        """
+        :param x_coordinates: Coordinate values of x-axis.
+        :param y_coordinates: Coordinate values of y-axis.
+        :param z_coordinates: Coordinate values of z-axis.
+        :param label: Label associated with this mesh.
+        """
         self.coordinates = [x_coordinates, y_coordinates, z_coordinates]
         self.extent = ((x_coordinates[0], x_coordinates[-1]),
                        (y_coordinates[0], y_coordinates[-1]),
@@ -51,10 +53,12 @@ class Mesh:
 class MeshCollection:
     """
     Creates a collection of slices by collecting all mesh (GRID) information in a given .smv file.
-    :param file_path: Path to the .smv file containing information about the meshes.
     """
 
     def __init__(self, file_path: str):
+        """
+        :param file_path: Path to the .smv file containing information about the meshes.
+        """
         self._meshes = list()
 
         logging.debug("scanning smv file for meshes: %s", file_path)
