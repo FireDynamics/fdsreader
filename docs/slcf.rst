@@ -6,5 +6,4 @@ ___________
 .. automodule:: fds.slcf.slice
     :members:
     :undoc-members:
-    :inherited-members:
-    :show-inheritance:
+    :noindex:
