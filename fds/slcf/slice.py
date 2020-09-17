@@ -1,32 +1,29 @@
 """
-
+Defines classes and methods to load slice-files and work with sliced data.
 """
 
 import os
-import sys
-import typing
 import mmap
 import logging
+from typing import List, Tuple, Union, Iterator
+from typing_extensions import Literal
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
 
-import fds.utils
-
-# as the binary representation of raw data is compiler dependent, this
-# information must be provided by the user
+# As the binary representation of raw data is compiler dependent, this information must be provided
+# by the user
 FDS_DATA_TYPE_INTEGER = "i4"  # i4 -> 32 bit integer (native endiannes, probably little-endian)
 FDS_DATA_TYPE_FLOAT = "f4"  # f4 -> 32 bit floating point (native endiannes, probably little-endian)
 FDS_DATA_TYPE_CHAR = "a"  # a -> 8 bit character
 FDS_FORTRAN_BACKWARD = True  # sets weather the blocks are ended with the size of the block
 
 
-def get_slice_type(name: str, n_size=0):
+def get_slice_type(name: Literal['header', 'index', 'time', 'data'],
+                   n_size=0) -> np.dtype:
     """
-
-    :param name:
-    :param n_size:
-    :return:
+    Convenience function to get the numpy datatype for a given type name.
+    :param name: The data type name.
+    :param n_size: Required argument for the 'data' type that defines the total size of the slice.
+    :return: Numpy datatype for given name.
     """
     type_slice_str = FDS_DATA_TYPE_INTEGER + ", "
     if name == 'header':
@@ -38,7 +35,8 @@ def get_slice_type(name: str, n_size=0):
     elif name == 'data':
         type_slice_str += "(%i)%s" % (n_size, FDS_DATA_TYPE_FLOAT)
     else:
-        return None
+        raise ValueError("Parameter name (" + str(
+            name) + ") has to be one of ('header', 'index', 'time', 'data')!")
     if FDS_FORTRAN_BACKWARD:
         type_slice_str += ", " + FDS_DATA_TYPE_INTEGER
     return np.dtype(type_slice_str)
@@ -49,23 +47,27 @@ class SliceMesh:
 
     """
 
-    def __init__(self, x1, x2, norm_dir: typing.Union[str, int], norm_offset: float):
+    def __init__(self, x1, x2, normal_direction: Literal['x', 'y', 'z', 0, 1, 2],
+                 norm_offset: float):
         """
 
         :param x1:
         :param x2:
-        :param norm_dir:
+        :param normal_direction:
         :param norm_offset:
         """
 
-        if norm_dir in ('x', 0):
+        if normal_direction in ('x', 0):
             self.directions = [1, 2]
-        elif norm_dir in ('y', 1):
+        elif normal_direction in ('y', 1):
             self.directions = [0, 2]
-        elif norm_dir in ('z', 2):
+        elif normal_direction in ('z', 2):
             self.directions = [0, 1]
+        else:
+            raise ValueError("Parameter normal_direction  (" + str(
+                normal_direction) + ") has to be one of (x,y,z,0,1,2)!")
 
-        self.norm_direction = norm_dir
+        self.normal_direction = normal_direction
         self.norm_offset = norm_offset
 
         self.axes = [x1, x2]
@@ -110,51 +112,50 @@ class Mesh:
                                                                          self.ranges[2][0],
                                                                          self.ranges[2][1])
 
-    def extract_slice_mesh(self, norm_dir: typing.Union[str, int], norm_index: int) -> SliceMesh:
+    def extract_slice_mesh(self,
+                           normal_direction: Literal['x', 'y', 'z', 0, 1, 2],
+                           norm_index: int) -> SliceMesh:
         """
 
-        :param norm_dir:
+        :param normal_direction :
         :param norm_index:
         :return:
         """
-        if norm_dir in ('x', 0):
+        if normal_direction in ('x', 0):
             offset = self.axes[0][norm_index]
-            return SliceMesh(self.axes[1], self.axes[2], norm_dir, offset)
-        if norm_dir in ('y', 1):
+            return SliceMesh(self.axes[1], self.axes[2], normal_direction, offset)
+        if normal_direction in ('y', 1):
             offset = self.axes[1][norm_index]
-            return SliceMesh(self.axes[0], self.axes[2], norm_dir, offset)
-        if norm_dir in ('z', 2):
+            return SliceMesh(self.axes[0], self.axes[2], normal_direction, offset)
+        if normal_direction in ('z', 2):
             offset = self.axes[2][norm_index]
-            return SliceMesh(self.axes[0], self.axes[1], norm_dir, offset)
-        raise ValueError(
-            "Parameter norm_dir (" + str(norm_dir) + ") has to be one of (x,y,z,0,1,2)!")
+            return SliceMesh(self.axes[0], self.axes[1], normal_direction, offset)
+        raise ValueError("Parameter normal_direction  (" + str(
+            normal_direction) + ") has to be one of (x,y,z,0,1,2)!")
 
 
 class MeshCollection:
     """
-
+    Creates a collection of slices by collecting all mesh (GRID) information in a given .smv file.
+    :param file_path: Path to the .smv file containing information about the meshes.
     """
 
-    def __init__(self, filename: str):
-        """
+    def __init__(self, file_path: str):
+        self._meshes = list()
 
-        :param filename:
-        """
-        self.meshes = list()
+        logging.debug("scanning smv file for meshes: %s", file_path)
 
-        logging.debug("scanning smv file for meshes: %s", filename)
-
-        with open(filename, 'r') as infile, mmap.mmap(infile.fileno(), 0,
-                                                      access=mmap.ACCESS_READ) as s:
-            pos = s.find(b'GRID')
+        with open(file_path, 'r') as infile, mmap.mmap(infile.fileno(), 0,
+                                                       access=mmap.ACCESS_READ) as smv_file:
+            pos = smv_file.find(b'GRID')
 
             while pos > 0:
-                s.seek(pos)
+                smv_file.seek(pos)
 
-                label = s.readline().split()[1].decode()
+                label = smv_file.readline().split()[1].decode()
                 logging.debug("found MESH with label: %s", label)
 
-                grid_numbers = s.readline().split()
+                grid_numbers = smv_file.readline().split()
                 nx = int(grid_numbers[0]) + 1
                 # # correct for 2D cases
                 # if nx == 2: nx = 1
@@ -165,39 +166,42 @@ class MeshCollection:
 
                 logging.debug("number of cells: %i x %i x %i", nx, ny, nz)
 
-                pos = s.find(b'TRNX', pos + 1)
-                s.seek(pos)
-                s.readline()
-                s.readline()
-                x_coordinate = np.zeros(nx)
+                pos = smv_file.find(b'TRNX', pos + 1)
+                smv_file.seek(pos)
+                smv_file.readline()
+                smv_file.readline()
+                x_coordinate = np.empty(nx, dtype=np.dtype(FDS_DATA_TYPE_FLOAT))
                 for ix in range(nx):
-                    x_coordinate[ix] = float(s.readline().split()[1])
+                    x_coordinate[ix] = float(smv_file.readline().split()[1])
 
-                pos = s.find(b'TRNY', pos + 1)
-                s.seek(pos)
-                s.readline()
-                s.readline()
-                y_coordinate = np.zeros(ny)
+                pos = smv_file.find(b'TRNY', pos + 1)
+                smv_file.seek(pos)
+                smv_file.readline()
+                smv_file.readline()
+                y_coordinate = np.empty(ny, dtype=np.dtype(FDS_DATA_TYPE_FLOAT))
                 for iy in range(ny):
-                    y_coordinate[iy] = float(s.readline().split()[1])
+                    y_coordinate[iy] = float(smv_file.readline().split()[1])
 
-                pos = s.find(b'TRNZ', pos + 1)
-                s.seek(pos)
-                s.readline()
-                s.readline()
-                z_coordinate = np.zeros(nz)
+                pos = smv_file.find(b'TRNZ', pos + 1)
+                smv_file.seek(pos)
+                smv_file.readline()
+                smv_file.readline()
+                z_coordinate = np.empty(nz, dtype=np.dtype(FDS_DATA_TYPE_FLOAT))
                 for iz in range(nz):
-                    z_coordinate[iz] = float(s.readline().split()[1])
+                    z_coordinate[iz] = float(smv_file.readline().split()[1])
 
-                self.meshes.append(Mesh(x_coordinate, y_coordinate, z_coordinate, label))
+                self._meshes.append(Mesh(x_coordinate, y_coordinate, z_coordinate, label))
 
-                pos = s.find(b'GRID', pos + 1)
+                pos = smv_file.find(b'GRID', pos + 1)
 
     def __str__(self, *args, **kwargs):
-        return '\n'.join((str(m) for m in self.meshes))
+        return '\n'.join((str(m) for m in self))
 
     def __getitem__(self, item: int):
-        return self.meshes[item]
+        return self._meshes[item]
+
+    def __iter__(self) -> Iterator[Mesh]:
+        return iter(self._meshes)
 
 
 class Slice:
@@ -207,9 +211,7 @@ class Slice:
     offset = 3 * get_slice_type('header').itemsize + get_slice_type('index').itemsize
 
     def __init__(self, quantity: str, label: str, units: str, filename: str, mesh_id: int,
-                 index_ranges: typing.Union[
-                     typing.List[typing.Union[typing.List[int], typing.Tuple[int]]], typing.Tuple[
-                         typing.Union[typing.List[int], typing.Tuple[int]]]],
+                 index_ranges: Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int]],
                  centered: bool, root: str = '.'):
         self.root = root
         self.quantity = quantity
@@ -257,13 +259,13 @@ class Slice:
             self.n_size = self.read_size
 
         if index_ranges[0][0] == index_ranges[0][1]:
-            self.norm_direction = 0
+            self.normal_direction = 0
             self.norm_offset = index_ranges[0][0]
         if index_ranges[1][0] == index_ranges[1][1]:
-            self.norm_direction = 1
+            self.normal_direction = 1
             self.norm_offset = index_ranges[1][0]
         if index_ranges[2][0] == index_ranges[2][1]:
-            self.norm_direction = 2
+            self.normal_direction = 2
             self.norm_offset = index_ranges[2][0]
 
     @property
@@ -345,8 +347,8 @@ class Slice:
         :param mesh_col:
         :return:
         """
-        mesh = mesh_col.meshes[self.mesh_id]
-        self.slice_mesh = mesh.extract_slice_mesh(self.norm_direction, self.norm_offset)
+        mesh = mesh_col[self.mesh_id]
+        self.slice_mesh = mesh.extract_slice_mesh(self.normal_direction, self.norm_offset)
 
         n1 = self.slice_mesh.n[0]
         n2 = self.slice_mesh.n[1]
@@ -357,58 +359,46 @@ class Slice:
         self.sd = np.zeros((self.times.size, n2, n1))
         for i in range(self.times.size):
             if self.centered:
-                self.sd[i] = np.reshape(self.data_raw[i],
-                                        (self.slice_mesh.n[1], self.slice_mesh.n[0]))[1:, 1:]
+                self.sd[i] = np.reshape(self.data_raw[i], (n2, n1))[1:, 1:]
             else:
-                self.sd[i] = np.reshape(self.data_raw[i],
-                                        (self.slice_mesh.n[1], self.slice_mesh.n[0]))
+                self.sd[i] = np.reshape(self.data_raw[i], (n2, n1))
 
     def __str__(self, *args, **kwargs):
-        str_general = "%s, %s, %s, mesh_id: %i, [%i, %i] x [%i, %i] x [%i, %i]" % (
+        ret_str = "%s, %s, %s, mesh_id: %i, [%i, %i] x [%i, %i] x [%i, %i]" % (
             self.label, self.quantity, self.units, self.mesh_id, self.index_ranges[0][0],
             self.index_ranges[0][1], self.index_ranges[1][0], self.index_ranges[1][1],
             self.index_ranges[2][0], self.index_ranges[2][1])
 
-        str_times = ''
         if self.times is not None:
-            str_times = ", times: {}, [{}, {}]".format(self.times.size, self.times[0],
+            ret_str += ", times: {}, [{}, {}]".format(self.times.size, self.times[0],
                                                        self.times[-1])
 
-        str_data = ''
         if self.data_raw is not None:
             # Todo: Implement
-            str_data = "TO BE IMPLEMENTED"
+            ret_str += "TO BE IMPLEMENTED"
 
-        return str_general + str_times + str_data
+        return ret_str
 
 
 class SliceCollection:
     """
-
+    Creates a collection of slices by collecting all slice (SLC) information in a given .smv file.
+    :param file_path: Path to the .smv file containing information about the slices.
     """
 
-    def __init__(self, filename: str, meshes: MeshCollection = None):
-        """
+    def __init__(self, file_path: str):
+        self._slices = list()
 
-        :param filename:
-        :param meshes:
-        """
-        if meshes is None:
-            self.meshes = MeshCollection(filename)
-        else:
-            self.meshes = meshes
-        self.slices = list()
+        logging.debug("scanning smv file for slcf: %s", file_path)
 
-        logging.debug("scanning smv file for slcf: %s", filename)
-
-        with open(filename, 'r') as infile, mmap.mmap(infile.fileno(), 0,
-                                                      access=mmap.ACCESS_READ) as s:
-            pos = s.find(b'SLC')
+        with open(file_path, 'r') as infile, mmap.mmap(infile.fileno(), 0,
+                                                       access=mmap.ACCESS_READ) as smv_file:
+            pos = smv_file.find(b'SLC')
             while pos > 0:
-                s.seek(pos)
-                line = s.readline()
+                smv_file.seek(pos)
+                line = smv_file.readline()
                 centered = False
-                if line.find(b'SLCC') >= 0:
+                if line.find(b'SLCC') != -1:
                     centered = True
 
                 logging.debug("slice centered: %s", centered)
@@ -423,19 +413,20 @@ class SliceCollection:
                 z1 = int(index_range[4])
                 z2 = int(index_range[5])
 
-                fn = s.readline().decode().strip()
-                q = s.readline().decode().strip()
-                l = s.readline().decode().strip()
-                u = s.readline().decode().strip()
+                fn = smv_file.readline().decode().strip()
+                q = smv_file.readline().decode().strip()
+                l = smv_file.readline().decode().strip()
+                u = smv_file.readline().decode().strip()
 
-                self.slices.append(
-                    Slice(q, l, u, fn, mesh_id, [[x1, x2], [y1, y2], [z1, z2]], centered, root=os.path.dirname(filename)))
+                self._slices.append(
+                    Slice(q, l, u, fn, mesh_id, ((x1, x2), (y1, y2), (z1, z2)), centered,
+                          root=os.path.dirname(file_path)))
 
                 logging.debug("slice info: %i %s", mesh_id, [[x1, x2], [y1, y2], [z1, z2]])
 
-                pos = s.find(b'SLC', pos + 1)
+                pos = smv_file.find(b'SLC', pos + 1)
 
-    def combine_slices(self, slices: typing.Iterable[Slice]):
+    def combine_slices(self, slices: Union[List[Slice], Tuple[Slice]]):
         """
 
         :param slice_indices: Indices of slices to combine.
@@ -498,9 +489,10 @@ class SliceCollection:
         for slc in self:
             if slc.label == label:
                 return slc
-        logging.warning("no slice matching label: " + label)
+        raise ValueError("no slice matching label: " + label)
 
-    def find_slices(self, quantity: str, normal_direction: int, offset: float):
+    def find_slices(self, quantity: str, normal_direction: Literal['x', 'y', 'z', 0, 1, 2],
+                    offset: float):
         """
 
         :param quantity:
@@ -511,7 +503,7 @@ class SliceCollection:
         slices = list()
 
         for slc in self:
-            if slc.quantity == quantity and slc.norm_direction == normal_direction and np.abs(
+            if slc.quantity == quantity and slc.normal_direction == normal_direction and np.abs(
                     slc.slice_mesh.norm_offset - offset) < 0.01:
                 slices.append(slc)
 
@@ -519,92 +511,12 @@ class SliceCollection:
 
     def __str__(self, *args, **kwargs):
         lines = list()
-        for s in range(len(self.slices)):
-            lines.append("index %d-03: %s" % (s, self.slices[s]))
+        for s in range(len(self._slices)):
+            lines.append("index %d-03: %s" % (s, self._slices[s]))
         return '\n'.join(lines)
 
     def __getitem__(self, item: int):
-        return self.slices[item]
+        return self._slices[item]
 
-
-def main():
-    logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
-
-    root_dir = sys.argv[1]
-    smv_fn, _ = fds.utils.scan_directory_smv(root_dir)[0]
-
-    meshes = MeshCollection(smv_fn)
-
-    logging.debug(meshes)
-
-    slc_col = SliceCollection(smv_fn)
-
-    slice1 = slc_col.slices[0]
-    slice2 = slc_col.slices[6]
-
-    slice1.read_data()
-    slice2.read_data()
-
-    slice1.map_data(meshes)
-    slice2.map_data(meshes)
-
-    logging.debug(slice1.slice_mesh.extent + " " + slice2.slice_mesh.extent)
-
-    fig, axis = plt.subplots()
-
-    cmin = min(np.amin(slice1.sd[-1]), np.amin(slice2.sd[-1]))
-    cmax = max(np.amax(slice1.sd[-1]), np.amax(slice2.sd[-1]))
-
-    im1 = axis.imshow(slice1.sd[-1], extent=slice1.slice_mesh.extent, origin='lower', vmax=cmax,
-                      vmin=cmin,
-                      animated=True)
-    im2 = axis.imshow(slice2.sd[-1], extent=slice2.slice_mesh.extent, origin='lower', vmax=cmax,
-                      vmin=cmin,
-                      animated=True)
-
-    axis.autoscale()
-
-    plt.xlabel(slice1.slice_mesh.directions[0])
-    plt.ylabel(slice1.slice_mesh.directions[1])
-    plt.title(slice1)
-
-    plt.colorbar(im1)
-
-    iteration = 0
-
-    def updatefig(frame, *args):
-        nonlocal iteration
-        iteration += 1
-        if iteration >= slice1.times.size:
-            iteration = 0
-        im1.set_array(slice1.sd[iteration])
-        im2.set_array(slice2.sd[iteration])
-        return im1, im2
-
-    _ = animation.FuncAnimation(fig, updatefig, interval=10, blit=True)
-
-    plt.show()
-
-    # f = open(os.path.join(root_dir, smv_fn), 'r')
-    # list_slice_summary, list_meshes, list_slcf = readGeometry(f)
-    # f.close()
-
-    # for slc in list_slice_summary:
-    #    direction = 'x='
-    #    if slc['dir'] == 1: direction = 'y='
-    #    if slc['dir'] == 2: direction = 'z='
-    #    print("available slice: ", slc['q'], 'at ', direction, slc['coord'])
-
-    # times = readSliceTimes(os.path.join(root_dir, list_slcf[0]['fn']),
-    # list_slcf[0]['n_size'])
-
-    ## print(times)
-
-    # time = 44.9
-    # time_step = np.where(times > time)[0][0]
-    # print('read in time :', time, 'at step: ', time_step)
-    # data = readSliceData(os.path.join(root_dir, slice_fns[0]), time_step)
-
-
-if __name__ == "__main__":
-    main()
+    def __iter__(self) -> Iterator[Slice]:
+        return iter(self._slices)
