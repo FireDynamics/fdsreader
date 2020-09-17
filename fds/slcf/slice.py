@@ -9,12 +9,9 @@ from typing import List, Tuple, Union, Iterator
 from typing_extensions import Literal
 import numpy as np
 
-# As the binary representation of raw data is compiler dependent, this information must be provided
-# by the user
-FDS_DATA_TYPE_INTEGER = "i4"  # i4 -> 32 bit integer (native endianness, probably little-endian)
-FDS_DATA_TYPE_FLOAT = "f4"  # f4 -> 32 bit floating point (native endianness, probably little-endian)
-FDS_DATA_TYPE_CHAR = "a"  # a -> 8 bit character
-FDS_FORTRAN_BACKWARD = True  # sets weather the blocks are ended with the size of the block
+from fds.utils import FDS_DATA_TYPE_INTEGER, FDS_DATA_TYPE_FLOAT, FDS_DATA_TYPE_CHAR, \
+    FDS_FORTRAN_BACKWARD
+from fds.mesh import MeshCollection
 
 
 def get_slice_type(name: Literal['header', 'index', 'time', 'data'],
@@ -40,181 +37,6 @@ def get_slice_type(name: Literal['header', 'index', 'time', 'data'],
     if FDS_FORTRAN_BACKWARD:
         type_slice_str += ", " + FDS_DATA_TYPE_INTEGER
     return np.dtype(type_slice_str)
-
-
-class SliceMesh:
-    """
-    slice of a mesh in a given direction.
-    :param x1:
-    :param x2:
-    :param normal_direction: Direction of the normal (parallel to one axis).
-    :param normal_offset: Offset value in normal direction.
-    :ivar normal_direction: Direction of the normal, defines which axes the slice mesh has.
-    :ivar normal_offset: Offset value in normal direction.
-    :ivar directions: Labels for axes directions.
-    :ivar axes: Coordinate values for the two axes the slice mesh expands on.
-    :ivar mesh: Numpy meshgrid along both axes.
-    :ivar n: Number of elements for both of the 2 dimensions.
-    :ivar n_size: Total number of blocks in this mesh slice.
-
-    """
-
-    def __init__(self, x1, x2, normal_direction: Literal[0, 1, 2], normal_offset: float):
-        if normal_direction == 0:
-            self.directions = ['y', 'z']
-        elif normal_direction == 1:
-            self.directions = ['x', 'z']
-        elif normal_direction == 2:
-            self.directions = ['x', 'y']
-        else:
-            raise ValueError("Parameter normal_direction  (" + str(
-                normal_direction) + ") has to be one of [0,1,2]!")
-
-        self.normal_direction = normal_direction
-
-        self.normal_offset = normal_offset
-
-        self.axes = [x1, x2]
-        self.mesh = np.meshgrid(x1, x2)
-
-        self.extent = (np.min(x1), np.max(x1), np.min(x2), np.max(x2))
-
-        self.n = [x1.size, x2.size]
-        self.n_size = self.n[0] * self.n[1]
-
-
-class Mesh:
-    """
-    3-dimensional Mesh of fixed, defined size.
-    :param x_coordinates: Coordinate values of x-axis.
-    :param y_coordinates: Coordinate values of y-axis.
-    :param z_coordinates: Coordinate values of z-axis.
-    :param label: Label associated with this mesh.
-    :ivar coordinates: Coordinate values for each of the 3 dimension.
-    :ivar extent: Tuple with three tuples containing minimum and maximum coordinate value on the
-    corresponding dimension.
-    :ivar mesh:
-    :ivar n: Number of elements for each of the 3 dimensions.
-    :ivar n_size: Total number of blocks in this mesh.
-    :ivar label: Label associated with this mesh.
-    """
-
-    def __init__(self, x_coordinates, y_coordinates, z_coordinates, label):
-        self.coordinates = [x_coordinates, y_coordinates, z_coordinates]
-        self.extent = ((x_coordinates[0], x_coordinates[-1]),
-                       (y_coordinates[0], y_coordinates[-1]),
-                       (z_coordinates[0], z_coordinates[-1]))
-        # Todo: Does this really do what it is supposed to do? What is it even supposed to do?
-        self.mesh = np.meshgrid(self.coordinates)
-
-        self.n = [x_coordinates.size, y_coordinates.size, z_coordinates.size]
-        self.n_size = self.n[0] * self.n[1] * self.n[2]
-
-        self.label = label
-
-    def extract_slice_mesh(self,
-                           normal_direction: Literal['x', 'y', 'z', 0, 1, 2],
-                           normal_offset_index: int) -> SliceMesh:
-        """
-        Extracts a slice of the mesh for a given direction and offset in that direction.
-        :param normal_direction: Direction of the normal (parallel to one axis).
-        :param normal_offset_index: Index in normal direction defining the offset.
-        :returns: A SliceMesh created by slicing this mesh.
-        """
-        if normal_direction in ('x', 0):
-            offset = self.coordinates[0][normal_offset_index]
-            return SliceMesh(self.coordinates[1], self.coordinates[2], 0, offset)
-        if normal_direction in ('y', 1):
-            offset = self.coordinates[1][normal_offset_index]
-            return SliceMesh(self.coordinates[0], self.coordinates[2], 1, offset)
-        if normal_direction in ('z', 2):
-            offset = self.coordinates[2][normal_offset_index]
-            return SliceMesh(self.coordinates[0], self.coordinates[1], 2, offset)
-        raise ValueError("Parameter normal_direction  (" + str(
-            normal_direction) + ") has to be one of [x,y,z,0,1,2]!")
-        # Todo: Centered/Nicht-centered
-
-    def __str__(self, *args, **kwargs):
-        return "{}, {} x {} x {}, [{}, {}] x [{}, {}] x [{}, {}]".format(self.label,
-                                                                         self.n[0], self.n[1],
-                                                                         self.n[2],
-                                                                         self.extent[0][0],
-                                                                         self.extent[0][1],
-                                                                         self.extent[1][0],
-                                                                         self.extent[1][1],
-                                                                         self.extent[2][0],
-                                                                         self.extent[2][1])
-
-
-class MeshCollection:
-    """
-    Creates a collection of slices by collecting all mesh (GRID) information in a given .smv file.
-    :param file_path: Path to the .smv file containing information about the meshes.
-    """
-
-    def __init__(self, file_path: str):
-        self._meshes = list()
-
-        logging.debug("scanning smv file for meshes: %s", file_path)
-
-        with open(file_path, 'r') as infile, mmap.mmap(infile.fileno(), 0,
-                                                       access=mmap.ACCESS_READ) as smv_file:
-            float_dtype = np.dtype(FDS_DATA_TYPE_FLOAT)
-            pos = smv_file.find(b'GRID')
-
-            while pos > 0:
-                smv_file.seek(pos)
-
-                label = smv_file.readline().split()[1].decode()
-                logging.debug("found MESH with label: %s", label)
-
-                grid_numbers = smv_file.readline().split()
-                nx = int(grid_numbers[0]) + 1
-                # # correct for 2D cases
-                # if nx == 2: nx = 1
-                ny = int(grid_numbers[1]) + 1
-                # if ny == 2: ny = 1
-                nz = int(grid_numbers[2]) + 1
-                # if nz == 2: nz = 1
-
-                logging.debug("number of cells: %i x %i x %i", nx, ny, nz)
-
-                pos = smv_file.find(b'TRNX', pos + 1)
-                smv_file.seek(pos)
-                smv_file.readline()
-                smv_file.readline()
-                x_coordinates = np.empty(nx, dtype=float_dtype)
-                for ix in range(nx):
-                    x_coordinates[ix] = smv_file.readline().split()[1]
-
-                pos = smv_file.find(b'TRNY', pos + 1)
-                smv_file.seek(pos)
-                smv_file.readline()
-                smv_file.readline()
-                y_coordinates = np.empty(ny, dtype=float_dtype)
-                for iy in range(ny):
-                    y_coordinates[iy] = smv_file.readline().split()[1]
-
-                pos = smv_file.find(b'TRNZ', pos + 1)
-                smv_file.seek(pos)
-                smv_file.readline()
-                smv_file.readline()
-                z_coordinates = np.empty(nz, dtype=float_dtype)
-                for iz in range(nz):
-                    z_coordinates[iz] = smv_file.readline().split()[1]
-
-                self._meshes.append(Mesh(x_coordinates, y_coordinates, z_coordinates, label))
-
-                pos = smv_file.find(b'GRID', pos + 1)
-
-    def __str__(self, *args, **kwargs):
-        return '\n'.join((str(m) for m in self))
-
-    def __getitem__(self, item: int):
-        return self._meshes[item]
-
-    def __iter__(self) -> Iterator[Mesh]:
-        return iter(self._meshes)
 
 
 class Slice:
@@ -515,7 +337,7 @@ class SliceCollection:
 
         :param quantity:
         :param normal_direction: Direction of the normal (parallel to one axis).
-        :param offset:
+        :param normal_offset:
         :return:
         """
         slices = list()
@@ -537,3 +359,50 @@ class SliceCollection:
 
     def __iter__(self) -> Iterator[Slice]:
         return iter(self._slices)
+
+
+class SliceMesh:
+    """
+    slice of a mesh in a given direction.
+    :ivar normal_direction: Direction of the normal, defines which axes the slice mesh has.
+    :ivar normal_offset: Offset value in normal direction.
+    :ivar directions: Labels for axes directions.
+    :ivar axes: Coordinate values for the two axes the slice mesh expands on.
+    :ivar mesh: Numpy meshgrid along both axes.
+    :ivar n: Number of elements for both of the 2 dimensions.
+    :ivar n_size: Total number of blocks in this mesh slice.
+    """
+
+    def __init__(self, mesh, normal_direction: Literal[0, 1, 2], normal_offset_index: float):
+        """
+        :param mesh: The mesh to extract a slice from.
+        :param normal_direction: Direction of the normal (parallel to one axis).
+        :param normal_offset_index: Offset index in normal direction.
+        """
+        # Todo: Centered/Nicht-centered
+        if normal_direction in ('x', 0):
+            self.normal_direction = 0
+            self.directions = ['y', 'z']
+            self.normal_offset = mesh.coordinates[0][normal_offset_index]
+            self.axes = [mesh.coordinates[1], mesh.coordinates[2]]
+        if normal_direction in ('y', 1):
+            self.normal_direction = 1
+            self.directions = ['x', 'z']
+            self.normal_offset = mesh.coordinates[1][normal_offset_index]
+            self.axes = [mesh.coordinates[0], mesh.coordinates[2]]
+        if normal_direction in ('z', 2):
+            self.normal_direction = 2
+            self.directions = ['x', 'y']
+            self.normal_offset = mesh.coordinates[2][normal_offset_index]
+            self.axes = [mesh.coordinates[0], mesh.coordinates[1]]
+        else:
+            raise ValueError("Parameter normal_direction  (" + str(
+                normal_direction) + ") has to be one of [x,y,z,0,1,2]!")
+
+        self.mesh = np.meshgrid(self.axes[0], self.axes[1])
+
+        self.extent = (
+            np.min(self.axes[0]), np.max(self.axes[0]), np.min(self.axes[1]), np.max(self.axes[1]))
+
+        self.n = [self.axes[0].size, self.axes[1].size]
+        self.n_size = self.n[0] * self.n[1]

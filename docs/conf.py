@@ -15,7 +15,7 @@ import sys
 
 sys.path.insert(0, os.path.abspath('..'))
 from fds._version import __version__
-import sphinx_rtd_theme
+# import sphinx_rtd_theme
 
 # -- Project information -----------------------------------------------------
 
@@ -36,6 +36,8 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx_rtd_theme'
 ]
+
+autoclass_content = 'both'
 
 # Add any paths that contain templates here, relative to this directory.
 #   templates_path = ['_templates']
