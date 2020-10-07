@@ -11,7 +11,7 @@ import numpy as np
 
 from fds.utils import FDS_DATA_TYPE_INTEGER, FDS_DATA_TYPE_FLOAT, FDS_DATA_TYPE_CHAR, \
     FDS_FORTRAN_BACKWARD
-from fds.mesh import MeshCollection
+from fds.utils.mesh import MeshCollection
 
 
 def get_slice_type(name: Literal['header', 'index', 'time', 'data'],
@@ -62,8 +62,7 @@ class Slice:
     offset = 3 * get_slice_type('header').itemsize + get_slice_type('index').itemsize
 
     def __init__(self, quantity: str, label: str, units: str, filename: str, mesh_id: int,
-                 extent: Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int]],
-                 centered: bool, root_path: str = '.'):
+                 extent: Tuple[int, int, int], centered: bool, root_path: str = '.'):
         """
         :param quantity: Quantity string as defined in .fds file.
         :param label: Label assigned by fds in .smv file.
@@ -84,12 +83,10 @@ class Slice:
         self.extent = extent
         self.centered = centered
 
-        self.read_size = (extent[0][1] - extent[0][0] + 1) * \
-                         (extent[1][1] - extent[1][0] + 1) * \
-                         (extent[2][1] - extent[2][0] + 1)
+        self._read_size = (extent[0] + 1) * (extent[1] + 1) * (extent[2] + 1)
 
         self.stride = get_slice_type('time').itemsize + get_slice_type('data',
-                                                                       self.read_size).itemsize
+                                                                       self._read_size).itemsize
 
         infile = open(os.path.join(self.root, self.filename), 'r')
         infile.seek(0, 0)
@@ -99,25 +96,25 @@ class Slice:
         self.index = np.fromfile(infile, dtype=get_slice_type('index'), count=1)[0]
         logging.debug("slice index: %i", str(self.index))
 
-        if self.centered:
-            self.n_size = 1
-            # Todo: +1 missing here?
-            if (extent[0][1] - extent[0][0]) > 0:
-                self.n_size *= extent[0][1] - extent[0][0]
-            if (extent[1][1] - extent[1][0]) > 0:
-                self.n_size *= extent[1][1] - extent[1][0]
-            if (extent[2][1] - extent[2][0]) > 0:
-                self.n_size *= extent[2][1] - extent[2][0]
+        if not self.centered:
+            self.n_size = self._read_size
         else:
-            self.n_size = self.read_size
+            self.n_size = 1
+            if extent[0] > 0:
+                self.n_size *= extent[0]
+            if extent[1] > 0:
+                self.n_size *= extent[1]
+            if extent[2] > 0:
+                self.n_size *= extent[2]
 
-        if extent[0][0] == extent[0][1]:
+        # Check
+        if extent[0] == 0:
             self.normal_direction = 0
             self.normal_offset = extent[0][0]
-        if extent[1][0] == extent[1][1]:
+        elif extent[1] == 0:
             self.normal_direction = 1
             self.normal_offset = extent[1][0]
-        if extent[2][0] == extent[2][1]:
+        elif extent[2] == 0:
             self.normal_direction = 2
             self.normal_offset = extent[2][0]
 
@@ -160,7 +157,7 @@ class Slice:
         # Todo: Instead of single datetime, make it a selection. What is average_dt?
 
         type_time = get_slice_type('time')
-        type_data = get_slice_type('data', self.read_size)
+        type_data = get_slice_type('data', self._read_size)
         stride = type_time.itemsize + type_data.itemsize
 
         if dt != -1:
@@ -172,7 +169,7 @@ class Slice:
         self.times = np.zeros(n_slices)
 
         # Numpy 2D-array with time on the first and all data values on the second axis
-        self.data_raw = np.zeros((n_slices, self.read_size))
+        self.data_raw = np.zeros((n_slices, self._read_size))
 
         with open(os.path.join(self.root, self.filename), 'r') as infile:
             for t in range(n_slices):
@@ -232,8 +229,7 @@ class Slice:
                                                       self.times[-1])
 
         if hasattr(self, "data_raw"):
-            # Todo: Implement
-            ret_str += "TO BE IMPLEMENTED"
+            ret_str += ", " + str(self.data_raw[0, :5].extend(self.data_raw[-1, -5:]))
 
         return ret_str
 
@@ -288,8 +284,8 @@ class SliceCollection:
                 units = smv_file.readline().decode().strip()
 
                 self._slices.append(Slice(quantity, label, units, filename, mesh_id,
-                                          ((x_start, x_end), (y_start, y_end), (z_start, z_end)),
-                                          centered, root_path=os.path.dirname(file_path)))
+                                          (x_end - x_start, y_end - y_start, z_end - z_start), centered,
+                                          root_path=os.path.dirname(file_path)))
 
                 logging.debug("slice info: %i %s", mesh_id,
                               [[x_start, x_end], [y_start, y_end], [z_start, z_end]])

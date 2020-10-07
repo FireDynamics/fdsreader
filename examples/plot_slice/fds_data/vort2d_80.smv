@@ -2,8 +2,7 @@ TITLE
  2D Vortex Simulation, Mesh Size = 80
 
 FDSVERSION
-FDS 6.5.3
-FDS6.5.3-823-ge117549
+FDS6.7.5-0-g71f025606-release
 
 ENDF
  vort2d_80.end
@@ -17,9 +16,16 @@ Revisio
 CHID
  vort2d_80
 
+SOLID_HT3D
+  0
+
 CSVF
  hrr
  vort2d_80_hrr.csv
+
+CSVF
+ steps
+ vort2d_80_steps.csv
 
 NMESHES
   1
@@ -88,12 +94,6 @@ SURFACE
  null                                                        
 
 SURFACE
- VEGETATION                                                  
- 5000.00    1.00
- 0      1.00000      1.00000      1.00000      0.80000      0.40000      1.00000
- null                                                        
-
-SURFACE
  EVACUATION_OUTFLOW                                          
  5000.00    1.00
  0      1.00000      1.00000      1.00000      0.80000      0.40000      1.00000
@@ -106,7 +106,7 @@ SURFACE
  null                                                        
 
 SURFACE
- PERIODIC WIND                                               
+ PERIODIC FLOW ONLY                                          
  5000.00    1.00
  0      1.00000      1.00000      1.00000      0.80000      0.40000      1.00000
  null                                                        
@@ -142,16 +142,10 @@ PROP
  sensor
   0
 
-VERT
-       0
-
-FACE
-       0
-
 OFFSET
       0.00000      0.00000      0.00000
 
-GRID   MESH_0000001
+GRID   mesh1
    80    1   80    0
 
 PDIM
@@ -335,54 +329,54 @@ OBST
 
 VENT
     6    0
+      -0.15560       0.15560      -0.00194      -0.00194      -0.15560       0.15560     0   2    -999.00000    -999.00000    -999.00000
+      -0.15560       0.15560       0.00194       0.00194      -0.15560       0.15560     0   2    -999.00000    -999.00000    -999.00000
       -0.15560      -0.15560      -0.00194       0.00194      -0.15560       0.15560     1   4    -999.00000    -999.00000    -999.00000
        0.15560       0.15560      -0.00194       0.00194      -0.15560       0.15560     2   4    -999.00000    -999.00000    -999.00000
       -0.15560       0.15560      -0.00194       0.00194      -0.15560      -0.15560     3   4    -999.00000    -999.00000    -999.00000
       -0.15560       0.15560      -0.00194       0.00194       0.15560       0.15560     4   4    -999.00000    -999.00000    -999.00000
-      -0.15560       0.15560      -0.00194      -0.00194      -0.15560       0.15560     5   2    -999.00000    -999.00000    -999.00000
-      -0.15560       0.15560       0.00194       0.00194      -0.15560       0.15560     6   2    -999.00000    -999.00000    -999.00000
+    0   80    0    0    0   80  -99   -2
+    0   80    1    1    0   80  -99   -2
     0    0    0    1    0   80   99   -2
    80   80    0    1    0   80   99   -2
     0   80    0    1    0    0   99   -2
     0   80    0    1   80   80   99   -2
-    0   80    0    0    0   80   99   -2
-    0   80    1    1    0   80   99   -2
 
 CVENT
     0
 
-SLCC     1 &     0    80     1     1     0    80
- vort2d_80_01.sf
+SLCC     1 # STRUCTURED &     0    80     1     1     0    80 !      1  0
+ vort2d_80_0001_01.sf
  PRESSURE
  pres
  Pa
-SLCC     1 &     0    80     1     1     0    80
- vort2d_80_02.sf
+SLCC     1 # STRUCTURED &     0    80     1     1     0    80 !      2  0
+ vort2d_80_0001_02.sf
  VELOCITY
  vel
  m/s
-SLCC     1 &     0    80     1     1     0    80
- vort2d_80_03.sf
+SLCC     1 # STRUCTURED &     0    80     1     1     0    80 !      2  0
+ vort2d_80_0001_03.sf
  U-VELOCITY
  U-VEL
  m/s
-SLCC     1 &     0    80     1     1     0    80
- vort2d_80_04.sf
+SLCC     1 # STRUCTURED &     0    80     1     1     0    80 !      2  0
+ vort2d_80_0001_04.sf
  W-VELOCITY
  W-VEL
  m/s
-SLCC     1 &     0    80     1     1     0    80
- vort2d_80_05.sf
+SLCC     1 # STRUCTURED &     0    80     1     1     0    80 !      3  0
+ vort2d_80_0001_05.sf
  VORTICITY Y
  vort_y
  1/s
-SLCC     1 &     0    80     1     1     0    80
- vort2d_80_06.sf
+SLCC     1 # STRUCTURED &     0    80     1     1     0    80 !      3  0
+ vort2d_80_0001_06.sf
  U-VELOCITY
  U-VEL
  m/s
-SLCC     1 &     0    80     1     1     0    80
- vort2d_80_07.sf
+SLCC     1 # STRUCTURED &     0    80     1     1     0    80 !      3  0
+ vort2d_80_0001_07.sf
  W-VELOCITY
  W-VEL
  m/s

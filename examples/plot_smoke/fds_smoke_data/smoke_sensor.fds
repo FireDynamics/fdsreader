@@ -3,7 +3,6 @@
 
 &MESH ID='Mesh1', IJK=48,36,12, XB=-1.0,11.0,-1.0,8.0,0.0,3.0/
 
-
 &REAC ID='POLYURETHANE',
       FYI='NFPA Babrauskas',
       FUEL='REAC_FUEL',
