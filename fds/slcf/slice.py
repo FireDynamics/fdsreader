@@ -39,7 +39,16 @@ class Slice(numpy.lib.mixins.NDArrayOperatorsMixin):
         self._subslices.append(_SubSlice(filename, extent, quantity, mesh_id))
 
     def __array__(self):
-        raise NotImplementedError()
+        raise NotImplemented
+
+    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        new_slice = Slice(self.root_path, self.cell_centered)
+        for i, subslice in enumerate(self._subslices):
+            quantity = self.quantities[i]
+            new_slice._add_subslice(subslice.filename, quantity.quantity, quantity.label,
+                                    quantity.unit, subslice.extent, subslice.mesh_id)
+            new_slice._subslices[-1]._data[quantity.quantity] = ufunc(subslice.get_data(), *inputs, **kwargs)
+
 
 
 class _SubSlice:
@@ -49,7 +58,6 @@ class _SubSlice:
 
         self.file_names = {quantity: filename}
         self._data = dict()
-
 
     def get_data(self, quantity: str, root_path: str, cell_centered: bool):
         if quantity not in self._data:
