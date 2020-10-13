@@ -2,8 +2,7 @@ TITLE
  
 
 FDSVERSION
-FDS 6.5.3
-FDS6.5.3-823-ge117549
+FDS6.7.5-0-g71f025606-release
 
 ENDF
  smoke_sensor.end
@@ -17,9 +16,16 @@ Revisio
 CHID
  smoke_sensor
 
+SOLID_HT3D
+  0
+
 CSVF
  hrr
  smoke_sensor_hrr.csv
+
+CSVF
+ steps
+ smoke_sensor_steps.csv
 
 NMESHES
   1
@@ -94,12 +100,6 @@ SURFACE
  null                                                        
 
 SURFACE
- VEGETATION                                                  
- 5000.00    1.00
- 0      1.00000      1.00000      1.00000      0.80000      0.40000      1.00000
- null                                                        
-
-SURFACE
  EVACUATION_OUTFLOW                                          
  5000.00    1.00
  0      1.00000      1.00000      1.00000      0.80000      0.40000      1.00000
@@ -112,7 +112,7 @@ SURFACE
  null                                                        
 
 SURFACE
- PERIODIC WIND                                               
+ PERIODIC FLOW ONLY                                          
  5000.00    1.00
  0      1.00000      1.00000      1.00000      0.80000      0.40000      1.00000
  null                                                        
@@ -141,13 +141,13 @@ HRRPUVCUT
 
 RAMP
     2
- RAMP: ASSUMED TEMPERATURE PROFILE                                 
+ RAMP: RSRVD TEMPERATURE PROFILE                                   
     2
   0.0000      1.0000    
   3.0000      1.0000    
- RAMP: COMPUTED PRESSURE PROFILE                                   
+ RAMP: RSRVD PRESSURE PROFILE                                      
     2
-  0.0000      1.0000    
+  0.0000      0.0000    
   3.0000      1.0000    
 
 PROP
@@ -155,12 +155,6 @@ PROP
   1
  sensor
   0
-
-VERT
-       0
-
-FACE
-       0
 
 OFFSET
       0.00000      0.00000      0.00000
@@ -345,17 +339,32 @@ CVENT
     0
 
 SMOKF3D     1
- smoke_sensor_01.s3d
- SOOT MASS FRACTION
- Y_C0.9H0.1
- kg/kg
+ smoke_sensor_0001_01.s3d
+ SOOT DENSITY
+ rho_C0.9H0.1
+ kg/m3
 SMOKF3D     1
- smoke_sensor_02.s3d
+ smoke_sensor_0001_02.s3d
  HRRPUV
  hrrpuv
  kW/m3
-SLCF     1 &     0    48     0    36     9     9
- smoke_sensor_01.sf
+SMOKG3D     1
+ smoke_sensor_0001_03.s3d
+ TEMPERATURE
+ temp
+ C
+SMOKG3D     1
+ smoke_sensor_0001_04.s3d
+ CARBON DIOXIDE DENSITY
+ rho_CO2
+ kg/m3
+SLCF     1 # STRUCTURED &     0    48     0    36     9     9 !      1  0
+ smoke_sensor_0001_01.sf
+ SOOT EXTINCTION COEFFICIENT
+ ext_coef_C0.9H0.1
+ 1/m
+SLCC     1 # STRUCTURED &     0    48     0    36    11    11 !      2  0
+ smoke_sensor_0001_02.sf
  SOOT EXTINCTION COEFFICIENT
  ext_coef_C0.9H0.1
  1/m
