@@ -42,13 +42,18 @@ class Slice(numpy.lib.mixins.NDArrayOperatorsMixin):
         raise NotImplemented
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        if method != "__call__":
+            logging.warning("The %s method has been used which is not explicitly implemented. Correctness of results is"
+                            " not guaranteed. If you require this feature to be implemented please submit an issue"
+                            " on github where you explain your use case.", method)
         new_slice = Slice(self.root_path, self.cell_centered)
         for i, subslice in enumerate(self._subslices):
-            quantity = self.quantities[i]
-            new_slice._add_subslice(subslice.filename, quantity.quantity, quantity.label,
-                                    quantity.unit, subslice.extent, subslice.mesh_id)
-            new_slice._subslices[-1]._data[quantity.quantity] = ufunc(subslice.get_data(), *inputs, **kwargs)
-
+            q = self.quantities[i]
+            new_slice._add_subslice(subslice.filename, q.quantity, q.label,
+                                    q.unit, subslice.extent, subslice.mesh_id)
+            new_slice._subslices[-1]._data[q.quantity] = ufunc(subslice.get_data(), *inputs, **kwargs)
+        logging.debug(ufunc)
+        return new_slice
 
 
 class _SubSlice:
