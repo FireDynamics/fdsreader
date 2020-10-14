@@ -1,10 +1,6 @@
-import logging
-import mmap
-from typing import Iterator
-
 import numpy as np
 
-from fds.utils import FDS_DATA_TYPE_FLOAT
+from utils import Extent
 
 
 class Mesh:
@@ -27,10 +23,10 @@ class Mesh:
         :param label: Label associated with this mesh.
         """
         self.coordinates = [x_coordinates, y_coordinates, z_coordinates]
-        self.extent = ((x_coordinates[0], x_coordinates[-1]),
-                       (y_coordinates[0], y_coordinates[-1]),
-                       (z_coordinates[0], z_coordinates[-1]))
+        self.extent = Extent(x_coordinates[0], x_coordinates[-1], y_coordinates[0],
+                             y_coordinates[-1], z_coordinates[0], z_coordinates[-1])
         # Todo: Does this really do what it is supposed to do? What is it even supposed to do?
+        # Todo: Numpy: Deprecated
         self.mesh = np.meshgrid(self.coordinates)
 
         self.n = [x_coordinates.size, y_coordinates.size, z_coordinates.size]
@@ -39,12 +35,5 @@ class Mesh:
         self.label = label
 
     def __str__(self, *args, **kwargs):
-        return "{}, {} x {} x {}, [{}, {}] x [{}, {}] x [{}, {}]".format(self.label,
-                                                                         self.n[0], self.n[1],
-                                                                         self.n[2],
-                                                                         self.extent[0][0],
-                                                                         self.extent[0][1],
-                                                                         self.extent[1][0],
-                                                                         self.extent[1][1],
-                                                                         self.extent[2][0],
-                                                                         self.extent[2][1])
+        return "{}, {} x {} x {}, ".format(self.label, self.n[0], self.n[1], self.n[2]) + str(
+            self.extent)

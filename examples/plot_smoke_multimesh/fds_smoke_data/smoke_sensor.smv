@@ -2,8 +2,7 @@ TITLE
  
 
 FDSVERSION
-FDS 6.6.0
-FDS6.6.0-286-g92a12d51b-master
+FDS6.7.5-0-g71f025606-release
 
 ENDF
  smoke_sensor.end
@@ -17,9 +16,16 @@ Revisio
 CHID
  smoke_sensor
 
+SOLID_HT3D
+  0
+
 CSVF
  hrr
  smoke_sensor_hrr.csv
+
+CSVF
+ steps
+ smoke_sensor_steps.csv
 
 NMESHES
   2
@@ -94,12 +100,6 @@ SURFACE
  null                                                        
 
 SURFACE
- VEGETATION                                                  
- 5000.00    1.00
- 0      1.00000      1.00000      1.00000      0.80000      0.40000      1.00000
- null                                                        
-
-SURFACE
  EVACUATION_OUTFLOW                                          
  5000.00    1.00
  0      1.00000      1.00000      1.00000      0.80000      0.40000      1.00000
@@ -112,7 +112,7 @@ SURFACE
  null                                                        
 
 SURFACE
- PERIODIC WIND                                               
+ PERIODIC FLOW ONLY                                          
  5000.00    1.00
  0      1.00000      1.00000      1.00000      0.80000      0.40000      1.00000
  null                                                        
@@ -441,30 +441,50 @@ CVENT
 
 SMOKF3D     1
  smoke_sensor_0001_01.s3d
- SOOT MASS FRACTION
- Y_C0.9H0.1
- kg/kg
+ SOOT DENSITY
+ rho_C0.9H0.1
+ kg/m3
 SMOKF3D     1
  smoke_sensor_0001_02.s3d
  HRRPUV
  hrrpuv
  kW/m3
-SLCF     1 # STRUCTURED &     0    24     0    36     9     9
+SMOKG3D     1
+ smoke_sensor_0001_03.s3d
+ TEMPERATURE
+ temp
+ C
+SMOKG3D     1
+ smoke_sensor_0001_04.s3d
+ CARBON DIOXIDE DENSITY
+ rho_CO2
+ kg/m3
+SLCF     1 # STRUCTURED &     0    24     0    36     9     9 !      1  0
  smoke_sensor_0001_01.sf
  SOOT EXTINCTION COEFFICIENT
  ext_coef_C0.9H0.1
  1/m
 SMOKF3D     2
  smoke_sensor_0002_01.s3d
- SOOT MASS FRACTION
- Y_C0.9H0.1
- kg/kg
+ SOOT DENSITY
+ rho_C0.9H0.1
+ kg/m3
 SMOKF3D     2
  smoke_sensor_0002_02.s3d
  HRRPUV
  hrrpuv
  kW/m3
-SLCF     2 # STRUCTURED &     0    24     0    36     9     9
+SMOKG3D     2
+ smoke_sensor_0002_03.s3d
+ TEMPERATURE
+ temp
+ C
+SMOKG3D     2
+ smoke_sensor_0002_04.s3d
+ CARBON DIOXIDE DENSITY
+ rho_CO2
+ kg/m3
+SLCF     2 # STRUCTURED &     0    24     0    36     9     9 !      1  0
  smoke_sensor_0002_01.sf
  SOOT EXTINCTION COEFFICIENT
  ext_coef_C0.9H0.1
