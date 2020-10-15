@@ -21,6 +21,19 @@ else:
     DTYPE_STRIDE_RAW = "({})" + FDS_DATA_TYPE_FLOAT
 
 
+_HANDLED_FUNCTIONS = {}
+
+
+def implements(np_function):
+    """
+    Decorator to register an __array_function__ implementation for Slices.
+    """
+    def decorator(func):
+        _HANDLED_FUNCTIONS[np_function] = func
+        return func
+    return decorator
+
+
 class Slice(numpy.lib.mixins.NDArrayOperatorsMixin):
     def __init__(self, root_path: str, cell_centered: bool):
         self.root_path = root_path
@@ -39,21 +52,36 @@ class Slice(numpy.lib.mixins.NDArrayOperatorsMixin):
         self._subslices.append(_SubSlice(filename, extent, quantity, mesh_id))
 
     def __array__(self):
-        raise NotImplemented
+        raise UserWarning("Slices can not be converted to numpy arrays, but they support all typical numpy operations"
+                          "such as np.multiply.")
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         if method != "__call__":
             logging.warning("The %s method has been used which is not explicitly implemented. Correctness of results is"
                             " not guaranteed. If you require this feature to be implemented please submit an issue"
                             " on github where you explain your use case.", method)
+        input_list = list(inputs)
+        for i, input in enumerate(inputs):
+            if isinstance(input, self.__class__):
+                del input_list[i]
+
         new_slice = Slice(self.root_path, self.cell_centered)
         for i, subslice in enumerate(self._subslices):
             q = self.quantities[i]
-            new_slice._add_subslice(subslice.filename, q.quantity, q.label,
+            new_slice._add_subslice(subslice.file_names[q.quantity], q.quantity, q.label,
                                     q.unit, subslice.extent, subslice.mesh_id)
-            new_slice._subslices[-1]._data[q.quantity] = ufunc(subslice.get_data(), *inputs, **kwargs)
-        logging.debug(ufunc)
+            new_slice._subslices[-1]._data[q.quantity] = ufunc(
+                subslice.get_data(q.quantity, self.root_path, self.cell_centered), input_list[0], **kwargs)
         return new_slice
+
+    def __array_function__(self, func, types, args, kwargs):
+        arg_list = list(args)
+        for i, arg in enumerate(args):
+            if isinstance(input, self.__class__):
+                del arg_list[i]
+        for subslice in self._subslices:
+            pass
+
 
 
 class _SubSlice:
