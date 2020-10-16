@@ -75,13 +75,13 @@ class Slice(numpy.lib.mixins.NDArrayOperatorsMixin):
         return new_slice
 
     def __array_function__(self, func, types, args, kwargs):
-        arg_list = list(args)
-        for i, arg in enumerate(args):
-            if isinstance(input, self.__class__):
-                del arg_list[i]
-        for subslice in self._subslices:
-            pass
-
+        if func not in _HANDLED_FUNCTIONS:
+            return NotImplemented
+            # Note: this allows subclasses that don't override
+            # __array_function__ to handle DiagonalArray objects.
+        if not all(issubclass(t, self.__class__) for t in types):
+            return NotImplemented
+        return _HANDLED_FUNCTIONS[func](*args, **kwargs)
 
 
 class _SubSlice:
@@ -110,3 +110,12 @@ class _SubSlice:
                     slice_data = np.fromfile(infile, dtype=dtype_float, count=N)
                     self._data[quantity][t, :] = slice_data.reshape((self.extent.x, self.extent.y, self.extent.z))
         return self._data[quantity]
+
+
+# __array_function__ implementations
+@implements(np.mean)
+def mean(slc):
+    mean = 0
+    for subsclice in slc._subslices:
+        mean += np.mean(subsclice.get_data())
+    return mean / len(slc._subslices)
