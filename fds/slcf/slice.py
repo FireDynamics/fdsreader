@@ -35,6 +35,9 @@ def implements(np_function):
 
 
 class Slice(numpy.lib.mixins.NDArrayOperatorsMixin):
+    """
+
+    """
     def __init__(self, root_path: str, cell_centered: bool):
         self.root_path = root_path
         self.quantities = list()
@@ -44,6 +47,14 @@ class Slice(numpy.lib.mixins.NDArrayOperatorsMixin):
 
     def _add_subslice(self, filename: str, quantity: str, label: str, unit: str, extent: Extent,
                       mesh_id: int):
+        """
+        :param filename:
+        :param quantity:
+        :param label:
+        :param unit:
+        :param extent:
+        :param mesh_id:
+        """
         self.quantities.append(Quantity(quantity, label, unit))
         for subslice in self._subslices:
             if subslice.extent == extent:
@@ -52,10 +63,16 @@ class Slice(numpy.lib.mixins.NDArrayOperatorsMixin):
         self._subslices.append(_SubSlice(filename, extent, quantity, mesh_id))
 
     def __array__(self):
+        """
+
+        """
         raise UserWarning("Slices can not be converted to numpy arrays, but they support all typical numpy operations"
                           "such as np.multiply.")
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        """
+        
+        """
         if method != "__call__":
             logging.warning("The %s method has been used which is not explicitly implemented. Correctness of results is"
                             " not guaranteed. If you require this feature to be implemented please submit an issue"
@@ -75,6 +92,9 @@ class Slice(numpy.lib.mixins.NDArrayOperatorsMixin):
         return new_slice
 
     def __array_function__(self, func, types, args, kwargs):
+        """
+
+        """
         if func not in _HANDLED_FUNCTIONS:
             return NotImplemented
             # Note: this allows subclasses that don't override
@@ -85,6 +105,9 @@ class Slice(numpy.lib.mixins.NDArrayOperatorsMixin):
 
 
 class _SubSlice:
+    """
+
+    """
     def __init__(self, filename: str, extent: Extent, quantity: str, mesh_id: int):
         self.mesh_id = mesh_id
         self.extent = extent
@@ -93,6 +116,9 @@ class _SubSlice:
         self._data = dict()
 
     def get_data(self, quantity: str, root_path: str, cell_centered: bool):
+        """
+
+        """
         if quantity not in self._data:
             file_path = os.path.join(root_path, self.file_names[quantity])
             dtype_float = np.dtype(FDS_DATA_TYPE_FLOAT)
@@ -114,7 +140,7 @@ class _SubSlice:
 
 # __array_function__ implementations
 @implements(np.mean)
-def mean(slc):
+def mean(slc: Slice):
     mean = 0
     for subsclice in slc._subslices:
         mean += np.mean(subsclice.get_data())
