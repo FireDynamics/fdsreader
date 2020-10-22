@@ -1,0 +1,8 @@
+&HEAD CHID='vort2d_80', TITLE='2D Vortex Simulation, Mesh Size = 80' /
+
+&MESH ID='mesh1', IJK=80,1,80, XB=-0.155600,0.155600,-0.001945,0.001945,-0.155600,0.155600 /
+
+&TIME T_END=0.01, DT=5.5571428e-5, LOCK_TIME_STEP=.TRUE. /
+
+
+&TAIL /
