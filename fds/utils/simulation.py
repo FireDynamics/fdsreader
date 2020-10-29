@@ -6,6 +6,7 @@ import logging
 
 from utils import FDS_DATA_TYPE_FLOAT, Mesh, Extent
 from slcf import Slice
+from isof import Isosurface
 
 
 class Simulation:
@@ -98,11 +99,14 @@ class Simulation:
 
     @property
     def slices(self):
-        # Only load slices once initially and then reuse the loaded information
+        """
+        Lazy loads all slices for the simulation.
+        :return: All slices.
+        """
         if not hasattr(self, "_slices"):
             slices = dict()
-            with open(self.smv_file_path, 'r') as infile, mmap.mmap(infile.fileno(), 0,
-                                                                    access=mmap.ACCESS_READ) as smv_file:
+            with open(self.smv_file_path, 'r') as infile, \
+                    mmap.mmap(infile.fileno(), 0, access=mmap.ACCESS_READ) as smv_file:
                 pos = smv_file.find(b'SLC')
                 while pos > 0:
                     smv_file.seek(pos)
@@ -132,4 +136,85 @@ class Simulation:
 
                     pos = smv_file.find(b'SLC', pos + 1)
             self._slices = list(slices.values())
+        return self._slices
+
+    @property
+    def data_3d(self):
+        """
+        Lazy loads all plot3d data for the simulation.
+        :return: All plot3d data.
+        """
+        # Only load slices once initially and then reuse the loaded information
+        if not hasattr(self, "_3d_data"):
+            slices = dict()
+            with open(self.smv_file_path, 'r') as infile, \
+                    mmap.mmap(infile.fileno(), 0, access=mmap.ACCESS_READ) as smv_file:
+                pos = smv_file.find(b'SLC')
+                while pos > 0:
+                    smv_file.seek(pos)
+                    line = smv_file.readline()
+                    if line.find(b'SLCC') != -1:
+                        centered = True
+                    else:
+                        centered = False
+
+                    slice_id = int(line.split(b'!')[1].strip().split()[0].decode())
+
+                    mesh_id = int(line.split(b'&')[0].strip().split()[1].decode()) - 1
+
+                    # Read in index ranges for x, y and z
+                    index_ranges = [int(i.strip()) for i in
+                                    line.split(b'&')[1].split(b'!')[0].strip().split()]
+
+                    filename = smv_file.readline().decode().strip()
+                    quantity = smv_file.readline().decode().strip()
+                    label = smv_file.readline().decode().strip()
+                    unit = smv_file.readline().decode().strip()
+
+                    if slice_id not in slices:
+                        slices[slice_id] = Slice(os.path.dirname(self.smv_file_path), centered)
+                    slices[slice_id]._add_subslice(filename, quantity, label, unit,
+                                                   Extent(*index_ranges), mesh_id)
+
+                    pos = smv_file.find(b'SLC', pos + 1)
+            self._slices = list(slices.values())
+        return self._slices
+
+    @property
+    def isosurfaces(self):
+        """
+        Lazy loads all isosurfaces for the simulation.
+        :return: All isof data.
+        """
+        # Only load slices once initially and then reuse the loaded information
+        if not hasattr(self, "_isosurfaces"):
+            self._isosurfaces = list()
+            with open(self.smv_file_path, 'r') as infile, \
+                    mmap.mmap(infile.fileno(), 0, access=mmap.ACCESS_READ) as smv_file:
+                pos = smv_file.find(b'ISOG')
+                while pos > 0:
+                    smv_file.seek(pos-1)
+                    if smv_file.read_byte() == "T":
+                        double_quantity = True
+                    else:
+                        double_quantity = False
+
+                    iso_filename = smv_file.readline().decode().strip()
+                    if double_quantity:
+                        viso_filename = smv_file.readline().decode().strip()
+                    quantity = smv_file.readline().decode().strip()
+                    label = smv_file.readline().decode().strip()
+                    unit = smv_file.readline().decode().strip()
+                    if double_quantity:
+                        v_quantity = smv_file.readline().decode().strip()
+                        v_label = smv_file.readline().decode().strip()
+                        v_unit = smv_file.readline().decode().strip()
+
+                    if double_quantity:
+                        self._isosurfaces.append(Isosurface(os.path.dirname(self.smv_file_path), double_quantity, iso_filename, quantity, label, unit, viso_filename=viso_filename, v_quantity=v_quantity, v_label=v_label, v_unit=v_unit))
+                    else:
+                        self._isosurfaces.append(
+                            Isosurface(os.path.dirname(self.smv_file_path), double_quantity, iso_filename, quantity, label, unit))
+
+                    pos = smv_file.find(b'ISOG', pos + 1)
         return self._slices
