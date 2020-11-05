@@ -5,27 +5,27 @@ FDSVERSION
 FDS6.7.5-0-g71f025606-release
 
 ENDF
- vort3d_80.end
+ isof_80.end
 
 INPF
- vort3d_80.fds
+ isof_80.fds
 
 REVISION
 Revisio                                                                                                                                                                                                                                                        
 
 CHID
- vort3d_80
+ isof_80
 
 SOLID_HT3D
   0
 
 CSVF
  hrr
- vort3d_80_hrr.csv
+ isof_80_hrr.csv
 
 CSVF
  steps
- vort3d_80_steps.csv
+ isof_80_steps.csv
 
 NMESHES
   1
@@ -345,173 +345,31 @@ VENT
 CVENT
     0
 
-PL3D        0.00     1
- vort3d_80_0001_00000000_00.q
+ISOG     1      1 -0.100000E+01
+ isof_80_0001_01.iso
  TEMPERATURE
  temp
  C
+TISOG     1      1 -0.100000E+01
+ isof_80_0001_02.iso
+ isof_80_0001_02.viso
  U-VELOCITY
  U-VEL
  m/s
- V-VELOCITY
- V-VEL
- m/s
- W-VELOCITY
- W-VEL
- m/s
- HRRPUV
- hrrpuv
- kW/m3
-PL3D        0.00     1
- vort3d_80_0001_00000000_00.q
  TEMPERATURE
  temp
  C
- U-VELOCITY
- U-VEL
- m/s
- V-VELOCITY
- V-VEL
- m/s
- W-VELOCITY
- W-VEL
- m/s
- HRRPUV
- hrrpuv
- kW/m3
-PL3D        0.00     1
- vort3d_80_0001_00000000_00.q
+ISOG     1      1 -0.100000E+01
+ isof_80_0001_03.iso
  TEMPERATURE
  temp
  C
+TISOG     1      1 -0.100000E+01
+ isof_80_0001_04.iso
+ isof_80_0001_04.viso
  U-VELOCITY
  U-VEL
  m/s
- V-VELOCITY
- V-VEL
- m/s
- W-VELOCITY
- W-VEL
- m/s
- HRRPUV
- hrrpuv
- kW/m3
-PL3D        0.00     1
- vort3d_80_0001_00000000_00.q
  TEMPERATURE
  temp
  C
- U-VELOCITY
- U-VEL
- m/s
- V-VELOCITY
- V-VEL
- m/s
- W-VELOCITY
- W-VEL
- m/s
- HRRPUV
- hrrpuv
- kW/m3
-PL3D        0.00     1
- vort3d_80_0001_00000000_00.q
- TEMPERATURE
- temp
- C
- U-VELOCITY
- U-VEL
- m/s
- V-VELOCITY
- V-VEL
- m/s
- W-VELOCITY
- W-VEL
- m/s
- HRRPUV
- hrrpuv
- kW/m3
-PL3D        0.00     1
- vort3d_80_0001_00000000_00.q
- TEMPERATURE
- temp
- C
- U-VELOCITY
- U-VEL
- m/s
- V-VELOCITY
- V-VEL
- m/s
- W-VELOCITY
- W-VEL
- m/s
- HRRPUV
- hrrpuv
- kW/m3
-PL3D        0.00     1
- vort3d_80_0001_00000000_00.q
- TEMPERATURE
- temp
- C
- U-VELOCITY
- U-VEL
- m/s
- V-VELOCITY
- V-VEL
- m/s
- W-VELOCITY
- W-VEL
- m/s
- HRRPUV
- hrrpuv
- kW/m3
-PL3D        0.00     1
- vort3d_80_0001_00000000_00.q
- TEMPERATURE
- temp
- C
- U-VELOCITY
- U-VEL
- m/s
- V-VELOCITY
- V-VEL
- m/s
- W-VELOCITY
- W-VEL
- m/s
- HRRPUV
- hrrpuv
- kW/m3
-PL3D        0.00     1
- vort3d_80_0001_00000000_00.q
- TEMPERATURE
- temp
- C
- U-VELOCITY
- U-VEL
- m/s
- V-VELOCITY
- V-VEL
- m/s
- W-VELOCITY
- W-VEL
- m/s
- HRRPUV
- hrrpuv
- kW/m3
-PL3D        0.01     1
- vort3d_80_0001_00000000_01.q
- TEMPERATURE
- temp
- C
- U-VELOCITY
- U-VEL
- m/s
- V-VELOCITY
- V-VEL
- m/s
- W-VELOCITY
- W-VEL
- m/s
- HRRPUV
- hrrpuv
- kW/m3

@@ -1,1 +1,1 @@
-from .plot3d import Slice, SliceCollection, SliceMesh
+from .plot3d import Plot3D
