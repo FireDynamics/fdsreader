@@ -1,12 +1,11 @@
-import logging
 import os
-from typing import List, Dict
-
 import numpy as np
 import numpy.lib.mixins
+import logging
+from typing import List, Dict
 
 from utils import FDS_DATA_TYPE_INTEGER, FDS_DATA_TYPE_FLOAT, FDS_DATA_TYPE_CHAR, \
-    FDS_FORTRAN_BACKWARD, Extent, Quantity
+    FDS_FORTRAN_BACKWARD, Extent, Quantity, settings
 
 if FDS_FORTRAN_BACKWARD:
     DTYPE_HEADER = np.dtype(f"30{FDS_DATA_TYPE_CHAR}, {FDS_DATA_TYPE_INTEGER}")
@@ -70,6 +69,10 @@ class Slice(numpy.lib.mixins.NDArrayOperatorsMixin):
                 break
         self._subslices.append(_SubSlice(filename, extent, quantity, mesh_id))
 
+        # If lazy loading has been disabled by the user, load the data instantaneously instead
+        if not settings.LAZY_LOAD:
+            self._subslices[-1].get_data(quantity, self.root_path, self.cell_centered)
+
     def mean(self, quantity: str = None):
         """
         Calculates the mean over the whole slice.
@@ -90,8 +93,8 @@ class Slice(numpy.lib.mixins.NDArrayOperatorsMixin):
         """
         raise UserWarning(
             "Slices can not be converted to numpy arrays, but they support all typical numpy"
-            "operations such as np.multiply. If a 'global' array containg all subslices is"
-            "required, please request this functionality by submitting an issue on Github.")
+            " operations such as np.multiply. If a 'global' array containg all subslices is"
+            " required, please request this functionality by submitting an issue on Github.")
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """
@@ -169,7 +172,7 @@ class _SubSlice:
             self._data[quantity] = np.empty((t_n, self.extent.x, self.extent.y, self.extent.z),
                                             dtype=dtype_float)
 
-            with open(file_path, 'r') as infile:
+            with open(file_path, 'rb') as infile:
                 for t in range(t_n):
                     infile.seek(offset + t * stride)
                     slice_data = np.fromfile(infile, dtype=dtype_float, count=n)

@@ -12,6 +12,8 @@ from isof import Isosurface
 class Simulation:
     def __init__(self, smv_file_path):
         self.smv_file_path = smv_file_path
+        self.root_path = os.path.dirname(self.smv_file_path)
+
         with open(smv_file_path, 'r') as infile, mmap.mmap(infile.fileno(), 0,
                                                            access=mmap.ACCESS_READ) as smv_file:
             smv_file.seek(smv_file.find(b'FDSVERSION'))
@@ -21,6 +23,8 @@ class Simulation:
             smv_file.seek(smv_file.find(b'CHID'))
             smv_file.readline()
             self.chid = smv_file.readline().decode().strip()
+
+            self.out_file_path = os.path.join(self.root_path, self.chid + ".out")
 
             self.meshes = self._load_meshes(smv_file)
             self.obstacles = self._load_obstacles(smv_file)
@@ -130,7 +134,7 @@ class Simulation:
                     unit = smv_file.readline().decode().strip()
 
                     if slice_id not in slices:
-                        slices[slice_id] = Slice(os.path.dirname(self.smv_file_path), centered)
+                        slices[slice_id] = Slice(self.root_path, centered)
                     slices[slice_id]._add_subslice(filename, quantity, label, unit,
                                                    Extent(*index_ranges), mesh_id)
 
@@ -189,18 +193,36 @@ class Simulation:
         Lazy loads all isosurfaces for the simulation.
         :return: All isof data.
         """
-        # Only load slices once initially and then reuse the loaded information
+        # Dictionary mapping isosurface index to all its computed levels
+        # iso_levels = dict()
+        # # Read information about isosurfaces in .out-file
+        # with open(self.out_file_path, 'r') as infile, \
+        #         mmap.mmap(infile.fileno(), 0, access=mmap.ACCESS_READ) as out_file:
+        #     pos = out_file.find(b'Isosurface File Information')
+        #     out_file.seek(pos)
+        #     for i in range(4): out_file.readline()
+        #
+        #     line = out_file.readline().decode().strip()
+        #     while "Quantity:" in line:
+        #         index, levels = line.split("Quantity:")
+        #         levels = levels.split(":")[1].strip().split(" ")
+        #         iso_levels[int(index)] = [float(level) for level in levels]
+        #
+        #         line = out_file.readline().decode().strip()
+
+        # Only load isosurfaces once initially and then reuse the loaded information
         if not hasattr(self, "_isosurfaces"):
             self._isosurfaces = list()
             with open(self.smv_file_path, 'r') as infile, \
                     mmap.mmap(infile.fileno(), 0, access=mmap.ACCESS_READ) as smv_file:
                 pos = smv_file.find(b'ISOG')
                 while pos > 0:
-                    smv_file.seek(pos-1)
-                    if smv_file.read_byte() == "T":
+                    smv_file.seek(pos - 1)
+                    if smv_file.read(1).decode() == "T":
                         double_quantity = True
                     else:
                         double_quantity = False
+                    smv_file.readline()
 
                     iso_filename = smv_file.readline().decode().strip()
                     if double_quantity:
@@ -214,10 +236,15 @@ class Simulation:
                         v_unit = smv_file.readline().decode().strip()
 
                     if double_quantity:
-                        self._isosurfaces.append(Isosurface(os.path.dirname(self.smv_file_path), double_quantity, iso_filename, quantity, label, unit, viso_filename=viso_filename, v_quantity=v_quantity, v_label=v_label, v_unit=v_unit))
+                        self._isosurfaces.append(
+                            Isosurface(os.path.dirname(self.smv_file_path), double_quantity,
+                                       iso_filename, quantity, label, unit,
+                                       viso_filename=viso_filename, v_quantity=v_quantity,
+                                       v_label=v_label, v_unit=v_unit))
                     else:
                         self._isosurfaces.append(
-                            Isosurface(os.path.dirname(self.smv_file_path), double_quantity, iso_filename, quantity, label, unit))
+                            Isosurface(os.path.dirname(self.smv_file_path), double_quantity,
+                                       iso_filename, quantity, label, unit))
 
                     pos = smv_file.find(b'ISOG', pos + 1)
-        return self._slices
+        return self._isosurfaces
