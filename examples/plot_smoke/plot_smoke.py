@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-import fds.utils
-import fds.slcf
+import fdsreaderutils
+import fdsreaderslcf
 
 # locate smokeview file
 root_dir = "./fds_smoke_data"
