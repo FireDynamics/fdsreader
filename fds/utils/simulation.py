@@ -131,5 +131,8 @@ class Simulation:
                                                    Extent(*index_ranges), mesh_id)
 
                     pos = smv_file.find(b'SLC', pos + 1)
-            self._slices = list(slices.values())
+            if len(slices) > 0:
+                self._slices = list(slices.values())
+            else:
+                raise IOError("This simulation did not output any slices.")
         return self._slices
