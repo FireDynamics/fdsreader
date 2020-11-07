@@ -4,19 +4,13 @@ import numpy.lib.mixins
 import logging
 from typing import List, Dict
 
-from utils import FDS_DATA_TYPE_INTEGER, FDS_DATA_TYPE_FLOAT, FDS_DATA_TYPE_CHAR, \
-    FDS_FORTRAN_BACKWARD, Extent, Quantity, settings
+from utils import Extent, Quantity, settings
+import utils.fortran_data as fdtype
 
-if FDS_FORTRAN_BACKWARD:
-    DTYPE_HEADER = np.dtype(f"30{FDS_DATA_TYPE_CHAR}, {FDS_DATA_TYPE_INTEGER}")
-    DTYPE_INDEX = np.dtype(f"6{FDS_DATA_TYPE_INTEGER}, {FDS_DATA_TYPE_INTEGER}")
-    DTYPE_TIME = np.dtype(f"{FDS_DATA_TYPE_FLOAT}, {FDS_DATA_TYPE_INTEGER}")
-    DTYPE_STRIDE_RAW = f"({{}}){FDS_DATA_TYPE_FLOAT}, {FDS_DATA_TYPE_INTEGER}"
-else:
-    DTYPE_HEADER = np.dtype("30" + FDS_DATA_TYPE_CHAR)
-    DTYPE_INDEX = np.dtype("6" + FDS_DATA_TYPE_INTEGER)
-    DTYPE_TIME = np.dtype(FDS_DATA_TYPE_FLOAT)
-    DTYPE_STRIDE_RAW = "({})" + FDS_DATA_TYPE_FLOAT
+DTYPE_HEADER = fdtype.new((('c', 30),))
+DTYPE_INDEX = fdtype.new((('i', 6),))
+DTYPE_TIME = fdtype.FLOAT
+DTYPE_STRIDE_RAW = fdtype.new_raw((('f', '{}'),))
 
 _HANDLED_FUNCTIONS = {}
 
@@ -162,8 +156,8 @@ class _SubSlice:
         """
         if quantity not in self._data:
             file_path = os.path.join(root_path, self.file_names[quantity])
-            dtype_float = np.dtype(FDS_DATA_TYPE_FLOAT)
             n = self.extent.size(cell_centered=cell_centered)
+            dtype_float = fdtype.new((('f', n),))
             stride = np.dtype(DTYPE_STRIDE_RAW.format(n)).itemsize
             offset = 3 * DTYPE_HEADER.itemsize + DTYPE_INDEX.itemsize
 
@@ -175,7 +169,7 @@ class _SubSlice:
             with open(file_path, 'rb') as infile:
                 for t in range(t_n):
                     infile.seek(offset + t * stride)
-                    slice_data = np.fromfile(infile, dtype=dtype_float, count=n)
+                    slice_data = fdtype.read(infile, dtype_float, 1)
                     self._data[quantity][t, :] = slice_data.reshape(
                         (self.extent.x, self.extent.y, self.extent.z))
         return self._data[quantity]

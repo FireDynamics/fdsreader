@@ -4,13 +4,6 @@ Collection of utilities (convenience functions) for data.
 
 import os
 
-# As the binary representation of raw data is compiler dependent, this information must be provided
-# by the user
-FDS_DATA_TYPE_INTEGER = "<i4"  # i4 -> 32 bit integer (little-endian)
-FDS_DATA_TYPE_FLOAT = "<f4"  # f4 -> 32 bit floating point (little-endian)
-FDS_DATA_TYPE_CHAR = "a"  # a -> 8 bit character
-FDS_FORTRAN_BACKWARD = True  # Sets weather the blocks are ended with the size of the block
-
 
 class Quantity:
     def __init__(self, quantity: str, label: str, unit: str):

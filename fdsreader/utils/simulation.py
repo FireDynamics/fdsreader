@@ -4,7 +4,7 @@ import os
 import numpy as np
 import logging
 
-from utils import FDS_DATA_TYPE_FLOAT, Mesh, Extent
+from utils import Mesh, Extent
 from slcf import Slice
 from isof import Isosurface
 
@@ -32,7 +32,6 @@ class Simulation:
     def _load_meshes(self, smv_file):
         meshes = list()
 
-        float_dtype = np.dtype(FDS_DATA_TYPE_FLOAT)
         pos = smv_file.find(b'GRID')
 
         while pos > 0:
@@ -56,7 +55,7 @@ class Simulation:
             smv_file.seek(pos)
             smv_file.readline()
             smv_file.readline()
-            x_coordinates = np.empty(nx, dtype=float_dtype)
+            x_coordinates = np.empty(nx, dtype=np.float32)
             for ix in range(nx):
                 x_coordinates[ix] = smv_file.readline().split()[1]
 
@@ -64,7 +63,7 @@ class Simulation:
             smv_file.seek(pos)
             smv_file.readline()
             smv_file.readline()
-            y_coordinates = np.empty(ny, dtype=float_dtype)
+            y_coordinates = np.empty(ny, dtype=np.float32)
             for iy in range(ny):
                 y_coordinates[iy] = smv_file.readline().split()[1]
 
@@ -72,7 +71,7 @@ class Simulation:
             smv_file.seek(pos)
             smv_file.readline()
             smv_file.readline()
-            z_coordinates = np.empty(nz, dtype=float_dtype)
+            z_coordinates = np.empty(nz, dtype=np.float32)
             for iz in range(nz):
                 z_coordinates[iz] = smv_file.readline().split()[1]
 

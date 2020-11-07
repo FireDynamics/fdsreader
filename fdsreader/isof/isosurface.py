@@ -1,10 +1,8 @@
 import os
-import numpy as np
-import logging
-from typing import List, BinaryIO
+from typing import BinaryIO
 
-from utils import FDS_DATA_TYPE_INTEGER, FDS_DATA_TYPE_FLOAT, FDS_DATA_TYPE_CHAR, \
-    FDS_FORTRAN_BACKWARD, Quantity, settings
+from utils import Quantity, settings
+import utils.fortran_data as fdtype
 
 
 class Isosurface:
@@ -21,37 +19,30 @@ class Isosurface:
             self.v_file_path = os.path.join(root_path, viso_filename)
 
         with open(self.file_path, 'rb') as infile:
-            dtype_header_nlevels = np.dtype(f"8{FDS_DATA_TYPE_INTEGER}")
-            nlevels = np.fromfile(infile, dtype=dtype_header_nlevels, count=1)[0][7]
-            print(nlevels)
-            dtype_header_levels = np.dtype(f"2{FDS_DATA_TYPE_INTEGER}, ({nlevels},){FDS_DATA_TYPE_FLOAT}, 3{FDS_DATA_TYPE_INTEGER}")
-            self.levels = np.fromfile(infile, dtype=dtype_header_levels, count=1)[0][1]
-            print(self.levels)
-            dtype_dims = np.dtype(f"{FDS_DATA_TYPE_FLOAT}, 3{FDS_DATA_TYPE_INTEGER}")
-            time_data = np.fromfile(infile, dtype=dtype_dims, count=1)
+            nlevels = fdtype.read(infile, fdtype.INT, 3)[2][0]
 
-            print(time_data)
-            exit(0)
-            self.n_vertices = time_data[0][1][1]
-            self.n_triangles = time_data[0][1][2]
+            dtype_header_levels = fdtype.new((('f', nlevels),))
+            self.levels = fdtype.read(infile, dtype_header_levels, 1)[0]
 
-            self.offset = dtype_header_nlevels.itemsize + dtype_header_levels.itemsize + dtype_dims.itemsize
+            dtype_header_rest = fdtype.combine(fdtype.INT, fdtype.new((('i', 2),)), fdtype.new((('f', 1), ('i', 1))))
+            self.offset = fdtype.INT.itemsize * 3 + dtype_header_levels.itemsize + dtype_header_rest.itemsize
+
+            dtype_dims = fdtype.new((('i', 2),))
+            dims_data = fdtype.read(infile, dtype_dims, 1, offset=self.offset)
+            self.n_vertices = dims_data[0][0]
+            self.n_triangles = dims_data[0][1]
+            print(self.n_vertices, self.n_vertices)
+
+            self.offset += dtype_dims.itemsize
 
             if not settings.LAZY_LOAD:
                 self._load_data(infile)
 
         if self._double_quantity:
-            v_header_offset = dtype_header_nlevels.itemsize + dtype_header_levels.itemsize + np.dtype(f"2{FDS_DATA_TYPE_INTEGER}").itemsize
-            v_dtype_dims = np.dtype(f"{FDS_DATA_TYPE_FLOAT}, 4{FDS_DATA_TYPE_INTEGER}")
-            self.v_offset = v_header_offset + v_dtype_dims.itemsize
+            self.v_offset = fdtype.INT.itemsize * 2 + fdtype.FLOAT.itemsize + fdtype.new((('i', 4),)).itemsize
 
-            with open(self.v_file_path, 'rb') as infile:
-                infile.seek(v_header_offset)
-                time_data = np.fromfile(infile, dtype=v_dtype_dims, count=1)
-                logging.error(time_data)
-
-                self.v_n = 0
-                if not settings.LAZY_LOAD:
+            if not settings.LAZY_LOAD:
+                with open(self.v_file_path, 'rb') as infile:
                     self._load_vdata(infile)
 
     @property
@@ -91,17 +82,14 @@ class Isosurface:
                               " color-data.")
 
     def _load_data(self, infile: BinaryIO):
-        dtype_vertices = np.dtype(f"3{FDS_DATA_TYPE_FLOAT}")
-        dtype_triangles = np.dtype(f"3{FDS_DATA_TYPE_INTEGER}")
-        dtype_surfaces = np.dtype(FDS_DATA_TYPE_INTEGER)
+        dtype_vertices = fdtype.new((('f', 3*self.n_vertices),))
+        dtype_triangles = fdtype.new((('i', 3*self.n_triangles),))
+        dtype_surfaces = fdtype.new((('i', self.n_triangles),))
 
-        infile.seek(self.offset)
-
-        self._vertices = np.fromfile(infile, dtype=dtype_vertices, count=self.n_vertices)
-        self._triangles = np.fromfile(infile, dtype=dtype_triangles, count=self.n_triangles)
-        self._surfaces = np.fromfile(infile, dtype=dtype_surfaces, count=self.n_triangles)
+        self._vertices = fdtype.read(infile, dtype_vertices, 1, offset=self.offset)
+        self._triangles = fdtype.read(infile, dtype_triangles, 1)
+        self._surfaces = fdtype.read(infile, dtype_surfaces, 1)
 
     def _load_vdata(self, infile: BinaryIO):
-        dtype_color = np.dtype(FDS_DATA_TYPE_FLOAT)
-        infile.seek(self.v_offset)
-        self._colors = np.fromfile(infile, dtype=dtype_color, count=self.v_n)
+        dtype_color = fdtype.new((('f', self.n_vertices),))
+        self._colors = fdtype.read(infile, dtype_color, self.n_vertices, offset=self.v_offset)
