@@ -1,7 +1,5 @@
-from .data import scan_directory_smv, Quantity
+from utils.data import scan_directory_smv, Quantity
 
-from .extent import Extent
+from utils.fds_classes import *
 
-from .mesh import Mesh
-
-from .simulation import Simulation
+from utils.simulation import Simulation

@@ -19,10 +19,10 @@ class Isosurface:
             self.v_file_path = os.path.join(root_path, viso_filename)
 
         with open(self.file_path, 'rb') as infile:
-            nlevels = fdtype.read(infile, fdtype.INT, 3)[2][0]
+            nlevels = fdtype.read(infile, fdtype.INT, 3, offset=0)[2][0]
 
             dtype_header_levels = fdtype.new((('f', nlevels),))
-            self.levels = fdtype.read(infile, dtype_header_levels, 1)[0]
+            self.levels = fdtype.read(infile, dtype_header_levels, 1, offset=fdtype.INT*3)[0]
 
             dtype_header_rest = fdtype.combine(fdtype.INT, fdtype.new((('i', 2),)), fdtype.new((('f', 1), ('i', 1))))
             self.offset = fdtype.INT.itemsize * 3 + dtype_header_levels.itemsize + dtype_header_rest.itemsize
@@ -87,8 +87,8 @@ class Isosurface:
         dtype_surfaces = fdtype.new((('i', self.n_triangles),))
 
         self._vertices = fdtype.read(infile, dtype_vertices, 1, offset=self.offset)
-        self._triangles = fdtype.read(infile, dtype_triangles, 1)
-        self._surfaces = fdtype.read(infile, dtype_surfaces, 1)
+        self._triangles = fdtype.read(infile, dtype_triangles, 1, offset=self.offset+dtype_vertices.itemsize)
+        self._surfaces = fdtype.read(infile, dtype_surfaces, 1, offset=self.offset+dtype_vertices.itemsize+dtype_triangles.itemsize)
 
     def _load_vdata(self, infile: BinaryIO):
         dtype_color = fdtype.new((('f', self.n_vertices),))

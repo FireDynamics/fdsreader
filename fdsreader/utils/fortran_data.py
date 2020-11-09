@@ -14,8 +14,8 @@ def new_raw(data_structure: Sequence[Tuple[str, Union[int, str]]]) -> str:
     """
     Creates the string definition for a fortran-compliant numpy dtype to read in binary fortran data.
     :param data_structure: Tuple consisting of tuples with 2 elements each where the first element is a char ('i', 'f',
-    'c' or '{}') representing the primitive data type to be used and the second element an integer representing the
-    number of times this data type was written out in Fortran.
+     'c' or '{}') representing the primitive data type to be used and the second element an integer representing the
+     number of times this data type was written out in Fortran.
     :returns: The definition string for a fortran-compliant numpy dtype with the desired structure.
     """
     return ", ".join([(str(n) if d == 'c' else f"({n},)") + _DATA_TYPES[d] for d, n in data_structure])
@@ -25,8 +25,8 @@ def new(data_structure: Sequence[Tuple[str, Union[int, str]]]) -> np.dtype:
     """
     Creates a fortran-compliant numpy dtype to read in binary fortran data.
     :param data_structure: Tuple consisting of tuples with 2 elements each where the first element is a char ('i', 'f'
-    or 'c') representing the primitive data type to be used and the second element an integer representing the number
-    of times this data type was written out in Fortran.
+     or 'c') representing the primitive data type to be used and the second element an integer representing the number
+     of times this data type was written out in Fortran.
     :returns: The newly created fortran-compliant numpy dtype with the desired structure.
     """
     return np.dtype(_BASE_FORMAT.format(new_raw(data_structure)))
@@ -50,17 +50,22 @@ def combine(*dtypes: np.dtype):
 # Commonly used datatypes
 INT = new((('i', 1),))
 FLOAT = new((('f', 1),))
-CHAR = new((('c', 1),))
 
 
-def read(infile: BinaryIO, dtype: np.dtype, n: int, offset: int = 0):
+# CHAR = new((('c', 1),))
+
+
+def read(infile: BinaryIO, dtype: np.dtype, n: int, offset: int):
     """
     Convenience function to read in binary data from a file using a numpy dtype.
     :param infile: Already opened binary IO stream.
     :param dtype: Numpy dtype object.
     :param n: The number of times an dtype object should be read in from the stream.
-    :param offset: Optionally an offset can be given where the reader should start reading from the file.
+    :param offset: Offset where the reader should start reading from the file.
     :returns: Read in data.
     """
-    infile.seek(offset)
-    return [t[1] for t in np.fromfile(infile, dtype=dtype, count=n)]
+    dtypes = dtype.descr
+    final_dtypes = combine(
+        *[np.dtype((dtypes[i][1], dtypes[i][2] if len(dtypes[i]) > 2 else (1,))) for i in range(1, len(dtypes), 3)])
+    return np.array(
+        [[t[i] for i in range(1, len(t), 3)] for t in np.fromfile(infile, dtype=dtype, count=n, offset=offset)])

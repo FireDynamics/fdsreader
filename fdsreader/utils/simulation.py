@@ -1,10 +1,11 @@
 import mmap
 import os
+from typing import List, Dict, Literal
 
 import numpy as np
 import logging
 
-from utils import Mesh, Extent
+from utils import Mesh, Extent, Surface
 from slcf import Slice
 from isof import Isosurface
 
@@ -24,81 +25,87 @@ class Simulation:
             smv_file.readline()
             self.chid = smv_file.readline().decode().strip()
 
+            smv_file.seek(smv_file.find(b'HRRPUVCUT'))
+            smv_file.readline()
+            smv_file.readline()
+            self.hrrpuv_cutoff = float(smv_file.readline().decode().strip())
+
+            smv_file.seek(smv_file.find(b'TOFFSET'))
+            smv_file.readline()
+            self.default_texture_origin = tuple(smv_file.readline().decode().strip().split())
+
             self.out_file_path = os.path.join(self.root_path, self.chid + ".out")
 
+            self.surfaces = self._load_surfaces(smv_file)
             self.meshes = self._load_meshes(smv_file)
-            self.obstacles = self._load_obstacles(smv_file)
 
-    def _load_meshes(self, smv_file):
-        meshes = list()
+    def _load_meshes(self, smv_file: mmap.mmap) -> Dict[str, Mesh]:
+        meshes = dict()
+
+        def read_dimension(dim: Literal[b'X', b'Y', b'Z'], n: int, startpos: int):
+            pos = smv_file.find(b'TRN' + dim, startpos)
+            smv_file.seek(pos)
+            smv_file.readline()
+            noc = int(smv_file.readline().decode().strip())
+            for _ in range(noc):
+                smv_file.readline()
+            coordinates = np.empty(n, dtype=np.float32)
+            for i in range(n):
+                coordinates[i] = smv_file.readline().split()[1]
+            return coordinates
 
         pos = smv_file.find(b'GRID')
-
         while pos > 0:
             smv_file.seek(pos)
 
-            label = smv_file.readline().split()[1].decode()
-            logging.debug("found MESH with label: %s", label)
+            mesh_id = smv_file.readline().split()[1].decode()
+            logging.debug("found MESH with id: %s", mesh_id)
 
             grid_numbers = smv_file.readline().split()
             nx = int(grid_numbers[0]) + 1
+            ny = int(grid_numbers[1]) + 1
+            nz = int(grid_numbers[2]) + 1
             # # correct for 2D cases
             # if nx == 2: nx = 1
-            ny = int(grid_numbers[1]) + 1
             # if ny == 2: ny = 1
-            nz = int(grid_numbers[2]) + 1
             # if nz == 2: nz = 1
 
             logging.debug("number of cells: %i x %i x %i", nx, ny, nz)
 
-            pos = smv_file.find(b'TRNX', pos + 1)
-            smv_file.seek(pos)
-            smv_file.readline()
-            smv_file.readline()
-            x_coordinates = np.empty(nx, dtype=np.float32)
-            for ix in range(nx):
-                x_coordinates[ix] = smv_file.readline().split()[1]
-
-            pos = smv_file.find(b'TRNY', pos + 1)
-            smv_file.seek(pos)
-            smv_file.readline()
-            smv_file.readline()
-            y_coordinates = np.empty(ny, dtype=np.float32)
-            for iy in range(ny):
-                y_coordinates[iy] = smv_file.readline().split()[1]
-
-            pos = smv_file.find(b'TRNZ', pos + 1)
-            smv_file.seek(pos)
-            smv_file.readline()
-            smv_file.readline()
-            z_coordinates = np.empty(nz, dtype=np.float32)
-            for iz in range(nz):
-                z_coordinates[iz] = smv_file.readline().split()[1]
-
-            meshes.append(Mesh(x_coordinates, y_coordinates, z_coordinates, label))
+            meshes[mesh_id] = Mesh(read_dimension(b'X', nx, pos + 1), read_dimension(b'Y', ny, pos + 1),
+                                   read_dimension(b'Z', nz, pos + 1), mesh_id, smv_file, pos, self.surfaces,
+                                   self.default_texture_origin)
 
             pos = smv_file.find(b'GRID', pos + 1)
 
         return meshes
 
-    def _load_obstacles(self, smv_file):
-        obstacles = dict()
-        pos = smv_file.find(b'OBST')
+    def _load_surfaces(self, smv_file: mmap.mmap) -> List[Surface]:
+        surfaces = list()
+        pos = smv_file.find(b'SURFACE')
         while pos > 0:
             smv_file.seek(pos)
             smv_file.readline()
-            n = int(smv_file.readline().decode().strip())
-            for i in range(n):
-                obst = smv_file.readline().decode().strip().split()
-                obst_id = int(obst[6])
-                if obst_id not in obstacles:
-                    obstacles[obst_id] = (
-                        (int(obst[0]), int(obst[1])), (int(obst[2]), int(obst[3])),
-                        (int(obst[4]), int(obst[5]))
-                    )
-            pos = smv_file.find(b'OBST')
 
-        return list(obstacles.values())
+            surface_id = smv_file.readline().decode().strip()
+
+            line = smv_file.readline().decode().strip().split()
+            tmpm, material_emissivity = float(line[0]), float(line[1])
+
+            line = smv_file.readline().decode().strip().split()
+
+            surface_type, texture_width, texture_height, rgb, transparency = int(line[0]), float(line[1]), float(
+                line[2]), (float(line[3]), float(line[4]), float(line[5])), float(line[6])
+
+            texture_map = smv_file.readline().decode().strip()
+            texture_map = None if texture_map == "null" else os.path.join(self.root_path, texture_map)
+
+            surfaces.append(
+                Surface(surface_id, tmpm, material_emissivity, surface_type, texture_width, texture_height, texture_map,
+                        rgb, transparency))
+
+            pos = smv_file.find(b'SURFACE')
+        return surfaces
 
     @property
     def slices(self):
@@ -192,23 +199,6 @@ class Simulation:
         Lazy loads all isosurfaces for the simulation.
         :return: All isof data.
         """
-        # Dictionary mapping isosurface index to all its computed levels
-        # iso_levels = dict()
-        # # Read information about isosurfaces in .out-file
-        # with open(self.out_file_path, 'r') as infile, \
-        #         mmap.mmap(infile.fileno(), 0, access=mmap.ACCESS_READ) as out_file:
-        #     pos = out_file.find(b'Isosurface File Information')
-        #     out_file.seek(pos)
-        #     for i in range(4): out_file.readline()
-        #
-        #     line = out_file.readline().decode().strip()
-        #     while "Quantity:" in line:
-        #         index, levels = line.split("Quantity:")
-        #         levels = levels.split(":")[1].strip().split(" ")
-        #         iso_levels[int(index)] = [float(level) for level in levels]
-        #
-        #         line = out_file.readline().decode().strip()
-
         # Only load isosurfaces once initially and then reuse the loaded information
         if not hasattr(self, "_isosurfaces"):
             self._isosurfaces = list()
@@ -217,10 +207,7 @@ class Simulation:
                 pos = smv_file.find(b'ISOG')
                 while pos > 0:
                     smv_file.seek(pos - 1)
-                    if smv_file.read(1).decode() == "T":
-                        double_quantity = True
-                    else:
-                        double_quantity = False
+                    double_quantity = smv_file.read(1) == b'T'
                     smv_file.readline()
 
                     iso_filename = smv_file.readline().decode().strip()
