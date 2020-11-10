@@ -4,9 +4,8 @@ import numpy.lib.mixins
 import logging
 from typing import List, Dict
 
-from utils import Extent, Quantity, settings
+from utils import Extent, Quantity, settings, Mesh
 import utils.fortran_data as fdtype
-
 
 _HANDLED_FUNCTIONS = {}
 
@@ -43,7 +42,7 @@ class Slice(numpy.lib.mixins.NDArrayOperatorsMixin):
         self.times = None
 
     def _add_subslice(self, filename: str, quantity: str, label: str, unit: str, extent: Extent,
-                      mesh_id: int):
+                      mesh: Mesh):
         """
         Adds another subslice to the slice.
         :param filename: Name of the slice file
@@ -51,7 +50,7 @@ class Slice(numpy.lib.mixins.NDArrayOperatorsMixin):
         :param label: Quantity label
         :param unit: Quantity unit
         :param extent: Extent object containing 3-dimensional extent information
-        :param mesh_id: Id of the mesh the subslice cuts through
+        :param mesh: The mesh the subslice cuts through
         """
         self.quantities.append(Quantity(quantity, label, unit))
         for subslice in self._subslices:
@@ -59,15 +58,16 @@ class Slice(numpy.lib.mixins.NDArrayOperatorsMixin):
                 subslice.file_names[quantity] = filename
                 break
 
-        dtype_data = fdtype.combine(fdtype.FLOAT,
-                                    fdtype.new((('f', extent.size(cell_centered=self.cell_centered)),)))
+        dtype_data = fdtype.combine(fdtype.FLOAT, fdtype.new(
+            (('f', extent.size(cell_centered=self.cell_centered)),)))
 
         if self.times is None:
-            t_n = (os.stat(os.path.join(self.root_path, filename)).st_size - _SubSlice.offset) // dtype_data.itemsize
+            t_n = (os.stat(os.path.join(self.root_path, filename)).st_size - _SubSlice._offset) \
+                  // dtype_data.itemsize
             self.times = np.empty(shape=(t_n,))
             self.times[0] = -1
 
-        self._subslices.append(_SubSlice(filename, extent, quantity, mesh_id, self.times))
+        self._subslices.append(_SubSlice(filename, extent, quantity, mesh, self.times))
 
         # If lazy loading has been disabled by the user, load the data instantaneously instead
         if not settings.LAZY_LOAD:
@@ -116,7 +116,7 @@ class Slice(numpy.lib.mixins.NDArrayOperatorsMixin):
             q = self.quantities[i]
             new_slice._add_subslice(subslice.file_names[q.quantity],
                                     q.quantity, q.label,
-                                    q.unit, subslice.extent, subslice.mesh_id)
+                                    q.unit, subslice.extent, subslice.mesh)
             new_slice._subslices[-1]._data[q.quantity] = ufunc(
                 subslice.get_data(q.quantity, self.root_path, self.cell_centered),
                 input_list[0],
@@ -140,16 +140,16 @@ class Slice(numpy.lib.mixins.NDArrayOperatorsMixin):
 class _SubSlice:
     """
     Part of a slice that cuts through a single mesh.
-    :ivar mesh_id: Id of the mesh the subslice cuts through
+    :ivar mesh: The mesh the subslice cuts through
     :ivar extent: Extent object containing 3-dimensional extent information
     :ivar file_names: File names for the corresponding slice file depending on the quantity.
     :ivar _data: Dictionary that maps quantity to data.
     """
 
-    offset = 3 * fdtype.new((('c', 30),)).itemsize + fdtype.new((('i', 6),)).itemsize
+    _offset = 3 * fdtype.new((('c', 30),)).itemsize + fdtype.new((('i', 6),)).itemsize
 
-    def __init__(self, filename: str, extent: Extent, quantity: str, mesh_id: int, times):
-        self.mesh_id = mesh_id
+    def __init__(self, filename: str, extent: Extent, quantity: str, mesh: Mesh, times):
+        self.mesh = mesh
         self.extent = extent
 
         self.file_names = {quantity: filename}
@@ -171,13 +171,15 @@ class _SubSlice:
             fill_times = self._times[0] == -1
             t_n = self._times.shape[0]
 
-            self._data[quantity] = np.empty((t_n, self.extent.x, self.extent.y, self.extent.z), dtype=np.float32)
+            self._data[quantity] = np.empty((t_n, self.extent.x, self.extent.y, self.extent.z),
+                                            dtype=np.float32)
 
             with open(file_path, 'rb') as infile:
-                for i, data in enumerate(fdtype.read(infile, dtype_data, t_n, offset=self.offset)):
+                for i, data in enumerate(fdtype.read(infile, dtype_data, t_n, offset=self._offset)):
                     if fill_times:
                         self._times[i] = data[0][0]
-                    self._data[quantity][i, :] = data[1].reshape((self.extent.x, self.extent.y, self.extent.z))
+                    self._data[quantity][i, :] = data[1].reshape(
+                        (self.extent.x, self.extent.y, self.extent.z))
         return self._data[quantity]
 
 

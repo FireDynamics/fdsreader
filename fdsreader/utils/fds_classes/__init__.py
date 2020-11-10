@@ -1,9 +1,9 @@
-from utils.fds_classes.extent import Extent
+from .extent import Extent
 
-from utils.fds_classes.mesh import Mesh
+from .surface import Surface
 
-from utils.fds_classes.vent import Ventilation
+from .vent import Ventilation
 
-from utils.fds_classes.surface import Surface
+from .obstruction import Obstruction
 
-from utils.fds_classes.obstruction import Obstruction
+from .mesh import Mesh

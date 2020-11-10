@@ -1,11 +1,12 @@
 import mmap
 import os
-from typing import List, Dict, Literal
+from typing import List, Literal
 
 import numpy as np
 import logging
 
-from utils import Mesh, Extent, Surface
+from plot3d import Plot3D
+from utils import Mesh, Extent, Surface, Quantity
 from slcf import Slice
 from isof import Isosurface
 
@@ -17,20 +18,20 @@ class Simulation:
 
         with open(smv_file_path, 'r') as infile, mmap.mmap(infile.fileno(), 0,
                                                            access=mmap.ACCESS_READ) as smv_file:
-            smv_file.seek(smv_file.find(b'FDSVERSION'))
+            smv_file.seek(smv_file.find(b'FDSVERSION', 0))
             smv_file.readline()
             self.fds_version = smv_file.readline().decode().strip()
 
-            smv_file.seek(smv_file.find(b'CHID'))
+            smv_file.seek(smv_file.find(b'CHID', 0))
             smv_file.readline()
             self.chid = smv_file.readline().decode().strip()
 
-            smv_file.seek(smv_file.find(b'HRRPUVCUT'))
+            smv_file.seek(smv_file.find(b'HRRPUVCUT', 0))
             smv_file.readline()
             smv_file.readline()
             self.hrrpuv_cutoff = float(smv_file.readline().decode().strip())
 
-            smv_file.seek(smv_file.find(b'TOFFSET'))
+            smv_file.seek(smv_file.find(b'TOFFSET', 0))
             smv_file.readline()
             self.default_texture_origin = tuple(smv_file.readline().decode().strip().split())
 
@@ -39,8 +40,8 @@ class Simulation:
             self.surfaces = self._load_surfaces(smv_file)
             self.meshes = self._load_meshes(smv_file)
 
-    def _load_meshes(self, smv_file: mmap.mmap) -> Dict[str, Mesh]:
-        meshes = dict()
+    def _load_meshes(self, smv_file: mmap.mmap) -> List[Mesh]:
+        meshes: List[Mesh] = list()
 
         def read_dimension(dim: Literal[b'X', b'Y', b'Z'], n: int, startpos: int):
             pos = smv_file.find(b'TRN' + dim, startpos)
@@ -54,7 +55,7 @@ class Simulation:
                 coordinates[i] = smv_file.readline().split()[1]
             return coordinates
 
-        pos = smv_file.find(b'GRID')
+        pos = smv_file.find(b'GRID', 0)
         while pos > 0:
             smv_file.seek(pos)
 
@@ -72,9 +73,10 @@ class Simulation:
 
             logging.debug("number of cells: %i x %i x %i", nx, ny, nz)
 
-            meshes[mesh_id] = Mesh(read_dimension(b'X', nx, pos + 1), read_dimension(b'Y', ny, pos + 1),
-                                   read_dimension(b'Z', nz, pos + 1), mesh_id, smv_file, pos, self.surfaces,
-                                   self.default_texture_origin)
+            meshes.append(Mesh(read_dimension(b'X', nx, pos + 1), read_dimension(b'Y', ny, pos + 1),
+                               read_dimension(b'Z', nz, pos + 1), mesh_id, len(meshes) - 1,
+                               smv_file, pos, self.surfaces,
+                               self.default_texture_origin))
 
             pos = smv_file.find(b'GRID', pos + 1)
 
@@ -82,7 +84,7 @@ class Simulation:
 
     def _load_surfaces(self, smv_file: mmap.mmap) -> List[Surface]:
         surfaces = list()
-        pos = smv_file.find(b'SURFACE')
+        pos = smv_file.find(b'SURFACE', 0)
         while pos > 0:
             smv_file.seek(pos)
             smv_file.readline()
@@ -94,21 +96,24 @@ class Simulation:
 
             line = smv_file.readline().decode().strip().split()
 
-            surface_type, texture_width, texture_height, rgb, transparency = int(line[0]), float(line[1]), float(
+            surface_type, texture_width, texture_height, rgb, transparency = int(line[0]), float(
+                line[1]), float(
                 line[2]), (float(line[3]), float(line[4]), float(line[5])), float(line[6])
 
             texture_map = smv_file.readline().decode().strip()
-            texture_map = None if texture_map == "null" else os.path.join(self.root_path, texture_map)
+            texture_map = None if texture_map == "null" else os.path.join(self.root_path,
+                                                                          texture_map)
 
             surfaces.append(
-                Surface(surface_id, tmpm, material_emissivity, surface_type, texture_width, texture_height, texture_map,
+                Surface(surface_id, tmpm, material_emissivity, surface_type, texture_width,
+                        texture_height, texture_map,
                         rgb, transparency))
 
             pos = smv_file.find(b'SURFACE')
         return surfaces
 
     @property
-    def slices(self):
+    def slices(self) -> List[Slice]:
         """
         Lazy loads all slices for the simulation.
         :return: All slices.
@@ -117,7 +122,7 @@ class Simulation:
             slices = dict()
             with open(self.smv_file_path, 'r') as infile, \
                     mmap.mmap(infile.fileno(), 0, access=mmap.ACCESS_READ) as smv_file:
-                pos = smv_file.find(b'SLC')
+                pos = smv_file.find(b'SLC', 0)
                 while pos > 0:
                     smv_file.seek(pos)
                     line = smv_file.readline()
@@ -128,7 +133,7 @@ class Simulation:
 
                     slice_id = int(line.split(b'!')[1].strip().split()[0].decode())
 
-                    mesh_id = int(line.split(b'&')[0].strip().split()[1].decode()) - 1
+                    mesh_index = int(line.split(b'&')[0].strip().split()[1].decode()) - 1
 
                     # Read in index ranges for x, y and z
                     index_ranges = [int(i.strip()) for i in
@@ -142,56 +147,50 @@ class Simulation:
                     if slice_id not in slices:
                         slices[slice_id] = Slice(self.root_path, centered)
                     slices[slice_id]._add_subslice(filename, quantity, label, unit,
-                                                   Extent(*index_ranges), mesh_id)
+                                                   Extent(*index_ranges), self.meshes[mesh_index])
 
                     pos = smv_file.find(b'SLC', pos + 1)
             self._slices = list(slices.values())
         return self._slices
 
     @property
-    def data_3d(self):
+    def data_3d(self) -> List[Plot3D]:
         """
         Lazy loads all plot3d data for the simulation.
         :return: All plot3d data.
         """
+        # Todo: Also read SMOKG3D data?
         # Only load slices once initially and then reuse the loaded information
         if not hasattr(self, "_3d_data"):
-            slices = dict()
+            plot3ds = list()
             with open(self.smv_file_path, 'r') as infile, \
                     mmap.mmap(infile.fileno(), 0, access=mmap.ACCESS_READ) as smv_file:
-                pos = smv_file.find(b'SLC')
+                pos = smv_file.find(b'PL3D', 0)
                 while pos > 0:
                     smv_file.seek(pos)
-                    line = smv_file.readline()
-                    if line.find(b'SLCC') != -1:
-                        centered = True
-                    else:
-                        centered = False
+                    line = smv_file.readline().decode().strip().split()
 
-                    slice_id = int(line.split(b'!')[1].strip().split()[0].decode())
+                    time = float(line[1])
 
-                    mesh_id = int(line.split(b'&')[0].strip().split()[1].decode()) - 1
-
-                    # Read in index ranges for x, y and z
-                    index_ranges = [int(i.strip()) for i in
-                                    line.split(b'&')[1].split(b'!')[0].strip().split()]
+                    mesh_index = int(line[2]) - 1
 
                     filename = smv_file.readline().decode().strip()
-                    quantity = smv_file.readline().decode().strip()
-                    label = smv_file.readline().decode().strip()
-                    unit = smv_file.readline().decode().strip()
+                    quantities = list()
+                    for _ in range(5):
+                        quantity = smv_file.readline().decode().strip()
+                        label = smv_file.readline().decode().strip()
+                        unit = smv_file.readline().decode().strip()
+                        quantities.append(Quantity(quantity, label, unit))
 
-                    if slice_id not in slices:
-                        slices[slice_id] = Slice(os.path.dirname(self.smv_file_path), centered)
-                    slices[slice_id]._add_subslice(filename, quantity, label, unit,
-                                                   Extent(*index_ranges), mesh_id)
+                    plot3ds.append(
+                        Plot3D(self.root_path, filename, time, quantities, self.meshes[mesh_index]))
 
-                    pos = smv_file.find(b'SLC', pos + 1)
-            if len(slices) > 0:
-                self._slices = list(slices.values())
+                    pos = smv_file.find(b'PL3D', pos + 1)
+            if len(plot3ds) > 0:
+                self._3d_data = plot3ds
             else:
-                raise IOError("This simulation did not output any slices.")
-        return self._slices
+                raise IOError("This simulation did not output any plot3d data.")
+        return self._3d_data
 
     @property
     def isosurfaces(self):
@@ -199,12 +198,13 @@ class Simulation:
         Lazy loads all isosurfaces for the simulation.
         :return: All isof data.
         """
+        # Todo: Check for multimesh
         # Only load isosurfaces once initially and then reuse the loaded information
         if not hasattr(self, "_isosurfaces"):
             self._isosurfaces = list()
             with open(self.smv_file_path, 'r') as infile, \
                     mmap.mmap(infile.fileno(), 0, access=mmap.ACCESS_READ) as smv_file:
-                pos = smv_file.find(b'ISOG')
+                pos = smv_file.find(b'ISOG', 0)
                 while pos > 0:
                     smv_file.seek(pos - 1)
                     double_quantity = smv_file.read(1) == b'T'

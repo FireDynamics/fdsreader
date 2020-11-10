@@ -1,7 +1,7 @@
 from typing import Tuple, Union
 from fastcore.basics import store_attr
 
-from utils import Extent, Surface
+from . import Extent, Surface
 
 
 class Obstruction:

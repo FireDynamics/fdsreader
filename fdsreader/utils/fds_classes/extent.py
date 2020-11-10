@@ -12,7 +12,7 @@ class Extent:
         if len(args) % 2 == 1:
             ValueError("An uneven number of ranges were passed to the constructor.")
         for i in range(0, len(args), 2):
-            self._extents.append((args[i], args[i + 1]))
+            self._extents.append((int(args[i]), int(args[i + 1])))
 
         if skip_dimension == 'x':
             self._extents.insert(0, (0, 0))
@@ -30,12 +30,12 @@ class Extent:
 
     def size(self, cell_centered=False):
         if cell_centered:
-            x = self.x if self.x != 0 else 1
-            y = self.y if self.y != 0 else 1
-            z = self.z if self.z != 0 else 1
+            x = self.x-1 if self.x != 1 else 1
+            y = self.y-1 if self.y != 1 else 1
+            z = self.z-1 if self.z != 1 else 1
             return x * y * z
         else:
-            return (self.x + 1) * (self.y + 1) * (self.z + 1)
+            return self.x * self.y * self.z
 
     @property
     def x(self):

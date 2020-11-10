@@ -1,5 +1,5 @@
-from utils.data import scan_directory_smv, Quantity
+from .data import scan_directory_smv, Quantity
 
-from utils.fds_classes import *
+from .fds_classes import *
 
-from utils.simulation import Simulation
+from .simulation import Simulation

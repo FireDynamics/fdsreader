@@ -2,7 +2,7 @@ import mmap
 from typing import Dict, List, Union, Tuple
 import numpy as np
 
-from utils import Extent, Obstruction, Ventilation, Surface
+from . import Extent, Obstruction, Ventilation, Surface
 
 
 class Mesh:
@@ -15,12 +15,16 @@ class Mesh:
     :ivar n: Number of elements for each of the 3 dimensions.
     :ivar n_size: Total number of blocks in this mesh.
     :ivar label: Label associated with this mesh.
+    :ivar id: Mesh id assigned to mesh.
+    :ivar index: Index of mesh in smv file.
     :ivar obstructions: All obstructions inside of the mesh.
     :ivar vents: All vents inside of the mesh.
     """
 
-    def __init__(self, x_coordinates: np.ndarray, y_coordinates: np.ndarray, z_coordinates: np.ndarray, mid: str,
-                 smv_file: Union[str, mmap.mmap], pos: int, surfaces: List[Surface],
+    def __init__(self, x_coordinates: np.ndarray, y_coordinates: np.ndarray,
+                 z_coordinates: np.ndarray, mesh_id: str,
+                 mesh_index: int, smv_file: Union[str, mmap.mmap], pos: int,
+                 surfaces: List[Surface],
                  default_texture_origin: Tuple[float, float, float]):
         """
         :param x_coordinates: Coordinate values of x-axis.
@@ -42,21 +46,23 @@ class Mesh:
         self.n = [x_coordinates.size, y_coordinates.size, z_coordinates.size]
         self.n_size = self.n[0] * self.n[1] * self.n[2]
 
-        self.id = mid
+        self.id = mesh_id
+        self.index = mesh_index
 
         if type(smv_file) == str:
             infile = open(smv_file, 'r')
             smv_file = mmap.mmap(infile.fileno(), 0, access=mmap.ACCESS_READ)
 
         self.obstructions = self._load_obstructions(smv_file, pos, surfaces, default_texture_origin)
-        self.vents = self._load_vents(smv_file, pos)
+        self.vents = self._load_vents(smv_file, pos, surfaces, self.index)
 
         if type(smv_file) == str:
             smv_file.close()
             infile.close()
 
     def _load_obstructions(self, smv_file: mmap.mmap, pos: int, surfaces: List[Surface],
-                           default_texture_origin: Tuple[float, float, float]) -> Dict[int, Obstruction]:
+                           default_texture_origin: Tuple[float, float, float]) -> Dict[
+        int, Obstruction]:
         obstructions = dict()
         pos = smv_file.find(b'OBST', pos)
         smv_file.seek(pos)
@@ -92,12 +98,14 @@ class Mesh:
                 obst_id, extent, side_surfaces = temp_data[i]
                 texture_origin = default_texture_origin
 
-            obstructions[obst_id] = Obstruction(obst_id, extent, side_surfaces, bound_indices, color_index, block_type,
+            obstructions[obst_id] = Obstruction(obst_id, extent, side_surfaces, bound_indices,
+                                                color_index, block_type,
                                                 texture_origin, rgba=rgba)
 
         return obstructions
 
-    def _load_vents(self, smv_file: mmap.mmap, startpos: int, surfaces: List[Surface], mesh_id: int) -> List[
+    def _load_vents(self, smv_file: mmap.mmap, startpos: int, surfaces: List[Surface],
+                    mesh_id: int) -> List[
         Ventilation]:
         # Read information about opening and closing of vents
         def get_vents(oc):
@@ -105,7 +113,7 @@ class Mesh:
             pos = smv_file.find(oc + b'_VENT', 0)
             while pos > 0:
                 smv_file.seek(pos)
-                pos = smv_file.find(b'OPEN_VENT', pos)
+                pos = smv_file.find(oc + b'_VENT', pos)
 
                 target_mesh_id = int(smv_file.readline().decode().strip().split()[1])
                 if target_mesh_id != mesh_id:
@@ -129,7 +137,7 @@ class Mesh:
 
         def read_common_info():
             line = smv_file.readline().decode().strip().split()
-            return Extent(*[float(line[i]) for i in range(6)]), int(line[6]), surfaces[int(line[7])]
+            return line, Extent(*[float(line[i]) for i in range(6)]), int(line[6]), surfaces[int(line[7])]
 
         def read_common_info2():
             line = smv_file.readline().decode().strip().split()
@@ -143,26 +151,28 @@ class Mesh:
             return bound_indices, color_index, draw_type, rgba
 
         for _ in range(n - n_dummies):
-            extent, vid, surface = read_common_info()
+            line, extent, vid, surface = read_common_info()
             texture_origin = (float(line[8]), float(line[9]), float(line[10]))
             temp_data.append((extent, vid, surface, texture_origin))
 
         for _ in range(n_dummies):
-            extent, vid, surface = read_common_info()
+            _, extent, vid, surface = read_common_info()
             temp_data.append((extent, vid, surface))
 
         for i in range(n - n_dummies):
             extent, vid, surface, texture_origin = temp_data[i]
             bound_indices, color_index, draw_type, rgba = read_common_info2()
-            ventilations.append(Ventilation(extent, vid, surface, bound_indices, color_index, draw_type, rgba=rgba,
-                                            texture_origin=texture_origin, open_time=open_vents.get(vid, -1),
-                                            close_time=close_vents.get(vid, -1)))
+            ventilations.append(
+                Ventilation(extent, vid, surface, bound_indices, color_index, draw_type, rgba=rgba,
+                            texture_origin=texture_origin, open_time=open_vents.get(vid, -1),
+                            close_time=close_vents.get(vid, -1)))
 
-        for i in range(n_dummies):
+        for i in range(n - n_dummies, n):
             extent, vid, surface = temp_data[i]
             bound_indices, color_index, draw_type, rgba = read_common_info2()
-            ventilations.append(Ventilation(extent, vid, surface, bound_indices, color_index, draw_type, rgba=rgba,
-                                            open_time=open_vents.get(vid, -1), close_time=close_vents.get(vid, -1)))
+            ventilations.append(
+                Ventilation(extent, vid, surface, bound_indices, color_index, draw_type, rgba=rgba,
+                            open_time=open_vents.get(vid, -1), close_time=close_vents.get(vid, -1)))
 
         pos = smv_file.find(b'CVENT', pos)
         smv_file.seek(pos)
@@ -173,18 +183,19 @@ class Mesh:
         temp_data.clear()
 
         for _ in range(n):
-            extent, vid, surface = read_common_info()
+            line, extent, vid, surface = read_common_info()
             circular_vent_origin = (float(line[12]), float(line[13]), float(line[14]))
             radius = float(line[15])
-            temp_data.append((extent, vid, surface, circular_vent_origin, radius))
+            temp_data.append((extent, vid, surface, texture_origin, circular_vent_origin, radius))
 
         for i in range(n):
-            extent, vid, surface, circular_vent_origin, radius = temp_data[i]
+            extent, vid, surface, texture_origin, circular_vent_origin, radius = temp_data[i]
             bound_indices, color_index, draw_type, rgba = read_common_info2()
             ventilations.append(
                 Ventilation(extent, vid, surface, bound_indices, color_index, draw_type, rgba=rgba,
-                            circular_vent_origin=circular_vent_origin, radius=radius, open_time=open_vents.get(vid, -1),
-                            close_time=close_vents.get(vid, -1)))
+                            texture_origin=texture_origin,
+                            circular_vent_origin=circular_vent_origin, radius=radius,
+                            open_time=open_vents.get(vid, -1), close_time=close_vents.get(vid, -1)))
 
         return ventilations
 

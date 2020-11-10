@@ -2,7 +2,7 @@ from typing import Union, Tuple
 
 from fastcore.basics import store_attr
 
-from utils import Surface, Extent
+from . import Surface, Extent
 
 
 class Ventilation:
