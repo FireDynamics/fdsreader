@@ -2,7 +2,7 @@ alabaster==0.7.12
 astroid==2.4.2
 attrs==20.3.0
 Automat==20.2.0
-Babel==2.8.0
+Babel==2.8.1
 bleach==3.2.1
 bump2version==1.0.1
 certifi==2020.11.8
@@ -40,7 +40,7 @@ python-dateutil==2.8.1
 pytz==2020.4
 pywin32-ctypes==0.2.0
 readme-renderer==28.0
-requests==2.24.0
+requests==2.25.0
 requests-toolbelt==0.9.1
 rfc3986==1.4.0
 scipy==1.5.4
@@ -57,9 +57,10 @@ sphinxcontrib-serializinghtml==1.1.4
 toml==0.10.2
 tqdm==4.51.0
 twine==3.2.0
+twisted==20.3.0
 typed-ast==1.4.1
 typing-extensions==3.7.4.3
-urllib3==1.25.11
+urllib3==1.26.1
 webencodings==0.5.1
 wrapt==1.12.1
 zipp==3.4.0
