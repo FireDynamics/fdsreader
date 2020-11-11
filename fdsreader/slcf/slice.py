@@ -1,6 +1,5 @@
 import os
 import numpy as np
-import numpy.lib.mixins
 import logging
 from typing import List, Dict
 
@@ -22,7 +21,7 @@ def implements(np_function):
     return decorator
 
 
-class Slice(numpy.lib.mixins.NDArrayOperatorsMixin):
+class Slice(np.lib.mixins.NDArrayOperatorsMixin):
     """
     Slice file data container including metadata. Consists of multiple subslices, one for each mesh
      the slice cuts through.

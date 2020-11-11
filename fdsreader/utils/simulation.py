@@ -150,7 +150,10 @@ class Simulation:
                                                    Extent(*index_ranges), self.meshes[mesh_index])
 
                     pos = smv_file.find(b'SLC', pos + 1)
-            self._slices = list(slices.values())
+            if len(slices) > 0:
+                self._slices = list(slices.values())
+            else:
+                raise IOError("This simulation did not output any slices.")
         return self._slices
 
     @property
@@ -162,7 +165,7 @@ class Simulation:
         # Todo: Also read SMOKG3D data?
         # Only load slices once initially and then reuse the loaded information
         if not hasattr(self, "_3d_data"):
-            plot3ds = list()
+            plot3ds = dict()
             with open(self.smv_file_path, 'r') as infile, \
                     mmap.mmap(infile.fileno(), 0, access=mmap.ACCESS_READ) as smv_file:
                 pos = smv_file.find(b'PL3D', 0)
@@ -182,12 +185,13 @@ class Simulation:
                         unit = smv_file.readline().decode().strip()
                         quantities.append(Quantity(quantity, label, unit))
 
-                    plot3ds.append(
-                        Plot3D(self.root_path, filename, time, quantities, self.meshes[mesh_index]))
+                    if time not in plot3ds:
+                        plot3ds[time] = Plot3D(self.root_path, time, quantities)
+                    plot3ds[time]._add_subplot(filename, self.meshes[mesh_index])
 
                     pos = smv_file.find(b'PL3D', pos + 1)
             if len(plot3ds) > 0:
-                self._3d_data = plot3ds
+                self._3d_data = list(plot3ds.values())
             else:
                 raise IOError("This simulation did not output any plot3d data.")
         return self._3d_data
@@ -233,4 +237,6 @@ class Simulation:
                                        iso_filename, quantity, label, unit))
 
                     pos = smv_file.find(b'ISOG', pos + 1)
+            if len(self._isosurfaces) == 0:
+                raise IOError("This simulation did not output any isosurfaces.")
         return self._isosurfaces
