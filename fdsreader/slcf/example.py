@@ -1,4 +1,6 @@
-from utils import Simulation, scan_directory_smv
+from utils import scan_directory_smv
+from simulation import Simulation
+
 import numpy as np
 
 

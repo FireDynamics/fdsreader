@@ -3,6 +3,8 @@ import numpy as np
 import logging
 from typing import List, Dict
 
+from fastcore.basics import store_attr
+
 from utils import Extent, Quantity, settings, Mesh
 import utils.fortran_data as fdtype
 
@@ -33,10 +35,9 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
     """
 
     def __init__(self, root_path: str, cell_centered: bool):
-        self.root_path = root_path
-        self.quantities: List[Quantity] = list()
+        store_attr()
 
-        self.cell_centered = cell_centered
+        self.quantities: List[Quantity] = list()
         self._subslices: List[_SubSlice] = list()
         self.times = None
 

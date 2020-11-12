@@ -1,4 +1,5 @@
-from utils import Simulation, scan_directory_smv
+from utils import scan_directory_smv
+from simulation import Simulation
 
 
 def main():
@@ -8,7 +9,7 @@ def main():
 
     plot3d = sim.data_3d[0]
 
-    print(plot3d.get_data())
+    print(plot3d._subplots[0].get_data())
 
 
 if __name__ == "__main__":

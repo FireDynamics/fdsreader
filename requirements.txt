@@ -2,7 +2,7 @@ alabaster==0.7.12
 astroid==2.4.2
 attrs==20.3.0
 Automat==20.2.0
-Babel==2.8.1
+Babel==2.9.0
 bleach==3.2.1
 bump2version==1.0.1
 certifi==2020.11.8
@@ -12,7 +12,7 @@ colorama==0.4.4
 constantly==15.1.0
 cycler==0.10.0
 docutils==0.16
-fastcore==1.3.2
+fastcore==1.3.4
 hyperlink==20.0.1
 idna==2.10
 imagesize==1.2.0
@@ -24,7 +24,7 @@ keyring==21.5.0
 kiwisolver==1.3.1
 lazy-object-proxy==1.5.1
 MarkupSafe==1.1.1
-matplotlib==3.3.2
+matplotlib==3.3.3
 mccabe==0.6.1
 mypy==0.790
 mypy-extensions==0.4.3

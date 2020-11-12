@@ -1,1 +1,1 @@
-from isof.isosurface import Isosurface
+from .isosurface import Isosurface

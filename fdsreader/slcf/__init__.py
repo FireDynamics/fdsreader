@@ -1,1 +1,1 @@
-from slcf.slice import Slice
+from .slice import Slice

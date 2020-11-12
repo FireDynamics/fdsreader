@@ -2,6 +2,7 @@ import logging
 import os
 from typing import List
 import numpy as np
+from fastcore.basics import store_attr
 
 from utils import Quantity, Mesh
 import utils.fortran_data as fdtype
@@ -26,9 +27,7 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
 
     """
     def __init__(self, root_path: str, time: float, quantities: List[Quantity]):
-        self.root_path = root_path
-        self.time = time
-        self.quantities = quantities
+        store_attr()
 
         self._subplots: List[_SubPlot3D] = list()
 
@@ -93,12 +92,11 @@ class _SubPlot3D:
     _offset = fdtype.new((('i', 3),)).itemsize + fdtype.new((('i', 4),)).itemsize
 
     def __init__(self, file_path: str, mesh: Mesh):
-        self.mesh = mesh
-        self.file_path = file_path
+        store_attr()
 
     def get_data(self) -> np.ndarray:
         """
-        Method to lazy load the 3D data.
+        Method to lazy load the 3D data for a single mesh.
         :returns: 4D numpy array wiht (x,y,z,q) as dimensions, while q represents the 5 quantities.
         """
         if not hasattr(self, "_data"):
