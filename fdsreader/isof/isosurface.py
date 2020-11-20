@@ -19,16 +19,19 @@ class Isosurface:
             self.v_file_path = os.path.join(root_path, viso_filename)
 
         with open(self.file_path, 'rb') as infile:
-            nlevels = fdtype.read(infile, fdtype.INT, 3, offset=0)[2][0]
+            nlevels = fdtype.read(infile, fdtype.INT, 3)[2][0]
 
             dtype_header_levels = fdtype.new((('f', nlevels),))
-            self.levels = fdtype.read(infile, dtype_header_levels, 1, offset=fdtype.INT*3)[0]
+            self.levels = fdtype.read(infile, dtype_header_levels, 1)[0]
 
-            dtype_header_rest = fdtype.combine(fdtype.INT, fdtype.new((('i', 2),)), fdtype.new((('f', 1), ('i', 1))))
-            self._offset = fdtype.INT.itemsize * 3 + dtype_header_levels.itemsize + dtype_header_rest.itemsize
+            dtype_header_rest = fdtype.combine(fdtype.INT, fdtype.new((('i', 2),)),
+                                               fdtype.new((('f', 1), ('i', 1))))
+            self._offset = fdtype.INT.itemsize * 3 + dtype_header_levels.itemsize + \
+                           dtype_header_rest.itemsize
+            infile.seek(self._offset)
 
             dtype_dims = fdtype.new((('i', 2),))
-            dims_data = fdtype.read(infile, dtype_dims, 1, offset=self._offset)
+            dims_data = fdtype.read(infile, dtype_dims, 1)
             self.n_vertices = dims_data[0][0]
             self.n_triangles = dims_data[0][1]
             print(self.n_vertices, self.n_vertices)
@@ -39,7 +42,8 @@ class Isosurface:
                 self._load_data(infile)
 
         if self._double_quantity:
-            self.v_offset = fdtype.INT.itemsize * 2 + fdtype.FLOAT.itemsize + fdtype.new((('i', 4),)).itemsize
+            self._v_offset = fdtype.INT.itemsize * 2 + fdtype.FLOAT.itemsize + fdtype.new(
+                (('i', 4),)).itemsize
 
             if not settings.LAZY_LOAD:
                 with open(self.v_file_path, 'rb') as infile:
@@ -82,14 +86,16 @@ class Isosurface:
                               " color-data.")
 
     def _load_data(self, infile: BinaryIO):
-        dtype_vertices = fdtype.new((('f', 3*self.n_vertices),))
-        dtype_triangles = fdtype.new((('i', 3*self.n_triangles),))
+        dtype_vertices = fdtype.new((('f', 3 * self.n_vertices),))
+        dtype_triangles = fdtype.new((('i', 3 * self.n_triangles),))
         dtype_surfaces = fdtype.new((('i', self.n_triangles),))
+        infile.seek(self._offset)
 
-        self._vertices = fdtype.read(infile, dtype_vertices, 1, offset=self._offset)
-        self._triangles = fdtype.read(infile, dtype_triangles, 1, offset=self._offset + dtype_vertices.itemsize)
-        self._surfaces = fdtype.read(infile, dtype_surfaces, 1, offset=self._offset + dtype_vertices.itemsize + dtype_triangles.itemsize)
+        self._vertices = fdtype.read(infile, dtype_vertices, 1)
+        self._triangles = fdtype.read(infile, dtype_triangles, 1)
+        self._surfaces = fdtype.read(infile, dtype_surfaces, 1)
 
     def _load_vdata(self, infile: BinaryIO):
         dtype_color = fdtype.new((('f', self.n_vertices),))
-        self._colors = fdtype.read(infile, dtype_color, self.n_vertices, offset=self.v_offset)
+        infile.seek(self._v_offset)
+        self._colors = fdtype.read(infile, dtype_color, self.n_vertices)

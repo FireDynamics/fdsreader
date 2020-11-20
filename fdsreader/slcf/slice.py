@@ -130,8 +130,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         """
         if func not in _HANDLED_FUNCTIONS:
             return NotImplemented
-            # Note: this allows subclasses that don't override
-            # __array_function__ to handle DiagonalArray objects.
+            # Note: this allows subclasses that don't override __array_function__ to handle Slices.
         if not all(issubclass(t, self.__class__) for t in types):
             return NotImplemented
         return _HANDLED_FUNCTIONS[func](*args, **kwargs)

@@ -81,8 +81,7 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
         """
         if func not in _HANDLED_FUNCTIONS:
             return NotImplemented
-            # Note: this allows subclasses that don't override
-            # __array_function__ to handle DiagonalArray objects.
+            # Note: this allows subclasses that don't override __array_function__ to handle Plot3Ds.
         if not all(issubclass(t, self.__class__) for t in types):
             return NotImplemented
         return _HANDLED_FUNCTIONS[func](*args, **kwargs)
@@ -102,7 +101,8 @@ class _SubPlot3D:
         if not hasattr(self, "_data"):
             with open(self.file_path, 'rb') as infile:
                 dtype_data = fdtype.new((('f', self.mesh.extent.size(cell_centered=False) * 5),))
-                self._data = fdtype.read(infile, dtype_data, 1, offset=self._offset)[0][0].reshape(
+                infile.seek(self._offset)
+                self._data = fdtype.read(infile, dtype_data, 1)[0][0].reshape(
                     (self.mesh.extent.x, self.mesh.extent.y, self.mesh.extent.z, 5))
         return self._data
 

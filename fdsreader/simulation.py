@@ -117,7 +117,7 @@ class Simulation:
     def slices(self) -> List[Slice]:
         """
         Lazy loads all slices for the simulation.
-        :return: All slices.
+        :returns: All slices.
         """
         # Only load slices once initially and then reuse the loaded information
         if not hasattr(self, "_slices"):
@@ -162,7 +162,7 @@ class Simulation:
     def boundaries(self) -> List[Boundary]:
         """
         Lazy loads all boundary data for the simulation.
-        :return: All boundary data.
+        :returns: All boundary data.
         """
         if not hasattr(self, "_boundaries"):
             boundaries = dict()
@@ -186,10 +186,11 @@ class Simulation:
                     bid = int(filename.split('_')[-1][:-3])
 
                     if bid not in boundaries:
-                        boundaries[bid] = Boundary(self.root_path, cell_centered, quantity, label, unit)
+                        boundaries[bid] = Boundary(bid, self.root_path, cell_centered, quantity,
+                                                   label, unit)
                     boundaries[bid]._add_subboundary(filename, self.meshes[mesh_index])
 
-                    pos = smv_file.find(b'PL3D', pos + 1)
+                    pos = smv_file.find(b'BND', pos + 1)
             if len(boundaries) > 0:
                 self._boundaries = list(boundaries.values())
             else:
@@ -200,7 +201,7 @@ class Simulation:
     def data_3d(self) -> List[Plot3D]:
         """
         Lazy loads all plot3d data for the simulation.
-        :return: All plot3d data.
+        :returns: All plot3d data.
         """
         # Todo: Also read SMOKG3D data?
         # Only load plot3d data once initially and then reuse the loaded information
@@ -240,7 +241,7 @@ class Simulation:
     def isosurfaces(self):
         """
         Lazy loads all isosurfaces for the simulation.
-        :return: All isof data.
+        :returns: All isof data.
         """
         # Todo: Check for multimesh
         # Only load isosurfaces once initially and then reuse the loaded information
