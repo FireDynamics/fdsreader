@@ -39,7 +39,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         self.quantities: List[Quantity] = list()
         self.times = None
         # List of all subslices this slice consists of (one per mesh).
-        self._subslices: List[_SubSlice] = list()
+        self._subslices: List[SubSlice] = list()
 
     def _add_subslice(self, filename: str, quantity: str, label: str, unit: str, extent: Extent,
                       mesh: Mesh):
@@ -62,16 +62,26 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             (('f', extent.size(cell_centered=self.cell_centered)),)))
 
         if self.times is None:
-            t_n = (os.stat(os.path.join(self.root_path, filename)).st_size - _SubSlice._offset) \
+            t_n = (os.stat(os.path.join(self.root_path, filename)).st_size - SubSlice._offset) \
                   // dtype_data.itemsize
             self.times = np.empty(shape=(t_n,))
             self.times[0] = -1
 
-        self._subslices.append(_SubSlice(filename, extent, quantity, mesh, self.times))
+        self._subslices.append(SubSlice(filename, extent, quantity, mesh, self.times))
 
         # If lazy loading has been disabled by the user, load the data instantaneously instead
         if not settings.LAZY_LOAD:
             self._subslices[-1].get_data(quantity, self.root_path, self.cell_centered)
+
+    def get_subslice(self, mesh: Mesh):
+        """
+        Returns the SubSlice that cuts through the given mesh.
+        :param mesh:
+        """
+        for slc in self._subslices:
+            if slc.mesh.id == mesh.id:
+                return slc
+        return None
 
     def mean(self, quantity: str = None):
         """
@@ -136,7 +146,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         return _HANDLED_FUNCTIONS[func](*args, **kwargs)
 
 
-class _SubSlice:
+class SubSlice:
     """
     Part of a slice that cuts through a single mesh.
     :ivar mesh: The mesh the subslice cuts through.
@@ -156,7 +166,7 @@ class _SubSlice:
 
     def get_data(self, quantity: str, root_path: str, cell_centered: bool) -> np.ndarray:
         """
-        Method to lazy load the slice's data.
+        Method to lazy load the slice's data for a specific quantity.
         :param quantity: Quantity of the data.
         :param root_path: Path to the directory containing all slice files.
         :param cell_centered: Indicates whether centered positioning for data is used.
