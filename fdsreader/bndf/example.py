@@ -8,7 +8,7 @@ def main():
 
     sim = Simulation(smv_file_paths[0])
 
-    print(sim.boundaries)
+    print(sim.boundaries[0].sub_boundaries[0])
 
 
 if __name__ == "__main__":
