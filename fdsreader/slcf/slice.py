@@ -67,11 +67,13 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             self.times = np.empty(shape=(t_n,))
             self.times[0] = -1
 
-        self._subslices.append(SubSlice(filename, extent, quantity, mesh, self.times))
+        self._subslices.append(
+            SubSlice(filename, self.root_path, self.cell_centered, extent, quantity, mesh,
+                     self.times))
 
         # If lazy loading has been disabled by the user, load the data instantaneously instead
         if not settings.LAZY_LOAD:
-            self._subslices[-1].get_data(quantity, self.root_path, self.cell_centered)
+            self._subslices[-1].get_data(quantity)
 
     def get_subslice(self, mesh: Mesh):
         """
@@ -94,7 +96,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             quantity = self.quantities[0].quantity
         mean_sum = 0
         for subsclice in self._subslices:
-            mean_sum += np.mean(subsclice.get_data(quantity, self.root_path, self.cell_centered))
+            mean_sum += np.mean(subsclice.get_data(quantity))
         return mean_sum / len(self._subslices)
 
     def __array__(self):
@@ -128,7 +130,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                                     q.quantity, q.label,
                                     q.unit, subslice.extent, subslice.mesh)
             new_slice._subslices[-1]._data[q.quantity] = ufunc(
-                subslice.get_data(q.quantity, self.root_path, self.cell_centered),
+                subslice.get_data(q.quantity),
                 input_list[0],
                 **kwargs)
         return new_slice
@@ -149,6 +151,8 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
 class SubSlice:
     """
     Part of a slice that cuts through a single mesh.
+    :ivar root_path: Path to the directory containing the slice file.
+    :ivar cell_centered: Indicates whether centered positioning for data is used.
     :ivar mesh: The mesh the subslice cuts through.
     :ivar extent: Extent object containing 3-dimensional extent information.
     :ivar file_names: File names for the corresponding slice file depending on the quantity.
@@ -156,24 +160,24 @@ class SubSlice:
 
     _offset = 3 * fdtype.new((('c', 30),)).itemsize + fdtype.new((('i', 6),)).itemsize
 
-    def __init__(self, filename: str, extent: Extent, quantity: str, mesh: Mesh, times):
+    def __init__(self, filename: str, root_path: str, cell_centered: bool, extent: Extent,
+                 quantity: str, mesh: Mesh, times):
         self.mesh = mesh
         self.extent = extent
+        self.root_path = root_path
+        self.cell_centered = cell_centered
 
         self.file_names = {quantity: filename}
         self._data: Dict[str, np.ndarray] = dict()  # Dictionary that maps quantity to data.
         self._times = times
 
-    def get_data(self, quantity: str, root_path: str, cell_centered: bool) -> np.ndarray:
+    def get_data(self, quantity: str) -> np.ndarray:
         """
         Method to lazy load the slice's data for a specific quantity.
-        :param quantity: Quantity of the data.
-        :param root_path: Path to the directory containing all slice files.
-        :param cell_centered: Indicates whether centered positioning for data is used.
         """
         if quantity not in self._data:
-            file_path = os.path.join(root_path, self.file_names[quantity])
-            n = self.extent.size(cell_centered=cell_centered)
+            file_path = os.path.join(self.root_path, self.file_names[quantity])
+            n = self.extent.size(cell_centered=self.cell_centered)
             dtype_data = fdtype.combine(fdtype.FLOAT, fdtype.new((('f', n),)))
 
             fill_times = self._times[0] == -1

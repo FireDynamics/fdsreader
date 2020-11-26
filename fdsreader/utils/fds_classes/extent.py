@@ -3,7 +3,7 @@ from typing_extensions import Literal
 
 class Extent:
     """
-
+    Three-dimensional extent with support for a missing dimension (size of 1).
     """
 
     def __init__(self, *args, skip_dimension: Literal['x', 'y', 'z', ''] = ''):
