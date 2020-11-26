@@ -5,11 +5,11 @@ from typing import List, Literal
 import numpy as np
 import logging
 
-from bndf import Boundary
-from plot3d import Plot3D
-from utils import Mesh, Extent, Surface, Quantity
-from slcf import Slice
-from isof import Isosurface
+from .bndf import Boundary
+from .plot3d import Plot3D
+from .utils import Mesh, Extent, Surface, Quantity
+from .slcf import Slice
+from .isof import Isosurface
 
 
 class Simulation:
