@@ -3,8 +3,8 @@ import os
 from typing import List
 import numpy as np
 
-from utils import Quantity, Mesh
-import utils.fortran_data as fdtype
+from fdsreader.utils import Quantity, Mesh
+import fdsreader.utils.fortran_data as fdtype
 
 _HANDLED_FUNCTIONS = {np.mean: (lambda pl: pl.mean)}
 

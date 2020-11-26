@@ -2,8 +2,8 @@ import os
 from typing import List, BinaryIO, Tuple
 import numpy as np
 
-from utils import Quantity, Mesh, Extent
-import utils.fortran_data as fdtype
+from fdsreader.utils import Quantity, Mesh, Extent
+import fdsreader.utils.fortran_data as fdtype
 
 
 class Boundary:

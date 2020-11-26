@@ -3,8 +3,8 @@ import numpy as np
 import logging
 from typing import List, Dict
 
-from utils import Extent, Quantity, settings, Mesh
-import utils.fortran_data as fdtype
+from fdsreader.utils import Extent, Quantity, settings, Mesh
+import fdsreader.utils.fortran_data as fdtype
 
 _HANDLED_FUNCTIONS = {}
 

@@ -1,8 +1,8 @@
 import os
 from typing import BinaryIO
 
-from utils import Quantity, settings
-import utils.fortran_data as fdtype
+from fdsreader.utils import Quantity, settings
+import fdsreader.utils.fortran_data as fdtype
 
 
 class Isosurface:
