@@ -7,7 +7,8 @@ import utils.fortran_data as fdtype
 
 class Isosurface:
     """
-
+    Isosurface file data container including metadata. Consists of a list of vertices forming a list
+     of triangles. Can optionally have additional color data for the surfaces.
     :ivar file_path: Path to the binary data file.
     :ivar v_file_path: Path to the binary data file containing color data.
     :ivar quantity: Information about the quantity.
@@ -66,7 +67,7 @@ class Isosurface:
     @property
     def vertices(self):
         """
-
+        Property to lazy load all vertices for all triangles of any level.
         """
         if not hasattr(self, "_vertices"):
             with open(self.file_path, 'rb') as infile:
@@ -75,7 +76,7 @@ class Isosurface:
 
     def triangles(self):
         """
-
+        Property to lazy load all triangles of any level.
         """
         if not hasattr(self, "_triangles"):
             with open(self.file_path, 'rb') as infile:
@@ -85,7 +86,7 @@ class Isosurface:
     @property
     def surfaces(self):
         """
-
+        Property to lazy load a list that maps triangles to an isosurface for a specific level.
         """
         if not hasattr(self, "_surfaces"):
             with open(self.file_path, 'rb') as infile:
@@ -102,7 +103,7 @@ class Isosurface:
     @property
     def colors(self):
         """
-
+        Property to lazy load the color data that might be associated with the isosurfaces.
         """
         if self._double_quantity:
             if not hasattr(self, "_colors"):
@@ -116,7 +117,7 @@ class Isosurface:
 
     def _load_data(self, infile: BinaryIO):
         """
-
+        Loads all data for all isosurfaces in a given iso file.
         """
         dtype_vertices = fdtype.new((('f', 3 * self.n_vertices),))
         dtype_triangles = fdtype.new((('i', 3 * self.n_triangles),))
@@ -129,7 +130,7 @@ class Isosurface:
 
     def _load_vdata(self, infile: BinaryIO):
         """
-
+        Loads all color data for all isosurfaces in a given viso file.
         """
         dtype_color = fdtype.new((('f', self.n_vertices),))
         infile.seek(self._v_offset)

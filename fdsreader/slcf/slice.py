@@ -3,8 +3,6 @@ import numpy as np
 import logging
 from typing import List, Dict
 
-from fastcore.basics import store_attr
-
 from utils import Extent, Quantity, settings, Mesh
 import utils.fortran_data as fdtype
 
@@ -32,15 +30,16 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
      calculated for this slice with the corresponding label and unit.
     :ivar cell_centered: Indicates whether centered positioning for data is used.
     :ivar times: Numpy array containing all times for which data has been recorded.
-    :ivar _subslices: List of all subslices this slice consists of (one per mesh).
     """
 
     def __init__(self, root_path: str, cell_centered: bool):
-        store_attr()
+        self.root_path = root_path
+        self.cell_centered = cell_centered
 
         self.quantities: List[Quantity] = list()
-        self._subslices: List[_SubSlice] = list()
         self.times = None
+        # List of all subslices this slice consists of (one per mesh).
+        self._subslices: List[_SubSlice] = list()
 
     def _add_subslice(self, filename: str, quantity: str, label: str, unit: str, extent: Extent,
                       mesh: Mesh):
@@ -143,7 +142,6 @@ class _SubSlice:
     :ivar mesh: The mesh the subslice cuts through.
     :ivar extent: Extent object containing 3-dimensional extent information.
     :ivar file_names: File names for the corresponding slice file depending on the quantity.
-    :ivar _data: Dictionary that maps quantity to data.
     """
 
     _offset = 3 * fdtype.new((('c', 30),)).itemsize + fdtype.new((('i', 6),)).itemsize
@@ -153,7 +151,7 @@ class _SubSlice:
         self.extent = extent
 
         self.file_names = {quantity: filename}
-        self._data: Dict[str, np.ndarray] = dict()
+        self._data: Dict[str, np.ndarray] = dict()  # Dictionary that maps quantity to data.
         self._times = times
 
     def get_data(self, quantity: str, root_path: str, cell_centered: bool) -> np.ndarray:
@@ -175,7 +173,8 @@ class _SubSlice:
                                             dtype=np.float32)
 
             with open(file_path, 'rb') as infile:
-                for i, data in enumerate(fdtype.read(infile, dtype_data, t_n, offset=self._offset)):
+                infile.seek(self._offset)
+                for i, data in enumerate(fdtype.read(infile, dtype_data, t_n)):
                     if fill_times:
                         self._times[i] = data[0][0]
                     self._data[quantity][i, :] = data[1].reshape(

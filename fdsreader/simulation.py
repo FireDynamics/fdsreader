@@ -5,14 +5,27 @@ from typing import List, Literal
 import numpy as np
 import logging
 
-from .bndf import Boundary
-from .plot3d import Plot3D
-from .utils import Mesh, Extent, Surface, Quantity
-from .slcf import Slice
-from .isof import Isosurface
+from fdsreader.bndf import Boundary
+from fdsreader.plot3d import Plot3D
+from fdsreader.utils import Mesh, Extent, Surface, Quantity
+from fdsreader.slcf import Slice
+from fdsreader.isof import Isosurface
 
 
 class Simulation:
+    """
+    Master class managing all data for a given simulation.
+    :ivar smv_file_path: Path to the smv-file for the simulation.
+    :ivar root_path: Path to the root directory of the simulation.
+    :ivar fds_version: Version of FDS the simulation was performed with.
+    :ivar chid: Name (ID) of the simulation.
+    :ivar hrrpuv_cutoff: The hrrpuv_cutoff value.
+    :ivar default_texture_origin: The default origin used for textures with no explicit origin.
+    :ivar out_file_path: Path to the .out file of the simulation.
+    :ivar surfaces: List containing all surfaces defined in this simulation.
+    :ivar meshes: List containing all meshes (grids) defined in this simulation.
+    """
+
     def __init__(self, smv_file_path):
         self.smv_file_path = smv_file_path
         self.root_path = os.path.dirname(self.smv_file_path)
@@ -42,6 +55,9 @@ class Simulation:
             self.meshes = self._load_meshes(smv_file)
 
     def _load_meshes(self, smv_file: mmap.mmap) -> List[Mesh]:
+        """
+        Method to load the mesh information from the smv file.
+        """
         meshes: List[Mesh] = list()
 
         def read_dimension(dim: Literal[b'X', b'Y', b'Z'], n: int, startpos: int):
@@ -84,6 +100,9 @@ class Simulation:
         return meshes
 
     def _load_surfaces(self, smv_file: mmap.mmap) -> List[Surface]:
+        """
+        Method to load the surface information from the smv file.
+        """
         surfaces = list()
         pos = smv_file.find(b'SURFACE', 0)
         while pos > 0:

@@ -2,7 +2,6 @@ import logging
 import os
 from typing import List
 import numpy as np
-from fastcore.basics import store_attr
 
 from utils import Quantity, Mesh
 import utils.fortran_data as fdtype
@@ -29,11 +28,13 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
     :ivar time: The point in time when this data has been recorded.
     :ivar quantities: List with quantity objects containing information about recorded quantities
      calculated for this Plot3D with the corresponding label and unit.
-    :ivar _subslices: List of all subplots this slice consists of (one per mesh).
     """
     def __init__(self, root_path: str, time: float, quantities: List[Quantity]):
-        store_attr()
+        self.root_path = root_path
+        self.time = time
+        self.quantities = quantities
 
+        # List of all subplots this slice consists of (one per mesh).
         self._subplots: List[_SubPlot3D] = list()
 
     def _add_subplot(self, filename: str, mesh: Mesh):
@@ -97,12 +98,13 @@ class _SubPlot3D:
 
     :ivar file_path: Path to the binary data file.
     :ivar mesh: The mesh containing the data.
-    :cvar _offset: Offset of the binary file to the end of the file header.
     """
+    # Offset of the binary file to the end of the file header.
     _offset = fdtype.new((('i', 3),)).itemsize + fdtype.new((('i', 4),)).itemsize
 
     def __init__(self, file_path: str, mesh: Mesh):
-        store_attr()
+        self.file_path = file_path
+        self.mesh = mesh
 
     def get_data(self) -> np.ndarray:
         """
