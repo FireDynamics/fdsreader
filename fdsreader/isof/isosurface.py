@@ -6,6 +6,19 @@ import utils.fortran_data as fdtype
 
 
 class Isosurface:
+    """
+
+    :ivar file_path: Path to the binary data file.
+    :ivar v_file_path: Path to the binary data file containing color data.
+    :ivar quantity: Information about the quantity.
+    :ivar v_quantity: Information about the color quantity.
+    :ivar levels: All isosurface levels
+    :ivar n_vertices: The number of vertices for this isosurface.
+    :ivar n_triangles: The number of triangles for this isosurface.
+    :ivar _double_quantity: Defines whether there is color data for this isosurface or not.
+    :ivar _offset: Offset of the binary file to the end of the file header.
+    :ivar _v_offset: Offset of the binary file containing color data to the end of the file header.
+    """
     def __init__(self, root_path: str, double_quantity: bool, iso_filename: str, quantity: str,
                  label: str, unit: str, viso_filename: str = "", v_quantity: str = "",
                  v_label: str = "", v_unit: str = ""):
@@ -23,6 +36,7 @@ class Isosurface:
 
             dtype_header_levels = fdtype.new((('f', nlevels),))
             self.levels = fdtype.read(infile, dtype_header_levels, 1)[0]
+            # Todo: Actually use levels
 
             dtype_header_rest = fdtype.combine(fdtype.INT, fdtype.new((('i', 2),)),
                                                fdtype.new((('f', 1), ('i', 1))))
@@ -51,12 +65,18 @@ class Isosurface:
 
     @property
     def vertices(self):
+        """
+
+        """
         if not hasattr(self, "_vertices"):
             with open(self.file_path, 'rb') as infile:
                 self._load_data(infile)
         return self._vertices
 
     def triangles(self):
+        """
+
+        """
         if not hasattr(self, "_triangles"):
             with open(self.file_path, 'rb') as infile:
                 self._load_data(infile)
@@ -64,6 +84,9 @@ class Isosurface:
 
     @property
     def surfaces(self):
+        """
+
+        """
         if not hasattr(self, "_surfaces"):
             with open(self.file_path, 'rb') as infile:
                 self._load_data(infile)
@@ -71,10 +94,16 @@ class Isosurface:
 
     @property
     def has_color_data(self):
+        """
+        Defines whether there is color data for this isosurface or not.
+        """
         return self._double_quantity
 
     @property
     def colors(self):
+        """
+
+        """
         if self._double_quantity:
             if not hasattr(self, "_colors"):
                 with open(self.v_file_path, 'rb') as infile:
@@ -86,6 +115,9 @@ class Isosurface:
                               " color-data.")
 
     def _load_data(self, infile: BinaryIO):
+        """
+
+        """
         dtype_vertices = fdtype.new((('f', 3 * self.n_vertices),))
         dtype_triangles = fdtype.new((('i', 3 * self.n_triangles),))
         dtype_surfaces = fdtype.new((('i', self.n_triangles),))
@@ -96,6 +128,9 @@ class Isosurface:
         self._surfaces = fdtype.read(infile, dtype_surfaces, 1)
 
     def _load_vdata(self, infile: BinaryIO):
+        """
+
+        """
         dtype_color = fdtype.new((('f', self.n_vertices),))
         infile.seek(self._v_offset)
         self._colors = fdtype.read(infile, dtype_color, self.n_vertices)

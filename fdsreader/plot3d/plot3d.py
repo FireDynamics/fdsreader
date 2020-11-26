@@ -25,6 +25,11 @@ def implements(np_function):
 class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
     """
 
+    :ivar root_path: Path to the directory containing all slice files.
+    :ivar time: The point in time when this data has been recorded.
+    :ivar quantities: List with quantity objects containing information about recorded quantities
+     calculated for this Plot3D with the corresponding label and unit.
+    :ivar _subslices: List of all subplots this slice consists of (one per mesh).
     """
     def __init__(self, root_path: str, time: float, quantities: List[Quantity]):
         store_attr()
@@ -88,6 +93,12 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
 
 
 class _SubPlot3D:
+    """
+
+    :ivar file_path: Path to the binary data file.
+    :ivar mesh: The mesh containing the data.
+    :cvar _offset: Offset of the binary file to the end of the file header.
+    """
     _offset = fdtype.new((('i', 3),)).itemsize + fdtype.new((('i', 4),)).itemsize
 
     def __init__(self, file_path: str, mesh: Mesh):

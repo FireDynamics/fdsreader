@@ -18,7 +18,7 @@ class Boundary:
         self.cell_centered = cell_centered
         self.quantity = Quantity(quantity, label, unit)
 
-        self.subboundaries: List[_SubBoundary] = list()
+        self.sub_boundaries: List[_SubBoundary] = list()
 
         self.times = None
 
@@ -27,7 +27,7 @@ class Boundary:
 
         """
         file_path = os.path.join(self.root_path, filename)
-        self.subboundaries.append(_SubBoundary(file_path, mesh, self))
+        self.sub_boundaries.append(_SubBoundary(file_path, mesh, self))
 
 
 class Patch:
@@ -67,7 +67,11 @@ class Patch:
 
 class _SubBoundary:
     """
-    Contains all
+    Contains all boundary data for a single mesh subdivided into patches.
+    :ivar file_path:
+    :ivar mesh:
+    :ivar patches:
+    :ivar _offset: Offset of the binary file to the end of the file header.
     """
 
     def __init__(self, file_path: str, mesh: Mesh, parent_boundary: Boundary):

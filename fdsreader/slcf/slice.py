@@ -28,10 +28,11 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
     Slice file data container including metadata. Consists of multiple subslices, one for each mesh
      the slice cuts through.
     :ivar root_path: Path to the directory containing all slice files.
-    :ivar quantities: List with quantity objects containing information about the quantities
-     calculated for this slice with the corresponding label and unit
-    :ivar cell_centered: Indicates whether centered positioning for data is used
-    :ivar _subslices: List of all subslices this slice consists of
+    :ivar quantities: List with quantity objects containing information about the quantities.
+     calculated for this slice with the corresponding label and unit.
+    :ivar cell_centered: Indicates whether centered positioning for data is used.
+    :ivar times: Numpy array containing all times for which data has been recorded.
+    :ivar _subslices: List of all subslices this slice consists of (one per mesh).
     """
 
     def __init__(self, root_path: str, cell_centered: bool):
@@ -45,12 +46,12 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                       mesh: Mesh):
         """
         Adds another subslice to the slice.
-        :param filename: Name of the slice file
-        :param quantity: Quantity of the data
-        :param label: Quantity label
-        :param unit: Quantity unit
-        :param extent: Extent object containing 3-dimensional extent information
-        :param mesh: The mesh the subslice cuts through
+        :param filename: Name of the slice file.
+        :param quantity: Quantity of the data.
+        :param label: Quantity label.
+        :param unit: Quantity unit.
+        :param extent: Extent object containing 3-dimensional extent information.
+        :param mesh: The mesh the subslice cuts through.
         """
         self.quantities.append(Quantity(quantity, label, unit))
         for subslice in self._subslices:
@@ -77,7 +78,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         """
         Calculates the mean over the whole slice.
         :param quantity: The quantity for which the mean should be calculated. If not provided, the
-         first found quantity will be used
+         first found quantity will be used.
         :returns: The calculated mean value.
         """
         if quantity is None:
@@ -139,8 +140,8 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
 class _SubSlice:
     """
     Part of a slice that cuts through a single mesh.
-    :ivar mesh: The mesh the subslice cuts through
-    :ivar extent: Extent object containing 3-dimensional extent information
+    :ivar mesh: The mesh the subslice cuts through.
+    :ivar extent: Extent object containing 3-dimensional extent information.
     :ivar file_names: File names for the corresponding slice file depending on the quantity.
     :ivar _data: Dictionary that maps quantity to data.
     """
@@ -158,7 +159,7 @@ class _SubSlice:
     def get_data(self, quantity: str, root_path: str, cell_centered: bool) -> np.ndarray:
         """
         Method to lazy load the slice's data.
-        :param quantity: Quantity of the data
+        :param quantity: Quantity of the data.
         :param root_path: Path to the directory containing all slice files.
         :param cell_centered: Indicates whether centered positioning for data is used.
         """
