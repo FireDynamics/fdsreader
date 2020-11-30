@@ -148,7 +148,35 @@
             
   <div class="section" id="plot3d-files">
 <h1>Plot3D files<a class="headerlink" href="#plot3d-files" title="Permalink to this headline">¶</a></h1>
-<span class="target" id="apireference"></span></div>
+<span class="target" id="apireference"></span><dl class="py class">
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">fdsreader.plot3d.plot3d.</code><code class="sig-name descname">Plot3D</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">root_path</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">time</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">quantities</span><span class="p">:</span> <span class="n">List<span class="p">[</span>fdsreader.utils.data.Quantity<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/plot3d/plot3d.html#Plot3D"><span class="viewcode-link">[source]</span></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>root_path</strong> – Path to the directory containing all slice files.</p></li>
+<li><p><strong>time</strong> – The point in time when this data has been recorded.</p></li>
+<li><p><strong>quantities</strong> – List with quantity objects containing information about recorded quantities
+calculated for this Plot3D with the corresponding label and unit.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt>
+<code class="sig-name descname">mean</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="_modules/fdsreader/plot3d/plot3d.html#Plot3D.mean"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Calculates the mean over each quantity individually of the whole Plot3D.
+:returns: The calculated mean values.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt>
+<code class="sig-prename descclassname">fdsreader.plot3d.plot3d.</code><code class="sig-name descname">implements</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">np_function</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/plot3d/plot3d.html#implements"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Decorator to register an __array_function__ implementation for Slices.</p>
+</dd></dl>
+
+</div>
 
 
            </div>

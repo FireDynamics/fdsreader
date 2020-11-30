@@ -1,0 +1,398 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>fdsreader.utils.fds_classes.mesh &mdash; fdsreader [fdsreader, version 0.4.3] documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home" alt="Documentation Home"> fdsreader
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">fdsreader</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>fdsreader.utils.fds_classes.mesh</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for fdsreader.utils.fds_classes.mesh</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">mmap</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">fdsreader.utils</span> <span class="kn">import</span> <span class="n">Extent</span><span class="p">,</span> <span class="n">Obstruction</span><span class="p">,</span> <span class="n">Ventilation</span><span class="p">,</span> <span class="n">Surface</span>
+
+
+<div class="viewcode-block" id="Mesh"><a class="viewcode-back" href="../../../../utils.html#fdsreader.utils.fds_classes.mesh.Mesh">[docs]</a><span class="k">class</span> <span class="nc">Mesh</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    3-dimensional Mesh of fixed, defined size.</span>
+<span class="sd">    :ivar coordinates: Coordinate values for each of the 3 dimension.</span>
+<span class="sd">    :ivar extent: Tuple with three tuples containing minimum and maximum coordinate value on the</span>
+<span class="sd">      corresponding dimension.</span>
+<span class="sd">    :ivar mesh:</span>
+<span class="sd">    :ivar n: Number of elements for each of the 3 dimensions.</span>
+<span class="sd">    :ivar n_size: Total number of blocks in this mesh.</span>
+<span class="sd">    :ivar label: Label associated with this mesh.</span>
+<span class="sd">    :ivar id: Mesh id assigned to mesh.</span>
+<span class="sd">    :ivar index: Index of mesh in smv file.</span>
+<span class="sd">    :ivar obstructions: All obstructions inside of the mesh.</span>
+<span class="sd">    :ivar vents: All vents inside of the mesh.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_coordinates</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">y_coordinates</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                 <span class="n">z_coordinates</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">mesh_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                 <span class="n">mesh_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">mmap</span><span class="o">.</span><span class="n">mmap</span><span class="p">],</span> <span class="n">pos</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">surfaces</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Surface</span><span class="p">],</span>
+                 <span class="n">default_texture_origin</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param x_coordinates: Coordinate values of x-axis.</span>
+<span class="sd">        :param y_coordinates: Coordinate values of y-axis.</span>
+<span class="sd">        :param z_coordinates: Coordinate values of z-axis.</span>
+<span class="sd">        :param mid: ID of this mesh.</span>
+<span class="sd">        :param smv_file: Either provide an initialized mmap object to read in additional data without having to open</span>
+<span class="sd">         the smv_file again or the name of the smv-file containing the mesh information.</span>
+<span class="sd">        :param pos: The current file pointer position so the correct obstacles and ventilations for this mesh are read.</span>
+<span class="sd">        :param surfaces: List of surfaces available for obstacles and ventilations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="p">[</span><span class="n">x_coordinates</span><span class="p">,</span> <span class="n">y_coordinates</span><span class="p">,</span> <span class="n">z_coordinates</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extent</span> <span class="o">=</span> <span class="n">Extent</span><span class="p">(</span><span class="n">x_coordinates</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x_coordinates</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">y_coordinates</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                             <span class="n">y_coordinates</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">z_coordinates</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">z_coordinates</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="c1"># Todo: Does this really do what it is supposed to do? What is it even supposed to do?</span>
+        <span class="c1"># Todo: Numpy: Deprecated</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="p">[</span><span class="n">x_coordinates</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">y_coordinates</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">z_coordinates</span><span class="o">.</span><span class="n">size</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">mesh_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">mesh_index</span>
+
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">smv_file</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">infile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">smv_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+            <span class="n">smv_file</span> <span class="o">=</span> <span class="n">mmap</span><span class="o">.</span><span class="n">mmap</span><span class="p">(</span><span class="n">infile</span><span class="o">.</span><span class="n">fileno</span><span class="p">(),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">access</span><span class="o">=</span><span class="n">mmap</span><span class="o">.</span><span class="n">ACCESS_READ</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">obstructions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_obstructions</span><span class="p">(</span><span class="n">smv_file</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">surfaces</span><span class="p">,</span> <span class="n">default_texture_origin</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_vents</span><span class="p">(</span><span class="n">smv_file</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">surfaces</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">smv_file</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">smv_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">infile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_load_obstructions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">:</span> <span class="n">mmap</span><span class="o">.</span><span class="n">mmap</span><span class="p">,</span> <span class="n">pos</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">surfaces</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Surface</span><span class="p">],</span>
+                           <span class="n">default_texture_origin</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span>
+        <span class="nb">int</span><span class="p">,</span> <span class="n">Obstruction</span><span class="p">]:</span>
+        <span class="n">obstructions</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;OBST&#39;</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span>
+        <span class="n">smv_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+        <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+
+        <span class="n">temp_data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="n">obst_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
+            <span class="n">extent</span> <span class="o">=</span> <span class="n">Extent</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">)])</span>
+            <span class="n">side_surfaces</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">surfaces</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">i</span><span class="p">])]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">13</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">13</span><span class="p">:</span>
+                <span class="n">texture_origin</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">13</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">14</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">15</span><span class="p">]))</span>
+                <span class="n">temp_data</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">obst_id</span><span class="p">,</span> <span class="n">extent</span><span class="p">,</span> <span class="n">side_surfaces</span><span class="p">,</span> <span class="n">texture_origin</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">temp_data</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">obst_id</span><span class="p">,</span> <span class="n">extent</span><span class="p">,</span> <span class="n">side_surfaces</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="n">bound_indices</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span>
+            <span class="n">color_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
+            <span class="n">block_type</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">7</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">color_index</span> <span class="o">==</span> <span class="o">-</span><span class="mi">3</span><span class="p">:</span>
+                <span class="n">rgba</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">12</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">rgba</span> <span class="o">=</span> <span class="p">()</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">temp_data</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="n">obst_id</span><span class="p">,</span> <span class="n">extent</span><span class="p">,</span> <span class="n">side_surfaces</span><span class="p">,</span> <span class="n">texture_origin</span> <span class="o">=</span> <span class="n">temp_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">obst_id</span><span class="p">,</span> <span class="n">extent</span><span class="p">,</span> <span class="n">side_surfaces</span> <span class="o">=</span> <span class="n">temp_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">texture_origin</span> <span class="o">=</span> <span class="n">default_texture_origin</span>
+
+            <span class="n">obstructions</span><span class="p">[</span><span class="n">obst_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">Obstruction</span><span class="p">(</span><span class="n">obst_id</span><span class="p">,</span> <span class="n">extent</span><span class="p">,</span> <span class="n">side_surfaces</span><span class="p">,</span> <span class="n">bound_indices</span><span class="p">,</span>
+                                                <span class="n">color_index</span><span class="p">,</span> <span class="n">block_type</span><span class="p">,</span>
+                                                <span class="n">texture_origin</span><span class="p">,</span> <span class="n">rgba</span><span class="o">=</span><span class="n">rgba</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">obstructions</span>
+
+    <span class="k">def</span> <span class="nf">_load_vents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">:</span> <span class="n">mmap</span><span class="o">.</span><span class="n">mmap</span><span class="p">,</span> <span class="n">startpos</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">surfaces</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Surface</span><span class="p">],</span>
+                    <span class="n">mesh_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span>
+        <span class="n">Ventilation</span><span class="p">]:</span>
+        <span class="c1"># Read information about opening and closing of vents</span>
+        <span class="k">def</span> <span class="nf">get_vents</span><span class="p">(</span><span class="n">oc</span><span class="p">):</span>
+            <span class="n">vents</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">oc</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;_VENT&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">while</span> <span class="n">pos</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">smv_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+                <span class="n">pos</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">oc</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;_VENT&#39;</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span>
+
+                <span class="n">target_mesh_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">target_mesh_id</span> <span class="o">!=</span> <span class="n">mesh_id</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="n">line</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="n">vents</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">vents</span>
+
+        <span class="n">open_vents</span> <span class="o">=</span> <span class="n">get_vents</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;OPEN&#39;</span><span class="p">)</span>
+        <span class="n">close_vents</span> <span class="o">=</span> <span class="n">get_vents</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;CLOSE&#39;</span><span class="p">)</span>
+
+        <span class="n">ventilations</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;VENT&#39;</span><span class="p">,</span> <span class="n">startpos</span><span class="p">)</span>
+        <span class="n">smv_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+        <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="n">n</span><span class="p">,</span> <span class="n">n_dummies</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="n">temp_data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+        <span class="k">def</span> <span class="nf">read_common_info</span><span class="p">():</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">line</span><span class="p">,</span> <span class="n">Extent</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">)]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">6</span><span class="p">]),</span> <span class="n">surfaces</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">7</span><span class="p">])]</span>
+
+        <span class="k">def</span> <span class="nf">read_common_info2</span><span class="p">():</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="n">bound_indices</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span>
+            <span class="n">color_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
+            <span class="n">draw_type</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">7</span><span class="p">])</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">8</span><span class="p">:</span>
+                <span class="n">rgba</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">12</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">rgba</span> <span class="o">=</span> <span class="p">()</span>
+            <span class="k">return</span> <span class="n">bound_indices</span><span class="p">,</span> <span class="n">color_index</span><span class="p">,</span> <span class="n">draw_type</span><span class="p">,</span> <span class="n">rgba</span>
+
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="n">n_dummies</span><span class="p">):</span>
+            <span class="n">line</span><span class="p">,</span> <span class="n">extent</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">surface</span> <span class="o">=</span> <span class="n">read_common_info</span><span class="p">()</span>
+            <span class="n">texture_origin</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">8</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">9</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">10</span><span class="p">]))</span>
+            <span class="n">temp_data</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">extent</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">surface</span><span class="p">,</span> <span class="n">texture_origin</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_dummies</span><span class="p">):</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">extent</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">surface</span> <span class="o">=</span> <span class="n">read_common_info</span><span class="p">()</span>
+            <span class="n">temp_data</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">extent</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">surface</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="n">n_dummies</span><span class="p">):</span>
+            <span class="n">extent</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">surface</span><span class="p">,</span> <span class="n">texture_origin</span> <span class="o">=</span> <span class="n">temp_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">bound_indices</span><span class="p">,</span> <span class="n">color_index</span><span class="p">,</span> <span class="n">draw_type</span><span class="p">,</span> <span class="n">rgba</span> <span class="o">=</span> <span class="n">read_common_info2</span><span class="p">()</span>
+            <span class="n">ventilations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">Ventilation</span><span class="p">(</span><span class="n">extent</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">surface</span><span class="p">,</span> <span class="n">bound_indices</span><span class="p">,</span> <span class="n">color_index</span><span class="p">,</span> <span class="n">draw_type</span><span class="p">,</span> <span class="n">rgba</span><span class="o">=</span><span class="n">rgba</span><span class="p">,</span>
+                            <span class="n">texture_origin</span><span class="o">=</span><span class="n">texture_origin</span><span class="p">,</span> <span class="n">open_time</span><span class="o">=</span><span class="n">open_vents</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+                            <span class="n">close_time</span><span class="o">=</span><span class="n">close_vents</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)))</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="n">n_dummies</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+            <span class="n">extent</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">surface</span> <span class="o">=</span> <span class="n">temp_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">bound_indices</span><span class="p">,</span> <span class="n">color_index</span><span class="p">,</span> <span class="n">draw_type</span><span class="p">,</span> <span class="n">rgba</span> <span class="o">=</span> <span class="n">read_common_info2</span><span class="p">()</span>
+            <span class="n">ventilations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">Ventilation</span><span class="p">(</span><span class="n">extent</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">surface</span><span class="p">,</span> <span class="n">bound_indices</span><span class="p">,</span> <span class="n">color_index</span><span class="p">,</span> <span class="n">draw_type</span><span class="p">,</span> <span class="n">rgba</span><span class="o">=</span><span class="n">rgba</span><span class="p">,</span>
+                            <span class="n">open_time</span><span class="o">=</span><span class="n">open_vents</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">close_time</span><span class="o">=</span><span class="n">close_vents</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)))</span>
+
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;CVENT&#39;</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span>
+        <span class="n">smv_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+        <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+
+        <span class="n">temp_data</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">line</span><span class="p">,</span> <span class="n">extent</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">surface</span> <span class="o">=</span> <span class="n">read_common_info</span><span class="p">()</span>
+            <span class="n">circular_vent_origin</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">12</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">13</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">14</span><span class="p">]))</span>
+            <span class="n">radius</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">15</span><span class="p">])</span>
+            <span class="n">temp_data</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">extent</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">surface</span><span class="p">,</span> <span class="n">texture_origin</span><span class="p">,</span> <span class="n">circular_vent_origin</span><span class="p">,</span> <span class="n">radius</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">extent</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">surface</span><span class="p">,</span> <span class="n">texture_origin</span><span class="p">,</span> <span class="n">circular_vent_origin</span><span class="p">,</span> <span class="n">radius</span> <span class="o">=</span> <span class="n">temp_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">bound_indices</span><span class="p">,</span> <span class="n">color_index</span><span class="p">,</span> <span class="n">draw_type</span><span class="p">,</span> <span class="n">rgba</span> <span class="o">=</span> <span class="n">read_common_info2</span><span class="p">()</span>
+            <span class="n">ventilations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">Ventilation</span><span class="p">(</span><span class="n">extent</span><span class="p">,</span> <span class="n">vid</span><span class="p">,</span> <span class="n">surface</span><span class="p">,</span> <span class="n">bound_indices</span><span class="p">,</span> <span class="n">color_index</span><span class="p">,</span> <span class="n">draw_type</span><span class="p">,</span> <span class="n">rgba</span><span class="o">=</span><span class="n">rgba</span><span class="p">,</span>
+                            <span class="n">texture_origin</span><span class="o">=</span><span class="n">texture_origin</span><span class="p">,</span>
+                            <span class="n">circular_vent_origin</span><span class="o">=</span><span class="n">circular_vent_origin</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">radius</span><span class="p">,</span>
+                            <span class="n">open_time</span><span class="o">=</span><span class="n">open_vents</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">close_time</span><span class="o">=</span><span class="n">close_vents</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">vid</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)))</span>
+
+        <span class="k">return</span> <span class="n">ventilations</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> x </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> x </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2">, &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, FZJ IAS-7 (Prof. Dr. Lukas Arnold, Jan Vogelsang)
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

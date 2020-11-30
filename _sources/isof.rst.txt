@@ -3,7 +3,7 @@ ________________
 
 .. _APIReference:
 
-.. automodule:: fds.isof.isosurface
+.. automodule:: fdsreader.isof.isosurface
     :members:
     :undoc-members:
     :noindex:

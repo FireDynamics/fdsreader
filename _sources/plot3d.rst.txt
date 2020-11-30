@@ -3,7 +3,7 @@ ____________
 
 .. _APIReference:
 
-.. automodule:: fds.plot3d.plot3d
+.. automodule:: fdsreader.plot3d.plot3d
     :members:
     :undoc-members:
     :noindex:
