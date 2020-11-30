@@ -156,8 +156,7 @@
 
 
 <div class="viewcode-block" id="implements"><a class="viewcode-back" href="../../../plot3d.html#fdsreader.plot3d.plot3d.implements">[docs]</a><span class="k">def</span> <span class="nf">implements</span><span class="p">(</span><span class="n">np_function</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Decorator to register an __array_function__ implementation for Slices.</span>
+    <span class="sd">&quot;&quot;&quot;Decorator to register an __array_function__ implementation for Slices.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
@@ -168,8 +167,7 @@
 
 
 <div class="viewcode-block" id="Plot3D"><a class="viewcode-back" href="../../../plot3d.html#fdsreader.plot3d.plot3d.Plot3D">[docs]</a><span class="k">class</span> <span class="nc">Plot3D</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">lib</span><span class="o">.</span><span class="n">mixins</span><span class="o">.</span><span class="n">NDArrayOperatorsMixin</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Plot3d file data container including metadata. Consists of multiple subplots, one for each mesh.</span>
+    <span class="sd">&quot;&quot;&quot;Plot3d file data container including metadata. Consists of multiple subplots, one for each mesh.</span>
 
 <span class="sd">    :ivar root_path: Path to the directory containing all slice files.</span>
 <span class="sd">    :ivar time: The point in time when this data has been recorded.</span>
@@ -188,8 +186,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_SubPlot3D</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="n">filename</span><span class="p">),</span> <span class="n">mesh</span><span class="p">))</span>
 
 <div class="viewcode-block" id="Plot3D.mean"><a class="viewcode-back" href="../../../plot3d.html#fdsreader.plot3d.plot3d.Plot3D.mean">[docs]</a>    <span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculates the mean over each quantity individually of the whole Plot3D.</span>
+        <span class="sd">&quot;&quot;&quot;Calculates the mean over each quantity individually of the whole Plot3D.</span>
 
 <span class="sd">        :returns: The calculated mean values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -199,8 +196,7 @@
         <span class="k">return</span> <span class="n">mean_sums</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">__array__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Method that will be called by numpy when trying to convert the object to a numpy ndarray.</span>
+        <span class="sd">&quot;&quot;&quot;Method that will be called by numpy when trying to convert the object to a numpy ndarray.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">UserWarning</span><span class="p">(</span>
             <span class="s2">&quot;Plot3Ds can not be converted to numpy arrays, but they support all typical numpy&quot;</span>
@@ -208,8 +204,7 @@
             <span class="s2">&quot; required, please request this functionality by submitting an issue on Github.&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__array_ufunc__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ufunc</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="o">*</span><span class="n">inputs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Method that will be called by numpy when using a ufunction with a Plot3D as input.</span>
+        <span class="sd">&quot;&quot;&quot;Method that will be called by numpy when using a ufunction with a Plot3D as input.</span>
 
 <span class="sd">        :returns: A new plot3d on which the ufunc has been applied.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -230,8 +225,7 @@
         <span class="k">return</span> <span class="n">new_pl3d</span>
 
     <span class="k">def</span> <span class="nf">__array_function__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">types</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Method that will be called by numpy when using an array function with a Slice as input.</span>
+        <span class="sd">&quot;&quot;&quot;Method that will be called by numpy when using an array function with a Slice as input.</span>
 
 <span class="sd">        :returns: The output of the array function.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -244,8 +238,7 @@
 
 
 <span class="k">class</span> <span class="nc">_SubPlot3D</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Subplot of a plot3d output for a single mesh.</span>
+    <span class="sd">&quot;&quot;&quot;Subplot of a plot3d output for a single mesh.</span>
 
 <span class="sd">    :ivar file_path: Path to the binary data file.</span>
 <span class="sd">    :ivar mesh: The mesh containing the data.</span>
@@ -258,8 +251,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="n">mesh</span>
 
     <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Method to lazy load the 3D data for a single mesh.</span>
+        <span class="sd">&quot;&quot;&quot;Method to lazy load the 3D data for a single mesh.</span>
 
 <span class="sd">        :returns: 4D numpy array wiht (x,y,z,q) as dimensions, while q represents the 5 quantities.</span>
 <span class="sd">        &quot;&quot;&quot;</span>

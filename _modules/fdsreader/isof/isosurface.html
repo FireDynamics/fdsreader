@@ -152,8 +152,7 @@
 
 
 <div class="viewcode-block" id="Isosurface"><a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.Isosurface">[docs]</a><span class="k">class</span> <span class="nc">Isosurface</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Isosurface file data container including metadata. Consists of a list of vertices forming a list</span>
+    <span class="sd">&quot;&quot;&quot;Isosurface file data container including metadata. Consists of a list of vertices forming a list</span>
 <span class="sd">     of triangles. Can optionally have additional color data for the surfaces.</span>
 
 <span class="sd">    :ivar file_path: Path to the binary data file.</span>
@@ -212,8 +211,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Property to lazy load all vertices for all triangles of any level.</span>
+        <span class="sd">&quot;&quot;&quot;Property to lazy load all vertices for all triangles of any level.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_vertices&quot;</span><span class="p">):</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
@@ -221,8 +219,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span>
 
 <div class="viewcode-block" id="Isosurface.triangles"><a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.Isosurface.triangles">[docs]</a>    <span class="k">def</span> <span class="nf">triangles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Property to lazy load all triangles of any level.</span>
+        <span class="sd">&quot;&quot;&quot;Property to lazy load all triangles of any level.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_triangles&quot;</span><span class="p">):</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
@@ -231,8 +228,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">surfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Property to lazy load a list that maps triangles to an isosurface for a specific level.</span>
+        <span class="sd">&quot;&quot;&quot;Property to lazy load a list that maps triangles to an isosurface for a specific level.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_surfaces&quot;</span><span class="p">):</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
@@ -241,15 +237,13 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">has_color_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Defines whether there is color data for this isosurface or not.</span>
+        <span class="sd">&quot;&quot;&quot;Defines whether there is color data for this isosurface or not.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_double_quantity</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">colors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Property to lazy load the color data that might be associated with the isosurfaces.</span>
+        <span class="sd">&quot;&quot;&quot;Property to lazy load the color data that might be associated with the isosurfaces.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_double_quantity</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_colors&quot;</span><span class="p">):</span>
@@ -262,8 +256,7 @@
                               <span class="s2">&quot; color-data.&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">:</span> <span class="n">BinaryIO</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Loads all data for all isosurfaces in a given iso file.</span>
+        <span class="sd">&quot;&quot;&quot;Loads all data for all isosurfaces in a given iso file.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">dtype_vertices</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="mi">3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_vertices</span><span class="p">),))</span>
         <span class="n">dtype_triangles</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_triangles</span><span class="p">),))</span>
@@ -275,8 +268,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_surfaces</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_surfaces</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_load_vdata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">:</span> <span class="n">BinaryIO</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Loads all color data for all isosurfaces in a given viso file.</span>
+        <span class="sd">&quot;&quot;&quot;Loads all color data for all isosurfaces in a given viso file.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">dtype_color</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_vertices</span><span class="p">),))</span>
         <span class="n">infile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_v_offset</span><span class="p">)</span>
