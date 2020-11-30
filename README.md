@@ -17,9 +17,10 @@ python -m pip install --upgrade fdsreader
 ## Usage example
 ```python
 import fdsreader as fds
+import fdsreader.utils as fdsutils
 
 # Recursively scans the directory for all .smv files
-smv_file_path = scan_directory_smv("./sample_data")[0]
+smv_file_path = fdsutils.scan_directory_smv("./sample_data")[0]
 
 # Creates an instance of a simulation master-class which manages all data for a given simulation
 sim = fds.Simulation(smv_file_path)

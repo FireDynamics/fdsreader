@@ -2,7 +2,7 @@ import mmap
 from typing import Dict, List, Union, Tuple
 import numpy as np
 
-from . import Extent, Obstruction, Ventilation, Surface
+from fdsreader.utils import Extent, Obstruction, Ventilation, Surface
 
 
 class Mesh:
