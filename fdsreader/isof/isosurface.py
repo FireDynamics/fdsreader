@@ -117,9 +117,11 @@ class Isosurface:
         dtype_surfaces = fdtype.new((('i', self.n_triangles),))
         infile.seek(self._offset)
 
-        self._vertices = fdtype.read(infile, dtype_vertices, 1)
-        self._triangles = fdtype.read(infile, dtype_triangles, 1)
-        self._surfaces = fdtype.read(infile, dtype_surfaces, 1)
+        self._vertices = fdtype.read(infile, dtype_vertices, 1)[0][0].reshape((self.n_vertices, 3))
+        self._triangles = fdtype.read(infile, dtype_triangles, 1)[0][0]
+        self._surfaces = fdtype.read(infile, dtype_surfaces, 1)[0][0]
+        print(self.n_triangles, self.n_vertices)
+        print(self._vertices, self._triangles, self._surfaces)
 
     def _load_vdata(self, infile: BinaryIO):
         """Loads all color data for all isosurfaces in a given viso file.

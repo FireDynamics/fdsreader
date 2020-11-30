@@ -32,7 +32,7 @@ class Simulation:
 
         with open(smv_file_path, 'r') as infile, mmap.mmap(infile.fileno(), 0,
                                                            access=mmap.ACCESS_READ) as smv_file:
-            smv_file.seek(smv_file.find(b'FDSVERSION', 0))
+            smv_file.seek(smv_file.find(b'VERSION', 0))
             smv_file.readline()
             self.fds_version = smv_file.readline().decode().strip()
 

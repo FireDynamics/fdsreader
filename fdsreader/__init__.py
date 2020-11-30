@@ -1,5 +1,5 @@
 import logging
 
-logging.getLogger('name.of.library').addHandler(logging.NullHandler())
+from .simulation import Simulation
 
-from fdsreader.simulation import Simulation
+logging.getLogger('name.of.library').addHandler(logging.NullHandler())
