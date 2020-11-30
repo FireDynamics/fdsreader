@@ -3,7 +3,7 @@ ___________
 
 .. _APIReference:
 
-.. automodule:: fds.slcf.slice
+.. automodule:: fdsreader.slcf.slice
     :members:
     :undoc-members:
     :noindex:

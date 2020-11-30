@@ -36,15 +36,21 @@ print(sim.meshes, sim.meshes[0].obstructions, sim.surfaces, sim.slices, sim.boun
 ## Release History
 * 1.0.0
     * (First official version will be released after sufficient public testing in beta stage)
-### Beta
+### Beta (Q1 2021)
 * 0.9.0
     * (Entering beta status after extensive testing with selected participants in alpha stage)
-### Alpha
+### Alpha (end of 2020)
 * 0.x.0
     * (Entering alpha status after extensive private testing in pre-alpha stage)
-### Pre-Alpha
-* 0.4.2
+    * Implemented automatic unit testing
+    
+### --> Pre-Alpha
+* 0.4.4
     * (Coming soon...)
+* 0.4.3
+    * Bugfixes for slcf and isof readers
+* 0.4.2
+    * Completed API documentation
 * 0.4.1
     * Fixed import issues 
 * 0.4.0
