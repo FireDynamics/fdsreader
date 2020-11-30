@@ -178,21 +178,23 @@ class SubSlice:
         if quantity not in self._data:
             file_path = os.path.join(self.root_path, self.file_names[quantity])
             n = self.extent.size(cell_centered=self.cell_centered)
+            shape = (self.extent.x - 1 if self.cell_centered else self.extent.x,
+                     self.extent.y - 1 if self.cell_centered else self.extent.y,
+                     self.extent.z - 1 if self.cell_centered else self.extent.z)
+
             dtype_data = fdtype.combine(fdtype.FLOAT, fdtype.new((('f', n),)))
 
             fill_times = self._times[0] == -1
             t_n = self._times.shape[0]
 
-            self._data[quantity] = np.empty((t_n, self.extent.x, self.extent.y, self.extent.z),
-                                            dtype=np.float32)
+            self._data[quantity] = np.empty((t_n,) + shape, dtype=np.float32)
 
             with open(file_path, 'rb') as infile:
                 infile.seek(self._offset)
                 for i, data in enumerate(fdtype.read(infile, dtype_data, t_n)):
                     if fill_times:
                         self._times[i] = data[0][0]
-                    self._data[quantity][i, :] = data[1].reshape(
-                        (self.extent.x, self.extent.y, self.extent.z))
+                    self._data[quantity][i, :] = data[1].reshape(shape)
         return self._data[quantity]
 
 

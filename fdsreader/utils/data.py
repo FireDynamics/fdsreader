@@ -18,4 +18,4 @@ def scan_directory_smv(dir: str):
     :param dir: The directory that will be scanned for smv files.
     :returns: A list containing the path to each smv-file found in the directory.
     """
-    return glob.glob(dir + "/**/*.txt", recursive=True)
+    return glob.glob(dir + "/**/*.smv", recursive=True)

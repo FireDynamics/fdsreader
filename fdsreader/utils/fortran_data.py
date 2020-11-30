@@ -17,7 +17,7 @@ def _get_dtype_output_format(d, n):
     """
     if d == 'c':
         return str(n)
-    if type(n) == int:
+    if type(n) == int or type(n) == np.int32:
         return f"({n},)"
     return n
 

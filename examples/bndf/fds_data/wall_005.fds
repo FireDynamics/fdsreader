@@ -1,6 +1,6 @@
 &HEAD CHID='wall_test'
       /
-&TIME T_END=60
+&TIME T_END=20
 
 &MULT ID='mesh', DX=1, DY=0.8, I_UPPER=3, J_UPPER=5,/
 

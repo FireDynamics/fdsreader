@@ -1,9 +1,9 @@
 from fdsreader.utils import scan_directory_smv
-from simulation import Simulation
+from fdsreader.simulation import Simulation
 
 
 def main():
-    smv_file_paths = scan_directory_smv("../../examples/plot_3d/fds_data")
+    smv_file_paths = scan_directory_smv("../../examples/plot3d/fds_data")
 
     sim = Simulation(smv_file_paths[0])
 

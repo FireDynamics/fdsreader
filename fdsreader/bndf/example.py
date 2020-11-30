@@ -1,5 +1,5 @@
 from fdsreader.utils import scan_directory_smv
-from simulation import Simulation
+from fdsreader.simulation import Simulation
 
 
 def main():

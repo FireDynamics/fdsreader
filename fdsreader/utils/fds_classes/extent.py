@@ -29,13 +29,11 @@ class Extent:
                                                        self.y_end, self.z_start, self.z_end)
 
     def size(self, cell_centered=False):
-        if cell_centered:
-            x = self.x-1 if self.x != 1 else 1
-            y = self.y-1 if self.y != 1 else 1
-            z = self.z-1 if self.z != 1 else 1
-            return x * y * z
-        else:
-            return self.x * self.y * self.z
+        c = 1 if cell_centered else 0
+        x = self.x-c if self.x != 0 else 1
+        y = self.y-c if self.y != 0 else 1
+        z = self.z-c if self.z != 0 else 1
+        return x * y * z
 
     @property
     def x(self):

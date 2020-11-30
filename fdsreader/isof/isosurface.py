@@ -33,7 +33,7 @@ class Isosurface:
             self.v_file_path = os.path.join(root_path, viso_filename)
 
         with open(self.file_path, 'rb') as infile:
-            nlevels = fdtype.read(infile, fdtype.INT, 3)[2][0]
+            nlevels = fdtype.read(infile, fdtype.INT, 3)[2][0][0]
 
             dtype_header_levels = fdtype.new((('f', nlevels),))
             self.levels = fdtype.read(infile, dtype_header_levels, 1)[0]
@@ -47,9 +47,8 @@ class Isosurface:
 
             dtype_dims = fdtype.new((('i', 2),))
             dims_data = fdtype.read(infile, dtype_dims, 1)
-            self.n_vertices = dims_data[0][0]
-            self.n_triangles = dims_data[0][1]
-            print(self.n_vertices, self.n_vertices)
+            self.n_vertices = dims_data[0][0][0]
+            self.n_triangles = dims_data[0][0][1]
 
             self._offset += dtype_dims.itemsize
 
