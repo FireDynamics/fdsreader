@@ -10,8 +10,7 @@ _HANDLED_FUNCTIONS = {np.mean: (lambda pl: pl.mean)}
 
 
 def implements(np_function):
-    """
-    Decorator to register an __array_function__ implementation for Slices.
+    """Decorator to register an __array_function__ implementation for Slices.
     """
 
     def decorator(func):
@@ -22,8 +21,7 @@ def implements(np_function):
 
 
 class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
-    """
-    Plot3d file data container including metadata. Consists of multiple subplots, one for each mesh.
+    """Plot3d file data container including metadata. Consists of multiple subplots, one for each mesh.
 
     :ivar root_path: Path to the directory containing all slice files.
     :ivar time: The point in time when this data has been recorded.
@@ -42,8 +40,7 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
         self._subplots.append(_SubPlot3D(os.path.join(self.root_path, filename), mesh))
 
     def mean(self) -> np.ndarray:
-        """
-        Calculates the mean over each quantity individually of the whole Plot3D.
+        """Calculates the mean over each quantity individually of the whole Plot3D.
 
         :returns: The calculated mean values.
         """
@@ -53,8 +50,7 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
         return mean_sums / len(self._subplots)
 
     def __array__(self):
-        """
-        Method that will be called by numpy when trying to convert the object to a numpy ndarray.
+        """Method that will be called by numpy when trying to convert the object to a numpy ndarray.
         """
         raise UserWarning(
             "Plot3Ds can not be converted to numpy arrays, but they support all typical numpy"
@@ -62,8 +58,7 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
             " required, please request this functionality by submitting an issue on Github.")
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        """
-        Method that will be called by numpy when using a ufunction with a Plot3D as input.
+        """Method that will be called by numpy when using a ufunction with a Plot3D as input.
 
         :returns: A new plot3d on which the ufunc has been applied.
         """
@@ -84,8 +79,7 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
         return new_pl3d
 
     def __array_function__(self, func, types, args, kwargs):
-        """
-        Method that will be called by numpy when using an array function with a Slice as input.
+        """Method that will be called by numpy when using an array function with a Slice as input.
 
         :returns: The output of the array function.
         """
@@ -98,8 +92,7 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
 
 
 class _SubPlot3D:
-    """
-    Subplot of a plot3d output for a single mesh.
+    """Subplot of a plot3d output for a single mesh.
 
     :ivar file_path: Path to the binary data file.
     :ivar mesh: The mesh containing the data.
@@ -112,8 +105,7 @@ class _SubPlot3D:
         self.mesh = mesh
 
     def get_data(self) -> np.ndarray:
-        """
-        Method to lazy load the 3D data for a single mesh.
+        """Method to lazy load the 3D data for a single mesh.
 
         :returns: 4D numpy array wiht (x,y,z,q) as dimensions, while q represents the 5 quantities.
         """

@@ -1,5 +1,4 @@
-"""
-Provides fdsreader version information.
+"""Provides fdsreader version information.
 """
 
 # This file is auto-generated! Do not edit!

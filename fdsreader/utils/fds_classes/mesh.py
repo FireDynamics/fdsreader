@@ -6,8 +6,7 @@ from fdsreader.utils import Extent, Obstruction, Ventilation, Surface
 
 
 class Mesh:
-    """
-    3-dimensional Mesh of fixed, defined size.
+    """3-dimensional Mesh of fixed, defined size.
 
     :ivar coordinates: Coordinate values for each of the 3 dimension.
     :ivar extent: Tuple with three tuples containing minimum and maximum coordinate value on the
@@ -27,7 +26,6 @@ class Mesh:
                  surfaces: List[Surface],
                  default_texture_origin: Tuple[float, float, float]):
         """
-
         :param x_coordinates: Coordinate values of x-axis.
         :param y_coordinates: Coordinate values of y-axis.
         :param z_coordinates: Coordinate values of z-axis.

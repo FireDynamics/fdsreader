@@ -4,8 +4,7 @@ from fdsreader.utils import Surface, Extent
 
 
 class Ventilation:
-    """
-    A ventilation can be used to model components of the ventilation system in a building, like a diffuser or a return.
+    """A ventilation can be used to model components of the ventilation system in a building, like a diffuser or a return.
     A ventilation can also be used as a means of applying a particular boundary condition to a rectangular patch on a
      solid surface.
 

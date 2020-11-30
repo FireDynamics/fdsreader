@@ -4,8 +4,7 @@ from fdsreader.utils import Extent, Surface
 
 
 class Obstruction:
-    """
-    A box-shaped obstruction with specific surfaces (materials) on each side.
+    """A box-shaped obstruction with specific surfaces (materials) on each side.
 
     :ivar id: ID of the obstruction.
     :ivar extent: Tuple with three tuples containing minimum and maximum coordinate value on the

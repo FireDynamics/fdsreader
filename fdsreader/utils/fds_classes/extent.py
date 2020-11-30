@@ -2,8 +2,7 @@ from typing_extensions import Literal
 
 
 class Extent:
-    """
-    Three-dimensional extent with support for a missing dimension (size of 1).
+    """Three-dimensional extent with support for a missing dimension (size of 1).
     """
 
     def __init__(self, *args, skip_dimension: Literal['x', 'y', 'z', ''] = ''):
@@ -37,63 +36,54 @@ class Extent:
 
     @property
     def x(self):
-        """
-        Gives the number of data points in x-direction (end is inclusive).
+        """Gives the number of data points in x-direction (end is inclusive).
         """
         return self._extents[0][1] - self._extents[0][0] + 1
 
     @property
     def y(self):
-        """
-        Gives the number of data points in y-direction (end is inclusive).
+        """Gives the number of data points in y-direction (end is inclusive).
         """
         return self._extents[1][1] - self._extents[1][0] + 1
 
     @property
     def z(self):
-        """
-        Gives the number of data points in z-direction (end is inclusive).
+        """Gives the number of data points in z-direction (end is inclusive).
         """
         return self._extents[2][1] - self._extents[2][0] + 1
 
     @property
     def x_start(self):
-        """
-        Gives the absolute extent in x-direction.
+        """Gives the absolute extent in x-direction.
         """
         return self._extents[0][0]
 
     @property
     def y_start(self):
-        """
-        Gives the absolute extent in y-direction.
+        """Gives the absolute extent in y-direction.
         """
         return self._extents[1][0]
 
     @property
     def z_start(self):
-        """
-        Gives the absolute extent in z-direction.
+        """Gives the absolute extent in z-direction.
         """
         return self._extents[2][0]
 
     @property
     def x_end(self):
-        """
-        Gives the absolute extent in x-direction.
+        """Gives the absolute extent in x-direction.
         """
         return self._extents[0][1]
 
     @property
     def y_end(self):
-        """
-        Gives the absolute extent in y-direction.
+        """Gives the absolute extent in y-direction.
         """
         return self._extents[1][1]
 
     @property
     def z_end(self):
-        """
-        Gives the absolute extent in z-direction.
+        """Gives the absolute extent in z-direction.
         """
         return self._extents[2][1]

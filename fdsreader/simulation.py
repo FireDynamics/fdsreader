@@ -13,8 +13,7 @@ from fdsreader.isof import Isosurface
 
 
 class Simulation:
-    """
-    Master class managing all data for a given simulation.
+    """Master class managing all data for a given simulation.
 
     :ivar smv_file_path: Path to the smv-file for the simulation.
     :ivar root_path: Path to the root directory of the simulation.
@@ -56,8 +55,7 @@ class Simulation:
             self.meshes = self._load_meshes(smv_file)
 
     def _load_meshes(self, smv_file: mmap.mmap) -> List[Mesh]:
-        """
-        Method to load the mesh information from the smv file.
+        """Method to load the mesh information from the smv file.
         """
         meshes: List[Mesh] = list()
 
@@ -101,8 +99,7 @@ class Simulation:
         return meshes
 
     def _load_surfaces(self, smv_file: mmap.mmap) -> List[Surface]:
-        """
-        Method to load the surface information from the smv file.
+        """Method to load the surface information from the smv file.
         """
         surfaces = list()
         pos = smv_file.find(b'SURFACE', 0)
@@ -135,8 +132,7 @@ class Simulation:
 
     @property
     def slices(self) -> List[Slice]:
-        """
-        Lazy loads all slices for the simulation.
+        """Lazy loads all slices for the simulation.
 
         :returns: All slices.
         """
@@ -181,8 +177,7 @@ class Simulation:
 
     @property
     def boundaries(self) -> List[Boundary]:
-        """
-        Lazy loads all boundary data for the simulation.
+        """Lazy loads all boundary data for the simulation.
         :returns: All boundary data.
         """
         if not hasattr(self, "_boundaries"):
@@ -220,8 +215,7 @@ class Simulation:
 
     @property
     def data_3d(self) -> List[Plot3D]:
-        """
-        Lazy loads all plot3d data for the simulation.
+        """Lazy loads all plot3d data for the simulation.
         :returns: All plot3d data.
         """
         # Todo: Also read SMOKG3D data?
@@ -260,8 +254,7 @@ class Simulation:
 
     @property
     def isosurfaces(self):
-        """
-        Lazy loads all isosurfaces for the simulation.
+        """Lazy loads all isosurfaces for the simulation.
         :returns: All isof data.
         """
         # Todo: Check for multimesh

@@ -10,8 +10,7 @@ _HANDLED_FUNCTIONS = {}
 
 
 def implements(np_function):
-    """
-    Decorator to register an __array_function__ implementation for Slices.
+    """Decorator to register an __array_function__ implementation for Slices.
     """
 
     def decorator(func):
@@ -22,8 +21,7 @@ def implements(np_function):
 
 
 class Slice(np.lib.mixins.NDArrayOperatorsMixin):
-    """
-    Slice file data container including metadata. Consists of multiple subslices, one for each mesh
+    """Slice file data container including metadata. Consists of multiple subslices, one for each mesh
      the slice cuts through.
 
     :ivar root_path: Path to the directory containing all slice files.
@@ -44,8 +42,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
 
     def _add_subslice(self, filename: str, quantity: str, label: str, unit: str, extent: Extent,
                       mesh: Mesh):
-        """
-        Adds another subslice to the slice.
+        """Adds another subslice to the slice.
 
         :param filename: Name of the slice file.
         :param quantity: Quantity of the data.

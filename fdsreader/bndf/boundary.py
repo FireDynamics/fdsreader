@@ -7,8 +7,7 @@ import fdsreader.utils.fortran_data as fdtype
 
 
 class Boundary:
-    """
-    Boundary file data container including metadata. Consists of multiple subslices, one for each mesh
+    """Boundary file data container including metadata. Consists of multiple subslices, one for each mesh
      the slice cuts through.
 
     :ivar id: The ID of this boundary file.
@@ -32,16 +31,14 @@ class Boundary:
         self.times = None
 
     def _add_subboundary(self, filename: str, mesh: Mesh):
-        """
-        Created a SubBoundary object and adds it to the list of sub_boundaries.
+        """Created a SubBoundary object and adds it to the list of sub_boundaries.
         """
         file_path = os.path.join(self.root_path, filename)
         self.sub_boundaries.append(_SubBoundary(file_path, mesh, self))
 
 
 class Patch:
-    """
-    Container for the actual data which is stored as rectangular plane with specific orientation and
+    """Container for the actual data which is stored as rectangular plane with specific orientation and
      extent.
 
     :ivar extent: Extent object containing 3-dimensional extent information.
@@ -56,14 +53,12 @@ class Patch:
         self.obst_index = obst_index
 
     def _init(self, t_n: int):
-        """
-        Initialize the data array as soon as the number of calculated time steps is known.
+        """Initialize the data array as soon as the number of calculated time steps is known.
         """
         self.data = np.empty((t_n,) + self._get_dimension())
 
     def _get_dimension(self):
-        """
-        Convenient function to calculate the shape of the array containing the data for this patch.
+        """Convenience function to calculate the shape of the array containing the data for this patch.
         """
         if abs(self.orientation) == 1:
             dim = (1, self.extent.y + 2, self.extent.z + 2)
@@ -74,8 +69,7 @@ class Patch:
         return dim
 
     def read_data(self, infile: BinaryIO, t: int) -> Tuple[float, int]:
-        """
-        Method to load the quantity data for a single patch.
+        """Method to load the quantity data for a single patch.
         """
         time = fdtype.read(infile, fdtype.FLOAT, 1)
         dtype_data = fdtype.new((('f', str(self._get_dimension())),))
@@ -84,8 +78,7 @@ class Patch:
 
 
 class _SubBoundary:
-    """
-    Contains all boundary data for a single mesh subdivided into patches.
+    """Contains all boundary data for a single mesh subdivided into patches.
 
     :ivar file_path: The path to the file containing data for this specific SubBoundary.
     :ivar mesh: The mesh containing all boundary data in this SubBoundary.
@@ -124,8 +117,7 @@ class _SubBoundary:
 
     @property
     def patches(self) -> List[Patch]:
-        """
-        Method to lazy load the boundary data for all patches in a single mesh.
+        """Method to lazy load the boundary data for all patches in a single mesh.
 
         :returns: The actual data in form of a list of patches (objects containing numpy ndarrays).
         """
