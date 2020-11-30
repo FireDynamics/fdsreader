@@ -145,10 +145,9 @@
             
   <h1>Source code for fdsreader.utils.data</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Collection of utilities (convenience functions) for data.</span>
+<span class="sd">Collection of utilities (convenience functions) for data handling.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">glob</span>
-<span class="kn">import</span> <span class="nn">os</span>
 
 
 <div class="viewcode-block" id="Quantity"><a class="viewcode-back" href="../../../utils.html#fdsreader.utils.data.Quantity">[docs]</a><span class="k">class</span> <span class="nc">Quantity</span><span class="p">:</span>
@@ -161,6 +160,7 @@
 <div class="viewcode-block" id="scan_directory_smv"><a class="viewcode-back" href="../../../utils.html#fdsreader.utils.data.scan_directory_smv">[docs]</a><span class="k">def</span> <span class="nf">scan_directory_smv</span><span class="p">(</span><span class="nb">dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Scanning a directory non-recursively for smv-files.</span>
+
 <span class="sd">    :param dir: The directory that will be scanned for smv files.</span>
 <span class="sd">    :returns: A list containing the path to each smv-file found in the directory.</span>
 <span class="sd">    &quot;&quot;&quot;</span>

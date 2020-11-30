@@ -336,7 +336,7 @@ for example windows or bricks, the texture_origin specifies where the pattern sh
 </dl>
 </dd></dl>
 
-<p>Collection of utilities (convenience functions) for data.</p>
+<p>Collection of utilities (convenience functions) for data handling.</p>
 <dl class="py class">
 <dt>
 <em class="property">class </em><code class="sig-prename descclassname">fdsreader.utils.data.</code><code class="sig-name descname">Quantity</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">quantity</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">label</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">unit</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/data.html#Quantity"><span class="viewcode-link">[source]</span></a></dt>
@@ -345,31 +345,43 @@ for example windows or bricks, the texture_origin specifies where the pattern sh
 <dl class="py function">
 <dt>
 <code class="sig-prename descclassname">fdsreader.utils.data.</code><code class="sig-name descname">scan_directory_smv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dir</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/data.html#scan_directory_smv"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Scanning a directory non-recursively for smv-files.
-:param dir: The directory that will be scanned for smv files.
-:returns: A list containing the path to each smv-file found in the directory.</p>
+<dd><p>Scanning a directory non-recursively for smv-files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>dir</strong> – The directory that will be scanned for smv files.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list containing the path to each smv-file found in the directory.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt>
 <code class="sig-prename descclassname">fdsreader.utils.fortran_data.</code><code class="sig-name descname">combine</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">dtypes</span><span class="p">:</span> <span class="n">numpy.dtype</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/fortran_data.html#combine"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Combines multiple numpy dtypes into one.
-:param dtypes: An arbitrary amount of numpy dtype objects can be provided.
-:returns: The newly created numpy dtype.</p>
+<dd><p>Combines multiple numpy dtypes into one.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>dtypes</strong> – An arbitrary amount of numpy dtype objects can be provided.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The newly created numpy dtype.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt>
 <code class="sig-prename descclassname">fdsreader.utils.fortran_data.</code><code class="sig-name descname">new</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_structure</span><span class="p">:</span> <span class="n">Sequence<span class="p">[</span>Tuple<span class="p">[</span>str<span class="p">, </span>Union<span class="p">[</span>int<span class="p">, </span>str<span class="p">]</span><span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; numpy.dtype<a class="reference internal" href="_modules/fdsreader/utils/fortran_data.html#new"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Creates a fortran-compliant numpy dtype to read in binary fortran data.
-:param data_structure: Tuple consisting of tuples with 2 elements each where the first element</p>
-<blockquote>
-<div><p>is a char (‘i’, ‘f’ or ‘c’) representing the primitive data type to be used and the second
-element an integer representing the number of times this data type was written out in Fortran.</p>
-</div></blockquote>
+<dd><p>Creates a fortran-compliant numpy dtype to read in binary fortran data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>The newly created fortran-compliant numpy dtype with the desired structure.</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data_structure</strong> – Tuple consisting of tuples with 2 elements each where the first element
+is a char (‘i’, ‘f’ or ‘c’) representing the primitive data type to be used and the second
+element an integer representing the number of times this data type was written out in Fortran.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The newly created fortran-compliant numpy dtype with the desired structure.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -377,16 +389,16 @@ element an integer representing the number of times this data type was written o
 <dl class="py function">
 <dt>
 <code class="sig-prename descclassname">fdsreader.utils.fortran_data.</code><code class="sig-name descname">new_raw</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_structure</span><span class="p">:</span> <span class="n">Sequence<span class="p">[</span>Tuple<span class="p">[</span>str<span class="p">, </span>Union<span class="p">[</span>int<span class="p">, </span>str<span class="p">]</span><span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; str<a class="reference internal" href="_modules/fdsreader/utils/fortran_data.html#new_raw"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Creates the string definition for a fortran-compliant numpy dtype to read in binary fortran data.
-:param data_structure: Tuple consisting of tuples with 2 elements each where the first element</p>
-<blockquote>
-<div><p>is a char (‘i’, ‘f’, ‘c’ or ‘{}’) representing the primitive data type to be used and the
+<dd><p>Creates the string definition for a fortran-compliant numpy dtype to read in binary fortran data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data_structure</strong> – Tuple consisting of tuples with 2 elements each where the first element
+is a char (‘i’, ‘f’, ‘c’ or ‘{}’) representing the primitive data type to be used and the
 second element an integer representing the number of times this data type was written out in
 Fortran.</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>The definition string for a fortran-compliant numpy dtype with the desired structure.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The definition string for a fortran-compliant numpy dtype with the desired structure.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -394,11 +406,19 @@ Fortran.</p>
 <dl class="py function">
 <dt>
 <code class="sig-prename descclassname">fdsreader.utils.fortran_data.</code><code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">infile</span><span class="p">:</span> <span class="n">BinaryIO</span></em>, <em class="sig-param"><span class="n">dtype</span><span class="p">:</span> <span class="n">numpy.dtype</span></em>, <em class="sig-param"><span class="n">n</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/fortran_data.html#read"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Convenience function to read in binary data from a file using a numpy dtype.
-:param infile: Already opened binary IO stream.
-:param dtype: Numpy dtype object.
-:param n: The number of times a dtype object should be read in from the stream.
-:returns: Read in data.</p>
+<dd><p>Convenience function to read in binary data from a file using a numpy dtype.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>infile</strong> – Already opened binary IO stream.</p></li>
+<li><p><strong>dtype</strong> – Numpy dtype object.</p></li>
+<li><p><strong>n</strong> – The number of times a dtype object should be read in from the stream.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Read in data.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>

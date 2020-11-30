@@ -171,6 +171,7 @@
 <div class="viewcode-block" id="new_raw"><a class="viewcode-back" href="../../../utils.html#fdsreader.utils.fortran_data.new_raw">[docs]</a><span class="k">def</span> <span class="nf">new_raw</span><span class="p">(</span><span class="n">data_structure</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates the string definition for a fortran-compliant numpy dtype to read in binary fortran data.</span>
+
 <span class="sd">    :param data_structure: Tuple consisting of tuples with 2 elements each where the first element</span>
 <span class="sd">     is a char (&#39;i&#39;, &#39;f&#39;, &#39;c&#39; or &#39;{}&#39;) representing the primitive data type to be used and the</span>
 <span class="sd">     second element an integer representing the number of times this data type was written out in</span>
@@ -183,6 +184,7 @@
 <div class="viewcode-block" id="new"><a class="viewcode-back" href="../../../utils.html#fdsreader.utils.fortran_data.new">[docs]</a><span class="k">def</span> <span class="nf">new</span><span class="p">(</span><span class="n">data_structure</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a fortran-compliant numpy dtype to read in binary fortran data.</span>
+
 <span class="sd">    :param data_structure: Tuple consisting of tuples with 2 elements each where the first element</span>
 <span class="sd">     is a char (&#39;i&#39;, &#39;f&#39; or &#39;c&#39;) representing the primitive data type to be used and the second</span>
 <span class="sd">     element an integer representing the number of times this data type was written out in Fortran.</span>
@@ -194,6 +196,7 @@
 <div class="viewcode-block" id="combine"><a class="viewcode-back" href="../../../utils.html#fdsreader.utils.fortran_data.combine">[docs]</a><span class="k">def</span> <span class="nf">combine</span><span class="p">(</span><span class="o">*</span><span class="n">dtypes</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Combines multiple numpy dtypes into one.</span>
+
 <span class="sd">    :param dtypes: An arbitrary amount of numpy dtype objects can be provided.</span>
 <span class="sd">    :returns: The newly created numpy dtype.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -215,6 +218,7 @@
 <div class="viewcode-block" id="read"><a class="viewcode-back" href="../../../utils.html#fdsreader.utils.fortran_data.read">[docs]</a><span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="n">infile</span><span class="p">:</span> <span class="n">BinaryIO</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convenience function to read in binary data from a file using a numpy dtype.</span>
+
 <span class="sd">    :param infile: Already opened binary IO stream.</span>
 <span class="sd">    :param dtype: Numpy dtype object.</span>
 <span class="sd">    :param n: The number of times a dtype object should be read in from the stream.</span>
