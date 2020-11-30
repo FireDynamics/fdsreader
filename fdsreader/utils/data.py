@@ -1,7 +1,7 @@
 """
 Collection of utilities (convenience functions) for data.
 """
-
+import glob
 import os
 
 
@@ -12,14 +12,10 @@ class Quantity:
         self.quantity = quantity
 
 
-def scan_directory_smv(directory: str):
+def scan_directory_smv(dir: str):
     """
     Scanning a directory non-recursively for smv-files.
-    :param directory: The directory that will be scanned for smv files.
+    :param dir: The directory that will be scanned for smv files.
     :returns: A list containing the path to each smv-file found in the directory.
     """
-    smv_files = list()
-    for file in os.listdir(directory):
-        if file.endswith(".smv"):
-            smv_files.append(os.path.join(directory, file))
-    return smv_files
+    return glob.glob(dir + "/**/*.txt", recursive=True)
