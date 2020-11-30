@@ -157,8 +157,7 @@
 
 <span class="sd">    :ivar coordinates: Coordinate values for each of the 3 dimension.</span>
 <span class="sd">    :ivar extent: Tuple with three tuples containing minimum and maximum coordinate value on the</span>
-<span class="sd">      corresponding dimension.</span>
-<span class="sd">    :ivar mesh:</span>
+<span class="sd">        corresponding dimension.</span>
 <span class="sd">    :ivar n: Number of elements for each of the 3 dimensions.</span>
 <span class="sd">    :ivar n_size: Total number of blocks in this mesh.</span>
 <span class="sd">    :ivar label: Label associated with this mesh.</span>
@@ -189,7 +188,7 @@
                              <span class="n">y_coordinates</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">z_coordinates</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">z_coordinates</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
         <span class="c1"># Todo: Does this really do what it is supposed to do? What is it even supposed to do?</span>
         <span class="c1"># Todo: Numpy: Deprecated</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">)</span>
+        <span class="c1"># self.mesh = np.meshgrid(self.coordinates)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="p">[</span><span class="n">x_coordinates</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">y_coordinates</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">z_coordinates</span><span class="o">.</span><span class="n">size</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
