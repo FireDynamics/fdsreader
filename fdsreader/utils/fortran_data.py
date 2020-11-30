@@ -25,6 +25,7 @@ def _get_dtype_output_format(d, n):
 def new_raw(data_structure: Sequence[Tuple[str, Union[int, str]]]) -> str:
     """
     Creates the string definition for a fortran-compliant numpy dtype to read in binary fortran data.
+
     :param data_structure: Tuple consisting of tuples with 2 elements each where the first element
      is a char ('i', 'f', 'c' or '{}') representing the primitive data type to be used and the
      second element an integer representing the number of times this data type was written out in
@@ -37,6 +38,7 @@ def new_raw(data_structure: Sequence[Tuple[str, Union[int, str]]]) -> str:
 def new(data_structure: Sequence[Tuple[str, Union[int, str]]]) -> np.dtype:
     """
     Creates a fortran-compliant numpy dtype to read in binary fortran data.
+
     :param data_structure: Tuple consisting of tuples with 2 elements each where the first element
      is a char ('i', 'f' or 'c') representing the primitive data type to be used and the second
      element an integer representing the number of times this data type was written out in Fortran.
@@ -48,6 +50,7 @@ def new(data_structure: Sequence[Tuple[str, Union[int, str]]]) -> np.dtype:
 def combine(*dtypes: np.dtype):
     """
     Combines multiple numpy dtypes into one.
+
     :param dtypes: An arbitrary amount of numpy dtype objects can be provided.
     :returns: The newly created numpy dtype.
     """
@@ -69,6 +72,7 @@ FLOAT = new((('f', 1),))
 def read(infile: BinaryIO, dtype: np.dtype, n: int):
     """
     Convenience function to read in binary data from a file using a numpy dtype.
+
     :param infile: Already opened binary IO stream.
     :param dtype: Numpy dtype object.
     :param n: The number of times a dtype object should be read in from the stream.

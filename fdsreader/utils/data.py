@@ -1,8 +1,7 @@
 """
-Collection of utilities (convenience functions) for data.
+Collection of utilities (convenience functions) for data handling.
 """
 import glob
-import os
 
 
 class Quantity:
@@ -15,6 +14,7 @@ class Quantity:
 def scan_directory_smv(dir: str):
     """
     Scanning a directory non-recursively for smv-files.
+
     :param dir: The directory that will be scanned for smv files.
     :returns: A list containing the path to each smv-file found in the directory.
     """
