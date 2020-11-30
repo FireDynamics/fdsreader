@@ -8,6 +8,7 @@ class Ventilation:
     A ventilation can be used to model components of the ventilation system in a building, like a diffuser or a return.
     A ventilation can also be used as a means of applying a particular boundary condition to a rectangular patch on a
      solid surface.
+
     :ivar id: ID of the ventilation.
     :ivar extent: Tuple with three tuples containing minimum and maximum coordinate value on the
      corresponding dimension.

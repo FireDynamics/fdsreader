@@ -15,6 +15,7 @@ from fdsreader.isof import Isosurface
 class Simulation:
     """
     Master class managing all data for a given simulation.
+
     :ivar smv_file_path: Path to the smv-file for the simulation.
     :ivar root_path: Path to the root directory of the simulation.
     :ivar fds_version: Version of FDS the simulation was performed with.
@@ -136,6 +137,7 @@ class Simulation:
     def slices(self) -> List[Slice]:
         """
         Lazy loads all slices for the simulation.
+
         :returns: All slices.
         """
         # Only load slices once initially and then reuse the loaded information

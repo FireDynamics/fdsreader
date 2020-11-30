@@ -25,6 +25,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
     """
     Slice file data container including metadata. Consists of multiple subslices, one for each mesh
      the slice cuts through.
+
     :ivar root_path: Path to the directory containing all slice files.
     :ivar quantities: List with quantity objects containing information about the quantities.
      calculated for this slice with the corresponding label and unit.
@@ -45,6 +46,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                       mesh: Mesh):
         """
         Adds another subslice to the slice.
+
         :param filename: Name of the slice file.
         :param quantity: Quantity of the data.
         :param label: Quantity label.
@@ -78,6 +80,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
     def get_subslice(self, mesh: Mesh):
         """
         Returns the SubSlice that cuts through the given mesh.
+
         :param mesh:
         """
         for slc in self._subslices:
@@ -88,6 +91,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
     def mean(self, quantity: str = None):
         """
         Calculates the mean over the whole slice.
+
         :param quantity: The quantity for which the mean should be calculated. If not provided, the
          first found quantity will be used.
         :returns: The calculated mean value.
@@ -111,6 +115,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """
         Method that will be called by numpy when using a ufunction with a Slice as input.
+
         :returns: A new slice on which the ufunc has been applied.
         """
         if method != "__call__":
@@ -138,6 +143,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
     def __array_function__(self, func, types, args, kwargs):
         """
         Method that will be called by numpy when using an array function with a Slice as input.
+
         :returns: The output of the array function.
         """
         if func not in _HANDLED_FUNCTIONS:

@@ -9,6 +9,7 @@ class Isosurface:
     """
     Isosurface file data container including metadata. Consists of a list of vertices forming a list
      of triangles. Can optionally have additional color data for the surfaces.
+
     :ivar file_path: Path to the binary data file.
     :ivar v_file_path: Path to the binary data file containing color data.
     :ivar quantity: Information about the quantity.

@@ -6,6 +6,7 @@ class Surface:
     Surface objects describe what bounding surfaces consist of. Boundary conditions for obstructions and vents are
     prescribed by referencing the appropriate surface.
     TODO: Read in velocity
+
     :ivar name: Name of the surface.
     :ivar tmpm: TODO
     :ivar material_emissivity: Emissivity of the material.

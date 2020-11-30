@@ -10,6 +10,7 @@ class Boundary:
     """
     Boundary file data container including metadata. Consists of multiple subslices, one for each mesh
      the slice cuts through.
+
     :ivar id: The ID of this boundary file.
     :ivar root_path: Path to the directory containing all boundary files.
     :ivar quantities: List with quantity objects containing information about the quantities.
@@ -42,6 +43,7 @@ class Patch:
     """
     Container for the actual data which is stored as rectangular plane with specific orientation and
      extent.
+
     :ivar extent: Extent object containing 3-dimensional extent information.
     :ivar orientation: The direction the patch is facing (x={-1;1}, y={-2;2}, z={-3;3}).
     :ivar obst_index: Index of the obstacle
@@ -84,6 +86,7 @@ class Patch:
 class _SubBoundary:
     """
     Contains all boundary data for a single mesh subdivided into patches.
+
     :ivar file_path: The path to the file containing data for this specific SubBoundary.
     :ivar mesh: The mesh containing all boundary data in this SubBoundary.
     """
@@ -123,6 +126,7 @@ class _SubBoundary:
     def patches(self) -> List[Patch]:
         """
         Method to lazy load the boundary data for all patches in a single mesh.
+
         :returns: The actual data in form of a list of patches (objects containing numpy ndarrays).
         """
         if not hasattr(self._patches[0], "data"):
