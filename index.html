@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Welcome to the official FDSReader documentation! &mdash; fdsreader [fdsreader, version 0.4.3] documentation</title>
+  <title>Welcome to the official FDSReader API documentation! &mdash; fdsreader [fdsreader, version 0.4.3] documentation</title>
   
 
   
@@ -82,7 +82,7 @@
             
               <!-- Local TOC -->
               <div class="local-toc"><ul>
-<li><a class="reference internal" href="#">Welcome to the official FDSReader documentation!</a><ul>
+<li><a class="reference internal" href="#">Welcome to the official FDSReader API documentation!</a><ul>
 <li><a class="reference internal" href="#isosurface-files">Isosurface files</a></li>
 <li><a class="reference internal" href="#plot3d-files">Plot3D files</a></li>
 <li><a class="reference internal" href="#slice-files">Slice files</a></li>
@@ -135,7 +135,7 @@
     
       <li><a href="#" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Welcome to the official FDSReader documentation!</li>
+      <li>Welcome to the official FDSReader API documentation!</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -152,23 +152,29 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="welcome-to-the-official-fdsreader-documentation">
-<h1>Welcome to the official FDSReader documentation!<a class="headerlink" href="#welcome-to-the-official-fdsreader-documentation" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="welcome-to-the-official-fdsreader-api-documentation">
+<h1>Welcome to the official FDSReader API documentation!<a class="headerlink" href="#welcome-to-the-official-fdsreader-api-documentation" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 </div>
 <dl class="py class">
 <dt>
 <em class="property">class </em><code class="sig-prename descclassname">fdsreader.simulation.</code><code class="sig-name descname">Simulation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">smv_file_path</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/simulation.html#Simulation"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Master class managing all data for a given simulation.
-:ivar smv_file_path: Path to the smv-file for the simulation.
-:ivar root_path: Path to the root directory of the simulation.
-:ivar fds_version: Version of FDS the simulation was performed with.
-:ivar chid: Name (ID) of the simulation.
-:ivar hrrpuv_cutoff: The hrrpuv_cutoff value.
-:ivar default_texture_origin: The default origin used for textures with no explicit origin.
-:ivar out_file_path: Path to the .out file of the simulation.
-:ivar surfaces: List containing all surfaces defined in this simulation.
-:ivar meshes: List containing all meshes (grids) defined in this simulation.</p>
+<dd><p>Master class managing all data for a given simulation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>smv_file_path</strong> – Path to the smv-file for the simulation.</p></li>
+<li><p><strong>root_path</strong> – Path to the root directory of the simulation.</p></li>
+<li><p><strong>fds_version</strong> – Version of FDS the simulation was performed with.</p></li>
+<li><p><strong>chid</strong> – Name (ID) of the simulation.</p></li>
+<li><p><strong>hrrpuv_cutoff</strong> – The hrrpuv_cutoff value.</p></li>
+<li><p><strong>default_texture_origin</strong> – The default origin used for textures with no explicit origin.</p></li>
+<li><p><strong>out_file_path</strong> – Path to the .out file of the simulation.</p></li>
+<li><p><strong>surfaces</strong> – List containing all surfaces defined in this simulation.</p></li>
+<li><p><strong>meshes</strong> – List containing all meshes (grids) defined in this simulation.</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
 <dt>
 <em class="property">property </em><code class="sig-name descname">boundaries</code></dt>
@@ -193,8 +199,12 @@
 <dl class="py method">
 <dt>
 <em class="property">property </em><code class="sig-name descname">slices</code></dt>
-<dd><p>Lazy loads all slices for the simulation.
-:returns: All slices.</p>
+<dd><p>Lazy loads all slices for the simulation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>All slices.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -262,7 +272,8 @@
 <span class="target" id="id1"></span><dl class="py class">
 <dt>
 <em class="property">class </em><code class="sig-prename descclassname">fdsreader.plot3d.plot3d.</code><code class="sig-name descname">Plot3D</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">root_path</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">time</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">quantities</span><span class="p">:</span> <span class="n">List<span class="p">[</span>fdsreader.utils.data.Quantity<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/plot3d/plot3d.html#Plot3D"><span class="viewcode-link">[source]</span></a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Plot3d file data container including metadata. Consists of multiple subplots, one for each mesh.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>root_path</strong> – Path to the directory containing all slice files.</p></li>
@@ -275,8 +286,12 @@ calculated for this Plot3D with the corresponding label and unit.</p></li>
 <dl class="py method">
 <dt>
 <code class="sig-name descname">mean</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="_modules/fdsreader/plot3d/plot3d.html#Plot3D.mean"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Calculates the mean over each quantity individually of the whole Plot3D.
-:returns: The calculated mean values.</p>
+<dd><p>Calculates the mean over each quantity individually of the whole Plot3D.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The calculated mean values.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -311,21 +326,25 @@ calculated for this slice with the corresponding label and unit.</p></li>
 <dl class="py method">
 <dt>
 <code class="sig-name descname">get_subslice</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mesh</span><span class="p">:</span> <span class="n">fdsreader.utils.fds_classes.mesh.Mesh</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice.get_subslice"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Returns the SubSlice that cuts through the given mesh.
-:param mesh:</p>
+<dd><p>Returns the SubSlice that cuts through the given mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>mesh</strong> – </p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt>
 <code class="sig-name descname">mean</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">quantity</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice.mean"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Calculates the mean over the whole slice.
-:param quantity: The quantity for which the mean should be calculated. If not provided, the</p>
-<blockquote>
-<div><p>first found quantity will be used.</p>
-</div></blockquote>
+<dd><p>Calculates the mean over the whole slice.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>The calculated mean value.</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>quantity</strong> – The quantity for which the mean should be calculated. If not provided, the
+first found quantity will be used.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The calculated mean value.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -431,15 +450,13 @@ calculated for this slice with the corresponding label and unit.</p></li>
 <dl class="py class">
 <dt>
 <em class="property">class </em><code class="sig-prename descclassname">fdsreader.utils.fds_classes.mesh.</code><code class="sig-name descname">Mesh</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x_coordinates</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">y_coordinates</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">z_coordinates</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">mesh_id</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">mesh_index</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">smv_file</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>str<span class="p">, </span>mmap.mmap<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">pos</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">surfaces</span><span class="p">:</span> <span class="n">List<span class="p">[</span>fdsreader.utils.fds_classes.surface.Surface<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">default_texture_origin</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/fds_classes/mesh.html#Mesh"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>3-dimensional Mesh of fixed, defined size.
-:ivar coordinates: Coordinate values for each of the 3 dimension.
-:ivar extent: Tuple with three tuples containing minimum and maximum coordinate value on the</p>
-<blockquote>
-<div><p>corresponding dimension.</p>
-</div></blockquote>
+<dd><p>3-dimensional Mesh of fixed, defined size.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
 <dd class="field-odd"><ul class="simple">
+<li><p><strong>coordinates</strong> – Coordinate values for each of the 3 dimension.</p></li>
+<li><p><strong>extent</strong> – Tuple with three tuples containing minimum and maximum coordinate value on the
+corresponding dimension.</p></li>
 <li><p><strong>mesh</strong> – </p></li>
 <li><p><strong>n</strong> – Number of elements for each of the 3 dimensions.</p></li>
 <li><p><strong>n_size</strong> – Total number of blocks in this mesh.</p></li>
@@ -468,22 +485,20 @@ the smv_file again or the name of the smv-file containing the mesh information.<
 <dl class="py class">
 <dt>
 <em class="property">class </em><code class="sig-prename descclassname">fdsreader.utils.fds_classes.obstruction.</code><code class="sig-name descname">Obstruction</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">oid</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">extent</span><span class="p">:</span> <span class="n">fdsreader.utils.fds_classes.extent.Extent</span></em>, <em class="sig-param"><span class="n">side_surfaces</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>fdsreader.utils.fds_classes.surface.Surface<span class="p">, </span>fdsreader.utils.fds_classes.surface.Surface<span class="p">, </span>fdsreader.utils.fds_classes.surface.Surface<span class="p">, </span>fdsreader.utils.fds_classes.surface.Surface<span class="p">, </span>fdsreader.utils.fds_classes.surface.Surface<span class="p">, </span>fdsreader.utils.fds_classes.surface.Surface<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">bound_indices</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">color_index</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">block_type</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">texture_origin</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">rgba</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Tuple<span class="p">[</span><span class="p">(</span><span class="p">)</span><span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/fds_classes/obstruction.html#Obstruction"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>A box-shaped obstruction with specific surfaces (materials) on each side.
-:ivar id: ID of the obstruction.
-:ivar extent: Tuple with three tuples containing minimum and maximum coordinate value on the
-corresponding dimension together forming a cuboid.
-:ivar side_surfaces: Tuple of six surfaces for each side of the cuboid.
-:ivar bound_indices: Indices used to define obstruction bounds in terms of mesh locations.
-:ivar color_index: Type of coloring used to color obstruction.</p>
-<blockquote>
-<div><p>-1 - default color
--2 - invisible
--3 - use red, green, blue and alpha (rgba attribute)
-n&gt;0 - use n’th color table entry</p>
-</div></blockquote>
+<dd><p>A box-shaped obstruction with specific surfaces (materials) on each side.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
 <dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> – ID of the obstruction.</p></li>
+<li><p><strong>extent</strong> – Tuple with three tuples containing minimum and maximum coordinate value on the
+corresponding dimension together forming a cuboid.</p></li>
+<li><p><strong>side_surfaces</strong> – Tuple of six surfaces for each side of the cuboid.</p></li>
+<li><p><strong>bound_indices</strong> – Indices used to define obstruction bounds in terms of mesh locations.</p></li>
+<li><p><strong>color_index</strong> – Type of coloring used to color obstruction.
+-1 - default color
+-2 - invisible
+-3 - use red, green, blue and alpha (rgba attribute)
+n&gt;0 - use n’th color table entry</p></li>
 <li><p><strong>block_type</strong> – Defines how the obstruction is drawn.
 -1 - use surface to obtain blocktype
 0 - regular block
@@ -501,12 +516,18 @@ for example windows or bricks, the texture_origin specifies where the pattern sh
 <em class="property">class </em><code class="sig-prename descclassname">fdsreader.utils.fds_classes.surface.</code><code class="sig-name descname">Surface</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">tmpm</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">material_emissivity</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">surface_type</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">texture_width</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">texture_height</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">texture_map</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">rgb</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">transparency</span><span class="p">:</span> <span class="n">float</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/fds_classes/surface.html#Surface"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Surface objects describe what bounding surfaces consist of. Boundary conditions for obstructions and vents are
 prescribed by referencing the appropriate surface.
-TODO: Read in velocity
-:ivar name: Name of the surface.
-:ivar tmpm: TODO
-:ivar material_emissivity: Emissivity of the material.
-:ivar surface_type: Type of the surface.
-:ivar texture_width:Width of the texture of the surface.
+TODO: Read in velocity</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – Name of the surface.</p></li>
+<li><p><strong>tmpm</strong> – TODO</p></li>
+<li><p><strong>material_emissivity</strong> – Emissivity of the material.</p></li>
+<li><p><strong>surface_type</strong> – Type of the surface.</p></li>
+</ul>
+</dd>
+</dl>
+<p>:ivar texture_width:Width of the texture of the surface.
 :ivar texture_height: Height of the texture of the surface.
 :ivar texture_map: Path to the texture map used for the surface.
 :ivar rgb: Color of the surface in form of a 3-element tuple.

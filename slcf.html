@@ -169,21 +169,25 @@ calculated for this slice with the corresponding label and unit.</p></li>
 <dl class="py method">
 <dt>
 <code class="sig-name descname">get_subslice</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mesh</span><span class="p">:</span> <span class="n">fdsreader.utils.fds_classes.mesh.Mesh</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice.get_subslice"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Returns the SubSlice that cuts through the given mesh.
-:param mesh:</p>
+<dd><p>Returns the SubSlice that cuts through the given mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>mesh</strong> – </p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt>
 <code class="sig-name descname">mean</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">quantity</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice.mean"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Calculates the mean over the whole slice.
-:param quantity: The quantity for which the mean should be calculated. If not provided, the</p>
-<blockquote>
-<div><p>first found quantity will be used.</p>
-</div></blockquote>
+<dd><p>Calculates the mean over the whole slice.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>The calculated mean value.</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>quantity</strong> – The quantity for which the mean should be calculated. If not provided, the
+first found quantity will be used.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The calculated mean value.</p>
 </dd>
 </dl>
 </dd></dl>

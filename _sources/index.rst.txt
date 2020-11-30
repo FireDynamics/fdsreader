@@ -1,5 +1,5 @@
-Welcome to the official FDSReader documentation!
-================================================
+Welcome to the official FDSReader API documentation!
+====================================================
 
 .. toctree::
    :maxdepth: 4

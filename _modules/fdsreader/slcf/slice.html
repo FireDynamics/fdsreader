@@ -171,6 +171,7 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Slice file data container including metadata. Consists of multiple subslices, one for each mesh</span>
 <span class="sd">     the slice cuts through.</span>
+
 <span class="sd">    :ivar root_path: Path to the directory containing all slice files.</span>
 <span class="sd">    :ivar quantities: List with quantity objects containing information about the quantities.</span>
 <span class="sd">     calculated for this slice with the corresponding label and unit.</span>
@@ -191,6 +192,7 @@
                       <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds another subslice to the slice.</span>
+
 <span class="sd">        :param filename: Name of the slice file.</span>
 <span class="sd">        :param quantity: Quantity of the data.</span>
 <span class="sd">        :param label: Quantity label.</span>
@@ -224,6 +226,7 @@
 <div class="viewcode-block" id="Slice.get_subslice"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.slice.Slice.get_subslice">[docs]</a>    <span class="k">def</span> <span class="nf">get_subslice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the SubSlice that cuts through the given mesh.</span>
+
 <span class="sd">        :param mesh:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">slc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subslices</span><span class="p">:</span>
@@ -234,6 +237,7 @@
 <div class="viewcode-block" id="Slice.mean"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.slice.Slice.mean">[docs]</a>    <span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the mean over the whole slice.</span>
+
 <span class="sd">        :param quantity: The quantity for which the mean should be calculated. If not provided, the</span>
 <span class="sd">         first found quantity will be used.</span>
 <span class="sd">        :returns: The calculated mean value.</span>
@@ -257,6 +261,7 @@
     <span class="k">def</span> <span class="nf">__array_ufunc__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ufunc</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="o">*</span><span class="n">inputs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method that will be called by numpy when using a ufunction with a Slice as input.</span>
+
 <span class="sd">        :returns: A new slice on which the ufunc has been applied.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">method</span> <span class="o">!=</span> <span class="s2">&quot;__call__&quot;</span><span class="p">:</span>
@@ -284,6 +289,7 @@
     <span class="k">def</span> <span class="nf">__array_function__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">types</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method that will be called by numpy when using an array function with a Slice as input.</span>
+
 <span class="sd">        :returns: The output of the array function.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">func</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_HANDLED_FUNCTIONS</span><span class="p">:</span>

@@ -161,6 +161,7 @@
 <div class="viewcode-block" id="Simulation"><a class="viewcode-back" href="../../index.html#fdsreader.simulation.Simulation">[docs]</a><span class="k">class</span> <span class="nc">Simulation</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Master class managing all data for a given simulation.</span>
+
 <span class="sd">    :ivar smv_file_path: Path to the smv-file for the simulation.</span>
 <span class="sd">    :ivar root_path: Path to the root directory of the simulation.</span>
 <span class="sd">    :ivar fds_version: Version of FDS the simulation was performed with.</span>
@@ -282,6 +283,7 @@
     <span class="k">def</span> <span class="nf">slices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Slice</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Lazy loads all slices for the simulation.</span>
+
 <span class="sd">        :returns: All slices.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Only load slices once initially and then reuse the loaded information</span>
