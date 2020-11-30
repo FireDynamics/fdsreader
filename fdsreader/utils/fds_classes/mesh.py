@@ -11,8 +11,7 @@ class Mesh:
 
     :ivar coordinates: Coordinate values for each of the 3 dimension.
     :ivar extent: Tuple with three tuples containing minimum and maximum coordinate value on the
-      corresponding dimension.
-    :ivar mesh:
+        corresponding dimension.
     :ivar n: Number of elements for each of the 3 dimensions.
     :ivar n_size: Total number of blocks in this mesh.
     :ivar label: Label associated with this mesh.
@@ -43,7 +42,7 @@ class Mesh:
                              y_coordinates[-1], z_coordinates[0], z_coordinates[-1])
         # Todo: Does this really do what it is supposed to do? What is it even supposed to do?
         # Todo: Numpy: Deprecated
-        self.mesh = np.meshgrid(self.coordinates)
+        # self.mesh = np.meshgrid(self.coordinates)
 
         self.n = [x_coordinates.size, y_coordinates.size, z_coordinates.size]
         self.n_size = self.n[0] * self.n[1] * self.n[2]

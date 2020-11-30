@@ -27,8 +27,8 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
      the slice cuts through.
 
     :ivar root_path: Path to the directory containing all slice files.
-    :ivar quantities: List with quantity objects containing information about the quantities.
-     calculated for this slice with the corresponding label and unit.
+    :ivar quantities: List with quantity objects containing information about the
+        quantities calculated for this slice with the corresponding label and unit.
     :ivar cell_centered: Indicates whether centered positioning for data is used.
     :ivar times: Numpy array containing all times for which data has been recorded.
     """
@@ -157,6 +157,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
 class SubSlice:
     """
     Part of a slice that cuts through a single mesh.
+
     :ivar root_path: Path to the directory containing the slice file.
     :ivar cell_centered: Indicates whether centered positioning for data is used.
     :ivar mesh: The mesh the subslice cuts through.
