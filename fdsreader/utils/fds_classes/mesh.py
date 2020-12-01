@@ -1,5 +1,5 @@
 import mmap
-from typing import Dict, List, Union, Tuple
+from typing import Dict, List, Union, Tuple, Literal
 import numpy as np
 
 from fdsreader.utils import Extent, Obstruction, Ventilation, Surface
@@ -9,8 +9,7 @@ class Mesh:
     """3-dimensional Mesh of fixed, defined size.
 
     :ivar coordinates: Coordinate values for each of the 3 dimension.
-    :ivar extent: Tuple with three tuples containing minimum and maximum coordinate value on the
-        corresponding dimension.
+    :ivar extent: Extent object containing 3-dimensional extent information.
     :ivar n: Number of elements for each of the 3 dimensions.
     :ivar n_size: Total number of blocks in this mesh.
     :ivar label: Label associated with this mesh.
@@ -36,14 +35,10 @@ class Mesh:
         :param surfaces: List of surfaces available for obstacles and ventilations.
         """
         self.coordinates = [x_coordinates, y_coordinates, z_coordinates]
-        self.extent = Extent(x_coordinates[0], x_coordinates[-1], y_coordinates[0],
+        self.extent = Extent(0, x_coordinates.size, y_coordinates[0],
                              y_coordinates[-1], z_coordinates[0], z_coordinates[-1])
-        # Todo: Does this really do what it is supposed to do? What is it even supposed to do?
-        # Todo: Numpy: Deprecated
-        # self.mesh = np.meshgrid(self.coordinates)
 
-        self.n = [x_coordinates.size, y_coordinates.size, z_coordinates.size]
-        self.n_size = self.n[0] * self.n[1] * self.n[2]
+        self.n_size = self.extent.size()
 
         self.id = mesh_id
         self.index = mesh_index
@@ -58,6 +53,13 @@ class Mesh:
         if type(smv_file) == str:
             smv_file.close()
             infile.close()
+
+    def __getitem__(self, dimension: Literal[0, 1, 2]) -> np.ndarray:
+        """Get all values in given dimension.
+
+        :param dimension: The dimension in which to return all grid values (0=x, 1=y, 2=z).
+        """
+        return self.coordinates[dimension]
 
     def _load_obstructions(self, smv_file: mmap.mmap, pos: int, surfaces: List[Surface],
                            default_texture_origin: Tuple[float, float, float]) -> Dict[

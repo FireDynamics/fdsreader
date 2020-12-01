@@ -158,7 +158,8 @@ class SubSlice:
     :ivar root_path: Path to the directory containing the slice file.
     :ivar cell_centered: Indicates whether centered positioning for data is used.
     :ivar mesh: The mesh the subslice cuts through.
-    :ivar extent: Extent object containing 3-dimensional extent information.
+    :ivar extent: Extent object containing 3-dimensional extent information. Values are indexes for
+        the actual grid values of the mesh.
     :ivar file_names: File names for the corresponding slice file depending on the quantity.
     """
 
