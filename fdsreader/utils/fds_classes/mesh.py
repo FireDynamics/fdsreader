@@ -35,7 +35,9 @@ class Mesh:
         :param surfaces: List of surfaces available for obstacles and ventilations.
         """
         self.coordinates = [x_coordinates, y_coordinates, z_coordinates]
-        self.extent = Extent(0, x_coordinates.size, 0, y_coordinates.size, 0, z_coordinates.size)
+        self.extent = Extent(0, x_coordinates.size if x_coordinates.size > 1 else 0, 0,
+                             y_coordinates.size if y_coordinates.size > 1 else 0, 0,
+                             z_coordinates.size if z_coordinates.size > 1 else 0)
 
         self.n_size = self.extent.size()
 
@@ -137,7 +139,8 @@ class Mesh:
 
         def read_common_info():
             line = smv_file.readline().decode().strip().split()
-            return line, Extent(*[float(line[i]) for i in range(6)]), int(line[6]), surfaces[int(line[7])]
+            return line, Extent(*[float(line[i]) for i in range(6)]), int(line[6]), surfaces[
+                int(line[7])]
 
         def read_common_info2():
             line = smv_file.readline().decode().strip().split()

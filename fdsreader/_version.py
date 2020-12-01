@@ -1,4 +1,5 @@
-"""Provides fdsreader version information.
+"""
+Provides fdsreader version information.
 """
 
 # This file is auto-generated! Do not edit!
@@ -6,5 +7,5 @@
 
 from incremental import Version
 
-__version__ = Version('fdsreader', 0, 4, 3)
+__version__ = Version('fdsreader', 0, 4, 4)
 __all__ = ["__version__"]

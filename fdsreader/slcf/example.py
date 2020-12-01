@@ -12,6 +12,9 @@ def main():
     slice = sim.slices[0]
     # print(slice._subslices[0].get_data(slice.quantities[0].quantity, slice.root_path, slice.cell_centered))
 
+    mesh = sim.meshes[0]
+    print(mesh.extent)
+
     slice2 = slice * 2
 
     # np.array(slice)
