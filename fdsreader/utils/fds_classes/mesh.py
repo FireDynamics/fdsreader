@@ -35,8 +35,7 @@ class Mesh:
         :param surfaces: List of surfaces available for obstacles and ventilations.
         """
         self.coordinates = [x_coordinates, y_coordinates, z_coordinates]
-        self.extent = Extent(0, x_coordinates.size, y_coordinates[0],
-                             y_coordinates[-1], z_coordinates[0], z_coordinates[-1])
+        self.extent = Extent(0, x_coordinates.size, 0, y_coordinates.size, 0, z_coordinates.size)
 
         self.n_size = self.extent.size()
 
