@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>fdsreader.isof.isosurface &mdash; fdsreader [fdsreader, version 0.4.4dev1] documentation</title>
+  <title>fdsreader.isof.isosurface &mdash; fdsreader [fdsreader, version 0.4.5] documentation</title>
   
 
   
@@ -145,66 +145,54 @@
             
   <h1>Source code for fdsreader.isof.isosurface</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">BinaryIO</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">BinaryIO</span><span class="p">,</span> <span class="n">List</span>
 
-<span class="kn">from</span> <span class="nn">fdsreader.utils</span> <span class="kn">import</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">settings</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">fdsreader.utils</span> <span class="kn">import</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">Mesh</span>
 <span class="kn">import</span> <span class="nn">fdsreader.utils.fortran_data</span> <span class="k">as</span> <span class="nn">fdtype</span>
 
 
-<div class="viewcode-block" id="Isosurface"><a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.Isosurface">[docs]</a><span class="k">class</span> <span class="nc">Isosurface</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Isosurface file data container including metadata. Consists of a list of vertices forming a list</span>
-<span class="sd">     of triangles. Can optionally have additional color data for the surfaces.</span>
+<div class="viewcode-block" id="SubSurface"><a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.SubSurface">[docs]</a><span class="k">class</span> <span class="nc">SubSurface</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Part of an isosurface with data for a specific mesh.</span>
 
+<span class="sd">    :ivar mesh: The mesh containing all data for this :class:`SubSurface`.</span>
 <span class="sd">    :ivar file_path: Path to the binary data file.</span>
 <span class="sd">    :ivar v_file_path: Path to the binary data file containing color data.</span>
-<span class="sd">    :ivar quantity: Information about the quantity.</span>
-<span class="sd">    :ivar v_quantity: Information about the color quantity.</span>
-<span class="sd">    :ivar levels: All isosurface levels</span>
-<span class="sd">    :ivar n_vertices: The number of vertices for this isosurface.</span>
-<span class="sd">    :ivar n_triangles: The number of triangles for this isosurface.</span>
-<span class="sd">    :ivar _double_quantity: Defines whether there is color data for this isosurface or not.</span>
+<span class="sd">    :ivar n_vertices: The number of vertices for this subsurface.</span>
+<span class="sd">    :ivar n_triangles: The number of triangles for this subsurface.</span>
+<span class="sd">    :ivar t_n: Total number of time steps for which output data has been written.</span>
 <span class="sd">    :ivar _offset: Offset of the binary file to the end of the file header.</span>
-<span class="sd">    :ivar _v_offset: Offset of the binary file containing color data to the end of the file header.</span>
+<span class="sd">    :cvar _v_offset: Offset of the binary file containing color data to the end of the file header.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">double_quantity</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">iso_filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                 <span class="n">label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">viso_filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">v_quantity</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-                 <span class="n">v_label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">v_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="n">_v_offset</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">INT</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">FLOAT</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">+</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
+        <span class="p">((</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),))</span><span class="o">.</span><span class="n">itemsize</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_double_quantity</span> <span class="o">=</span> <span class="n">double_quantity</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="n">iso_filename</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">quantity</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">(</span><span class="n">quantity</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">,</span> <span class="n">iso_filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">viso_filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="n">mesh</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_double_quantity</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">v_quantity</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">(</span><span class="n">v_quantity</span><span class="p">,</span> <span class="n">v_label</span><span class="p">,</span> <span class="n">v_unit</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">v_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="n">viso_filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_path</span> <span class="o">=</span> <span class="n">iso_filepath</span>
+        <span class="k">if</span> <span class="n">viso_filepath</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">v_file_path</span> <span class="o">=</span> <span class="n">viso_filepath</span>
 
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
             <span class="n">nlevels</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">INT</span><span class="p">,</span> <span class="mi">3</span><span class="p">)[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
 
             <span class="n">dtype_header_levels</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">nlevels</span><span class="p">),))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">levels</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_header_levels</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="c1"># Todo: Actually use levels</span>
 
-            <span class="n">dtype_header_rest</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">combine</span><span class="p">(</span><span class="n">fdtype</span><span class="o">.</span><span class="n">INT</span><span class="p">,</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),)),</span>
-                                               <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))))</span>
+            <span class="n">dtype_header_zeros</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">combine</span><span class="p">(</span><span class="n">fdtype</span><span class="o">.</span><span class="n">INT</span><span class="p">,</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),)))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">INT</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="n">dtype_header_levels</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">+</span> \
-                           <span class="n">dtype_header_rest</span><span class="o">.</span><span class="n">itemsize</span>
-            <span class="n">infile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_offset</span><span class="p">)</span>
+                           <span class="n">dtype_header_zeros</span><span class="o">.</span><span class="n">itemsize</span>
 
-            <span class="n">dtype_dims</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),))</span>
-            <span class="n">dims_data</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_dims</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">n_vertices</span> <span class="o">=</span> <span class="n">dims_data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">n_triangles</span> <span class="o">=</span> <span class="n">dims_data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">_offset</span> <span class="o">+=</span> <span class="n">dtype_dims</span><span class="o">.</span><span class="n">itemsize</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">times</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_vertices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_triangles</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">LAZY_LOAD</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_load_data</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_double_quantity</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_v_offset</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">INT</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">FLOAT</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">+</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
-                <span class="p">((</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),))</span><span class="o">.</span><span class="n">itemsize</span>
-
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_color_data</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">LAZY_LOAD</span><span class="p">:</span>
                 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">v_file_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_load_vdata</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
@@ -218,7 +206,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_load_data</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span>
 
-<div class="viewcode-block" id="Isosurface.triangles"><a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.Isosurface.triangles">[docs]</a>    <span class="k">def</span> <span class="nf">triangles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="SubSurface.triangles"><a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.SubSurface.triangles">[docs]</a>    <span class="k">def</span> <span class="nf">triangles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Property to lazy load all triangles of any level.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_triangles&quot;</span><span class="p">):</span>
@@ -229,6 +217,7 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">surfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Property to lazy load a list that maps triangles to an isosurface for a specific level.</span>
+<span class="sd">        The list has the size n_triangles, while the indices correspond to indices of the triangles.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_surfaces&quot;</span><span class="p">):</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
@@ -237,15 +226,15 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">has_color_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Defines whether there is color data for this isosurface or not.</span>
+        <span class="sd">&quot;&quot;&quot;Defines whether there is color data for this subsurface or not.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_double_quantity</span>
+        <span class="k">return</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;v_file_path&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">colors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Property to lazy load the color data that might be associated with the isosurfaces.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_double_quantity</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_color_data</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_colors&quot;</span><span class="p">):</span>
                 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">v_file_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_load_vdata</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
@@ -256,25 +245,109 @@
                               <span class="s2">&quot; color-data.&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">:</span> <span class="n">BinaryIO</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Loads all data for all isosurfaces in a given iso file.</span>
+        <span class="sd">&quot;&quot;&quot;Loads data for the subsurface which is given in an iso file.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">dtype_vertices</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="mi">3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_vertices</span><span class="p">),))</span>
-        <span class="n">dtype_triangles</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_triangles</span><span class="p">),))</span>
-        <span class="n">dtype_surfaces</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_triangles</span><span class="p">),))</span>
-        <span class="n">infile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_offset</span><span class="p">)</span>
+        <span class="n">dtype_time</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+        <span class="n">dtype_dims</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),))</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_vertices</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_vertices</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_triangles</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_triangles</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_surfaces</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_surfaces</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_triangles</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_vertices</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_triangles</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_surfaces</span><span class="p">)</span>
+        <span class="n">vertices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">triangles</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">surfaces</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+        <span class="n">infile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_offset</span><span class="p">)</span>
+        <span class="n">time_data</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_time</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">while</span> <span class="n">time_data</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time_data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+
+            <span class="n">dims_data</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_dims</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">n_vertices</span> <span class="o">=</span> <span class="n">dims_data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">n_triangles</span> <span class="o">=</span> <span class="n">dims_data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="n">dtype_vertices</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">n_vertices</span><span class="p">),))</span>
+            <span class="n">dtype_triangles</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">n_triangles</span><span class="p">),))</span>
+            <span class="n">dtype_surfaces</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">n_triangles</span><span class="p">),))</span>
+
+            <span class="n">vertices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_vertices</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">n_vertices</span><span class="p">,</span> <span class="mi">3</span><span class="p">)))</span>
+            <span class="n">triangles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_triangles</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">n_triangles</span><span class="p">,</span> <span class="mi">3</span><span class="p">)))</span>
+            <span class="n">surfaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_surfaces</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_vertices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n_vertices</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_triangles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n_triangles</span><span class="p">)</span>
+            <span class="n">time_data</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_time</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vertices</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_triangles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">triangles</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_surfaces</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">surfaces</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">t_n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_load_vdata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">:</span> <span class="n">BinaryIO</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Loads all color data for all isosurfaces in a given viso file.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+        <span class="c1"># Todo: Fix this</span>
+        <span class="c1"># dtype_color = fdtype.new(((&#39;f&#39;, self.n_vertices),))</span>
+        <span class="c1"># infile.seek(self._v_offset)</span>
+        <span class="c1"># self._colors = fdtype.read(infile, dtype_color, self.n_vertices)</span>
+
+
+<div class="viewcode-block" id="Isosurface"><a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.Isosurface">[docs]</a><span class="k">class</span> <span class="nc">Isosurface</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Isosurface file data container including metadata. Consists of a list of vertices forming a list</span>
+<span class="sd">         of triangles. Can optionally have additional color data for the surfaces.</span>
+
+<span class="sd">    :ivar id: The ID of this isosurface.</span>
+<span class="sd">    :ivar root_path: Path to the directory containing all isosurface files.</span>
+<span class="sd">    :ivar quantity: Information about the quantity.</span>
+<span class="sd">    :ivar v_quantity: Information about the color quantity.</span>
+<span class="sd">    :ivar levels: All isosurface levels</span>
+<span class="sd">    :ivar _double_quantity: Defines whether there is color data for this isosurface or not.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">isosurface_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">root_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">double_quantity</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                 <span class="n">label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">v_quantity</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">v_label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">v_unit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">isosurface_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">root_path</span> <span class="o">=</span> <span class="n">root_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quantity</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">(</span><span class="n">quantity</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_double_quantity</span> <span class="o">=</span> <span class="n">double_quantity</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_times</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_subsurfaces</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">SubSurface</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_double_quantity</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">v_quantity</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">(</span><span class="n">v_quantity</span><span class="p">,</span> <span class="n">v_label</span><span class="p">,</span> <span class="n">v_unit</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_add_subsurface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">,</span> <span class="n">iso_filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">viso_filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SubSurface</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">viso_filename</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">subsurface</span> <span class="o">=</span> <span class="n">SubSurface</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="n">iso_filename</span><span class="p">),</span>
+                                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="n">viso_filename</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">subsurface</span> <span class="o">=</span> <span class="n">SubSurface</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="n">iso_filename</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_subsurfaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subsurface</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">subsurface</span>
+
+<div class="viewcode-block" id="Isosurface.get_subsurface"><a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.Isosurface.get_subsurface">[docs]</a>    <span class="k">def</span> <span class="nf">get_subsurface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the :class:`SubSurface` that contains data for the given mesh.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">dtype_color</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_vertices</span><span class="p">),))</span>
-        <span class="n">infile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_v_offset</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_colors</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_color</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_vertices</span><span class="p">)</span></div>
+        <span class="k">for</span> <span class="n">iso</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subsurfaces</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">iso</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">mesh</span><span class="o">.</span><span class="n">id</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">iso</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;The provided mesh is not valid for this operation in this simulation!&quot;</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">has_color_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Defines whether there is color data for this isosurface or not.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_double_quantity</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">times</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_times&quot;</span><span class="p">):</span>
+            <span class="c1"># Implicitly load the data for one subsurface and read times</span>
+            <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subsurfaces</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">vertices</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_times</span></div>
 </pre></div>
 
            </div>

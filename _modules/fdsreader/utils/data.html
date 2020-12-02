@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>fdsreader.utils.data &mdash; fdsreader [fdsreader, version 0.4.4dev1] documentation</title>
+  <title>fdsreader.utils.data &mdash; fdsreader [fdsreader, version 0.4.5] documentation</title>
   
 
   
@@ -154,7 +154,10 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">label</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="n">unit</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">quantity</span> <span class="o">=</span> <span class="n">quantity</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quantity</span> <span class="o">=</span> <span class="n">quantity</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">quantity</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">quantity</span></div>
 
 
 <div class="viewcode-block" id="scan_directory_smv"><a class="viewcode-back" href="../../../utils.html#fdsreader.utils.data.scan_directory_smv">[docs]</a><span class="k">def</span> <span class="nf">scan_directory_smv</span><span class="p">(</span><span class="nb">dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>

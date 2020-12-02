@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Isosurface files &mdash; fdsreader [fdsreader, version 0.4.4dev1] documentation</title>
+  <title>Isosurface files &mdash; fdsreader [fdsreader, version 0.4.5] documentation</title>
   
 
   
@@ -150,7 +150,7 @@
 <h1>Isosurface files<a class="headerlink" href="#isosurface-files" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="apireference"></span><dl class="py class">
 <dt>
-<em class="property">class </em><code class="sig-prename descclassname">fdsreader.isof.isosurface.</code><code class="sig-name descname">Isosurface</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">root_path</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">double_quantity</span><span class="p">:</span> <span class="n">bool</span></em>, <em class="sig-param"><span class="n">iso_filename</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">quantity</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">label</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">unit</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">viso_filename</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em>, <em class="sig-param"><span class="n">v_quantity</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em>, <em class="sig-param"><span class="n">v_label</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em>, <em class="sig-param"><span class="n">v_unit</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/isof/isosurface.html#Isosurface"><span class="viewcode-link">[source]</span></a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">fdsreader.isof.isosurface.</code><code class="sig-name descname">Isosurface</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">isosurface_id</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">root_path</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">double_quantity</span><span class="p">:</span> <span class="n">bool</span></em>, <em class="sig-param"><span class="n">quantity</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">label</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">unit</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">v_quantity</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em>, <em class="sig-param"><span class="n">v_label</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em>, <em class="sig-param"><span class="n">v_unit</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/isof/isosurface.html#Isosurface"><span class="viewcode-link">[source]</span></a></dt>
 <dd><dl class="simple">
 <dt>Isosurface file data container including metadata. Consists of a list of vertices forming a list</dt><dd><p>of triangles. Can optionally have additional color data for the surfaces.</p>
 </dd>
@@ -158,14 +158,47 @@
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>file_path</strong> – Path to the binary data file.</p></li>
-<li><p><strong>v_file_path</strong> – Path to the binary data file containing color data.</p></li>
+<li><p><strong>id</strong> – The ID of this isosurface.</p></li>
+<li><p><strong>root_path</strong> – Path to the directory containing all isosurface files.</p></li>
 <li><p><strong>quantity</strong> – Information about the quantity.</p></li>
 <li><p><strong>v_quantity</strong> – Information about the color quantity.</p></li>
 <li><p><strong>levels</strong> – All isosurface levels</p></li>
-<li><p><strong>n_vertices</strong> – The number of vertices for this isosurface.</p></li>
-<li><p><strong>n_triangles</strong> – The number of triangles for this isosurface.</p></li>
 <li><p><strong>_double_quantity</strong> – Defines whether there is color data for this isosurface or not.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt>
+<code class="sig-name descname">get_subsurface</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mesh</span><span class="p">:</span> <span class="n">fdsreader.utils.fds_classes.mesh.Mesh</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/isof/isosurface.html#Isosurface.get_subsurface"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Returns the <code class="xref py py-class docutils literal notranslate"><span class="pre">SubSurface</span></code> that contains data for the given mesh.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">has_color_data</code></dt>
+<dd><p>Defines whether there is color data for this isosurface or not.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">times</code></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">fdsreader.isof.isosurface.</code><code class="sig-name descname">SubSurface</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mesh</span><span class="p">:</span> <span class="n">fdsreader.utils.fds_classes.mesh.Mesh</span></em>, <em class="sig-param"><span class="n">iso_filepath</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">viso_filepath</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/isof/isosurface.html#SubSurface"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Part of an isosurface with data for a specific mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mesh</strong> – The mesh containing all data for this <code class="xref py py-class docutils literal notranslate"><span class="pre">SubSurface</span></code>.</p></li>
+<li><p><strong>file_path</strong> – Path to the binary data file.</p></li>
+<li><p><strong>v_file_path</strong> – Path to the binary data file containing color data.</p></li>
+<li><p><strong>n_vertices</strong> – The number of vertices for this subsurface.</p></li>
+<li><p><strong>n_triangles</strong> – The number of triangles for this subsurface.</p></li>
+<li><p><strong>t_n</strong> – Total number of time steps for which output data has been written.</p></li>
 <li><p><strong>_offset</strong> – Offset of the binary file to the end of the file header.</p></li>
 <li><p><strong>_v_offset</strong> – Offset of the binary file containing color data to the end of the file header.</p></li>
 </ul>
@@ -180,18 +213,19 @@
 <dl class="py method">
 <dt>
 <em class="property">property </em><code class="sig-name descname">has_color_data</code></dt>
-<dd><p>Defines whether there is color data for this isosurface or not.</p>
+<dd><p>Defines whether there is color data for this subsurface or not.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt>
 <em class="property">property </em><code class="sig-name descname">surfaces</code></dt>
-<dd><p>Property to lazy load a list that maps triangles to an isosurface for a specific level.</p>
+<dd><p>Property to lazy load a list that maps triangles to an isosurface for a specific level.
+The list has the size n_triangles, while the indices correspond to indices of the triangles.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname">triangles</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/isof/isosurface.html#Isosurface.triangles"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-name descname">triangles</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/isof/isosurface.html#SubSurface.triangles"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Property to lazy load all triangles of any level.</p>
 </dd></dl>
 
