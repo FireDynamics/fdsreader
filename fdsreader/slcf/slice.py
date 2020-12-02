@@ -20,6 +20,58 @@ def implements(np_function):
     return decorator
 
 
+class SubSlice:
+    """
+    Part of a slice that cuts through a single mesh.
+
+    :ivar root_path: Path to the directory containing the slice file.
+    :ivar cell_centered: Indicates whether centered positioning for data is used.
+    :ivar mesh: The mesh the subslice cuts through.
+    :ivar extent: Extent object containing 3-dimensional extent information. Values are indexes for
+        the actual grid values of the mesh.
+    :ivar file_names: File names for the corresponding slice file depending on the quantity.
+    """
+
+    _offset = 3 * fdtype.new((('c', 30),)).itemsize + fdtype.new((('i', 6),)).itemsize
+
+    def __init__(self, filename: str, root_path: str, cell_centered: bool, extent: Extent,
+                 quantity: str, mesh: Mesh, times):
+        self.mesh = mesh
+        self.extent = extent
+        self.root_path = root_path
+        self.cell_centered = cell_centered
+
+        self.file_names = {quantity: filename}
+        self._data: Dict[str, np.ndarray] = dict()  # Dictionary that maps quantity to data.
+        self._times = times
+
+    def get_data(self, quantity: str) -> np.ndarray:
+        """
+        Method to lazy load the slice's data for a specific quantity.
+        """
+        if quantity not in self._data:
+            file_path = os.path.join(self.root_path, self.file_names[quantity])
+            n = self.extent.size(cell_centered=self.cell_centered)
+            shape = (self.extent.x - 1 if self.cell_centered else self.extent.x,
+                     self.extent.y - 1 if self.cell_centered else self.extent.y,
+                     self.extent.z - 1 if self.cell_centered else self.extent.z)
+
+            dtype_data = fdtype.combine(fdtype.FLOAT, fdtype.new((('f', n),)))
+
+            fill_times = self._times[0] == -1
+            t_n = self._times.shape[0]
+
+            self._data[quantity] = np.empty((t_n,) + shape, dtype=np.float32)
+
+            with open(file_path, 'rb') as infile:
+                infile.seek(self._offset)
+                for i, data in enumerate(fdtype.read(infile, dtype_data, t_n)):
+                    if fill_times:
+                        self._times[i] = data[0][0]
+                    self._data[quantity][i, :] = data[1].reshape(shape)
+        return self._data[quantity]
+
+
 class Slice(np.lib.mixins.NDArrayOperatorsMixin):
     """Slice file data container including metadata. Consists of multiple subslices, one for each mesh
      the slice cuts through.
@@ -36,12 +88,12 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         self.cell_centered = cell_centered
 
         self.quantities: List[Quantity] = list()
-        self.times = None
+        self._times = None
         # List of all subslices this slice consists of (one per mesh).
         self._subslices: List[SubSlice] = list()
 
     def _add_subslice(self, filename: str, quantity: str, label: str, unit: str, extent: Extent,
-                      mesh: Mesh):
+                      mesh: Mesh) -> SubSlice:
         """Adds another subslice to the slice.
 
         :param filename: Name of the slice file.
@@ -50,40 +102,56 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         :param unit: Quantity unit.
         :param extent: Extent object containing 3-dimensional extent information.
         :param mesh: The mesh the subslice cuts through.
+        :returns: The added subslice.
         """
-        self.quantities.append(Quantity(quantity, label, unit))
-        for subslice in self._subslices:
-            if subslice.extent == extent:
-                subslice.file_names[quantity] = filename
-                break
+        q = Quantity(quantity, label, unit)
+        if q not in self.quantities:
+            self.quantities.append(q)
 
-        dtype_data = fdtype.combine(fdtype.FLOAT, fdtype.new(
-            (('f', extent.size(cell_centered=self.cell_centered)),)))
+        subslice = next((s for s in self._subslices if s.extent == extent), None)
+        if subslice is None:
+            dtype_data = fdtype.combine(fdtype.FLOAT, fdtype.new(
+                (('f', extent.size(cell_centered=self.cell_centered)),)))
 
-        if self.times is None:
-            t_n = (os.stat(os.path.join(self.root_path, filename)).st_size - SubSlice._offset) \
-                  // dtype_data.itemsize
-            self.times = np.empty(shape=(t_n,))
-            self.times[0] = -1
+            if self._times is None:
+                t_n = (os.stat(os.path.join(self.root_path, filename)).st_size - SubSlice._offset) \
+                      // dtype_data.itemsize
+                self._times = np.empty(shape=(t_n,))
+                # Mark times as not uninitialized
+                self._times[0] = -1
 
-        self._subslices.append(
-            SubSlice(filename, self.root_path, self.cell_centered, extent, quantity, mesh,
-                     self.times))
+            subslice = SubSlice(filename, self.root_path, self.cell_centered, extent, quantity,
+                                mesh,
+                                self._times)
+            self._subslices.append(subslice)
+        else:
+            # If a subslice does already exist only add the additional quantity
+            subslice.file_names[quantity] = filename
 
         # If lazy loading has been disabled by the user, load the data instantaneously instead
         if not settings.LAZY_LOAD:
-            self._subslices[-1].get_data(quantity)
+            subslice.get_data(quantity)
+
+        return subslice
 
     def get_subslice(self, mesh: Mesh):
-        """
-        Returns the SubSlice that cuts through the given mesh.
-
-        :param mesh:
+        """Returns the :class:`SubSlice` that cuts through the given mesh.
         """
         for slc in self._subslices:
             if slc.mesh.id == mesh.id:
                 return slc
-        return None
+        raise KeyError("The slice does not cut through the provided mesh!")
+
+    @property
+    def times(self):
+        if self._times is None:
+            raise AssertionError("Time data is not available before initializing the first"
+                                 " subslice. This indicates that this function has been called"
+                                 " mid-initialization, which should not happen!")
+        elif self._times[0] == -1:
+            # Implicitly load the data for one subslice, which (as a side effect) sets time data
+            self._subslices[0].get_data(self.quantities[0].quantity)
+        return self._times
 
     def mean(self, quantity: str = None):
         """
@@ -149,58 +217,6 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         if not all(issubclass(t, self.__class__) for t in types):
             return NotImplemented
         return _HANDLED_FUNCTIONS[func](*args, **kwargs)
-
-
-class SubSlice:
-    """
-    Part of a slice that cuts through a single mesh.
-
-    :ivar root_path: Path to the directory containing the slice file.
-    :ivar cell_centered: Indicates whether centered positioning for data is used.
-    :ivar mesh: The mesh the subslice cuts through.
-    :ivar extent: Extent object containing 3-dimensional extent information. Values are indexes for
-        the actual grid values of the mesh.
-    :ivar file_names: File names for the corresponding slice file depending on the quantity.
-    """
-
-    _offset = 3 * fdtype.new((('c', 30),)).itemsize + fdtype.new((('i', 6),)).itemsize
-
-    def __init__(self, filename: str, root_path: str, cell_centered: bool, extent: Extent,
-                 quantity: str, mesh: Mesh, times):
-        self.mesh = mesh
-        self.extent = extent
-        self.root_path = root_path
-        self.cell_centered = cell_centered
-
-        self.file_names = {quantity: filename}
-        self._data: Dict[str, np.ndarray] = dict()  # Dictionary that maps quantity to data.
-        self._times = times
-
-    def get_data(self, quantity: str) -> np.ndarray:
-        """
-        Method to lazy load the slice's data for a specific quantity.
-        """
-        if quantity not in self._data:
-            file_path = os.path.join(self.root_path, self.file_names[quantity])
-            n = self.extent.size(cell_centered=self.cell_centered)
-            shape = (self.extent.x - 1 if self.cell_centered else self.extent.x,
-                     self.extent.y - 1 if self.cell_centered else self.extent.y,
-                     self.extent.z - 1 if self.cell_centered else self.extent.z)
-
-            dtype_data = fdtype.combine(fdtype.FLOAT, fdtype.new((('f', n),)))
-
-            fill_times = self._times[0] == -1
-            t_n = self._times.shape[0]
-
-            self._data[quantity] = np.empty((t_n,) + shape, dtype=np.float32)
-
-            with open(file_path, 'rb') as infile:
-                infile.seek(self._offset)
-                for i, data in enumerate(fdtype.read(infile, dtype_data, t_n)):
-                    if fill_times:
-                        self._times[i] = data[0][0]
-                    self._data[quantity][i, :] = data[1].reshape(shape)
-        return self._data[quantity]
 
 
 # __array_function__ implementations

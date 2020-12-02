@@ -3,7 +3,7 @@ import os
 from typing import List
 import numpy as np
 
-from fdsreader.utils import Quantity, Mesh
+from fdsreader.utils import Quantity, Mesh, settings
 import fdsreader.utils.fortran_data as fdtype
 
 _HANDLED_FUNCTIONS = {np.mean: (lambda pl: pl.mean)}
@@ -20,6 +20,33 @@ def implements(np_function):
     return decorator
 
 
+class SubPlot3D:
+    """Subplot of a plot3d output for a single mesh.
+
+    :ivar file_path: Path to the binary data file.
+    :ivar mesh: The mesh containing the data.
+    """
+    # Offset of the binary file to the end of the file header.
+    _offset = fdtype.new((('i', 3),)).itemsize + fdtype.new((('i', 4),)).itemsize
+
+    def __init__(self, file_path: str, mesh: Mesh):
+        self.file_path = file_path
+        self.mesh = mesh
+
+    def get_data(self) -> np.ndarray:
+        """Method to lazy load the 3D data for a single mesh.
+
+        :returns: 4D numpy array wiht (x,y,z,q) as dimensions, while q represents the 5 quantities.
+        """
+        if not hasattr(self, "_data"):
+            with open(self.file_path, 'rb') as infile:
+                dtype_data = fdtype.new((('f', self.mesh.extent.size(cell_centered=False) * 5),))
+                infile.seek(self._offset)
+                self._data = fdtype.read(infile, dtype_data, 1)[0][0].reshape(
+                    (self.mesh.extent.x, self.mesh.extent.y, self.mesh.extent.z, 5))
+        return self._data
+
+
 class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
     """Plot3d file data container including metadata. Consists of multiple subplots, one for each mesh.
 
@@ -28,16 +55,32 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
     :ivar quantities: List with quantity objects containing information about recorded quantities
      calculated for this Plot3D with the corresponding label and unit.
     """
+
     def __init__(self, root_path: str, time: float, quantities: List[Quantity]):
         self.root_path = root_path
         self.time = time
         self.quantities = quantities
 
         # List of all subplots this slice consists of (one per mesh).
-        self._subplots: List[_SubPlot3D] = list()
+        self._subplots: List[SubPlot3D] = list()
 
-    def _add_subplot(self, filename: str, mesh: Mesh):
-        self._subplots.append(_SubPlot3D(os.path.join(self.root_path, filename), mesh))
+    def _add_subplot(self, filename: str, mesh: Mesh) -> SubPlot3D:
+        subplot = SubPlot3D(os.path.join(self.root_path, filename), mesh)
+        self._subplots.append(subplot)
+
+        # If lazy loading has been disabled by the user, load the data instantaneously instead
+        if not settings.LAZY_LOAD:
+            subplot.get_data()
+
+        return subplot
+
+    def get_subslice(self, mesh: Mesh):
+        """Returns the :class:`SubPlot` that contains data for the given mesh.
+        """
+        for plt in self._subplots:
+            if plt.mesh.id == mesh.id:
+                return plt
+        raise KeyError("The provided mesh is not valid for this operation in this simulation!")
 
     def mean(self) -> np.ndarray:
         """Calculates the mean over each quantity individually of the whole Plot3D.
@@ -89,34 +132,6 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
         if not all(issubclass(t, self.__class__) for t in types):
             return NotImplemented
         return _HANDLED_FUNCTIONS[func](*args, **kwargs)
-
-
-class _SubPlot3D:
-    """Subplot of a plot3d output for a single mesh.
-
-    :ivar file_path: Path to the binary data file.
-    :ivar mesh: The mesh containing the data.
-    """
-    # Offset of the binary file to the end of the file header.
-    _offset = fdtype.new((('i', 3),)).itemsize + fdtype.new((('i', 4),)).itemsize
-
-    def __init__(self, file_path: str, mesh: Mesh):
-        self.file_path = file_path
-        self.mesh = mesh
-
-    def get_data(self) -> np.ndarray:
-        """Method to lazy load the 3D data for a single mesh.
-
-        :returns: 4D numpy array wiht (x,y,z,q) as dimensions, while q represents the 5 quantities.
-        """
-        if not hasattr(self, "_data"):
-            with open(self.file_path, 'rb') as infile:
-                dtype_data = fdtype.new((('f', self.mesh.extent.size(cell_centered=False) * 5),))
-                infile.seek(self._offset)
-                self._data = fdtype.read(infile, dtype_data, 1)[0][0].reshape(
-                    (self.mesh.extent.x, self.mesh.extent.y, self.mesh.extent.z, 5))
-        return self._data
-
 
 # __array_function__ implementations
 # ...

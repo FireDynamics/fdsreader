@@ -90,7 +90,7 @@ class Simulation:
             logging.debug("number of cells: %i x %i x %i", nx, ny, nz)
 
             meshes.append(Mesh(read_dimension(b'X', nx, pos + 1), read_dimension(b'Y', ny, pos + 1),
-                               read_dimension(b'Z', nz, pos + 1), mesh_id, len(meshes) - 1,
+                               read_dimension(b'Z', nz, pos + 1), mesh_id, len(meshes),
                                smv_file, pos, self.surfaces,
                                self.default_texture_origin))
 
@@ -257,19 +257,21 @@ class Simulation:
         """Lazy loads all isosurfaces for the simulation.
         :returns: All isof data.
         """
-        # Todo: Check for multimesh
         # Only load isosurfaces once initially and then reuse the loaded information
         if not hasattr(self, "_isosurfaces"):
-            self._isosurfaces = list()
+            isosurfaces = dict()
             with open(self.smv_file_path, 'r') as infile, \
                     mmap.mmap(infile.fileno(), 0, access=mmap.ACCESS_READ) as smv_file:
                 pos = smv_file.find(b'ISOG', 0)
                 while pos > 0:
                     smv_file.seek(pos - 1)
                     double_quantity = smv_file.read(1) == b'T'
-                    smv_file.readline()
+
+                    mesh_index = int(smv_file.readline().decode().strip().split()[1]) - 1
 
                     iso_filename = smv_file.readline().decode().strip()
+                    iso_id = int(iso_filename.split('_')[-1][:-4])
+
                     if double_quantity:
                         viso_filename = smv_file.readline().decode().strip()
                     quantity = smv_file.readline().decode().strip()
@@ -281,17 +283,24 @@ class Simulation:
                         v_unit = smv_file.readline().decode().strip()
 
                     if double_quantity:
-                        self._isosurfaces.append(
-                            Isosurface(os.path.dirname(self.smv_file_path), double_quantity,
-                                       iso_filename, quantity, label, unit,
-                                       viso_filename=viso_filename, v_quantity=v_quantity,
-                                       v_label=v_label, v_unit=v_unit))
+                        if iso_id not in isosurfaces:
+                            isosurfaces[iso_id] = Isosurface(iso_id,
+                                                             os.path.dirname(self.smv_file_path),
+                                                             double_quantity, quantity, label, unit,
+                                                             v_quantity=v_quantity, v_label=v_label,
+                                                             v_unit=v_unit)
+                        isosurfaces[iso_id]._add_subsurface(self.meshes[mesh_index], iso_filename,
+                                                            viso_filename=viso_filename)
                     else:
-                        self._isosurfaces.append(
-                            Isosurface(os.path.dirname(self.smv_file_path), double_quantity,
-                                       iso_filename, quantity, label, unit))
+                        if iso_id not in isosurfaces:
+                            isosurfaces[iso_id] = Isosurface(iso_id,
+                                                             os.path.dirname(self.smv_file_path),
+                                                             double_quantity, quantity, label, unit)
+                        isosurfaces[iso_id]._add_subsurface(self.meshes[mesh_index], iso_filename)
 
                     pos = smv_file.find(b'ISOG', pos + 1)
-            if len(self._isosurfaces) == 0:
+            if len(isosurfaces) > 0:
+                self._isosurfaces = list(isosurfaces.values())
+            else:
                 raise IOError("This simulation did not output any isosurfaces.")
         return self._isosurfaces

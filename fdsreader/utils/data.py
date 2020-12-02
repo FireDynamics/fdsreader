@@ -10,6 +10,9 @@ class Quantity:
         self.unit = unit
         self.quantity = quantity
 
+    def __eq__(self, other):
+        return self.quantity == other.quantity
+
 
 def scan_directory_smv(dir: str):
     """

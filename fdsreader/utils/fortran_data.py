@@ -79,4 +79,5 @@ def read(infile: BinaryIO, dtype: np.dtype, n: int):
     :returns: Read in data.
     """
     return np.array(
-        [[t[i] for i in range(1, len(t), 3)] for t in np.fromfile(infile, dtype=dtype, count=n)])
+        [[t[i] for i in range(1, len(t), 3)] for t in np.fromfile(infile, dtype=dtype, count=n)],
+        dtype=object)

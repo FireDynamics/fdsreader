@@ -45,8 +45,13 @@ print(sim.meshes, sim.meshes[0].obstructions, sim.surfaces, sim.slices, sim.boun
     * Implemented automatic unit testing
     
 ### --> Pre-Alpha
-* 0.4.4
+* 0.4.6
     * (Coming soon...)
+* 0.4.5
+    * Added Multimesh isof support
+    * Improved slcf and bndf stability
+* 0.4.4
+    * Bugfixes for bndf and plot3d
 * 0.4.3
     * Bugfixes for slcf and isof readers
 * 0.4.2

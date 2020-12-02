@@ -27,7 +27,7 @@ slc.read_data()
 slc.map_data_onto_mesh(meshes)
 
 # plot slice data
-for it in range(0, slc.times.size, 10):
+for it in range(0, slc._times.size, 10):
     plt.imshow(slc.sd[it], origin='lower')
     plt.colorbar()
     plt.grid(True)

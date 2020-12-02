@@ -36,7 +36,7 @@ mesh, extent, data, mask = slc_col.combine_slices(slices)
 
 # get max value
 max_coefficient = 0
-times = slc.times.size
+times = slc._times.size
 for it in range(0, times):
     cmax = np.max(data[it])
     max_coefficient = max(cmax, max_coefficient)
@@ -44,7 +44,7 @@ for it in range(0, times):
 # plot slice data
 for it in range(0, times, 10):
     plt.imshow(data[it], cmap='Greys', vmax=max_coefficient, origin='lower', extent=extent)
-    plt.title("time = {:.2f}".format(slc.times[it]))
+    plt.title("time = {:.2f}".format(slc._times[it]))
     plt.colorbar(label="{} [{}]".format(slc.quantity, slc.units))
     plt.savefig("single_slice_{:06d}.pdf".format(it))
     plt.clf()

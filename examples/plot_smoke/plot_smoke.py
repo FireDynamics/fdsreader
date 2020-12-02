@@ -29,15 +29,15 @@ slc.map_data_onto_mesh(meshes)
 
 # get max value
 max_coefficient = 0
-for it in range(0, slc.times.size):
+for it in range(0, slc._times.size):
     cmax = np.max(slc.sd[it])
     max_coefficient = max(cmax, max_coefficient)
 
 # plot slice data
-for it in range(0, slc.times.size, 10):
+for it in range(0, slc._times.size, 10):
     plt.imshow(slc.sd[it], cmap='Greys', vmax=max_coefficient,
                origin='lower', extent=slc.slice_mesh.extent)
-    plt.title("time = {:.2f}".format(slc.times[it]))
+    plt.title("time = {:.2f}".format(slc._times[it]))
     plt.colorbar(label="{} [{}]".format(slc.quantity, slc.units))
     plt.savefig("single_slice_{:06d}.pdf".format(it))
     plt.clf()
