@@ -77,8 +77,8 @@ print(sim.meshes, sim.meshes[0].obstructions, sim.surfaces, sim.slices, sim.boun
 
 ## Meta
 
-Jan Vogelsang – j.vogelsang@fz-juelich.de
-Prof. Dr. Lukas Arnold - l.arnold@fz-juelich.de
+*  Jan Vogelsang – j.vogelsang@fz-juelich.de
+*  Prof. Dr. Lukas Arnold - l.arnold@fz-juelich.de
 
 Distributed under the LGPLv3 (GNU Lesser General Public License v3) license. See ``LICENSE`` for more information.
 
