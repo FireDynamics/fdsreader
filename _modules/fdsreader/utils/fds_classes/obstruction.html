@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>fdsreader.utils.fds_classes.obstruction &mdash; fdsreader [fdsreader, version 0.4.5] documentation</title>
+  <title>fdsreader.utils.fds_classes.obstruction &mdash; fdsreader [fdsreader, version 0.4.6] documentation</title>
   
 
   
@@ -166,14 +166,17 @@
 <span class="sd">     \n-1 - use surface to obtain blocktype</span>
 <span class="sd">     \n0 - regular block</span>
 <span class="sd">     \n2 - outline</span>
-<span class="sd">    :ivar texture_origin: Origin position of the texture provided by the surface. When the texture does have a pattern,</span>
-<span class="sd">        for example windows or bricks, the texture_origin specifies where the pattern should begin.</span>
-<span class="sd">    :ivar rgba: Optional color of the obstruction in form of a 4-element tuple (ranging from 0.0 to 1.0).</span>
+<span class="sd">    :ivar texture_origin: Origin position of the texture provided by the surface. When the texture</span>
+<span class="sd">        does have a pattern, for example windows or bricks, the texture_origin specifies where the</span>
+<span class="sd">        pattern should begin.</span>
+<span class="sd">    :ivar rgba: Optional color of the obstruction in form of a 4-element tuple</span>
+<span class="sd">        (ranging from 0.0 to 1.0).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oid</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">extent</span><span class="p">:</span> <span class="n">Extent</span><span class="p">,</span>
                  <span class="n">side_surfaces</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Surface</span><span class="p">,</span> <span class="n">Surface</span><span class="p">,</span> <span class="n">Surface</span><span class="p">,</span> <span class="n">Surface</span><span class="p">,</span> <span class="n">Surface</span><span class="p">,</span> <span class="n">Surface</span><span class="p">],</span>
-                 <span class="n">bound_indices</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">color_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">block_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                 <span class="n">texture_origin</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+                 <span class="n">bound_indices</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">color_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">block_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">texture_origin</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
                  <span class="n">rgba</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[()],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">()):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">oid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">extent</span> <span class="o">=</span> <span class="n">extent</span>

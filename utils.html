@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Utilities &mdash; fdsreader [fdsreader, version 0.4.5] documentation</title>
+  <title>Utilities &mdash; fdsreader [fdsreader, version 0.4.6] documentation</title>
   
 
   
@@ -286,11 +286,13 @@ corresponding dimension together forming a cuboid.</p>
 <dl class="simple">
 <dt>2 - outline</dt><dd><dl class="field-list simple">
 <dt class="field-odd">ivar texture_origin</dt>
-<dd class="field-odd"><p>Origin position of the texture provided by the surface. When the texture does have a pattern,
-for example windows or bricks, the texture_origin specifies where the pattern should begin.</p>
+<dd class="field-odd"><p>Origin position of the texture provided by the surface. When the texture
+does have a pattern, for example windows or bricks, the texture_origin specifies where the
+pattern should begin.</p>
 </dd>
 <dt class="field-even">ivar rgba</dt>
-<dd class="field-even"><p>Optional color of the obstruction in form of a 4-element tuple (ranging from 0.0 to 1.0).</p>
+<dd class="field-even"><p>Optional color of the obstruction in form of a 4-element tuple
+(ranging from 0.0 to 1.0).</p>
 </dd>
 </dl>
 </dd>
@@ -365,11 +367,30 @@ for example windows or bricks, the texture_origin specifies where the pattern sh
 
 <dl class="py function">
 <dt>
-<code class="sig-prename descclassname">fdsreader.utils.data.</code><code class="sig-name descname">scan_directory_smv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dir</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/data.html#scan_directory_smv"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-prename descclassname">fdsreader.utils.data.</code><code class="sig-name descname">create_hash</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/data.html#create_hash"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Returns the md5 hash for the given file.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt>
+<code class="sig-prename descclassname">fdsreader.utils.data.</code><code class="sig-name descname">get_smv_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/data.html#get_smv_file"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Get the .smv file in a given directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> – Either the path to the directory containing the simulation data or direct path
+to the .smv file for the simulation in case that multiple simulation output was written to
+the same directory.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt>
+<code class="sig-prename descclassname">fdsreader.utils.data.</code><code class="sig-name descname">scan_directory_smv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">directory</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/data.html#scan_directory_smv"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Scanning a directory non-recursively for smv-files.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>dir</strong> – The directory that will be scanned for smv files.</p>
+<dd class="field-odd"><p><strong>directory</strong> – The directory that will be scanned for smv files.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>A list containing the path to each smv-file found in the directory.</p>

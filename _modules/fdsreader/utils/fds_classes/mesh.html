@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>fdsreader.utils.fds_classes.mesh &mdash; fdsreader [fdsreader, version 0.4.5] documentation</title>
+  <title>fdsreader.utils.fds_classes.mesh &mdash; fdsreader [fdsreader, version 0.4.6] documentation</title>
   
 
   
@@ -181,9 +181,9 @@
 <span class="sd">        :param surfaces: List of surfaces available for obstacles and ventilations.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="p">[</span><span class="n">x_coordinates</span><span class="p">,</span> <span class="n">y_coordinates</span><span class="p">,</span> <span class="n">z_coordinates</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">extent</span> <span class="o">=</span> <span class="n">Extent</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">x_coordinates</span><span class="o">.</span><span class="n">size</span><span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">x_coordinates</span><span class="o">.</span><span class="n">size</span><span class="o">-</span><span class="mi">1</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
-                             <span class="n">y_coordinates</span><span class="o">.</span><span class="n">size</span><span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">y_coordinates</span><span class="o">.</span><span class="n">size</span><span class="o">-</span><span class="mi">1</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
-                             <span class="n">z_coordinates</span><span class="o">.</span><span class="n">size</span><span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">z_coordinates</span><span class="o">.</span><span class="n">size</span><span class="o">-</span><span class="mi">1</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extent</span> <span class="o">=</span> <span class="n">Extent</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">x_coordinates</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">x_coordinates</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+                             <span class="n">y_coordinates</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">y_coordinates</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+                             <span class="n">z_coordinates</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">z_coordinates</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">n_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
 
@@ -230,7 +230,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">temp_data</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">obst_id</span><span class="p">,</span> <span class="n">extent</span><span class="p">,</span> <span class="n">side_surfaces</span><span class="p">))</span>
 
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">tmp</span> <span class="ow">in</span> <span class="n">temp_data</span><span class="p">:</span>
             <span class="n">line</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
             <span class="n">bound_indices</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">))</span>
             <span class="n">color_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
@@ -240,15 +240,14 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">rgba</span> <span class="o">=</span> <span class="p">()</span>
 
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">temp_data</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-                <span class="n">obst_id</span><span class="p">,</span> <span class="n">extent</span><span class="p">,</span> <span class="n">side_surfaces</span><span class="p">,</span> <span class="n">texture_origin</span> <span class="o">=</span> <span class="n">temp_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="n">obst_id</span><span class="p">,</span> <span class="n">extent</span><span class="p">,</span> <span class="n">side_surfaces</span><span class="p">,</span> <span class="n">texture_origin</span> <span class="o">=</span> <span class="n">tmp</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">obst_id</span><span class="p">,</span> <span class="n">extent</span><span class="p">,</span> <span class="n">side_surfaces</span> <span class="o">=</span> <span class="n">temp_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">obst_id</span><span class="p">,</span> <span class="n">extent</span><span class="p">,</span> <span class="n">side_surfaces</span> <span class="o">=</span> <span class="n">tmp</span>
                 <span class="n">texture_origin</span> <span class="o">=</span> <span class="n">default_texture_origin</span>
 
             <span class="n">obstructions</span><span class="p">[</span><span class="n">obst_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">Obstruction</span><span class="p">(</span><span class="n">obst_id</span><span class="p">,</span> <span class="n">extent</span><span class="p">,</span> <span class="n">side_surfaces</span><span class="p">,</span> <span class="n">bound_indices</span><span class="p">,</span>
-                                                <span class="n">color_index</span><span class="p">,</span> <span class="n">block_type</span><span class="p">,</span>
-                                                <span class="n">texture_origin</span><span class="p">,</span> <span class="n">rgba</span><span class="o">=</span><span class="n">rgba</span><span class="p">)</span>
+                                                <span class="n">color_index</span><span class="p">,</span> <span class="n">block_type</span><span class="p">,</span> <span class="n">texture_origin</span><span class="p">,</span> <span class="n">rgba</span><span class="o">=</span><span class="n">rgba</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">obstructions</span>
 

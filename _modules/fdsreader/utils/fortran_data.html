@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>fdsreader.utils.fortran_data &mdash; fdsreader [fdsreader, version 0.4.5] documentation</title>
+  <title>fdsreader.utils.fortran_data &mdash; fdsreader [fdsreader, version 0.4.6] documentation</title>
   
 
   
@@ -190,6 +190,7 @@
 <span class="sd">     element an integer representing the number of times this data type was written out in Fortran.</span>
 <span class="sd">    :returns: The newly created fortran-compliant numpy dtype with the desired structure.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># print(_BASE_FORMAT.format(new_raw(data_structure)))</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">_BASE_FORMAT</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">new_raw</span><span class="p">(</span><span class="n">data_structure</span><span class="p">)))</span></div>
 
 

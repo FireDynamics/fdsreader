@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Isosurface files &mdash; fdsreader [fdsreader, version 0.4.5] documentation</title>
+  <title>Isosurface files &mdash; fdsreader [fdsreader, version 0.4.6] documentation</title>
   
 
   
@@ -152,7 +152,7 @@
 <dt>
 <em class="property">class </em><code class="sig-prename descclassname">fdsreader.isof.isosurface.</code><code class="sig-name descname">Isosurface</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">isosurface_id</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">root_path</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">double_quantity</span><span class="p">:</span> <span class="n">bool</span></em>, <em class="sig-param"><span class="n">quantity</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">label</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">unit</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">v_quantity</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em>, <em class="sig-param"><span class="n">v_label</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em>, <em class="sig-param"><span class="n">v_unit</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">''</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/isof/isosurface.html#Isosurface"><span class="viewcode-link">[source]</span></a></dt>
 <dd><dl class="simple">
-<dt>Isosurface file data container including metadata. Consists of a list of vertices forming a list</dt><dd><p>of triangles. Can optionally have additional color data for the surfaces.</p>
+<dt>Isosurface file data container including metadata. Consists of a list of vertices forming a</dt><dd><p>list of triangles. Can optionally have additional color data for the surfaces.</p>
 </dd>
 </dl>
 <dl class="field-list simple">
@@ -200,7 +200,6 @@
 <li><p><strong>n_triangles</strong> – The number of triangles for this subsurface.</p></li>
 <li><p><strong>t_n</strong> – Total number of time steps for which output data has been written.</p></li>
 <li><p><strong>_offset</strong> – Offset of the binary file to the end of the file header.</p></li>
-<li><p><strong>_v_offset</strong> – Offset of the binary file containing color data to the end of the file header.</p></li>
 </ul>
 </dd>
 </dl>

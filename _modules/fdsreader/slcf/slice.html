@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>fdsreader.slcf.slice &mdash; fdsreader [fdsreader, version 0.4.5] documentation</title>
+  <title>fdsreader.slcf.slice &mdash; fdsreader [fdsreader, version 0.4.6] documentation</title>
   
 
   
@@ -144,10 +144,13 @@
            <div itemprop="articleBody">
             
   <h1>Source code for fdsreader.slcf.slice</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Collection</span>
 
 <span class="kn">from</span> <span class="nn">fdsreader.utils</span> <span class="kn">import</span> <span class="n">Extent</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">Mesh</span>
 <span class="kn">import</span> <span class="nn">fdsreader.utils.fortran_data</span> <span class="k">as</span> <span class="nn">fdtype</span>
@@ -167,8 +170,7 @@
 
 
 <div class="viewcode-block" id="SubSlice"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.slice.SubSlice">[docs]</a><span class="k">class</span> <span class="nc">SubSlice</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Part of a slice that cuts through a single mesh.</span>
+    <span class="sd">&quot;&quot;&quot;Part of a slice that cuts through a single mesh.</span>
 
 <span class="sd">    :ivar root_path: Path to the directory containing the slice file.</span>
 <span class="sd">    :ivar cell_centered: Indicates whether centered positioning for data is used.</span>
@@ -181,46 +183,64 @@
     <span class="n">_offset</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="mi">30</span><span class="p">),))</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">+</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">),))</span><span class="o">.</span><span class="n">itemsize</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">root_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">cell_centered</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">extent</span><span class="p">:</span> <span class="n">Extent</span><span class="p">,</span>
-                 <span class="n">quantity</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">,</span> <span class="n">times</span><span class="p">):</span>
+                 <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">,</span> <span class="n">times</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="n">mesh</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">extent</span> <span class="o">=</span> <span class="n">extent</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">root_path</span> <span class="o">=</span> <span class="n">root_path</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cell_centered</span> <span class="o">=</span> <span class="n">cell_centered</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">file_names</span> <span class="o">=</span> <span class="p">{</span><span class="n">quantity</span><span class="p">:</span> <span class="n">filename</span><span class="p">}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>  <span class="c1"># Dictionary that maps quantity to data.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_times</span> <span class="o">=</span> <span class="n">times</span>
 
-<div class="viewcode-block" id="SubSlice.get_data"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.slice.SubSlice.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_centered</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
+                      <span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_centered</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
+                      <span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="o">.</span><span class="n">z</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_centered</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="o">.</span><span class="n">z</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vector_filenames</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_vector_data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data_out</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">t_n</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">fill_times</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">cell_centered</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cell_centered</span><span class="p">)</span>
+        <span class="n">dtype_data</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">combine</span><span class="p">(</span><span class="n">fdtype</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">,</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">n</span><span class="p">),)))</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
+            <span class="n">infile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_offset</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_data</span><span class="p">,</span> <span class="n">t_n</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">fill_times</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_times</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">data_out</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Method to lazy load the slice&#39;s data for a specific quantity.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">quantity</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">:</span>
-            <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_names</span><span class="p">[</span><span class="n">quantity</span><span class="p">])</span>
-            <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">cell_centered</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cell_centered</span><span class="p">)</span>
-            <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_centered</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
-                     <span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_centered</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
-                     <span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="o">.</span><span class="n">z</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_centered</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="o">.</span><span class="n">z</span><span class="p">)</span>
-
-            <span class="n">dtype_data</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">combine</span><span class="p">(</span><span class="n">fdtype</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">,</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">n</span><span class="p">),)))</span>
-
-            <span class="n">fill_times</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_times</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_data&quot;</span><span class="p">):</span>
             <span class="n">t_n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_times</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">quantity</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">t_n</span><span class="p">,)</span> <span class="o">+</span> <span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+            <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">t_n</span><span class="p">,)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_load_data</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">,</span> <span class="n">t_n</span><span class="p">,</span> <span class="n">fill_times</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_times</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
 
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
-                <span class="n">infile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_offset</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_data</span><span class="p">,</span> <span class="n">t_n</span><span class="p">)):</span>
-                    <span class="k">if</span> <span class="n">fill_times</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">_times</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">quantity</span><span class="p">][</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">quantity</span><span class="p">]</span></div></div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">vector_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_vector_data&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;There is no vector data available for this slice.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_vector_data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">t_n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_times</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">direction</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;u&#39;</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">):</span>
+                <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector_filenames</span><span class="p">[</span><span class="n">direction</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_vector_data</span><span class="p">[</span><span class="n">direction</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">t_n</span><span class="p">,)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_load_data</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vector_data</span><span class="p">[</span><span class="n">direction</span><span class="p">],</span> <span class="n">t_n</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vector_data</span></div>
 
 
 <div class="viewcode-block" id="Slice"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.slice.Slice">[docs]</a><span class="k">class</span> <span class="nc">Slice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">lib</span><span class="o">.</span><span class="n">mixins</span><span class="o">.</span><span class="n">NDArrayOperatorsMixin</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Slice file data container including metadata. Consists of multiple subslices, one for each mesh</span>
-<span class="sd">     the slice cuts through.</span>
+    <span class="sd">&quot;&quot;&quot;Slice file data container including metadata. Consists of multiple subslices, one for each</span>
+<span class="sd">        mesh the slice cuts through.</span>
 
 <span class="sd">    :ivar root_path: Path to the directory containing all slice files.</span>
 <span class="sd">    :ivar quantities: List with quantity objects containing information about the</span>
@@ -229,64 +249,50 @@
 <span class="sd">    :ivar times: Numpy array containing all times for which data has been recorded.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">cell_centered</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">cell_centered</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">multimesh_data</span><span class="p">:</span> <span class="n">Collection</span><span class="p">[</span><span class="n">Dict</span><span class="p">]):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">root_path</span> <span class="o">=</span> <span class="n">root_path</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cell_centered</span> <span class="o">=</span> <span class="n">cell_centered</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">quantities</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Quantity</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_times</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">multimesh_data</span><span class="p">))[</span><span class="s2">&quot;extent&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">cell_centered</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cell_centered</span><span class="p">)</span>
+        <span class="n">dtype_data</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">combine</span><span class="p">(</span><span class="n">fdtype</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">,</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">n</span><span class="p">),)))</span>
+        <span class="n">t_n</span> <span class="o">=</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">multimesh_data</span><span class="p">))[</span>
+            <span class="s2">&quot;filename&quot;</span><span class="p">]))</span><span class="o">.</span><span class="n">st_size</span> <span class="o">-</span> <span class="n">SubSlice</span><span class="o">.</span><span class="n">_offset</span><span class="p">)</span> <span class="o">//</span> <span class="n">dtype_data</span><span class="o">.</span><span class="n">itemsize</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">t_n</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_times</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>  <span class="c1"># Mark as uninitialized</span>
+
         <span class="c1"># List of all subslices this slice consists of (one per mesh).</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_subslices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">SubSlice</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_subslices</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Mesh</span><span class="p">,</span> <span class="n">SubSlice</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">_add_subslice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">extent</span><span class="p">:</span> <span class="n">Extent</span><span class="p">,</span>
-                      <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SubSlice</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Adds another subslice to the slice.</span>
+        <span class="n">vector_temp</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">mesh_data</span> <span class="ow">in</span> <span class="n">multimesh_data</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;-VELOCITY&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">mesh_data</span><span class="p">[</span><span class="s2">&quot;quantity&quot;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">quantity</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">(</span><span class="n">mesh_data</span><span class="p">[</span><span class="s2">&quot;quantity&quot;</span><span class="p">],</span> <span class="n">mesh_data</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">],</span>
+                                         <span class="n">mesh_data</span><span class="p">[</span><span class="s2">&quot;unit&quot;</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_subslices</span><span class="p">[</span><span class="n">mesh_data</span><span class="p">[</span><span class="s2">&quot;mesh&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">SubSlice</span><span class="p">(</span><span class="n">mesh_data</span><span class="p">[</span><span class="s2">&quot;filename&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span>
+                                                              <span class="bp">self</span><span class="o">.</span><span class="n">cell_centered</span><span class="p">,</span>
+                                                              <span class="n">mesh_data</span><span class="p">[</span><span class="s2">&quot;extent&quot;</span><span class="p">],</span>
+                                                              <span class="n">mesh_data</span><span class="p">[</span><span class="s2">&quot;mesh&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_times</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">mesh_data</span><span class="p">[</span><span class="s2">&quot;mesh&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">vector_temp</span><span class="p">:</span>
+                    <span class="n">vector_temp</span><span class="p">[</span><span class="n">mesh_data</span><span class="p">[</span><span class="s2">&quot;mesh&quot;</span><span class="p">]][</span><span class="n">mesh_data</span><span class="p">[</span><span class="s2">&quot;quantity&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">mesh_data</span><span class="p">[</span><span class="s2">&quot;filename&quot;</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">vector_temp</span><span class="p">[</span><span class="n">mesh_data</span><span class="p">[</span><span class="s2">&quot;mesh&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span><span class="n">mesh_data</span><span class="p">[</span><span class="s2">&quot;quantity&quot;</span><span class="p">]:</span> <span class="n">mesh_data</span><span class="p">[</span><span class="s2">&quot;filename&quot;</span><span class="p">]}</span>
 
-<span class="sd">        :param filename: Name of the slice file.</span>
-<span class="sd">        :param quantity: Quantity of the data.</span>
-<span class="sd">        :param label: Quantity label.</span>
-<span class="sd">        :param unit: Quantity unit.</span>
-<span class="sd">        :param extent: Extent object containing 3-dimensional extent information.</span>
-<span class="sd">        :param mesh: The mesh the subslice cuts through.</span>
-<span class="sd">        :returns: The added subslice.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">q</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">(</span><span class="n">quantity</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">q</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">quantities</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">quantities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
-
-        <span class="n">subslice</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subslices</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">extent</span> <span class="o">==</span> <span class="n">extent</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">subslice</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">dtype_data</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">combine</span><span class="p">(</span><span class="n">fdtype</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">,</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
-                <span class="p">((</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">extent</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">cell_centered</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cell_centered</span><span class="p">)),)))</span>
-
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_times</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">t_n</span> <span class="o">=</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="n">filename</span><span class="p">))</span><span class="o">.</span><span class="n">st_size</span> <span class="o">-</span> <span class="n">SubSlice</span><span class="o">.</span><span class="n">_offset</span><span class="p">)</span> \
-                      <span class="o">//</span> <span class="n">dtype_data</span><span class="o">.</span><span class="n">itemsize</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">t_n</span><span class="p">,))</span>
-                <span class="c1"># Mark times as not uninitialized</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_times</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-
-            <span class="n">subslice</span> <span class="o">=</span> <span class="n">SubSlice</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_centered</span><span class="p">,</span> <span class="n">extent</span><span class="p">,</span> <span class="n">quantity</span><span class="p">,</span>
-                                <span class="n">mesh</span><span class="p">,</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">_times</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_subslices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subslice</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># If a subslice does already exist only add the additional quantity</span>
-            <span class="n">subslice</span><span class="o">.</span><span class="n">file_names</span><span class="p">[</span><span class="n">quantity</span><span class="p">]</span> <span class="o">=</span> <span class="n">filename</span>
+        <span class="k">for</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">vector_filenames</span> <span class="ow">in</span> <span class="n">vector_temp</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_subslices</span><span class="p">[</span><span class="n">mesh</span><span class="p">]</span><span class="o">.</span><span class="n">vector_filenames</span><span class="p">[</span><span class="s2">&quot;u&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vector_filenames</span><span class="p">[</span><span class="s2">&quot;U-VELOCITY&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_subslices</span><span class="p">[</span><span class="n">mesh</span><span class="p">]</span><span class="o">.</span><span class="n">vector_filenames</span><span class="p">[</span><span class="s2">&quot;v&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vector_filenames</span><span class="p">[</span><span class="s2">&quot;V-VELOCITY&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_subslices</span><span class="p">[</span><span class="n">mesh</span><span class="p">]</span><span class="o">.</span><span class="n">vector_filenames</span><span class="p">[</span><span class="s2">&quot;w&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vector_filenames</span><span class="p">[</span><span class="s2">&quot;W-VELOCITY&quot;</span><span class="p">]</span>
 
         <span class="c1"># If lazy loading has been disabled by the user, load the data instantaneously instead</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">LAZY_LOAD</span><span class="p">:</span>
-            <span class="n">subslice</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">quantity</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">subslice</span>
+            <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">subslice</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subslices</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">_</span> <span class="o">=</span> <span class="n">subslice</span><span class="o">.</span><span class="n">data</span>
 
 <div class="viewcode-block" id="Slice.get_subslice"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.slice.Slice.get_subslice">[docs]</a>    <span class="k">def</span> <span class="nf">get_subslice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Returns the :class:`SubSlice` that cuts through the given mesh.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">slc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subslices</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">slc</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">mesh</span><span class="o">.</span><span class="n">id</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">slc</span>
-        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;The slice does not cut through the provided mesh!&quot;</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subslices</span><span class="p">[</span><span class="n">mesh</span><span class="p">]</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">times</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -296,27 +302,24 @@
                                  <span class="s2">&quot; mid-initialization, which should not happen!&quot;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_times</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
             <span class="c1"># Implicitly load the data for one subslice, which (as a side effect) sets time data</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_subslices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">quantities</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">quantity</span><span class="p">)</span>
+            <span class="n">_</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_subslices</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span><span class="o">.</span><span class="n">data</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_times</span>
 
-<div class="viewcode-block" id="Slice.mean"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.slice.Slice.mean">[docs]</a>    <span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculates the mean over the whole slice.</span>
+    <span class="c1"># def copy(self) -&gt; __class__:</span>
+    <span class="c1">#     &quot;&quot;&quot;Performs a deep copy of a slice.</span>
+    <span class="c1">#</span>
+    <span class="c1">#     :returns: A deep copy of the original slice.</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
 
-<span class="sd">        :param quantity: The quantity for which the mean should be calculated. If not provided, the</span>
-<span class="sd">         first found quantity will be used.</span>
+<div class="viewcode-block" id="Slice.mean"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.slice.Slice.mean">[docs]</a>    <span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculates the mean over the whole slice.</span>
+
 <span class="sd">        :returns: The calculated mean value.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">quantity</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">quantity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">quantities</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">quantity</span>
-        <span class="n">mean_sum</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">subsclice</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subslices</span><span class="p">:</span>
-            <span class="n">mean_sum</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">subsclice</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">quantity</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">mean_sum</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_subslices</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">subsclice</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="k">for</span> <span class="n">subsclice</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subslices</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span></div>
 
     <span class="k">def</span> <span class="nf">__array__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Method that will be called by numpy when trying to convert the object to a numpy ndarray.</span>
+        <span class="sd">&quot;&quot;&quot;Method that will be called by numpy when trying to convert the object to a numpy ndarray.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">UserWarning</span><span class="p">(</span>
             <span class="s2">&quot;Slices can not be converted to numpy arrays, but they support all typical numpy&quot;</span>
@@ -324,8 +327,7 @@
             <span class="s2">&quot; required, please request this functionality by submitting an issue on Github.&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__array_ufunc__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ufunc</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="o">*</span><span class="n">inputs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Method that will be called by numpy when using a ufunction with a Slice as input.</span>
+        <span class="sd">&quot;&quot;&quot;Method that will be called by numpy when using a ufunction with a Slice as input.</span>
 
 <span class="sd">        :returns: A new slice on which the ufunc has been applied.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -338,22 +340,19 @@
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">inp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">inputs</span><span class="p">):</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
                 <span class="k">del</span> <span class="n">input_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">UserWarning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;The </span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2"> operation is not implemented for multiple slices as input yet. If&quot;</span>
+                <span class="s2">&quot; you require this feature, please request this functionality by submitting an&quot;</span>
+                <span class="s2">&quot; issue on Github.&quot;</span><span class="p">)</span>
 
-        <span class="n">new_slice</span> <span class="o">=</span> <span class="n">Slice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_centered</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">subslice</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_subslices</span><span class="p">):</span>
-            <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">quantities</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-            <span class="n">new_slice</span><span class="o">.</span><span class="n">_add_subslice</span><span class="p">(</span><span class="n">subslice</span><span class="o">.</span><span class="n">file_names</span><span class="p">[</span><span class="n">q</span><span class="o">.</span><span class="n">quantity</span><span class="p">],</span>
-                                    <span class="n">q</span><span class="o">.</span><span class="n">quantity</span><span class="p">,</span> <span class="n">q</span><span class="o">.</span><span class="n">label</span><span class="p">,</span>
-                                    <span class="n">q</span><span class="o">.</span><span class="n">unit</span><span class="p">,</span> <span class="n">subslice</span><span class="o">.</span><span class="n">extent</span><span class="p">,</span> <span class="n">subslice</span><span class="o">.</span><span class="n">mesh</span><span class="p">)</span>
-            <span class="n">new_slice</span><span class="o">.</span><span class="n">_subslices</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">q</span><span class="o">.</span><span class="n">quantity</span><span class="p">]</span> <span class="o">=</span> <span class="n">ufunc</span><span class="p">(</span>
-                <span class="n">subslice</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">quantity</span><span class="p">),</span>
-                <span class="n">input_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">new_slice</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">subslice</span> <span class="ow">in</span> <span class="n">new_slice</span><span class="o">.</span><span class="n">_subslices</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">subslice</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">ufunc</span><span class="p">(</span><span class="n">subslice</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">input_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">new_slice</span>
 
     <span class="k">def</span> <span class="nf">__array_function__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">types</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Method that will be called by numpy when using an array function with a Slice as input.</span>
+        <span class="sd">&quot;&quot;&quot;Method that will be called by numpy when using an array function with a Slice as input.</span>
 
 <span class="sd">        :returns: The output of the array function.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -364,11 +363,7 @@
             <span class="k">return</span> <span class="bp">NotImplemented</span>
         <span class="k">return</span> <span class="n">_HANDLED_FUNCTIONS</span><span class="p">[</span><span class="n">func</span><span class="p">](</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-
 <span class="c1"># __array_function__ implementations</span>
-<div class="viewcode-block" id="mean"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.slice.mean">[docs]</a><span class="nd">@implements</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="n">slc</span><span class="p">:</span> <span class="n">Slice</span><span class="p">):</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">slc</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">quantity</span><span class="p">)</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">slc</span><span class="o">.</span><span class="n">quantities</span><span class="p">]</span></div>
 </pre></div>
 
            </div>
