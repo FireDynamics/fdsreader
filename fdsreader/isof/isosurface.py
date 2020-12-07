@@ -17,10 +17,7 @@ class SubSurface:
     :ivar n_triangles: The number of triangles for this subsurface.
     :ivar t_n: Total number of time steps for which output data has been written.
     :ivar _offset: Offset of the binary file to the end of the file header.
-    :cvar _v_offset: Offset of the binary file containing color data to the end of the file header.
     """
-    _v_offset = fdtype.INT.itemsize * 2 + fdtype.FLOAT.itemsize + fdtype.new(
-        (('i', 4),)).itemsize
 
     def __init__(self, mesh: Mesh, iso_filepath: str, viso_filepath: str = ""):
         self.mesh = mesh
@@ -118,37 +115,45 @@ class SubSurface:
             n_vertices = dims_data[0][0][0]
             n_triangles = dims_data[0][0][1]
 
-            dtype_vertices = fdtype.new((('f', 3 * n_vertices),))
-            dtype_triangles = fdtype.new((('i', 3 * n_triangles),))
-            dtype_surfaces = fdtype.new((('i', n_triangles),))
+            if n_vertices > 0:
+                dtype_vertices = fdtype.new((('f', 3 * n_vertices),))
+                dtype_triangles = fdtype.new((('i', 3 * n_triangles),))
+                dtype_surfaces = fdtype.new((('i', n_triangles),))
 
-            vertices.append(fdtype.read(infile, dtype_vertices, 1)[0][0].reshape((n_vertices, 3)))
-            triangles.append(
-                fdtype.read(infile, dtype_triangles, 1)[0][0].reshape((n_triangles, 3)))
-            surfaces.append(fdtype.read(infile, dtype_surfaces, 1)[0][0])
+                vertices.append(
+                    fdtype.read(infile, dtype_vertices, 1)[0][0].reshape((n_vertices, 3)))
+                triangles.append(
+                    fdtype.read(infile, dtype_triangles, 1)[0][0].reshape((n_triangles, 3)))
+                surfaces.append(fdtype.read(infile, dtype_surfaces, 1)[0][0])
 
-            self.n_vertices.append(n_vertices)
-            self.n_triangles.append(n_triangles)
+                self.n_vertices.append(n_vertices)
+                self.n_triangles.append(n_triangles)
+
             time_data = fdtype.read(infile, dtype_time, 1)
 
-        self._vertices = np.array(vertices)
-        self._triangles = np.array(triangles)
-        self._surfaces = np.array(surfaces)
+        self._vertices = np.array(vertices, dtype=object)
+        self._triangles = np.array(triangles, dtype=object)
+        self._surfaces = np.array(surfaces, dtype=object)
 
         self.t_n = len(self.times)
 
     def _load_vdata(self, infile: BinaryIO):
         """Loads all color data for all isosurfaces in a given viso file.
         """
-        # Todo: Fix this
-        # dtype_color = fdtype.new((('f', self.n_vertices),))
-        # infile.seek(self._v_offset)
-        # self._colors = fdtype.read(infile, dtype_color, self.n_vertices)
+        self._colors = np.empty((self.t_n,), dtype=object)
+        t_offset = fdtype.FLOAT.itemsize
+        dtype_nverts = fdtype.new((('i', 4),)).itemsize
+
+        infile.seek(fdtype.INT.itemsize * 2)
+        for t in range(self.t_n):
+            infile.seek(t_offset, os.SEEK_CUR)
+            n_vertices = fdtype.read(infile, dtype_nverts, 1)[0][0][2]
+            self._colors[t] = fdtype.read(infile, fdtype.new((('f', n_vertices),)), 1)
 
 
 class Isosurface:
-    """Isosurface file data container including metadata. Consists of a list of vertices forming a list
-         of triangles. Can optionally have additional color data for the surfaces.
+    """Isosurface file data container including metadata. Consists of a list of vertices forming a
+        list of triangles. Can optionally have additional color data for the surfaces.
 
     :ivar id: The ID of this isosurface.
     :ivar root_path: Path to the directory containing all isosurface files.

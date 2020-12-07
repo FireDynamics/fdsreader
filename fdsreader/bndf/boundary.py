@@ -1,30 +1,29 @@
 import os
-from typing import List, BinaryIO, Tuple
+from typing import List, BinaryIO, Dict
 import numpy as np
 
-from fdsreader.utils import Quantity, Mesh, Extent, settings
+from fdsreader.utils import Quantity, Mesh, Extent, settings, Obstruction
 import fdsreader.utils.fortran_data as fdtype
 
 
 class Patch:
-    """Container for the actual data which is stored as rectangular plane with specific orientation and
-     extent.
+    """Container for the actual data which is stored as rectangular plane with specific orientation
+        and extent.
 
     :ivar extent: Extent object containing 3-dimensional extent information.
     :ivar orientation: The direction the patch is facing (x={-1;1}, y={-2;2}, z={-3;3}).
-    :ivar obst_index: Index of the obstacle
     :ivar data: Numpy ndarray with the actual data.
     :ivar t_n: Total number of time steps for which output data has been written.
     """
 
-    def __init__(self, extent: Extent, orientation: int, obst_index: int):
+    def __init__(self, extent: Extent, orientation: int):
         self.extent = extent
         self.orientation = orientation
-        self.obst_index = obst_index
         self.t_n = -1
 
-    def _get_dimension(self):
-        """Convenience function to calculate the shape of the array containing the data for this patch.
+    @property
+    def shape(self):
+        """Convenience function to calculate the shape of the array containing data for this patch.
         """
         if abs(self.orientation) == 1:
             dim = (1, self.extent.y + 2, self.extent.z + 2)
@@ -34,14 +33,17 @@ class Patch:
             dim = (self.extent.x + 2, self.extent.y + 2, 1)
         return dim
 
-    def read_data(self, infile: BinaryIO, t: int) -> Tuple[float, int]:
-        """Method to load the quantity data for a single patch.
+    def _post_init(self, t_n: int):
+        """Fully initialize the patch as soon as the number of timesteps is known.
         """
-        self.data = np.empty((self.t_n,) + self._get_dimension())
-        time = fdtype.read(infile, fdtype.FLOAT, 1)
-        dtype_data = fdtype.new((('f', str(self._get_dimension())),))
+        self.t_n = t_n
+        self.data = np.empty((self.t_n,) + self.shape)
+
+    def _load_data(self, infile: BinaryIO, t: int):
+        """Method to load the quantity data for a single patch for a single timestep.
+        """
+        dtype_data = fdtype.new((('f', str(self.shape)),))
         self.data[t, :] = fdtype.read(infile, dtype_data, 1)
-        return time
 
 
 class SubBoundary:
@@ -55,7 +57,7 @@ class SubBoundary:
         self.file_path = file_path
         self.mesh = mesh
 
-        self._patches = list()
+        self._patches: Dict[Obstruction, List[Patch]] = dict()
         self._times = None
         with open(self.file_path, 'rb') as infile:
             # Offset of the binary file to the end of the file header.
@@ -68,45 +70,59 @@ class SubBoundary:
 
             self._offset += fdtype.INT.itemsize + dtype_patches.itemsize * n_patches
 
-            for patch in patch_infos:
+            for patch_info in patch_infos:
                 co = self.mesh.coordinates
-                self._patches.append(
-                    Patch(Extent(co[0][patch[0]], co[0][patch[1]], co[1][patch[2]],
-                                 co[1][patch[3]], co[2][patch[4]], co[2][patch[5]]),
-                          patch[6], patch[7]))
+                obst = mesh.obstructions[patch_info[7]]
+                extent = Extent(co[0][patch_info[0]], co[0][patch_info[1]], co[1][patch_info[2]],
+                                co[1][patch_info[3]], co[2][patch_info[4]], co[2][patch_info[5]])
+                orientation = patch_info[6]
+                if obst not in self._patches:
+                    self._patches[obst] = list()
+                self._patches[obst].append(Patch(extent, orientation))
 
-        t_n = (os.stat(file_path).st_size - self._offset) // (fdtype.FLOAT.itemsize + fdtype.new(
-            (('f', str(self._patches[0]._get_dimension())),)).itemsize)
-        for patch in self._patches:
-            patch.t_n = t_n
+        total_dim_size = 0
+        for patches in self._patches.values():
+            for patch in patches:
+                total_dim_size += fdtype.new((('f', str(patch.shape)),)).itemsize
+
+        t_n = (os.stat(file_path).st_size - self._offset) // (
+                    fdtype.FLOAT.itemsize + total_dim_size)
+
+        for patches in self._patches.values():
+            for patch in patches:
+                patch._post_init(t_n)
 
     @property
-    def patches(self) -> List[Patch]:
+    def patches(self) -> Dict[Obstruction, List[Patch]]:
         """Method to lazy load the boundary data for all patches in a single mesh.
 
-        :returns: The actual data in form of a list of patches (objects containing numpy ndarrays).
+        :returns: The actual data in form of a dictionary that maps an obstruction to a list with
+            all six sides of the cuboid obstruction, which are here called patches
+            (objects containing numpy ndarrays).
         """
-        if not hasattr(self._patches[0], "data"):
+        if not hasattr(next(iter(self._patches.values()))[0], "data"):
             with open(self.file_path, 'rb') as infile:
                 infile.seek(self._offset)
                 for t in range(self._times.shape[0]):
-                    for patch in self._patches:
-                        time = patch.read_data(infile, t)
-                        self._times[t] = time
+                    time = fdtype.read(infile, fdtype.FLOAT, 1)
+                    self._times[t] = time
+                    for patches in self._patches.values():
+                        for patch in patches:
+                            patch._load_data(infile, t)
         return self._patches
 
 
 class Boundary:
-    """Boundary file data container including metadata. Consists of multiple subslices, one for each
-        mesh the slice cuts through.
+    """Boundary file data container including metadata. Consists of multiple subboundaries.
 
     :ivar id: The ID of this boundary.
     :ivar root_path: Path to the directory containing all boundary files.
-    :ivar quantities: List with quantity objects containing information about the quantities.
-     calculated for this slice with the corresponding label and unit.
+    :ivar quantities: List of :class:`Quantity` objects containing information about the quantities
+        calculated for this boundary with the corresponding label and unit.
     :ivar cell_centered: Indicates whether centered positioning for data is used.
     :ivar times: Numpy array containing all times for which data has been recorded.
-    :ivar sub_boundaries: List of :class:`SubBoundary` objects containing all boundary data in a single mesh.
+    :ivar sub_boundaries: List of :class:`SubBoundary` objects containing all boundary data in a
+        single mesh.
     """
 
     def __init__(self, boundary_id: int, root_path: str, cell_centered: bool, quantity: str,

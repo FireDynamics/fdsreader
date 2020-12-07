@@ -48,7 +48,8 @@ class SubPlot3D:
 
 
 class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
-    """Plot3d file data container including metadata. Consists of multiple subplots, one for each mesh.
+    """Plot3d file data container including metadata. Consists of multiple subplots, one for each
+        mesh.
 
     :ivar root_path: Path to the directory containing all slice files.
     :ivar time: The point in time when this data has been recorded.

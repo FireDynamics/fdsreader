@@ -20,14 +20,17 @@ class Obstruction:
      \n-1 - use surface to obtain blocktype
      \n0 - regular block
      \n2 - outline
-    :ivar texture_origin: Origin position of the texture provided by the surface. When the texture does have a pattern,
-        for example windows or bricks, the texture_origin specifies where the pattern should begin.
-    :ivar rgba: Optional color of the obstruction in form of a 4-element tuple (ranging from 0.0 to 1.0).
+    :ivar texture_origin: Origin position of the texture provided by the surface. When the texture
+        does have a pattern, for example windows or bricks, the texture_origin specifies where the
+        pattern should begin.
+    :ivar rgba: Optional color of the obstruction in form of a 4-element tuple
+        (ranging from 0.0 to 1.0).
     """
+
     def __init__(self, oid: int, extent: Extent,
                  side_surfaces: Tuple[Surface, Surface, Surface, Surface, Surface, Surface],
-                 bound_indices: Tuple[int, int, int, int, int, int], color_index: int, block_type: int,
-                 texture_origin: Tuple[float, float, float],
+                 bound_indices: Tuple[int, int, int, int, int, int], color_index: int,
+                 block_type: int, texture_origin: Tuple[float, float, float],
                  rgba: Union[Tuple[()], Tuple[float, float, float, float]] = ()):
         self.id = oid
         self.extent = extent

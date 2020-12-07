@@ -44,6 +44,7 @@ def new(data_structure: Sequence[Tuple[str, Union[int, str]]]) -> np.dtype:
      element an integer representing the number of times this data type was written out in Fortran.
     :returns: The newly created fortran-compliant numpy dtype with the desired structure.
     """
+    # print(_BASE_FORMAT.format(new_raw(data_structure)))
     return np.dtype(_BASE_FORMAT.format(new_raw(data_structure)))
 
 

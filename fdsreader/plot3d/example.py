@@ -1,4 +1,3 @@
-from fdsreader.utils import scan_directory_smv
 from fdsreader import Simulation
 
 

@@ -35,9 +35,9 @@ class Mesh:
         :param surfaces: List of surfaces available for obstacles and ventilations.
         """
         self.coordinates = [x_coordinates, y_coordinates, z_coordinates]
-        self.extent = Extent(0, x_coordinates.size-1 if x_coordinates.size-1 > 1 else 0, 0,
-                             y_coordinates.size-1 if y_coordinates.size-1 > 1 else 0, 0,
-                             z_coordinates.size-1 if z_coordinates.size-1 > 1 else 0)
+        self.extent = Extent(0, x_coordinates.size - 1 if x_coordinates.size - 1 > 1 else 0, 0,
+                             y_coordinates.size - 1 if y_coordinates.size - 1 > 1 else 0, 0,
+                             z_coordinates.size - 1 if z_coordinates.size - 1 > 1 else 0)
 
         self.n_size = self.extent.size()
 
@@ -84,7 +84,7 @@ class Mesh:
             else:
                 temp_data.append((obst_id, extent, side_surfaces))
 
-        for i in range(n):
+        for tmp in temp_data:
             line = smv_file.readline().decode().strip().split()
             bound_indices = tuple(int(line[i]) for i in range(6))
             color_index = int(line[6])
@@ -94,15 +94,14 @@ class Mesh:
             else:
                 rgba = ()
 
-            if len(temp_data[i]) == 4:
-                obst_id, extent, side_surfaces, texture_origin = temp_data[i]
+            if len(tmp) == 4:
+                obst_id, extent, side_surfaces, texture_origin = tmp
             else:
-                obst_id, extent, side_surfaces = temp_data[i]
+                obst_id, extent, side_surfaces = tmp
                 texture_origin = default_texture_origin
 
             obstructions[obst_id] = Obstruction(obst_id, extent, side_surfaces, bound_indices,
-                                                color_index, block_type,
-                                                texture_origin, rgba=rgba)
+                                                color_index, block_type, texture_origin, rgba=rgba)
 
         return obstructions
 

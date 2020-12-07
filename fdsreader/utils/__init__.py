@@ -1,4 +1,4 @@
-from .data import scan_directory_smv, Quantity
+from .data import Quantity
 
 from .fds_classes.extent import Extent
 

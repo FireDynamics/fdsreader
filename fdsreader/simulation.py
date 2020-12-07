@@ -1,21 +1,28 @@
+import glob
 import mmap
 import os
 from typing import List, Literal
 
 import numpy as np
 import logging
+import pickle
 
 from fdsreader.bndf import Boundary
+from fdsreader.bndf.BoundaryCollection import BoundaryCollection
+from fdsreader.isof.IsosurfaceCollection import IsosurfaceCollection
 from fdsreader.plot3d import Plot3D
+from fdsreader.plot3d.Plot3dCollection import Plot3DCollection
+from fdsreader.slcf.SliceCollection import SliceCollection
 from fdsreader.utils import Mesh, Extent, Surface, Quantity
 from fdsreader.slcf import Slice
 from fdsreader.isof import Isosurface
+from fdsreader.utils.data import create_hash, get_smv_file
 
 
 class Simulation:
     """Master class managing all data for a given simulation.
 
-    :ivar smv_file_path: Path to the smv-file for the simulation.
+    :ivar smv_file_path: Path to the .smv file of the simulation.
     :ivar root_path: Path to the root directory of the simulation.
     :ivar fds_version: Version of FDS the simulation was performed with.
     :ivar chid: Name (ID) of the simulation.
@@ -26,33 +33,76 @@ class Simulation:
     :ivar meshes: List containing all meshes (grids) defined in this simulation.
     """
 
-    def __init__(self, smv_file_path):
-        self.smv_file_path = smv_file_path
-        self.root_path = os.path.dirname(self.smv_file_path)
+    def __new__(cls, path: str):
+        root_path = os.path.dirname(path)
+        smv_file_path = get_smv_file(path)
 
         with open(smv_file_path, 'r') as infile, mmap.mmap(infile.fileno(), 0,
                                                            access=mmap.ACCESS_READ) as smv_file:
-            smv_file.seek(smv_file.find(b'VERSION', 0))
-            smv_file.readline()
-            self.fds_version = smv_file.readline().decode().strip()
-
             smv_file.seek(smv_file.find(b'CHID', 0))
             smv_file.readline()
-            self.chid = smv_file.readline().decode().strip()
+            chid = smv_file.readline().decode().strip()
 
-            smv_file.seek(smv_file.find(b'HRRPUVCUT', 0))
-            smv_file.readline()
-            smv_file.readline()
-            self.hrrpuv_cutoff = float(smv_file.readline().decode().strip())
+        pickle_file_path = Simulation._get_pickle_filename(root_path, chid)
 
-            smv_file.seek(smv_file.find(b'TOFFSET', 0))
-            smv_file.readline()
-            self.default_texture_origin = tuple(smv_file.readline().decode().strip().split())
+        if path and os.path.isfile(path):
+            with open(pickle_file_path) as f:
+                sim = pickle.load(f)
+            if not isinstance(sim, cls):
+                os.remove(path)
+            else:
+                if sim._hash == create_hash(smv_file_path):
+                    return sim
 
-            self.out_file_path = os.path.join(self.root_path, self.chid + ".out")
+        return super(Simulation, cls).__new__(cls)
 
-            self.surfaces = self._load_surfaces(smv_file)
-            self.meshes = self._load_meshes(smv_file)
+    def __init__(self, path: str):
+        """
+        :param path: Either the path to the directory containing the simulation data or direct path
+            to the .smv file for the simulation in case that multiple simulation output was written to
+            the same directory.
+        """
+        # Check if the file has already been instantiated via a cached pickle file
+        if not hasattr(self, "_hash"):
+            self.smv_file_path = get_smv_file(path)
+
+            self.root_path = os.path.dirname(self.smv_file_path)
+
+            with open(self.smv_file_path, 'r') as infile, mmap.mmap(infile.fileno(), 0,
+                                                                    access=mmap.ACCESS_READ) as smv_file:
+                smv_file.seek(smv_file.find(b'VERSION', 0))
+                smv_file.readline()
+                self.fds_version = smv_file.readline().decode().strip()
+
+                smv_file.seek(smv_file.find(b'CHID', 0))
+                smv_file.readline()
+                self.chid = smv_file.readline().decode().strip()
+
+                smv_file.seek(smv_file.find(b'HRRPUVCUT', 0))
+                smv_file.readline()
+                smv_file.readline()
+                self.hrrpuv_cutoff = float(smv_file.readline().decode().strip())
+
+                smv_file.seek(smv_file.find(b'TOFFSET', 0))
+                smv_file.readline()
+                self.default_texture_origin = tuple(smv_file.readline().decode().strip().split())
+
+                self.out_file_path = os.path.join(self.root_path, self.chid + ".out")
+
+                self.surfaces = self._load_surfaces(smv_file)
+                self.meshes = self._load_meshes(smv_file)
+
+                # Hash will be saved to simulation pickle file and compared to new hash when loading
+                # the pickled simulation again in the next run of the program.
+                self._hash = create_hash(self.smv_file_path)
+                pickle.dump(self,
+                            open(Simulation._get_pickle_filename(self.root_path, self.chid), 'wb'))
+
+    @classmethod
+    def _get_pickle_filename(cls, root_path: str, chid: str):
+        """Get the filename used to save the pickled simulation.
+        """
+        return root_path + chid + ".pickle"
 
     def _load_meshes(self, smv_file: mmap.mmap) -> List[Mesh]:
         """Method to load the mesh information from the smv file.
@@ -131,7 +181,7 @@ class Simulation:
         return surfaces
 
     @property
-    def slices(self) -> List[Slice]:
+    def slices(self) -> SliceCollection:
         """Lazy loads all slices for the simulation.
 
         :returns: All slices.
@@ -164,19 +214,22 @@ class Simulation:
                     unit = smv_file.readline().decode().strip()
 
                     if slice_id not in slices:
-                        slices[slice_id] = Slice(self.root_path, cell_centered)
-                    slices[slice_id]._add_subslice(filename, quantity, label, unit,
-                                                   Extent(*index_ranges), self.meshes[mesh_index])
+                        slices[slice_id] = list()
+                    slices[slice_id].append(
+                        {"extent": Extent(*index_ranges), "mesh": self.meshes[mesh_index],
+                         "filename": filename, "quantity": quantity, "label": label, "unit": unit})
 
                     pos = smv_file.find(b'SLC', pos + 1)
-            if len(slices) > 0:
-                self._slices = list(slices.values())
-            else:
+
+            if len(slices) == 0:
                 raise IOError("This simulation did not output any slices.")
+
+            self._slices = SliceCollection(
+                Slice(self.root_path, cell_centered, slice_data) for slice_data in slices.values())
         return self._slices
 
     @property
-    def boundaries(self) -> List[Boundary]:
+    def boundaries(self) -> BoundaryCollection:
         """Lazy loads all boundary data for the simulation.
         :returns: All boundary data.
         """
@@ -208,13 +261,13 @@ class Simulation:
 
                     pos = smv_file.find(b'BND', pos + 1)
             if len(boundaries) > 0:
-                self._boundaries = list(boundaries.values())
+                self._boundaries = BoundaryCollection(boundaries.values())
             else:
                 raise IOError("This simulation did not output any plot3d data.")
         return self._boundaries
 
     @property
-    def data_3d(self) -> List[Plot3D]:
+    def data_3d(self) -> Plot3DCollection:
         """Lazy loads all plot3d data for the simulation.
         :returns: All plot3d data.
         """
@@ -247,13 +300,13 @@ class Simulation:
 
                     pos = smv_file.find(b'PL3D', pos + 1)
             if len(plot3ds) > 0:
-                self._3d_data = list(plot3ds.values())
+                self._3d_data = Plot3DCollection(plot3ds.values())
             else:
                 raise IOError("This simulation did not output any plot3d data.")
         return self._3d_data
 
     @property
-    def isosurfaces(self):
+    def isosurfaces(self) -> IsosurfaceCollection:
         """Lazy loads all isosurfaces for the simulation.
         :returns: All isof data.
         """
@@ -300,7 +353,19 @@ class Simulation:
 
                     pos = smv_file.find(b'ISOG', pos + 1)
             if len(isosurfaces) > 0:
-                self._isosurfaces = list(isosurfaces.values())
+                self._isosurfaces = IsosurfaceCollection(isosurfaces.values())
             else:
                 raise IOError("This simulation did not output any isosurfaces.")
         return self._isosurfaces
+
+    def clear_cache(self):
+        """Remove all data from the internal cache that has been loaded so far to free memory.
+        """
+        if hasattr(self, "_slices"):
+            self._slices.clear_cache()
+        if hasattr(self, "_boundaries"):
+            self._boundaries.clear_cache()
+        if hasattr(self, "_3d_data"):
+            self._3d_data.clear_cache()
+        if hasattr(self, "_isosurfaces"):
+            self._isosurfaces.clear_cache()

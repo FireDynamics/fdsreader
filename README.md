@@ -42,11 +42,16 @@ print(sim.meshes, sim.meshes[0].obstructions, sim.surfaces, sim.slices, sim.boun
 ### Alpha (end of 2020)
 * 0.x.0
     * (Entering alpha status after extensive private testing in pre-alpha stage)
-    * Implemented automatic unit testing
     
 ### --> Pre-Alpha
-* 0.4.6
+* 0.4.7
     * (Coming soon...)
+* 0.4.6
+    * Added automatic caching for simulations (which significantly reduces simulation loading time) 
+    * Reworked internal slcf data structure
+    * Fixed isof reader (now correctly reads in data for all time steps)
+    * Connected bndf data to obstructions
+    * Simplified instantiation of Simulation objects  
 * 0.4.5
     * Added Multimesh isof support
     * Improved slcf and bndf stability
