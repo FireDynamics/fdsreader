@@ -201,5 +201,5 @@ class Mesh:
 
         return ventilations
 
-    def __str__(self, *args, **kwargs):
-        return f"Mesh {self.index}: {self.id} - " + str(self.extent)
+    def __repr__(self, *args, **kwargs):
+        return f'Mesh(index={self.index}, id="{self.id}", extent={str(self.extent)})'

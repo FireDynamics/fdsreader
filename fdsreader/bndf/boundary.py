@@ -1,5 +1,6 @@
 import os
-from typing import List, BinaryIO, Dict
+from operator import add
+from typing import List, BinaryIO, Dict, Tuple
 import numpy as np
 
 from fdsreader.utils import Quantity, Mesh, Extent, settings, Obstruction
@@ -16,21 +17,22 @@ class Patch:
     :ivar t_n: Total number of time steps for which output data has been written.
     """
 
-    def __init__(self, extent: Extent, orientation: int):
+    def __init__(self, extent: Extent, orientation: int, cell_centered: bool):
         self.extent = extent
         self.orientation = orientation
         self.t_n = -1
+        self.cell_centered = cell_centered
 
     @property
-    def shape(self):
+    def shape(self) -> Tuple:
         """Convenience function to calculate the shape of the array containing data for this patch.
         """
         if abs(self.orientation) == 1:
-            dim = (1, self.extent.y + 2, self.extent.z + 2)
+            dim = tuple(map(add, self.extent.shape(self.cell_centered), (0, 2, 2)))
         elif abs(self.orientation) == 2:
-            dim = (self.extent.x + 2, 1, self.extent.z + 2)
+            dim = tuple(map(add, self.extent.shape(self.cell_centered), (2, 0, 2)))
         else:
-            dim = (self.extent.x + 2, self.extent.y + 2, 1)
+            dim = tuple(map(add, self.extent.shape(self.cell_centered), (2, 2, 0)))
         return dim
 
     def _post_init(self, t_n: int):
@@ -51,6 +53,9 @@ class Patch:
         if hasattr(self, "data"):
             del self.data
 
+    def __repr__(self, *args, **kwargs):
+        return f"Patch(shape={self.shape}, orientation={self.orientation})"
+
 
 class SubBoundary:
     """Contains all boundary data for a single mesh subdivided into patches.
@@ -59,12 +64,12 @@ class SubBoundary:
     :ivar mesh: The mesh containing all boundary data in this :class:`SubBoundary`.
     """
 
-    def __init__(self, file_path: str, mesh: Mesh):
+    def __init__(self, file_path: str, mesh: Mesh, cell_centered: bool):
         self.file_path = file_path
         self.mesh = mesh
+        self.cell_centered = cell_centered
 
         self._patches: Dict[Obstruction, List[Patch]] = dict()
-        self._times = None
         with open(self.file_path, 'rb') as infile:
             # Offset of the binary file to the end of the file header.
             self._offset = 3 * fdtype.new((('c', 30),)).itemsize
@@ -78,28 +83,16 @@ class SubBoundary:
 
             for patch_info in patch_infos:
                 co = self.mesh.coordinates
-                obst = mesh.obstructions[patch_info[7]]
+                obst = mesh.obstructions[patch_info[7] + 1]
                 extent = Extent(co[0][patch_info[0]], co[0][patch_info[1]], co[1][patch_info[2]],
                                 co[1][patch_info[3]], co[2][patch_info[4]], co[2][patch_info[5]])
                 orientation = patch_info[6]
                 if obst not in self._patches:
                     self._patches[obst] = list()
-                self._patches[obst].append(Patch(extent, orientation))
-
-        total_dim_size = 0
-        for patches in self._patches.values():
-            for patch in patches:
-                total_dim_size += fdtype.new((('f', str(patch.shape)),)).itemsize
-
-        t_n = (os.stat(file_path).st_size - self._offset) // (
-                    fdtype.FLOAT.itemsize + total_dim_size)
-
-        for patches in self._patches.values():
-            for patch in patches:
-                patch._post_init(t_n)
+                self._patches[obst].append(Patch(extent, orientation, self.cell_centered))
 
     @property
-    def patches(self) -> Dict[Obstruction, List[Patch]]:
+    def obstruction_data(self) -> Dict[Obstruction, List[Patch]]:
         """Method to lazy load the boundary data for all patches in a single mesh.
 
         :returns: The actual data in form of a dictionary that maps an obstruction to a list with
@@ -107,6 +100,17 @@ class SubBoundary:
             (objects containing numpy ndarrays).
         """
         if not hasattr(next(iter(self._patches.values()))[0], "data"):
+            total_dim_size = 0
+            for patches in self._patches.values():
+                for patch in patches:
+                    total_dim_size += fdtype.new((('f', str(patch.shape)),)).itemsize
+            t_n = (os.stat(self.file_path).st_size - self._offset) // (
+                    fdtype.FLOAT.itemsize + total_dim_size)
+            for patches in self._patches.values():
+                for patch in patches:
+                    patch._post_init(t_n)
+            self._times = np.empty(shape=(t_n,))
+
             with open(self.file_path, 'rb') as infile:
                 infile.seek(self._offset)
                 for t in range(self._times.shape[0]):
@@ -117,8 +121,14 @@ class SubBoundary:
                             patch._load_data(infile, t)
         return self._patches
 
-    def get_obst_data(self, obst: Obstruction):
-        return self._patches[obst]
+    @property
+    def times(self):
+        if not hasattr(self, "_times"):
+            _ = self.obstruction_data
+        return self._times
+
+    def __getitem__(self, obst: Obstruction) -> List[Patch]:
+        return self.obstruction_data[obst]
 
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory.
@@ -155,37 +165,24 @@ class Boundary:
     def _add_subboundary(self, filename: str, mesh: Mesh) -> SubBoundary:
         """Created a :class:`SubBoundary` object and adds it to the list of sub_boundaries.
         """
-        subboundary = SubBoundary(os.path.join(self.root_path, filename), mesh)
+        subboundary = SubBoundary(os.path.join(self.root_path, filename), mesh, self.cell_centered)
         self._subboundaries[mesh] = subboundary
-
-        # Initialize time array
-        self._times = np.empty(shape=(subboundary._patches[0].t_n,))
-        # Mark times as not uninitialized
-        self.times[0] = -1
-        subboundary._times = self._times
 
         # If lazy loading has been disabled by the user, load the data instantaneously instead
         if not settings.LAZY_LOAD:
             # Implicitly load the data for one subboundary
-            _ = subboundary.patches
+            _ = subboundary.obstruction_data
 
         return subboundary
 
-    def get_subboundary(self, mesh: Mesh):
+    def __getitem__(self, mesh: Mesh):
         """Returns the :class:`SubBoundary` that contains data for the given mesh.
         """
         return self._subboundaries[mesh]
 
     @property
     def times(self):
-        if self._times is None:
-            raise AssertionError("Time data is not available before initializing the first"
-                                 " subboundary. This indicates that this function has been called"
-                                 " mid-initialization, which should not happen!")
-        elif self._times[0] == -1:
-            # Implicitly load the data for one subboundary, which (as a side effect) sets time data
-            _ = next(iter(self._subboundaries.values())).patches
-        return self._times
+        return next(iter(self._subboundaries.values())).times
 
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory.

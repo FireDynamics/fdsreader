@@ -3,7 +3,7 @@
 
 [![Build Status](https://travis-ci.org/JanVogelsang/fdsreader.svg?branch=master)](https://travis-ci.org/JanVogelsang/fdsreader)
 
-[One to two paragraph statement about the fdsreader.]
+[ToDo: One to two paragraph statement about the fdsreader package.]
 
 ![](https://via.placeholder.com/250)
 
@@ -17,13 +17,9 @@ python -m pip install --upgrade fdsreader
 ## Usage example
 ```python
 import fdsreader as fds
-import fdsreader.utils as fdsutils
-
-# Recursively scans the directory for all .smv files
-smv_file_path = fdsutils.scan_directory_smv("./sample_data")[0]
 
 # Creates an instance of a simulation master-class which manages all data for a given simulation
-sim = fds.Simulation(smv_file_path)
+sim = fds.Simulation("./sample_data")
 
 # Examples of data that can be easily accessed
 print(sim.meshes, sim.meshes[0].obstructions, sim.surfaces, sim.slices, sim.boundaries, sim.data_3d, sim.isosurfaces)
@@ -34,18 +30,21 @@ print(sim.meshes, sim.meshes[0].obstructions, sim.surfaces, sim.slices, sim.boun
 [https://janvogelsang.github.io/fdsreader/](https://janvogelsang.github.io/fdsreader/)
 
 ## Release History
-* 1.0.0
+* (unreleased) 1.0.0
     * (First official version will be released after sufficient public testing in beta stage)
-### Beta (Q1 2021)
-* 0.9.0
+
+### Beta *(Q1 2021)*
+* (unreleased) 0.9.0
     * (Entering beta status after extensive testing with selected participants in alpha stage)
-### Alpha (end of 2020)
-* 0.x.0
+    
+### Alpha *(12/2020 - 01/2021)*
+* (unreleased) 0.x.0
     * (Entering alpha status after extensive private testing in pre-alpha stage)
     
-### --> Pre-Alpha
+### Pre-Alpha *(current stage)*
 * 0.4.7
     * Added cache clearing functionality
+    * Bugfixes for bndf
 * 0.4.6
     * Added automatic caching for simulations (which significantly reduces simulation loading time) 
     * Reworked internal slcf data structure

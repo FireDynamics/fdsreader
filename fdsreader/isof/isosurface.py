@@ -201,7 +201,7 @@ class Isosurface:
 
         return subsurface
 
-    def get_subsurface(self, mesh: Mesh):
+    def __getitem__(self, mesh: Mesh):
         """Returns the :class:`SubSurface` that contains data for the given mesh.
         """
         return self._subsurfaces[mesh]

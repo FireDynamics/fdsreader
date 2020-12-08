@@ -42,5 +42,5 @@ class Obstruction:
         if len(rgba) != 0:
             self.rgba = rgba
 
-    def __str__(self, *args, **kwargs):
-        return f"{self.id}, " + str(self.extent)
+    def __repr__(self, *args, **kwargs):
+        return f"Obstruction(id={self.id}, extent={str(self.extent)})"

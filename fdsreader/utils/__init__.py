@@ -1,6 +1,6 @@
 from .data import Quantity
 
-from .fds_classes.extent import Extent
+from fdsreader.utils.extent import Extent
 
 from .fds_classes.surface import Surface
 

@@ -151,7 +151,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             for _, subslice in self._subslices.items():
                 _ = subslice.data
 
-    def get_subslice(self, mesh: Mesh):
+    def __getitem__(self, mesh: Mesh):
         """Returns the :class:`SubSlice` that cuts through the given mesh.
         """
         return self._subslices[mesh]

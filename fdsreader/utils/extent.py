@@ -1,3 +1,7 @@
+from functools import reduce
+from operator import mul
+from typing import Tuple
+
 from typing_extensions import Literal
 
 
@@ -5,7 +9,7 @@ class Extent:
     """Three-dimensional extent with support for a missing dimension (size of 1).
     """
 
-    def __init__(self, *args, skip_dimension: Literal['x', 'y', 'z', ''] = ''):
+    def __init__(self, *args, skip_dimension: Literal['x', 1, 'y', 2, 'z', 3, ''] = ''):
         self._extents = list()
 
         if len(args) % 2 == 1:
@@ -13,26 +17,29 @@ class Extent:
         for i in range(0, len(args), 2):
             self._extents.append((int(args[i]), int(args[i + 1])))
 
-        if skip_dimension == 'x':
+        if skip_dimension in ('x', 1):
             self._extents.insert(0, (0, 0))
-        elif skip_dimension == 'y':
+        elif skip_dimension in ('y', 2):
             self._extents.insert(1, (0, 0))
-        elif skip_dimension == 'z':
+        elif skip_dimension in ('z', 3):
             self._extents.append((0, 0))
 
     def __eq__(self, other):
         return self._extents == other._extents
 
-    def __str__(self):
-        return "[{}, {}] x [{}, {}] x [{}, {}]".format(self.x_start, self.x_end, self.y_start,
+    def __repr__(self, *args, **kwargs):
+        return "Extent({}, {}] x [{}, {}] x [{}, {}])".format(self.x_start, self.x_end, self.y_start,
                                                        self.y_end, self.z_start, self.z_end)
 
     def size(self, cell_centered=False):
+        return reduce(mul, self.shape(cell_centered))
+
+    def shape(self, cell_centered=False) -> Tuple[int, int, int]:
         c = 1 if cell_centered else 0
-        x = self.x-c if self.x != 0 else 1
-        y = self.y-c if self.y != 0 else 1
-        z = self.z-c if self.z != 0 else 1
-        return x * y * z
+        x = self.x - c if self.x != 0 else 1
+        y = self.y - c if self.y != 0 else 1
+        z = self.z - c if self.z != 0 else 1
+        return x, y, z
 
     @property
     def x(self):

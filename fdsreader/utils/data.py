@@ -1,9 +1,10 @@
 """
-Collection of utilities (convenience functions) for data handling.
+Collection of internal utilities (convenience functions) for data handling.
 """
 import glob
 import hashlib
 import os
+from collections import Iterable
 
 
 class Quantity:
@@ -17,9 +18,9 @@ class Quantity:
 
 
 def create_hash(path: str):
-    """Returns the md5 hash for the given file.
+    """Returns the md5 hash as string for the given file.
     """
-    return hashlib.md5(open(path, 'rb').read())
+    return str(hashlib.md5(open(path, 'rb').read()))
 
 
 def scan_directory_smv(directory: str):
@@ -47,3 +48,28 @@ def get_smv_file(path: str):
         return files[0]
     else:
         raise IOError("Path is invalid!")
+
+
+class FDSDataCollection:
+    """(Abstract) Base class for any collection of FDS data.
+    """
+    def __init__(self, *elements: Iterable):
+        self._elements = tuple(*elements)
+
+    def __getitem__(self, index):
+        return self._elements[index]
+
+    def __iter__(self):
+        return self._elements.__iter__()
+
+    def __len__(self):
+        return len(self._elements)
+
+    def __contains__(self, value):
+        return value in self._elements
+
+    def clear_cache(self):
+        """Remove all data from the internal cache that has been loaded so far to free memory.
+        """
+        for element in self._elements:
+            element.clear_cache()

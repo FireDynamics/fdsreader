@@ -53,5 +53,5 @@ class Ventilation:
         if radius != -1:
             self.radius = radius
 
-    def __str__(self, *args, **kwargs):
-        return f"{self.id}, " + str(self.extent)
+    def __repr__(self, *args, **kwargs):
+        return f"Ventilation(id={self.id}, extent={str(self.extent)})"

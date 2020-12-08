@@ -29,5 +29,5 @@ class Surface:
         self.rgb = rgb
         self.transparency = transparency
 
-    def __str__(self, *args, **kwargs):
-        return f'Surface "{self.name}"'
+    def __repr__(self, *args, **kwargs):
+        return f'Surface(name="{self.name}")'

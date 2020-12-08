@@ -83,7 +83,7 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
 
         return subplot
 
-    def get_subslice(self, mesh: Mesh):
+    def __getitem__(self, mesh: Mesh):
         """Returns the :class:`SubPlot` that contains data for the given mesh.
         """
         return self._subplots[mesh]

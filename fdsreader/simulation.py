@@ -34,8 +34,8 @@ class Simulation:
     """
 
     def __new__(cls, path: str):
-        root_path = os.path.dirname(path)
         smv_file_path = get_smv_file(path)
+        root_path = os.path.dirname(path)
 
         with open(smv_file_path, 'r') as infile, mmap.mmap(infile.fileno(), 0,
                                                            access=mmap.ACCESS_READ) as smv_file:
@@ -102,7 +102,7 @@ class Simulation:
     def _get_pickle_filename(cls, root_path: str, chid: str):
         """Get the filename used to save the pickled simulation.
         """
-        return root_path + chid + ".pickle"
+        return f"{root_path}/{chid}.pickle"
 
     def _load_meshes(self, smv_file: mmap.mmap) -> List[Mesh]:
         """Method to load the mesh information from the smv file.
