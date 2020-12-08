@@ -47,4 +47,3 @@ def get_smv_file(path: str):
         return files[0]
     else:
         raise IOError("Path is invalid!")
-

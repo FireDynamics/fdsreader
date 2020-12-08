@@ -45,7 +45,7 @@ print(sim.meshes, sim.meshes[0].obstructions, sim.surfaces, sim.slices, sim.boun
     
 ### --> Pre-Alpha
 * 0.4.7
-    * (Coming soon...)
+    * Added cache clearing functionality
 * 0.4.6
     * Added automatic caching for simulations (which significantly reduces simulation loading time) 
     * Reworked internal slcf data structure

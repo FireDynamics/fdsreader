@@ -8,20 +8,20 @@ class Plot3DCollection:
         using plot3Ds as well as its subclasses such as :class:`SubPlot3D`.
     """
 
-    def __init__(self, *slices: Iterable[Plot3D]):
-        self._slices = tuple(*slices)
+    def __init__(self, *plot3ds: Iterable[Plot3D]):
+        self._plot3ds = tuple(*plot3ds)
 
     def __getitem__(self, index):
-        return self._slices[index]
+        return self._plot3ds[index]
 
     def __len__(self):
-        return len(self._slices)
+        return len(self._plot3ds)
 
     def __contains__(self, value):
-        return value in self._slices
+        return value in self._plot3ds
 
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory.
         """
-        # TODO
-        pass
+        for plot3d in self._plot3ds:
+            plot3d.clear_cache()

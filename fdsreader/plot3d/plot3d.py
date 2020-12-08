@@ -1,6 +1,7 @@
 import logging
 import os
-from typing import List
+from copy import deepcopy
+from typing import List, Dict
 import numpy as np
 
 from fdsreader.utils import Quantity, Mesh, settings
@@ -33,7 +34,8 @@ class SubPlot3D:
         self.file_path = file_path
         self.mesh = mesh
 
-    def get_data(self) -> np.ndarray:
+    @property
+    def data(self) -> np.ndarray:
         """Method to lazy load the 3D data for a single mesh.
 
         :returns: 4D numpy array wiht (x,y,z,q) as dimensions, while q represents the 5 quantities.
@@ -45,6 +47,12 @@ class SubPlot3D:
                 self._data = fdtype.read(infile, dtype_data, 1)[0][0].reshape(
                     (self.mesh.extent.x, self.mesh.extent.y, self.mesh.extent.z, 5))
         return self._data
+
+    def clear_cache(self):
+        """Remove all data from the internal cache that has been loaded so far to free memory.
+        """
+        if hasattr(self, "_data"):
+            del self._data
 
 
 class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
@@ -63,25 +71,22 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
         self.quantities = quantities
 
         # List of all subplots this slice consists of (one per mesh).
-        self._subplots: List[SubPlot3D] = list()
+        self._subplots: Dict[Mesh, SubPlot3D] = dict()
 
     def _add_subplot(self, filename: str, mesh: Mesh) -> SubPlot3D:
         subplot = SubPlot3D(os.path.join(self.root_path, filename), mesh)
-        self._subplots.append(subplot)
+        self._subplots[mesh] = subplot
 
         # If lazy loading has been disabled by the user, load the data instantaneously instead
         if not settings.LAZY_LOAD:
-            subplot.get_data()
+            _ = subplot.data
 
         return subplot
 
     def get_subslice(self, mesh: Mesh):
         """Returns the :class:`SubPlot` that contains data for the given mesh.
         """
-        for plt in self._subplots:
-            if plt.mesh.id == mesh.id:
-                return plt
-        raise KeyError("The provided mesh is not valid for this operation in this simulation!")
+        return self._subplots[mesh]
 
     def mean(self) -> np.ndarray:
         """Calculates the mean over each quantity individually of the whole Plot3D.
@@ -89,9 +94,15 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
         :returns: The calculated mean values.
         """
         mean_sums = np.zeros((5,))
-        for subplot in self._subplots:
-            mean_sums += np.mean(subplot.get_data(), axis=(0, 1, 2))
+        for subplot in self._subplots.values():
+            mean_sums += np.mean(subplot.data, axis=(0, 1, 2))
         return mean_sums / len(self._subplots)
+
+    def clear_cache(self):
+        """Remove all data from the internal cache that has been loaded so far to free memory.
+        """
+        for subplot in self._subplots.values():
+            subplot.clear_cache()
 
     def __array__(self):
         """Method that will be called by numpy when trying to convert the object to a numpy ndarray.
@@ -116,10 +127,9 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
             if isinstance(inp, self.__class__):
                 del input_list[i]
 
-        new_pl3d = Plot3D(self.root_path, self.time, self.quantities)
-        for i, subplot in enumerate(self._subplots):
-            new_pl3d._add_subplot(subplot.file_path, subplot.mesh)
-            new_pl3d._subplots[-1]._data = ufunc(subplot.get_data(), input_list[0], **kwargs)
+        new_pl3d = deepcopy(self)
+        for subplot in self._subplots.values():
+            subplot._data = ufunc(subplot.data, input_list[0], **kwargs)
         return new_pl3d
 
     def __array_function__(self, func, types, args, kwargs):

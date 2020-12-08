@@ -23,5 +23,5 @@ class SliceCollection:
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory.
         """
-        # TODO
-        pass
+        for slc in self._slices:
+            slc.clear_cache()

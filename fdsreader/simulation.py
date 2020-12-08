@@ -49,7 +49,7 @@ class Simulation:
             with open(pickle_file_path) as f:
                 sim = pickle.load(f)
             if not isinstance(sim, cls):
-                os.remove(path)
+                os.remove(pickle_file_path)
             else:
                 if sim._hash == create_hash(smv_file_path):
                     return sim
@@ -273,7 +273,7 @@ class Simulation:
         """
         # Todo: Also read SMOKG3D data?
         # Only load plot3d data once initially and then reuse the loaded information
-        if not hasattr(self, "_3d_data"):
+        if not hasattr(self, "_plot3ds"):
             plot3ds = dict()
             with open(self.smv_file_path, 'r') as infile, \
                     mmap.mmap(infile.fileno(), 0, access=mmap.ACCESS_READ) as smv_file:
@@ -300,10 +300,10 @@ class Simulation:
 
                     pos = smv_file.find(b'PL3D', pos + 1)
             if len(plot3ds) > 0:
-                self._3d_data = Plot3DCollection(plot3ds.values())
+                self._plot3ds = Plot3DCollection(plot3ds.values())
             else:
                 raise IOError("This simulation did not output any plot3d data.")
-        return self._3d_data
+        return self._plot3ds
 
     @property
     def isosurfaces(self) -> IsosurfaceCollection:
@@ -358,14 +358,19 @@ class Simulation:
                 raise IOError("This simulation did not output any isosurfaces.")
         return self._isosurfaces
 
-    def clear_cache(self):
+    def clear_cache(self, clear_persistent_cache=False):
         """Remove all data from the internal cache that has been loaded so far to free memory.
+
+        :param clear_persistent_cache: Whether to clear the persistent simulation cache as well.
         """
         if hasattr(self, "_slices"):
             self._slices.clear_cache()
         if hasattr(self, "_boundaries"):
             self._boundaries.clear_cache()
-        if hasattr(self, "_3d_data"):
-            self._3d_data.clear_cache()
+        if hasattr(self, "_plot3ds"):
+            self._plot3ds.clear_cache()
         if hasattr(self, "_isosurfaces"):
             self._isosurfaces.clear_cache()
+
+        if clear_persistent_cache:
+            os.remove(Simulation._get_pickle_filename(self.root_path, self.chid))

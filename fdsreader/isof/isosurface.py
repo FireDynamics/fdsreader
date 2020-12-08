@@ -1,5 +1,5 @@
 import os
-from typing import BinaryIO, List
+from typing import BinaryIO, Dict
 
 import numpy as np
 
@@ -150,6 +150,20 @@ class SubSurface:
             n_vertices = fdtype.read(infile, dtype_nverts, 1)[0][0][2]
             self._colors[t] = fdtype.read(infile, fdtype.new((('f', n_vertices),)), 1)
 
+    def clear_cache(self):
+        """Remove all data from the internal cache that has been loaded so far to free memory.
+        """
+        if hasattr(self, "times"):
+            del self.times
+        if hasattr(self, "_vertices"):
+            del self._vertices
+        if hasattr(self, "_triangles"):
+            del self._triangles
+        if hasattr(self, "_surfaces"):
+            del self._surfaces
+        if hasattr(self, "_colors"):
+            del self._colors
+
 
 class Isosurface:
     """Isosurface file data container including metadata. Consists of a list of vertices forming a
@@ -172,7 +186,7 @@ class Isosurface:
 
         self._times = None
 
-        self._subsurfaces: List[SubSurface] = list()
+        self._subsurfaces: Dict[Mesh, SubSurface] = dict()
 
         if self._double_quantity:
             self.v_quantity = Quantity(v_quantity, v_label, v_unit)
@@ -183,17 +197,14 @@ class Isosurface:
                                     os.path.join(self.root_path, viso_filename))
         else:
             subsurface = SubSurface(mesh, os.path.join(self.root_path, iso_filename))
-        self._subsurfaces.append(subsurface)
+        self._subsurfaces[mesh] = subsurface
 
         return subsurface
 
     def get_subsurface(self, mesh: Mesh):
         """Returns the :class:`SubSurface` that contains data for the given mesh.
         """
-        for iso in self._subsurfaces:
-            if iso.mesh.id == mesh.id:
-                return iso
-        raise KeyError("The provided mesh is not valid for this operation in this simulation!")
+        return self._subsurfaces[mesh]
 
     @property
     def has_color_data(self):
@@ -207,3 +218,9 @@ class Isosurface:
             # Implicitly load the data for one subsurface and read times
             _ = self._subsurfaces[0].vertices
         return self._times
+
+    def clear_cache(self):
+        """Remove all data from the internal cache that has been loaded so far to free memory.
+        """
+        for subsurface in self._subsurfaces.values():
+            subsurface.clear_cache()

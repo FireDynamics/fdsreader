@@ -45,6 +45,12 @@ class Patch:
         dtype_data = fdtype.new((('f', str(self.shape)),))
         self.data[t, :] = fdtype.read(infile, dtype_data, 1)
 
+    def clear_cache(self):
+        """Remove all data from the internal cache that has been loaded so far to free memory.
+        """
+        if hasattr(self, "data"):
+            del self.data
+
 
 class SubBoundary:
     """Contains all boundary data for a single mesh subdivided into patches.
@@ -111,6 +117,16 @@ class SubBoundary:
                             patch._load_data(infile, t)
         return self._patches
 
+    def get_obst_data(self, obst: Obstruction):
+        return self._patches[obst]
+
+    def clear_cache(self):
+        """Remove all data from the internal cache that has been loaded so far to free memory.
+        """
+        for patches in self._patches.values():
+            for patch in patches:
+                patch.clear_cache()
+
 
 class Boundary:
     """Boundary file data container including metadata. Consists of multiple subboundaries.
@@ -132,7 +148,7 @@ class Boundary:
         self.cell_centered = cell_centered
         self.quantity = Quantity(quantity, label, unit)
 
-        self._subboundaries: List[SubBoundary] = list()
+        self._subboundaries: Dict[Mesh, SubBoundary] = dict()
 
         self._times = None
 
@@ -140,7 +156,7 @@ class Boundary:
         """Created a :class:`SubBoundary` object and adds it to the list of sub_boundaries.
         """
         subboundary = SubBoundary(os.path.join(self.root_path, filename), mesh)
-        self._subboundaries.append(subboundary)
+        self._subboundaries[mesh] = subboundary
 
         # Initialize time array
         self._times = np.empty(shape=(subboundary._patches[0].t_n,))
@@ -158,10 +174,7 @@ class Boundary:
     def get_subboundary(self, mesh: Mesh):
         """Returns the :class:`SubBoundary` that contains data for the given mesh.
         """
-        for bnd in self._subboundaries:
-            if bnd.mesh.id == mesh.id:
-                return bnd
-        raise KeyError("The provided mesh is not valid for this operation in this simulation!")
+        return self._subboundaries[mesh]
 
     @property
     def times(self):
@@ -171,5 +184,11 @@ class Boundary:
                                  " mid-initialization, which should not happen!")
         elif self._times[0] == -1:
             # Implicitly load the data for one subboundary, which (as a side effect) sets time data
-            _ = self._subboundaries[0].patches
+            _ = next(iter(self._subboundaries.values())).patches
         return self._times
+
+    def clear_cache(self):
+        """Remove all data from the internal cache that has been loaded so far to free memory.
+        """
+        for subboundary in self._subboundaries.values():
+            subboundary.clear_cache()

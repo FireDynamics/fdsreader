@@ -91,6 +91,14 @@ class SubSlice:
                 self._load_data(file_path, self._vector_data[direction], t_n)
         return self._vector_data
 
+    def clear_cache(self):
+        """Remove all data from the internal cache that has been loaded so far to free memory.
+        """
+        if hasattr(self, "_data"):
+            del self._data
+        if hasattr(self, "_vector_data"):
+            del self._vector_data
+
 
 class Slice(np.lib.mixins.NDArrayOperatorsMixin):
     """Slice file data container including metadata. Consists of multiple subslices, one for each
@@ -159,11 +167,11 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             _ = next(iter(self._subslices.values())).data
         return self._times
 
-    # def copy(self) -> __class__:
-    #     """Performs a deep copy of a slice.
-    #
-    #     :returns: A deep copy of the original slice.
-    #     """
+    def clear_cache(self):
+        """Remove all data from the internal cache that has been loaded so far to free memory.
+        """
+        for subslice in self._subslices.values():
+            subslice.clear_cache()
 
     def mean(self):
         """Calculates the mean over the whole slice.
