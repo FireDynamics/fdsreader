@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Slice files &mdash; fdsreader [fdsreader, version 0.4.7] documentation</title>
+  <title>Slice files &mdash; fdsreader [fdsreader, version 0.4.7dev1] documentation</title>
   
 
   
@@ -174,12 +174,6 @@ quantities calculated for this slice with the corresponding label and unit.</p><
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname">get_subslice</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mesh</span><span class="p">:</span> <span class="n">fdsreader.utils.fds_classes.mesh.Mesh</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice.get_subslice"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Returns the <code class="xref py py-class docutils literal notranslate"><span class="pre">SubSlice</span></code> that cuts through the given mesh.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt>
 <code class="sig-name descname">mean</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice.mean"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Calculates the mean over the whole slice.</p>
 <dl class="field-list simple">
@@ -198,7 +192,7 @@ quantities calculated for this slice with the corresponding label and unit.</p><
 
 <dl class="py class">
 <dt>
-<em class="property">class </em><code class="sig-prename descclassname">fdsreader.slcf.slice.</code><code class="sig-name descname">SubSlice</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">root_path</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">cell_centered</span><span class="p">:</span> <span class="n">bool</span></em>, <em class="sig-param"><span class="n">extent</span><span class="p">:</span> <span class="n">fdsreader.utils.fds_classes.extent.Extent</span></em>, <em class="sig-param"><span class="n">mesh</span><span class="p">:</span> <span class="n">fdsreader.utils.fds_classes.mesh.Mesh</span></em>, <em class="sig-param"><span class="n">times</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#SubSlice"><span class="viewcode-link">[source]</span></a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">fdsreader.slcf.slice.</code><code class="sig-name descname">SubSlice</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">root_path</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">cell_centered</span><span class="p">:</span> <span class="n">bool</span></em>, <em class="sig-param"><span class="n">extent</span><span class="p">:</span> <span class="n">fdsreader.utils.extent.Extent</span></em>, <em class="sig-param"><span class="n">mesh</span><span class="p">:</span> <span class="n">fdsreader.utils.fds_classes.mesh.Mesh</span></em>, <em class="sig-param"><span class="n">times</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#SubSlice"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Part of a slice that cuts through a single mesh.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>

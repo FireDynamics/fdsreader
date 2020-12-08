@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>fdsreader.isof.isosurface &mdash; fdsreader [fdsreader, version 0.4.7] documentation</title>
+  <title>fdsreader.isof.isosurface &mdash; fdsreader [fdsreader, version 0.4.7dev1] documentation</title>
   
 
   
@@ -347,10 +347,10 @@
 
         <span class="k">return</span> <span class="n">subsurface</span>
 
-<div class="viewcode-block" id="Isosurface.get_subsurface"><a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.Isosurface.get_subsurface">[docs]</a>    <span class="k">def</span> <span class="nf">get_subsurface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Returns the :class:`SubSurface` that contains data for the given mesh.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subsurfaces</span><span class="p">[</span><span class="n">mesh</span><span class="p">]</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subsurfaces</span><span class="p">[</span><span class="n">mesh</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">has_color_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

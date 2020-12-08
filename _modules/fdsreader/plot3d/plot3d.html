@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>fdsreader.plot3d.plot3d &mdash; fdsreader [fdsreader, version 0.4.7] documentation</title>
+  <title>fdsreader.plot3d.plot3d &mdash; fdsreader [fdsreader, version 0.4.7dev1] documentation</title>
   
 
   
@@ -229,10 +229,10 @@
 
         <span class="k">return</span> <span class="n">subplot</span>
 
-<div class="viewcode-block" id="Plot3D.get_subslice"><a class="viewcode-back" href="../../../plot3d.html#fdsreader.plot3d.plot3d.Plot3D.get_subslice">[docs]</a>    <span class="k">def</span> <span class="nf">get_subslice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Returns the :class:`SubPlot` that contains data for the given mesh.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="p">[</span><span class="n">mesh</span><span class="p">]</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="p">[</span><span class="n">mesh</span><span class="p">]</span>
 
 <div class="viewcode-block" id="Plot3D.mean"><a class="viewcode-back" href="../../../plot3d.html#fdsreader.plot3d.plot3d.Plot3D.mean">[docs]</a>    <span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Calculates the mean over each quantity individually of the whole Plot3D.</span>

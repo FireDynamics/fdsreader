@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>fdsreader.slcf.slice &mdash; fdsreader [fdsreader, version 0.4.7] documentation</title>
+  <title>fdsreader.slcf.slice &mdash; fdsreader [fdsreader, version 0.4.7dev1] documentation</title>
   
 
   
@@ -297,10 +297,10 @@
             <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">subslice</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subslices</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="n">_</span> <span class="o">=</span> <span class="n">subslice</span><span class="o">.</span><span class="n">data</span>
 
-<div class="viewcode-block" id="Slice.get_subslice"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.slice.Slice.get_subslice">[docs]</a>    <span class="k">def</span> <span class="nf">get_subslice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Returns the :class:`SubSlice` that cuts through the given mesh.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subslices</span><span class="p">[</span><span class="n">mesh</span><span class="p">]</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subslices</span><span class="p">[</span><span class="n">mesh</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">times</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

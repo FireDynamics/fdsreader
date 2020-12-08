@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Utilities &mdash; fdsreader [fdsreader, version 0.4.7] documentation</title>
+  <title>Utilities &mdash; fdsreader [fdsreader, version 0.4.7dev1] documentation</title>
   
 
   
@@ -150,71 +150,6 @@
 <h1>Utilities<a class="headerlink" href="#utilities" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="apireference"></span><dl class="py class">
 <dt>
-<em class="property">class </em><code class="sig-prename descclassname">fdsreader.utils.fds_classes.extent.</code><code class="sig-name descname">Extent</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">skip_dimension</span><span class="p">:</span> <span class="n">Literal<span class="p">[</span>x<span class="p">, </span>y<span class="p">, </span>z<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">''</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/fds_classes/extent.html#Extent"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Three-dimensional extent with support for a missing dimension (size of 1).</p>
-<dl class="py method">
-<dt>
-<code class="sig-name descname">size</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cell_centered</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/fds_classes/extent.html#Extent.size"><span class="viewcode-link">[source]</span></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt>
-<em class="property">property </em><code class="sig-name descname">x</code></dt>
-<dd><p>Gives the number of data points in x-direction (end is inclusive).</p>
-</dd></dl>
-
-<dl class="py method">
-<dt>
-<em class="property">property </em><code class="sig-name descname">x_end</code></dt>
-<dd><p>Gives the absolute extent in x-direction.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt>
-<em class="property">property </em><code class="sig-name descname">x_start</code></dt>
-<dd><p>Gives the absolute extent in x-direction.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt>
-<em class="property">property </em><code class="sig-name descname">y</code></dt>
-<dd><p>Gives the number of data points in y-direction (end is inclusive).</p>
-</dd></dl>
-
-<dl class="py method">
-<dt>
-<em class="property">property </em><code class="sig-name descname">y_end</code></dt>
-<dd><p>Gives the absolute extent in y-direction.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt>
-<em class="property">property </em><code class="sig-name descname">y_start</code></dt>
-<dd><p>Gives the absolute extent in y-direction.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt>
-<em class="property">property </em><code class="sig-name descname">z</code></dt>
-<dd><p>Gives the number of data points in z-direction (end is inclusive).</p>
-</dd></dl>
-
-<dl class="py method">
-<dt>
-<em class="property">property </em><code class="sig-name descname">z_end</code></dt>
-<dd><p>Gives the absolute extent in z-direction.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt>
-<em class="property">property </em><code class="sig-name descname">z_start</code></dt>
-<dd><p>Gives the absolute extent in z-direction.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt>
 <em class="property">class </em><code class="sig-prename descclassname">fdsreader.utils.fds_classes.mesh.</code><code class="sig-name descname">Mesh</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x_coordinates</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">y_coordinates</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">z_coordinates</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">mesh_id</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">mesh_index</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">smv_file</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>str<span class="p">, </span>mmap.mmap<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">pos</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">surfaces</span><span class="p">:</span> <span class="n">List<span class="p">[</span>fdsreader.utils.fds_classes.surface.Surface<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">default_texture_origin</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/fds_classes/mesh.html#Mesh"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>3-dimensional Mesh of fixed, defined size.</p>
 <dl class="field-list simple">
@@ -248,7 +183,7 @@ the smv_file again or the name of the smv-file containing the mesh information.<
 
 <dl class="py class">
 <dt>
-<em class="property">class </em><code class="sig-prename descclassname">fdsreader.utils.fds_classes.obstruction.</code><code class="sig-name descname">Obstruction</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">oid</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">extent</span><span class="p">:</span> <span class="n">fdsreader.utils.fds_classes.extent.Extent</span></em>, <em class="sig-param"><span class="n">side_surfaces</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>fdsreader.utils.fds_classes.surface.Surface<span class="p">, </span>fdsreader.utils.fds_classes.surface.Surface<span class="p">, </span>fdsreader.utils.fds_classes.surface.Surface<span class="p">, </span>fdsreader.utils.fds_classes.surface.Surface<span class="p">, </span>fdsreader.utils.fds_classes.surface.Surface<span class="p">, </span>fdsreader.utils.fds_classes.surface.Surface<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">bound_indices</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">color_index</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">block_type</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">texture_origin</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">rgba</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Tuple<span class="p">[</span><span class="p">(</span><span class="p">)</span><span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/fds_classes/obstruction.html#Obstruction"><span class="viewcode-link">[source]</span></a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">fdsreader.utils.fds_classes.obstruction.</code><code class="sig-name descname">Obstruction</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">oid</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">extent</span><span class="p">:</span> <span class="n">fdsreader.utils.extent.Extent</span></em>, <em class="sig-param"><span class="n">side_surfaces</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>fdsreader.utils.fds_classes.surface.Surface<span class="p">, </span>fdsreader.utils.fds_classes.surface.Surface<span class="p">, </span>fdsreader.utils.fds_classes.surface.Surface<span class="p">, </span>fdsreader.utils.fds_classes.surface.Surface<span class="p">, </span>fdsreader.utils.fds_classes.surface.Surface<span class="p">, </span>fdsreader.utils.fds_classes.surface.Surface<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">bound_indices</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">color_index</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">block_type</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">texture_origin</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">rgba</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Tuple<span class="p">[</span><span class="p">(</span><span class="p">)</span><span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/fds_classes/obstruction.html#Obstruction"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>A box-shaped obstruction with specific surfaces (materials) on each side.</p>
 <blockquote>
 <div><dl class="field-list simple">
@@ -324,7 +259,7 @@ TODO: Read in velocity</p>
 
 <dl class="py class">
 <dt>
-<em class="property">class </em><code class="sig-prename descclassname">fdsreader.utils.fds_classes.vent.</code><code class="sig-name descname">Ventilation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">extent</span><span class="p">:</span> <span class="n">fdsreader.utils.fds_classes.extent.Extent</span></em>, <em class="sig-param"><span class="n">vid</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">surface</span><span class="p">:</span> <span class="n">fdsreader.utils.fds_classes.surface.Surface</span></em>, <em class="sig-param"><span class="n">bound_indices</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">color_index</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">draw_type</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">rgba</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Tuple<span class="p">[</span><span class="p">(</span><span class="p">)</span><span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">texture_origin</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Tuple<span class="p">[</span><span class="p">(</span><span class="p">)</span><span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">circular_vent_origin</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Tuple<span class="p">[</span><span class="p">(</span><span class="p">)</span><span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">radius</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">- 1</span></em>, <em class="sig-param"><span class="n">open_time</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">- 1</span></em>, <em class="sig-param"><span class="n">close_time</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/fds_classes/vent.html#Ventilation"><span class="viewcode-link">[source]</span></a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">fdsreader.utils.fds_classes.vent.</code><code class="sig-name descname">Ventilation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">extent</span><span class="p">:</span> <span class="n">fdsreader.utils.extent.Extent</span></em>, <em class="sig-param"><span class="n">vid</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">surface</span><span class="p">:</span> <span class="n">fdsreader.utils.fds_classes.surface.Surface</span></em>, <em class="sig-param"><span class="n">bound_indices</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">color_index</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">draw_type</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">rgba</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Tuple<span class="p">[</span><span class="p">(</span><span class="p">)</span><span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">texture_origin</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Tuple<span class="p">[</span><span class="p">(</span><span class="p">)</span><span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">circular_vent_origin</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Tuple<span class="p">[</span><span class="p">(</span><span class="p">)</span><span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">radius</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">- 1</span></em>, <em class="sig-param"><span class="n">open_time</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">- 1</span></em>, <em class="sig-param"><span class="n">close_time</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/fds_classes/vent.html#Ventilation"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>A ventilation can be used to model components of the ventilation system in a building, like a diffuser or a return.
 A ventilation can also be used as a means of applying a particular boundary condition to a rectangular patch on a</p>
 <blockquote>
@@ -359,7 +294,19 @@ for example windows or bricks, the texture_origin specifies where the pattern sh
 </dl>
 </dd></dl>
 
-<p>Collection of utilities (convenience functions) for data handling.</p>
+<p>Collection of internal utilities (convenience functions) for data handling.</p>
+<dl class="py class">
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">fdsreader.utils.data.</code><code class="sig-name descname">FDSDataCollection</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">elements</span><span class="p">:</span> <span class="n">collections.abc.Iterable</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/data.html#FDSDataCollection"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>(Abstract) Base class for any collection of FDS data.</p>
+<dl class="py method">
+<dt>
+<code class="sig-name descname">clear_cache</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/data.html#FDSDataCollection.clear_cache"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Remove all data from the internal cache that has been loaded so far to free memory.</p>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="py class">
 <dt>
 <em class="property">class </em><code class="sig-prename descclassname">fdsreader.utils.data.</code><code class="sig-name descname">Quantity</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">quantity</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">label</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">unit</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/data.html#Quantity"><span class="viewcode-link">[source]</span></a></dt>
@@ -368,7 +315,7 @@ for example windows or bricks, the texture_origin specifies where the pattern sh
 <dl class="py function">
 <dt>
 <code class="sig-prename descclassname">fdsreader.utils.data.</code><code class="sig-name descname">create_hash</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/data.html#create_hash"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>Returns the md5 hash for the given file.</p>
+<dd><p>Returns the md5 hash as string for the given file.</p>
 </dd></dl>
 
 <dl class="py function">
