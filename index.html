@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Welcome to the official FDSReader API documentation! &mdash; fdsreader [fdsreader, version 0.4.6] documentation</title>
+  <title>Welcome to the official FDSReader API documentation! &mdash; fdsreader [fdsreader, version 0.4.7] documentation</title>
   
 
   
@@ -189,8 +189,13 @@ the same directory.</p>
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname">clear_cache</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/simulation.html#Simulation.clear_cache"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-name descname">clear_cache</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clear_persistent_cache</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/simulation.html#Simulation.clear_cache"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Remove all data from the internal cache that has been loaded so far to free memory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>clear_persistent_cache</strong> – Whether to clear the persistent simulation cache as well.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -243,6 +248,12 @@ the same directory.</p>
 </dl>
 <dl class="py method">
 <dt>
+<code class="sig-name descname">clear_cache</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/isof/isosurface.html#Isosurface.clear_cache"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Remove all data from the internal cache that has been loaded so far to free memory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
 <code class="sig-name descname">get_subsurface</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mesh</span><span class="p">:</span> <span class="n">fdsreader.utils.fds_classes.mesh.Mesh</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/isof/isosurface.html#Isosurface.get_subsurface"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Returns the <code class="xref py py-class docutils literal notranslate"><span class="pre">SubSurface</span></code> that contains data for the given mesh.</p>
 </dd></dl>
@@ -277,6 +288,12 @@ the same directory.</p>
 </ul>
 </dd>
 </dl>
+<dl class="py method">
+<dt>
+<code class="sig-name descname">clear_cache</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/isof/isosurface.html#SubSurface.clear_cache"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Remove all data from the internal cache that has been loaded so far to free memory.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt>
 <em class="property">property </em><code class="sig-name descname">colors</code></dt>
@@ -332,6 +349,12 @@ calculated for this Plot3D with the corresponding label and unit.</p></li>
 </dl>
 <dl class="py method">
 <dt>
+<code class="sig-name descname">clear_cache</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/plot3d/plot3d.html#Plot3D.clear_cache"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Remove all data from the internal cache that has been loaded so far to free memory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
 <code class="sig-name descname">get_subslice</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mesh</span><span class="p">:</span> <span class="n">fdsreader.utils.fds_classes.mesh.Mesh</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/plot3d/plot3d.html#Plot3D.get_subslice"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Returns the <code class="xref py py-class docutils literal notranslate"><span class="pre">SubPlot</span></code> that contains data for the given mesh.</p>
 </dd></dl>
@@ -363,7 +386,13 @@ calculated for this Plot3D with the corresponding label and unit.</p></li>
 </dl>
 <dl class="py method">
 <dt>
-<code class="sig-name descname">get_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="_modules/fdsreader/plot3d/plot3d.html#SubPlot3D.get_data"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-name descname">clear_cache</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/plot3d/plot3d.html#SubPlot3D.clear_cache"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Remove all data from the internal cache that has been loaded so far to free memory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">data</code></dt>
 <dd><p>Method to lazy load the 3D data for a single mesh.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -401,6 +430,12 @@ quantities calculated for this slice with the corresponding label and unit.</p><
 </ul>
 </dd>
 </dl>
+<dl class="py method">
+<dt>
+<code class="sig-name descname">clear_cache</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice.clear_cache"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Remove all data from the internal cache that has been loaded so far to free memory.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt>
 <code class="sig-name descname">get_subslice</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mesh</span><span class="p">:</span> <span class="n">fdsreader.utils.fds_classes.mesh.Mesh</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice.get_subslice"><span class="viewcode-link">[source]</span></a></dt>
@@ -441,6 +476,12 @@ the actual grid values of the mesh.</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py method">
+<dt>
+<code class="sig-name descname">clear_cache</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#SubSlice.clear_cache"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Remove all data from the internal cache that has been loaded so far to free memory.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt>
 <em class="property">property </em><code class="sig-name descname">data</code></dt>

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>fdsreader.plot3d.plot3d &mdash; fdsreader [fdsreader, version 0.4.6] documentation</title>
+  <title>fdsreader.plot3d.plot3d &mdash; fdsreader [fdsreader, version 0.4.7] documentation</title>
   
 
   
@@ -146,7 +146,8 @@
   <h1>Source code for fdsreader.plot3d.plot3d</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">fdsreader.utils</span> <span class="kn">import</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Mesh</span><span class="p">,</span> <span class="n">settings</span>
@@ -179,7 +180,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">file_path</span> <span class="o">=</span> <span class="n">file_path</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="n">mesh</span>
 
-<div class="viewcode-block" id="SubPlot3D.get_data"><a class="viewcode-back" href="../../../plot3d.html#fdsreader.plot3d.plot3d.SubPlot3D.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Method to lazy load the 3D data for a single mesh.</span>
 
 <span class="sd">        :returns: 4D numpy array wiht (x,y,z,q) as dimensions, while q represents the 5 quantities.</span>
@@ -190,7 +192,13 @@
                 <span class="n">infile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_offset</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_data</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
                     <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">extent</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">extent</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">extent</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
+
+<div class="viewcode-block" id="SubPlot3D.clear_cache"><a class="viewcode-back" href="../../../plot3d.html#fdsreader.plot3d.plot3d.SubPlot3D.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_data&quot;</span><span class="p">):</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span></div></div>
 
 
 <div class="viewcode-block" id="Plot3D"><a class="viewcode-back" href="../../../plot3d.html#fdsreader.plot3d.plot3d.Plot3D">[docs]</a><span class="k">class</span> <span class="nc">Plot3D</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">lib</span><span class="o">.</span><span class="n">mixins</span><span class="o">.</span><span class="n">NDArrayOperatorsMixin</span><span class="p">):</span>
@@ -209,25 +217,22 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">quantities</span> <span class="o">=</span> <span class="n">quantities</span>
 
         <span class="c1"># List of all subplots this slice consists of (one per mesh).</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">SubPlot3D</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Mesh</span><span class="p">,</span> <span class="n">SubPlot3D</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_add_subplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SubPlot3D</span><span class="p">:</span>
         <span class="n">subplot</span> <span class="o">=</span> <span class="n">SubPlot3D</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="n">filename</span><span class="p">),</span> <span class="n">mesh</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subplot</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="p">[</span><span class="n">mesh</span><span class="p">]</span> <span class="o">=</span> <span class="n">subplot</span>
 
         <span class="c1"># If lazy loading has been disabled by the user, load the data instantaneously instead</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">LAZY_LOAD</span><span class="p">:</span>
-            <span class="n">subplot</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+            <span class="n">_</span> <span class="o">=</span> <span class="n">subplot</span><span class="o">.</span><span class="n">data</span>
 
         <span class="k">return</span> <span class="n">subplot</span>
 
 <div class="viewcode-block" id="Plot3D.get_subslice"><a class="viewcode-back" href="../../../plot3d.html#fdsreader.plot3d.plot3d.Plot3D.get_subslice">[docs]</a>    <span class="k">def</span> <span class="nf">get_subslice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Returns the :class:`SubPlot` that contains data for the given mesh.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">plt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">plt</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">mesh</span><span class="o">.</span><span class="n">id</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">plt</span>
-        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;The provided mesh is not valid for this operation in this simulation!&quot;</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="p">[</span><span class="n">mesh</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="Plot3D.mean"><a class="viewcode-back" href="../../../plot3d.html#fdsreader.plot3d.plot3d.Plot3D.mean">[docs]</a>    <span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Calculates the mean over each quantity individually of the whole Plot3D.</span>
@@ -235,9 +240,15 @@
 <span class="sd">        :returns: The calculated mean values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">mean_sums</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">5</span><span class="p">,))</span>
-        <span class="k">for</span> <span class="n">subplot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="p">:</span>
-            <span class="n">mean_sums</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">subplot</span><span class="o">.</span><span class="n">get_data</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">subplot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">mean_sums</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">subplot</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">mean_sums</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Plot3D.clear_cache"><a class="viewcode-back" href="../../../plot3d.html#fdsreader.plot3d.plot3d.Plot3D.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">subplot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">subplot</span><span class="o">.</span><span class="n">clear_cache</span><span class="p">()</span></div>
 
     <span class="k">def</span> <span class="nf">__array__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Method that will be called by numpy when trying to convert the object to a numpy ndarray.</span>
@@ -262,10 +273,9 @@
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
                 <span class="k">del</span> <span class="n">input_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 
-        <span class="n">new_pl3d</span> <span class="o">=</span> <span class="n">Plot3D</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">quantities</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">subplot</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="p">):</span>
-            <span class="n">new_pl3d</span><span class="o">.</span><span class="n">_add_subplot</span><span class="p">(</span><span class="n">subplot</span><span class="o">.</span><span class="n">file_path</span><span class="p">,</span> <span class="n">subplot</span><span class="o">.</span><span class="n">mesh</span><span class="p">)</span>
-            <span class="n">new_pl3d</span><span class="o">.</span><span class="n">_subplots</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">ufunc</span><span class="p">(</span><span class="n">subplot</span><span class="o">.</span><span class="n">get_data</span><span class="p">(),</span> <span class="n">input_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">new_pl3d</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">subplot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">subplot</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">ufunc</span><span class="p">(</span><span class="n">subplot</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">input_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">new_pl3d</span>
 
     <span class="k">def</span> <span class="nf">__array_function__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">types</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
