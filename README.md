@@ -1,11 +1,9 @@
 # FDSReader
 > Python reader for FDS data
 
-[![Build Status](https://travis-ci.org/JanVogelsang/fdsreader.svg?branch=master)](https://travis-ci.org/JanVogelsang/fdsreader)
+[![Build Status](https://travis-ci.com/FireDynamics/fdsreader.svg?branch=master)](https://travis-ci.com/FireDynamics/fdsreader)
 
 [ToDo: One to two paragraph statement about the fdsreader package.]
-
-![](https://via.placeholder.com/250)
 
 ## Installation
 
@@ -25,9 +23,12 @@ sim = fds.Simulation("./sample_data")
 print(sim.meshes, sim.meshes[0].obstructions, sim.surfaces, sim.slices, sim.boundaries, sim.data_3d, sim.isosurfaces)
 ```
 
+### Data structure
+![Data structure]()
+
 
 ## API Documentation
-[https://janvogelsang.github.io/fdsreader/](https://janvogelsang.github.io/fdsreader/)
+[https://firedynamics.github.io/fdsreader/](https://firedynamics.github.io/fdsreader/)
 
 ## Release History
 * (unreleased) 1.0.0
@@ -86,11 +87,11 @@ print(sim.meshes, sim.meshes[0].obstructions, sim.surfaces, sim.slices, sim.boun
 
 Distributed under the LGPLv3 (GNU Lesser General Public License v3) license. See ``LICENSE`` for more information.
 
-[https://github.com/JanVogelsang/fdsreader](https://github.com/JanVogelsang/fdsreader)
+[https://github.com/FireDynamics/fdsreader](https://github.com/FireDynamics/fdsreader)
 
 ## Contributing
 
-1. Fork it (<https://github.com/JanVogelsang/fdsreader/fork>)
+1. Fork it (<https://github.com/FireDynamics/fdsreader/fork>)
 2. Create your feature branch (`git checkout -b feature/fooBar`)
 3. Commit your changes (`git commit -am 'Add some fooBar'`)
 4. Push to the branch (`git push origin feature/fooBar`)
