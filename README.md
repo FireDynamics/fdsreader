@@ -36,7 +36,7 @@ print(sim.meshes, sim.meshes[0].obstructions, sim.surfaces, sim.slices, sim.boun
 * (unreleased) 0.9.0
     * (Entering beta status after extensive testing with selected participants in alpha stage)
     
-### Alpha *(12/2020 - 01/2021)*
+### Alpha *(01/2021)*
 * (unreleased) 0.x.0
     * (Entering alpha status after extensive private testing in pre-alpha stage)
     
