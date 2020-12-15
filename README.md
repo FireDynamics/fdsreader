@@ -22,7 +22,7 @@ print(sim.meshes, sim.meshes[0].obstructions, sim.surfaces, sim.slices, sim.boun
 ```
 
 ### Data structure
-![Data structure]()
+![Data structure](https://raw.githubusercontent.com/FireDynamics/fdsreader/master/docs/img/data-structure.svg)
 
 
 ## API Documentation
