@@ -6,58 +6,59 @@ from typing_extensions import Literal
 
 
 class Extent:
-    """Three-dimensional extent with support for a missing dimension (size of 1).
+    """Three-dimensional value-based extent with support for a missing dimension (2D).
     """
 
     def __init__(self, *args, skip_dimension: Literal['x', 1, 'y', 2, 'z', 3, ''] = ''):
         self._extents = list()
+        self._step_sizes = list()
 
-        if len(args) % 2 == 1:
-            ValueError("An uneven number of ranges were passed to the constructor.")
-        for i in range(0, len(args), 2):
-            self._extents.append((int(args[i]), int(args[i + 1])))
+        if len(args) % 3 != 0:
+            ValueError("An invalid number of arguments were passed to the constructor.")
+        for i in range(0, len(args), 3):
+            self._extents.append((float(args[i]), float(args[i + 1])))
+            self._step_sizes.append(float(args[i + 2]))
 
         if skip_dimension in ('x', 1):
             self._extents.insert(0, (0, 0))
+            self._step_sizes.insert(0, 0)
         elif skip_dimension in ('y', 2):
             self._extents.insert(1, (0, 0))
+            self._step_sizes.insert(1, 0)
         elif skip_dimension in ('z', 3):
             self._extents.append((0, 0))
+            self._step_sizes.append(0)
 
     def __eq__(self, other):
-        return self._extents == other._extents
+        return self._extents == other._extents and self._step_sizes == other._step_sizes
 
     def __repr__(self, *args, **kwargs):
-        return "Extent({}, {}] x [{}, {}] x [{}, {}])".format(self.x_start, self.x_end, self.y_start,
-                                                       self.y_end, self.z_start, self.z_end)
+        return "Extent({}, {}] x [{}, {}] x [{}, {}])".format(self.x_start, self.x_end,
+                                                              self.y_start, self.y_end,
+                                                              self.z_start, self.z_end)
 
-    def size(self, cell_centered=False):
-        return reduce(mul, self.shape(cell_centered))
-
-    def shape(self, cell_centered=False) -> Tuple[int, int, int]:
-        c = 1 if cell_centered else 0
-        x = self.x - c if self.x != 0 else 1
-        y = self.y - c if self.y != 0 else 1
-        z = self.z - c if self.z != 0 else 1
-        return x, y, z
+    def __getitem__(self, dimension: Literal[0, 1, 2, 'x', 'y', 'z']):
+        if type(dimension) == int:
+            dimension = ('x', 'y', 'z')[dimension]
+        return self.__dict__[dimension]
 
     @property
     def x(self):
         """Gives the number of data points in x-direction (end is inclusive).
         """
-        return self._extents[0][1] - self._extents[0][0] + 1
+        return (self._extents[0][1] - self._extents[0][0]) / self._step_sizes[0] + 1
 
     @property
     def y(self):
         """Gives the number of data points in y-direction (end is inclusive).
         """
-        return self._extents[1][1] - self._extents[1][0] + 1
+        return (self._extents[1][1] - self._extents[1][0]) / self._step_sizes[0] + 1
 
     @property
     def z(self):
         """Gives the number of data points in z-direction (end is inclusive).
         """
-        return self._extents[2][1] - self._extents[2][0] + 1
+        return (self._extents[2][1] - self._extents[2][0]) / self._step_sizes[0] + 1
 
     @property
     def x_start(self):

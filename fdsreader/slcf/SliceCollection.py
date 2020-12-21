@@ -1,4 +1,4 @@
-from typing import Iterable, Iterator
+from typing import Iterable
 
 from fdsreader.slcf import Slice
 from fdsreader.utils.data import FDSDataCollection

@@ -1,12 +1,26 @@
-from typing import Union, Tuple
+from typing import Union, Tuple, Dict
 
-from fdsreader.utils import Surface, Extent
+from fdsreader.utils import Surface, Extent, Mesh
+
+
+class SubVentilation:
+    """Part of a :class:`Ventilation`.
+
+    :ivar extent: Tuple with three tuples containing minimum and maximum coordinate value on the
+        corresponding dimension together forming a cuboid.
+    :ivar mesh: The mesh that contains this part of the ventilation.
+    """
+
+    def __init__(self, mesh: Mesh, extent: Extent):
+        self.mesh = mesh
+        self.extent = extent
 
 
 class Ventilation:
-    """A ventilation can be used to model components of the ventilation system in a building, like a diffuser or a return.
-    A ventilation can also be used as a means of applying a particular boundary condition to a rectangular patch on a
-     solid surface.
+    """A ventilation can be used to model components of the ventilation system in a building, like a
+        diffuser or a return.
+        A ventilation can also be used as a means of applying a particular boundary condition to a
+        rectangular patch on a solid surface.
 
     :ivar id: ID of the ventilation.
     :ivar extent: Tuple with three tuples containing minimum and maximum coordinate value on the
@@ -30,19 +44,20 @@ class Ventilation:
     :ivar circular_vent_origin: Origin of the ventilation relative to bounding box.
     :ivar radius: Radius of the ventilation circle.
     """
-    def __init__(self, extent: Extent, vid: int, surface: Surface, bound_indices: Tuple[int, int, int, int, int, int],
-                 color_index: int, draw_type: int, rgba: Union[Tuple[()], Tuple[float, float, float, float]] = (),
+
+    def __init__(self, vid: int, surface: Surface,
+                 bound_indices: Tuple[int, int, int, int, int, int], color_index: int,
+                 draw_type: int, rgba: Union[Tuple[()], Tuple[float, float, float, float]] = (),
                  texture_origin: Union[Tuple[()], Tuple[float, float, float]] = (),
-                 circular_vent_origin: Union[Tuple[()], Tuple[float, float, float]] = (), radius: float = -1,
-                 open_time: float = -1, close_time: float = -1):
+                 circular_vent_origin: Union[Tuple[()], Tuple[float, float, float]] = (),
+                 radius: float = -1):
         self.id = vid
-        self.extent = extent
         self.surface = surface
         self.bound_indices = bound_indices
         self.color_index = color_index
         self.draw_type = draw_type
-        self.open_time = open_time
-        self.close_time = close_time
+        self.open_time = -1.0
+        self.close_time = -1.0
 
         if len(rgba) != 0:
             self.rgba = rgba
@@ -53,5 +68,10 @@ class Ventilation:
         if radius != -1:
             self.radius = radius
 
+        self._subventilations: Dict[Mesh, SubVentilation] = dict()
+
+    def _add_subventilation(self, mesh: Mesh, extent: Extent):
+        self._subventilations[mesh] = SubVentilation(mesh, extent)
+
     def __repr__(self, *args, **kwargs):
-        return f"Ventilation(id={self.id}, extent={str(self.extent)})"
+        return f"Ventilation(id={self.id})"

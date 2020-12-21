@@ -6,7 +6,8 @@ import numpy as np
 import logging
 from typing import Dict, Collection
 
-from fdsreader.utils import Extent, Quantity, settings, Mesh
+from fdsreader.utils import Dimension, Quantity, Mesh
+from fdsreader import settings
 import fdsreader.utils.fortran_data as fdtype
 
 _HANDLED_FUNCTIONS = {}
@@ -36,26 +37,24 @@ class SubSlice:
 
     _offset = 3 * fdtype.new((('c', 30),)).itemsize + fdtype.new((('i', 6),)).itemsize
 
-    def __init__(self, filename: str, root_path: str, cell_centered: bool, extent: Extent,
+    def __init__(self, filename: str, root_path: str, cell_centered: bool, dimension: Dimension,
                  mesh: Mesh, times: np.ndarray):
         self.mesh = mesh
-        self.extent = extent
+        self.dimension = dimension
         self.root_path = root_path
         self.cell_centered = cell_centered
 
         self.filename = filename
         self._times = times
 
-        self.shape = (self.extent.x - 1 if self.cell_centered else self.extent.x,
-                      self.extent.y - 1 if self.cell_centered else self.extent.y,
-                      self.extent.z - 1 if self.cell_centered else self.extent.z)
+        self.shape = self.dimension.shape(cell_centered=cell_centered)
 
         if True:
             self.vector_filenames = dict()
             self._vector_data = dict()
 
     def _load_data(self, file_path: str, data_out: np.ndarray, t_n: int, fill_times: bool = False):
-        n = self.extent.size(cell_centered=self.cell_centered)
+        n = self.dimension.size(cell_centered=self.cell_centered)
         dtype_data = fdtype.combine(fdtype.FLOAT, fdtype.new((('f', n),)))
 
         with open(file_path, 'rb') as infile:

@@ -1,10 +1,11 @@
 import logging
 import os
 from copy import deepcopy
-from typing import List, Dict
+from typing import Dict, Sequence
 import numpy as np
 
-from fdsreader.utils import Quantity, Mesh, settings
+from fdsreader.utils import Quantity, Mesh
+from fdsreader import settings
 import fdsreader.utils.fortran_data as fdtype
 
 _HANDLED_FUNCTIONS = {np.mean: (lambda pl: pl.mean)}
@@ -44,8 +45,7 @@ class SubPlot3D:
             with open(self.file_path, 'rb') as infile:
                 dtype_data = fdtype.new((('f', self.mesh.extent.size(cell_centered=False) * 5),))
                 infile.seek(self._offset)
-                self._data = fdtype.read(infile, dtype_data, 1)[0][0].reshape(
-                    (self.mesh.extent.x, self.mesh.extent.y, self.mesh.extent.z, 5))
+                self._data = fdtype.read(infile, dtype_data, 1)[0][0].reshape(self.mesh.dimension.shape + (5,))
         return self._data
 
     def clear_cache(self):
@@ -65,7 +65,7 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
      calculated for this Plot3D with the corresponding label and unit.
     """
 
-    def __init__(self, root_path: str, time: float, quantities: List[Quantity]):
+    def __init__(self, root_path: str, time: float, quantities: Sequence[Quantity]):
         self.root_path = root_path
         self.time = time
         self.quantities = quantities

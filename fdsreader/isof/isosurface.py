@@ -3,7 +3,8 @@ from typing import BinaryIO, Dict
 
 import numpy as np
 
-from fdsreader.utils import Quantity, settings, Mesh
+from fdsreader.utils import Quantity, Mesh
+from fdsreader import settings
 import fdsreader.utils.fortran_data as fdtype
 
 

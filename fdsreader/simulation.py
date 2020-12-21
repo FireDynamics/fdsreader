@@ -1,7 +1,5 @@
-import glob
-import mmap
 import os
-from typing import List, Literal
+from typing import List, TextIO, Dict, AnyStr
 
 import numpy as np
 import logging
@@ -13,7 +11,8 @@ from fdsreader.isof.IsosurfaceCollection import IsosurfaceCollection
 from fdsreader.plot3d import Plot3D
 from fdsreader.plot3d.Plot3dCollection import Plot3DCollection
 from fdsreader.slcf.SliceCollection import SliceCollection
-from fdsreader.utils import Mesh, Extent, Surface, Quantity
+from fdsreader.utils import Mesh, Dimension, Surface, Quantity, Obstruction, Ventilation, Extent
+from fdsreader import settings
 from fdsreader.slcf import Slice
 from fdsreader.isof import Isosurface
 from fdsreader.utils.data import create_hash, get_smv_file
@@ -34,25 +33,26 @@ class Simulation:
     """
 
     def __new__(cls, path: str):
-        smv_file_path = get_smv_file(path)
-        root_path = os.path.dirname(path)
+        if settings.ENABLE_CACHING:
+            smv_file_path = get_smv_file(path)
+            root_path = os.path.dirname(path)
 
-        with open(smv_file_path, 'r') as infile, mmap.mmap(infile.fileno(), 0,
-                                                           access=mmap.ACCESS_READ) as smv_file:
-            smv_file.seek(smv_file.find(b'CHID', 0))
-            smv_file.readline()
-            chid = smv_file.readline().decode().strip()
+            with open(smv_file_path, 'r') as infile:
+                for line in infile:
+                    if line.strip() == "CHID":
+                        chid = infile.readline().strip()
+                        break
 
-        pickle_file_path = Simulation._get_pickle_filename(root_path, chid)
+            pickle_file_path = Simulation._get_pickle_filename(root_path, chid)
 
-        if path and os.path.isfile(path):
-            with open(pickle_file_path) as f:
-                sim = pickle.load(f)
-            if not isinstance(sim, cls):
-                os.remove(pickle_file_path)
-            else:
-                if sim._hash == create_hash(smv_file_path):
-                    return sim
+            if path and os.path.isfile(path):
+                with open(pickle_file_path) as f:
+                    sim = pickle.load(f)
+                if not isinstance(sim, cls):
+                    os.remove(pickle_file_path)
+                else:
+                    if sim._hash == create_hash(smv_file_path):
+                        return sim
 
         return super(Simulation, cls).__new__(cls)
 
@@ -68,170 +68,267 @@ class Simulation:
 
             self.root_path = os.path.dirname(self.smv_file_path)
 
-            with open(self.smv_file_path, 'r') as infile, mmap.mmap(infile.fileno(), 0,
-                                                                    access=mmap.ACCESS_READ) as smv_file:
-                smv_file.seek(smv_file.find(b'VERSION', 0))
-                smv_file.readline()
-                self.fds_version = smv_file.readline().decode().strip()
+            self.meshes: List[Mesh] = list()
+            self.surfaces: List[Surface] = list()
+            self.obstructions: Dict[int, Obstruction] = dict()
+            self.ventilations: Dict[int, Ventilation] = dict()
 
-                smv_file.seek(smv_file.find(b'CHID', 0))
-                smv_file.readline()
-                self.chid = smv_file.readline().decode().strip()
+            # First collect all meta-information for any FDS data to later combine the gathered
+            # information into data collections
+            self.slices = dict()
+            self.data_3d = dict()
+            self.isosurfaces = dict()
 
-                smv_file.seek(smv_file.find(b'HRRPUVCUT', 0))
-                smv_file.readline()
-                smv_file.readline()
-                self.hrrpuv_cutoff = float(smv_file.readline().decode().strip())
+            with open(self.smv_file_path, 'r') as smv_file:
+                for line in smv_file:
+                    keyword = line.strip()
+                    if keyword == "VERSION":
+                        self.fds_version = smv_file.readline().strip()
+                    elif keyword == "CHID":
+                        self.chid = smv_file.readline().strip()
+                    elif keyword == "HRRPUVCUT":
+                        self.hrrpuv_cutoff = float(smv_file.readline().strip())
+                    elif keyword == "TOFFSET":
+                        offsets = smv_file.readline().strip().split()
+                        self.default_texture_origin = tuple(float(offsets[i]) for i in range(3))
+                    elif "GRID" in keyword:
+                        self.meshes.append(self._load_mesh(smv_file, keyword))
+                    elif keyword == "SURFACE":
+                        self.surfaces.append(self._load_surface(smv_file))
+                    elif "SLC" in keyword:
+                        self._load_slice(smv_file, keyword)
+                    elif "ISOG" in keyword:
+                        self._load_isosurface(smv_file, keyword)
+                    elif keyword == "PL3D":
+                        self._load_data_3d(smv_file, keyword)
 
-                smv_file.seek(smv_file.find(b'TOFFSET', 0))
-                smv_file.readline()
-                self.default_texture_origin = tuple(smv_file.readline().decode().strip().split())
+            self.out_file_path = os.path.join(self.root_path, self.chid + ".out")
 
-                self.out_file_path = os.path.join(self.root_path, self.chid + ".out")
+            # Now combine the gathered temporary information into data collections
+            self.slices = SliceCollection(
+                Slice(self.root_path, slice_data[0]["cell_centered"], slice_data[1:]) for slice_data
+                in self.slices.values())
+            self.data_3d = Plot3DCollection(self.data_3d.keys(), self.data_3d.values())
+            self.isosurfaces = IsosurfaceCollection(self.isosurfaces.values())
 
-                self.surfaces = self._load_surfaces(smv_file)
-                self.meshes = self._load_meshes(smv_file)
-
+            if settings.ENABLE_CACHING:
                 # Hash will be saved to simulation pickle file and compared to new hash when loading
                 # the pickled simulation again in the next run of the program.
                 self._hash = create_hash(self.smv_file_path)
                 pickle.dump(self,
-                            open(Simulation._get_pickle_filename(self.root_path, self.chid), 'wb'))
+                            open(Simulation._get_pickle_filename(self.root_path, self.chid), 'wb'),
+                            protocol=pickle.HIGHEST_PROTOCOL)
 
     @classmethod
-    def _get_pickle_filename(cls, root_path: str, chid: str):
+    def _get_pickle_filename(cls, root_path: str, chid: str) -> AnyStr:
         """Get the filename used to save the pickled simulation.
         """
-        return f"{root_path}/{chid}.pickle"
+        return os.path.join(root_path, chid + ".pickle")
 
-    def _load_meshes(self, smv_file: mmap.mmap) -> List[Mesh]:
-        """Method to load the mesh information from the smv file.
+    def _load_mesh(self, smv_file: TextIO, line: str) -> Mesh:
+        """Load information for a single mesh from the smv file at current pointer position.
         """
-        meshes: List[Mesh] = list()
+        mesh_id = line.split()[1]
+        logging.debug("Found MESH with id: %s", mesh_id)
 
-        def read_dimension(dim: Literal[b'X', b'Y', b'Z'], n: int, startpos: int):
-            pos = smv_file.find(b'TRN' + dim, startpos)
-            smv_file.seek(pos)
-            smv_file.readline()
-            noc = int(smv_file.readline().decode().strip())
+        grid_numbers = smv_file.readline().strip().split()
+        grid_dimensions = {'x': int(grid_numbers[0]) + 1, 'y': int(grid_numbers[1]) + 1,
+                           'z': int(grid_numbers[2]) + 1}
+        logging.debug("Number of cells: %i x %i x %i", *grid_dimensions.values())
+
+        smv_file.readline()  # Blank line
+        assert smv_file.readline().strip() == "PDIM"
+        coordinates = dict()
+        extents = smv_file.readline().split()
+        extents = {'x': (float(extents[0]), float(extents[1])),
+                   'y': (float(extents[2]), float(extents[3])),
+                   'z': (float(extents[4]), float(extents[5]))}
+
+        for dim in ('x', 'y', 'z'):
+            smv_file.readline()  # Blank line
+            assert smv_file.readline().strip()[:3] == "TRN"
+            noc = int(smv_file.readline().strip())
             for _ in range(noc):
                 smv_file.readline()
-            coordinates = np.empty(n, dtype=np.float32)
-            for i in range(n):
-                coordinates[i] = smv_file.readline().split()[1]
-            return coordinates
+            coordinates[dim] = np.empty(grid_dimensions[dim], dtype=np.float32)
+            for i in range(grid_dimensions[dim]):
+                coordinates[dim][i] = smv_file.readline().split()[1]
 
-        pos = smv_file.find(b'GRID', 0)
-        while pos > 0:
-            smv_file.seek(pos)
+        mesh = Mesh(coordinates, extents, mesh_id)
 
-            mesh_id = smv_file.readline().split()[1].decode()
-            logging.debug("found MESH with id: %s", mesh_id)
+        smv_file.readline()  # Blank line
+        assert smv_file.readline().strip() == "OBST"
+        self._load_obstructions(smv_file, mesh)
 
-            grid_numbers = smv_file.readline().split()
-            nx = int(grid_numbers[0]) + 1
-            ny = int(grid_numbers[1]) + 1
-            nz = int(grid_numbers[2]) + 1
-            # # correct for 2D cases
-            # if nx == 2: nx = 1
-            # if ny == 2: ny = 1
-            # if nz == 2: nz = 1
+        smv_file.readline()  # Blank line
+        assert smv_file.readline().strip() == "VENT"
+        self._load_vents(smv_file, mesh)
 
-            logging.debug("number of cells: %i x %i x %i", nx, ny, nz)
+        # TODO: Offset und closed/open vents
 
-            meshes.append(Mesh(read_dimension(b'X', nx, pos + 1), read_dimension(b'Y', ny, pos + 1),
-                               read_dimension(b'Z', nz, pos + 1), mesh_id, len(meshes),
-                               smv_file, pos, self.surfaces,
-                               self.default_texture_origin))
+        return mesh
 
-            pos = smv_file.find(b'GRID', pos + 1)
+    def _load_obstructions(self, smv_file: TextIO, mesh: Mesh):
+        temp_data = list()
+        n = int(smv_file.readline().strip())
+        for _ in range(n):
+            line = smv_file.readline().strip().split()
+            extent = Extent(*[float(line[i]) for i in range(6)])
+            obst_id = int(line[6])
 
-        return meshes
+            side_surfaces = tuple(self.surfaces[int(line[i]) - 1] for i in range(7, 13))
+            if len(line) > 13:
+                texture_origin = (float(line[13]), float(line[14]), float(line[15]))
+                temp_data.append((obst_id, extent, side_surfaces, texture_origin))
+            else:
+                temp_data.append((obst_id, extent, side_surfaces))
 
-    def _load_surfaces(self, smv_file: mmap.mmap) -> List[Surface]:
-        """Method to load the surface information from the smv file.
+            for tmp in temp_data:
+                line = smv_file.readline().strip().split()
+                # Todo: What does bound index mean?
+                bound_indices = (int(line[0]), int(line[1]), int(line[2]), int(line[3]),
+                                 int(line[4]), int(line[5]))
+                color_index = int(line[6])
+                block_type = int(line[7])
+                if color_index == -3:
+                    rgba = tuple(float(line[i]) for i in range(8, 12))
+                else:
+                    rgba = ()
+
+                if len(tmp) == 4:
+                    obst_id, extent, side_surfaces, texture_origin = tmp
+                else:
+                    obst_id, extent, side_surfaces = tmp
+                    texture_origin = self.default_texture_origin
+
+                if obst_id not in self.obstructions:
+                    self.obstructions[obst_id] = Obstruction(obst_id, side_surfaces, bound_indices,
+                                                             color_index, block_type,
+                                                             texture_origin, rgba=rgba)
+                self.obstructions[obst_id]._add_subobstruction(mesh, extent)
+
+    def _load_vents(self, smv_file: TextIO, mesh: Mesh):
+        line = smv_file.readline()
+        n, n_dummies = int(line[0]), int(line[1])
+
+        temp_data = list()
+
+        def read_common_info():
+            line = smv_file.readline().strip().split()
+            return line, Extent(*[float(line[i]) for i in range(6)]), int(line[6]), self.surfaces[
+                int(line[7])]
+
+        def read_common_info2():
+            line = smv_file.readline().strip().split()
+            bound_indices = tuple(int(line[i]) for i in range(6))
+            color_index = int(line[6])
+            draw_type = int(line[7])
+            if len(line) > 8:
+                rgba = tuple(float(line[i]) for i in range(8, 12))
+            else:
+                rgba = ()
+            return bound_indices, color_index, draw_type, rgba
+
+        texture_origin = ()
+        for _ in range(n - n_dummies):
+            line, extent, vent_id, surface = read_common_info()
+            texture_origin = (float(line[8]), float(line[9]), float(line[10]))
+            temp_data.append((extent, vent_id, surface, texture_origin))
+
+        for _ in range(n_dummies):
+            _, extent, vent_id, surface = read_common_info()
+            temp_data.append((extent, vent_id, surface))
+
+        for v in range(n):
+            if v < n - n_dummies:
+                extent, vent_id, surface, texture_origin = temp_data[v]
+            else:
+                extent, vent_id, surface = temp_data[v]
+            bound_indices, color_index, draw_type, rgba = read_common_info2()
+            if vent_id not in self.obstructions:
+                self.ventilations[vent_id] = Ventilation(vent_id, surface, bound_indices,
+                                                         color_index, draw_type, rgba=rgba,
+                                                         texture_origin=texture_origin)
+            self.ventilations[vent_id]._add_subventilation(mesh, extent)
+
+        smv_file.readline()
+        assert smv_file.readline() == "CVENT"
+
+        n = int(smv_file.readline().strip())
+        temp_data.clear()
+        for _ in range(n):
+            line, extent, vid, surface = read_common_info()
+            circular_vent_origin = (float(line[12]), float(line[13]), float(line[14]))
+            radius = float(line[15])
+            temp_data.append((extent, vid, surface, texture_origin, circular_vent_origin, radius))
+
+        for v in range(n):
+            extent, vent_id, surface, texture_origin, circular_vent_origin, radius = temp_data[v]
+            bound_indices, color_index, draw_type, rgba = read_common_info2()
+            if vent_id not in self.obstructions:
+                self.ventilations[vent_id] = Ventilation(vent_id, surface, bound_indices,
+                                                         color_index, draw_type, rgba=rgba,
+                                                         texture_origin=texture_origin,
+                                                         circular_vent_origin=circular_vent_origin,
+                                                         radius=radius)
+            self.ventilations[vent_id]._add_subventilation(mesh, extent)
+
+    def _load_surface(self, smv_file: TextIO) -> Surface:
+        """Load the information for a single surface from the smv file at current pointer position.
         """
-        surfaces = list()
-        pos = smv_file.find(b'SURFACE', 0)
-        while pos > 0:
-            smv_file.seek(pos)
-            smv_file.readline()
 
-            surface_id = smv_file.readline().decode().strip()
+        surface_id = smv_file.readline().strip()
 
-            line = smv_file.readline().decode().strip().split()
-            tmpm, material_emissivity = float(line[0]), float(line[1])
+        line = smv_file.readline().strip().split()
+        tmpm, material_emissivity = float(line[0]), float(line[1])
 
-            line = smv_file.readline().decode().strip().split()
+        line = smv_file.readline().strip().split()
 
-            surface_type, texture_width, texture_height, rgb, transparency = int(line[0]), float(
-                line[1]), float(
-                line[2]), (float(line[3]), float(line[4]), float(line[5])), float(line[6])
+        surface_type = int(line[0])
+        texture_width, texture_height = float(line[1]), float(line[2])
+        rgb = (float(line[3]), float(line[4]), float(line[5]))
+        transparency = float(line[6])
 
-            texture_map = smv_file.readline().decode().strip()
-            texture_map = None if texture_map == "null" else os.path.join(self.root_path,
-                                                                          texture_map)
+        texture_map = smv_file.readline().strip()
+        texture_map = None if texture_map == "null" else os.path.join(self.root_path, texture_map)
 
-            surfaces.append(
-                Surface(surface_id, tmpm, material_emissivity, surface_type, texture_width,
-                        texture_height, texture_map,
-                        rgb, transparency))
+        return Surface(surface_id, tmpm, material_emissivity, surface_type, texture_width,
+                       texture_height, texture_map, rgb, transparency)
 
-            pos = smv_file.find(b'SURFACE')
-        return surfaces
-
-    @property
-    def slices(self) -> SliceCollection:
-        """Lazy loads all slices for the simulation.
-
-        :returns: All slices.
+    def _load_slice(self, smv_file: TextIO, line: str):
+        """Loads the slice at current pointer position.
         """
-        # Only load slices once initially and then reuse the loaded information
-        if not hasattr(self, "_slices"):
-            slices = dict()
-            with open(self.smv_file_path, 'r') as infile, \
-                    mmap.mmap(infile.fileno(), 0, access=mmap.ACCESS_READ) as smv_file:
-                pos = smv_file.find(b'SLC', 0)
-                while pos > 0:
-                    smv_file.seek(pos)
-                    line = smv_file.readline()
-                    if line.find(b'SLCC') != -1:
-                        cell_centered = True
-                    else:
-                        cell_centered = False
+        if "SLCC" in line:
+            cell_centered = True
+        else:
+            cell_centered = False
 
-                    slice_id = int(line.split(b'!')[1].strip().split()[0].decode())
+        slice_id = int(line.split('!')[1].strip().split()[0])
 
-                    mesh_index = int(line.split(b'&')[0].strip().split()[1].decode()) - 1
+        mesh_index = int(line.split('&')[0].strip().split()[1]) - 1
 
-                    # Read in index ranges for x, y and z
-                    index_ranges = [int(i.strip()) for i in
-                                    line.split(b'&')[1].split(b'!')[0].strip().split()]
+        # Read in index ranges for x, y and z
+        index_ranges = [int(i.strip()) for i in
+                        line.split('&')[1].split('!')[0].strip().split()]
 
-                    filename = smv_file.readline().decode().strip()
-                    quantity = smv_file.readline().decode().strip()
-                    label = smv_file.readline().decode().strip()
-                    unit = smv_file.readline().decode().strip()
+        filename = smv_file.readline().strip()
+        quantity = smv_file.readline().strip()
+        label = smv_file.readline().strip()
+        unit = smv_file.readline().strip()
 
-                    if slice_id not in slices:
-                        slices[slice_id] = list()
-                    slices[slice_id].append(
-                        {"extent": Extent(*index_ranges), "mesh": self.meshes[mesh_index],
-                         "filename": filename, "quantity": quantity, "label": label, "unit": unit})
+        if slice_id not in self.slices:
+            self.slices[slice_id] = [{"cell_centered": cell_centered}]
+        self.slices[slice_id].append(
+            {"extent": Dimension(*index_ranges), "mesh": self.meshes[mesh_index],
+             "filename": filename, "quantity": quantity, "label": label, "unit": unit})
 
-                    pos = smv_file.find(b'SLC', pos + 1)
-
-            if len(slices) == 0:
-                raise IOError("This simulation did not output any slices.")
-
-            self._slices = SliceCollection(
-                Slice(self.root_path, cell_centered, slice_data) for slice_data in slices.values())
-        return self._slices
+        logging.debug("Found SLICE with id: :i", slice_id)
 
     @property
     def boundaries(self) -> BoundaryCollection:
-        """Lazy loads all boundary data for the simulation.
-        :returns: All boundary data.
+        """Loads all boundary data for the simulation.
+
+        :returns: Collection of all boundary data.
         """
         if not hasattr(self, "_boundaries"):
             boundaries = dict()
@@ -266,97 +363,62 @@ class Simulation:
                 raise IOError("This simulation did not output any plot3d data.")
         return self._boundaries
 
-    @property
-    def data_3d(self) -> Plot3DCollection:
-        """Lazy loads all plot3d data for the simulation.
-        :returns: All plot3d data.
+    def _load_data_3d(self, smv_file: TextIO, line: str):
+        """Loads the plot3d at current pointer position.
         """
         # Todo: Also read SMOKG3D data?
-        # Only load plot3d data once initially and then reuse the loaded information
-        if not hasattr(self, "_plot3ds"):
-            plot3ds = dict()
-            with open(self.smv_file_path, 'r') as infile, \
-                    mmap.mmap(infile.fileno(), 0, access=mmap.ACCESS_READ) as smv_file:
-                pos = smv_file.find(b'PL3D', 0)
-                while pos > 0:
-                    smv_file.seek(pos)
-                    line = smv_file.readline().decode().strip().split()
+        line = line.strip().split()
 
-                    time = float(line[1])
+        time = float(line[1])
 
-                    mesh_index = int(line[2]) - 1
+        mesh_index = int(line[2]) - 1
 
-                    filename = smv_file.readline().decode().strip()
-                    quantities = list()
-                    for _ in range(5):
-                        quantity = smv_file.readline().decode().strip()
-                        label = smv_file.readline().decode().strip()
-                        unit = smv_file.readline().decode().strip()
-                        quantities.append(Quantity(quantity, label, unit))
+        filename = smv_file.readline().strip()
+        quantities = list()
+        for _ in range(5):
+            quantity = smv_file.readline().strip()
+            label = smv_file.readline().strip()
+            unit = smv_file.readline().strip()
+            quantities.append(Quantity(quantity, label, unit))
 
-                    if time not in plot3ds:
-                        plot3ds[time] = Plot3D(self.root_path, time, quantities)
-                    plot3ds[time]._add_subplot(filename, self.meshes[mesh_index])
+        if time not in self.data_3d:
+            self.data_3d[time] = Plot3D(self.root_path, time, quantities)
+        self.data_3d[time]._add_subplot(filename, self.meshes[mesh_index])
 
-                    pos = smv_file.find(b'PL3D', pos + 1)
-            if len(plot3ds) > 0:
-                self._plot3ds = Plot3DCollection(plot3ds.values())
-            else:
-                raise IOError("This simulation did not output any plot3d data.")
-        return self._plot3ds
-
-    @property
-    def isosurfaces(self) -> IsosurfaceCollection:
-        """Lazy loads all isosurfaces for the simulation.
-        :returns: All isof data.
+    def _load_isosurface(self, smv_file: TextIO, line: str):
+        """Loads the isosurface at current pointer position.
         """
-        # Only load isosurfaces once initially and then reuse the loaded information
-        if not hasattr(self, "_isosurfaces"):
-            isosurfaces = dict()
-            with open(self.smv_file_path, 'r') as infile, \
-                    mmap.mmap(infile.fileno(), 0, access=mmap.ACCESS_READ) as smv_file:
-                pos = smv_file.find(b'ISOG', 0)
-                while pos > 0:
-                    smv_file.seek(pos - 1)
-                    double_quantity = smv_file.read(1) == b'T'
+        double_quantity = line[0] == 'T'
+        mesh_index = int(line.strip().split()[1]) - 1
 
-                    mesh_index = int(smv_file.readline().decode().strip().split()[1]) - 1
+        iso_filename = smv_file.readline().strip()
+        iso_id = int(iso_filename.split('_')[-1][:-4])
 
-                    iso_filename = smv_file.readline().decode().strip()
-                    iso_id = int(iso_filename.split('_')[-1][:-4])
+        if double_quantity:
+            viso_filename = smv_file.readline().strip()
+        quantity = smv_file.readline().strip()
+        label = smv_file.readline().strip()
+        unit = smv_file.readline().strip()
+        if double_quantity:
+            v_quantity = smv_file.readline().strip()
+            v_label = smv_file.readline().strip()
+            v_unit = smv_file.readline().strip()
 
-                    if double_quantity:
-                        viso_filename = smv_file.readline().decode().strip()
-                    quantity = smv_file.readline().decode().strip()
-                    label = smv_file.readline().decode().strip()
-                    unit = smv_file.readline().decode().strip()
-                    if double_quantity:
-                        v_quantity = smv_file.readline().decode().strip()
-                        v_label = smv_file.readline().decode().strip()
-                        v_unit = smv_file.readline().decode().strip()
-
-                    if double_quantity:
-                        if iso_id not in isosurfaces:
-                            isosurfaces[iso_id] = Isosurface(iso_id,
-                                                             os.path.dirname(self.smv_file_path),
-                                                             double_quantity, quantity, label, unit,
-                                                             v_quantity=v_quantity, v_label=v_label,
-                                                             v_unit=v_unit)
-                        isosurfaces[iso_id]._add_subsurface(self.meshes[mesh_index], iso_filename,
-                                                            viso_filename=viso_filename)
-                    else:
-                        if iso_id not in isosurfaces:
-                            isosurfaces[iso_id] = Isosurface(iso_id,
-                                                             os.path.dirname(self.smv_file_path),
-                                                             double_quantity, quantity, label, unit)
-                        isosurfaces[iso_id]._add_subsurface(self.meshes[mesh_index], iso_filename)
-
-                    pos = smv_file.find(b'ISOG', pos + 1)
-            if len(isosurfaces) > 0:
-                self._isosurfaces = IsosurfaceCollection(isosurfaces.values())
-            else:
-                raise IOError("This simulation did not output any isosurfaces.")
-        return self._isosurfaces
+        if double_quantity:
+            if iso_id not in self.isosurfaces:
+                self.isosurfaces[iso_id] = Isosurface(iso_id,
+                                                 os.path.dirname(self.smv_file_path),
+                                                 double_quantity, quantity, label, unit,
+                                                 v_quantity=v_quantity, v_label=v_label,
+                                                 v_unit=v_unit)
+            self.isosurfaces[iso_id]._add_subsurface(self.meshes[mesh_index], iso_filename,
+                                                viso_filename=viso_filename)
+        else:
+            if iso_id not in self.isosurfaces:
+                self.isosurfaces[iso_id] = Isosurface(iso_id,
+                                                 os.path.dirname(self.smv_file_path),
+                                                 double_quantity, quantity, label, unit)
+            self.isosurfaces[iso_id]._add_subsurface(self.meshes[mesh_index], iso_filename)
 
     def clear_cache(self, clear_persistent_cache=False):
         """Remove all data from the internal cache that has been loaded so far to free memory.
@@ -364,13 +426,13 @@ class Simulation:
         :param clear_persistent_cache: Whether to clear the persistent simulation cache as well.
         """
         if hasattr(self, "_slices"):
-            self._slices.clear_cache()
+            self.slices.clear_cache()
         if hasattr(self, "_boundaries"):
-            self._boundaries.clear_cache()
+            self._boundaries.clear_cache()  # Todo
         if hasattr(self, "_plot3ds"):
-            self._plot3ds.clear_cache()
+            self.data_3d.clear_cache()
         if hasattr(self, "_isosurfaces"):
-            self._isosurfaces.clear_cache()
+            self.isosurfaces.clear_cache()
 
         if clear_persistent_cache:
             os.remove(Simulation._get_pickle_filename(self.root_path, self.chid))

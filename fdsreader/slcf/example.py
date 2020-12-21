@@ -1,21 +1,25 @@
-from fdsreader import Simulation
+import logging
 
-import numpy as np
+import fdsreader as fds
 
 
 def main():
-    sim = Simulation("C:\\Users\\janv1\\Desktop\\fds\\sample_data\\fds_demo")
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+
+    fds.settings.ENABLE_CACHING = False
+
+    sim = fds.Simulation("../../examples/bndf/fds_data")
 
     mesh = sim.meshes[0]
     # Get the second slice
-    slc = sim.slices[2]
+    slc = sim.slices[0]
 
     # Output some information about our slice
     print("Quantity:\t\t", slc.quantity, "\nTimes[:5]:\t\t", slc.times[:5])
-    quantity = slc.quantity
 
     # Get subslice that cuts through our mesh
-    subslice = slc.get_subslice(mesh)
+    subslice = slc[mesh]
 
     sslc_data = subslice.data
 

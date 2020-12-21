@@ -36,7 +36,7 @@ for it in range(0, slc._times.size):
 # plot slice data
 for it in range(0, slc._times.size, 10):
     plt.imshow(slc.sd[it], cmap='Greys', vmax=max_coefficient,
-               origin='lower', extent=slc.slice_mesh.extent)
+               origin='lower', extent=slc.slice_mesh.dimension)
     plt.title("time = {:.2f}".format(slc._times[it]))
     plt.colorbar(label="{} [{}]".format(slc.quantity, slc.units))
     plt.savefig("single_slice_{:06d}.pdf".format(it))

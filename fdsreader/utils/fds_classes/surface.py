@@ -29,5 +29,8 @@ class Surface:
         self.rgb = rgb
         self.transparency = transparency
 
+    def __eq__(self, other):
+        return self.name == other.name
+
     def __repr__(self, *args, **kwargs):
         return f'Surface(name="{self.name}")'

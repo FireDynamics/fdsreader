@@ -3,7 +3,8 @@ from operator import add
 from typing import List, BinaryIO, Dict, Tuple
 import numpy as np
 
-from fdsreader.utils import Quantity, Mesh, Extent, settings, Obstruction
+from fdsreader.utils import Quantity, Mesh, Dimension, Obstruction
+from fdsreader import settings
 import fdsreader.utils.fortran_data as fdtype
 
 
@@ -17,7 +18,7 @@ class Patch:
     :ivar t_n: Total number of time steps for which output data has been written.
     """
 
-    def __init__(self, extent: Extent, orientation: int, cell_centered: bool):
+    def __init__(self, extent: Dimension, orientation: int, cell_centered: bool):
         self.extent = extent
         self.orientation = orientation
         self.t_n = -1
@@ -84,8 +85,8 @@ class SubBoundary:
             for patch_info in patch_infos:
                 co = self.mesh.coordinates
                 obst = mesh.obstructions[patch_info[7] + 1]
-                extent = Extent(co[0][patch_info[0]], co[0][patch_info[1]], co[1][patch_info[2]],
-                                co[1][patch_info[3]], co[2][patch_info[4]], co[2][patch_info[5]])
+                extent = Dimension(co[0][patch_info[0]], co[0][patch_info[1]], co[1][patch_info[2]],
+                                   co[1][patch_info[3]], co[2][patch_info[4]], co[2][patch_info[5]])
                 orientation = patch_info[6]
                 if obst not in self._patches:
                     self._patches[obst] = list()

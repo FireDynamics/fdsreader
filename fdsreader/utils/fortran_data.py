@@ -1,7 +1,7 @@
 from typing import Sequence, BinaryIO, Union, Tuple
 import numpy as np
 
-from .settings import FORTRAN_DATA_TYPE_CHAR, FORTRAN_DATA_TYPE_FLOAT, FORTRAN_DATA_TYPE_INTEGER, \
+from fdsreader.settings import FORTRAN_DATA_TYPE_CHAR, FORTRAN_DATA_TYPE_FLOAT, FORTRAN_DATA_TYPE_INTEGER, \
     FORTRAN_BACKWARD
 
 _BASE_FORMAT = f"{FORTRAN_DATA_TYPE_INTEGER}, {{}}" + (

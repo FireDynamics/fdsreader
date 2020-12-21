@@ -1,14 +1,24 @@
-from typing import Tuple, Union
+from typing import Tuple, Union, Dict
 
-from fdsreader.utils import Extent, Surface
+from fdsreader.utils import Surface, Mesh, Extent
+
+
+class SubObstruction:
+    """Part of an :class:`Obstruction`.
+
+    :ivar extent: Tuple with three tuples containing minimum and maximum coordinate value on the
+        corresponding dimension together forming a cuboid.
+    :ivar mesh: The mesh that contains this part of the obstruction.
+    """
+    def __init__(self, mesh: Mesh, extent: Extent):
+        self.mesh = mesh
+        self.extent = extent
 
 
 class Obstruction:
     """A box-shaped obstruction with specific surfaces (materials) on each side.
 
     :ivar id: ID of the obstruction.
-    :ivar extent: Tuple with three tuples containing minimum and maximum coordinate value on the
-        corresponding dimension together forming a cuboid.
     :ivar side_surfaces: Tuple of six surfaces for each side of the cuboid.
     :ivar bound_indices: Indices used to define obstruction bounds in terms of mesh locations.
     :ivar color_index: Type of coloring used to color obstruction.
@@ -27,13 +37,12 @@ class Obstruction:
         (ranging from 0.0 to 1.0).
     """
 
-    def __init__(self, oid: int, extent: Extent,
+    def __init__(self, oid: int,
                  side_surfaces: Tuple[Surface, Surface, Surface, Surface, Surface, Surface],
                  bound_indices: Tuple[int, int, int, int, int, int], color_index: int,
                  block_type: int, texture_origin: Tuple[float, float, float],
                  rgba: Union[Tuple[()], Tuple[float, float, float, float]] = ()):
         self.id = oid
-        self.extent = extent
         self.side_surfaces = side_surfaces
         self.bound_indices = bound_indices
         self.color_index = color_index
@@ -42,5 +51,13 @@ class Obstruction:
         if len(rgba) != 0:
             self.rgba = rgba
 
+        self._subobstructions: Dict[Mesh, SubObstruction] = dict()
+
+    def _add_subobstruction(self, mesh: Mesh, extent: Extent):
+        self._subobstructions[mesh] = SubObstruction(mesh, extent)
+
+    def __eq__(self, other):
+        return self.id == other.id
+
     def __repr__(self, *args, **kwargs):
-        return f"Obstruction(id={self.id}, extent={str(self.extent)})"
+        return f"Obstruction(id={self.id})"
