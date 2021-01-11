@@ -8,6 +8,4 @@ from .fds_classes.surface import Surface
 
 from .fds_classes.ventilation import Ventilation
 
-from .fds_classes.obstruction import Obstruction
-
 from .fds_classes.mesh import Mesh

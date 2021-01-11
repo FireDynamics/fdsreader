@@ -5,18 +5,17 @@ import numpy as np
 import logging
 import pickle
 
-from fdsreader.bndf import Boundary
+from fdsreader.bndf import Obstruction, Patch
 from fdsreader.isof import Isosurface
 from fdsreader.isof.IsosurfaceCollection import IsosurfaceCollection
 from fdsreader.plot3d import Plot3D
 from fdsreader.plot3d.Plot3dCollection import Plot3DCollection
 from fdsreader.slcf import Slice
 from fdsreader.slcf.SliceCollection import SliceCollection
-from fdsreader.utils import Mesh, Dimension, Surface, Quantity, Obstruction, Ventilation, Extent
+from fdsreader.utils import Mesh, Dimension, Surface, Quantity, Ventilation, Extent
 from fdsreader.utils.data import create_hash, get_smv_file
 import fdsreader.utils.fortran_data as fdtype
 from fdsreader import settings
-from fdsreader.utils.fds_classes.obstruction import Patch
 
 
 class Simulation:

@@ -1,1 +1,1 @@
-from .boundary import Boundary
+from .obstruction import Obstruction, Boundary, Patch
