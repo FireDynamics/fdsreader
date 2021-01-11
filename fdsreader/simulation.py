@@ -6,16 +6,17 @@ import logging
 import pickle
 
 from fdsreader.bndf import Boundary
-from fdsreader.bndf.BoundaryCollection import BoundaryCollection
+from fdsreader.isof import Isosurface
 from fdsreader.isof.IsosurfaceCollection import IsosurfaceCollection
 from fdsreader.plot3d import Plot3D
 from fdsreader.plot3d.Plot3dCollection import Plot3DCollection
+from fdsreader.slcf import Slice
 from fdsreader.slcf.SliceCollection import SliceCollection
 from fdsreader.utils import Mesh, Dimension, Surface, Quantity, Obstruction, Ventilation, Extent
-from fdsreader import settings
-from fdsreader.slcf import Slice
-from fdsreader.isof import Isosurface
 from fdsreader.utils.data import create_hash, get_smv_file
+import fdsreader.utils.fortran_data as fdtype
+from fdsreader import settings
+from fdsreader.utils.fds_classes.obstruction import Patch
 
 
 class Simulation:
@@ -101,6 +102,8 @@ class Simulation:
                         self._load_isosurface(smv_file, keyword)
                     elif keyword == "PL3D":
                         self._load_data_3d(smv_file, keyword)
+                    elif "BND" in keyword:
+                        self._load_boundary_data(smv_file, keyword)
 
             self.out_file_path = os.path.join(self.root_path, self.chid + ".out")
 
@@ -205,7 +208,7 @@ class Simulation:
                     self.obstructions[obst_id] = Obstruction(obst_id, side_surfaces, bound_indices,
                                                              color_index, block_type,
                                                              texture_origin, rgba=rgba)
-                self.obstructions[obst_id]._add_subobstruction(mesh, extent)
+                self.obstructions[obst_id]._extents[mesh] = extent
 
     def _load_vents(self, smv_file: TextIO, mesh: Mesh):
         line = smv_file.readline()
@@ -324,44 +327,67 @@ class Simulation:
 
         logging.debug("Found SLICE with id: :i", slice_id)
 
-    @property
-    def boundaries(self) -> BoundaryCollection:
-        """Loads all boundary data for the simulation.
-
-        :returns: Collection of all boundary data.
+    def _load_boundary_data(self, smv_file: TextIO, line: str):
+        """Loads the boundary data at current pointer position.
         """
-        if not hasattr(self, "_boundaries"):
-            boundaries = dict()
-            with open(self.smv_file_path, 'r') as infile, \
-                    mmap.mmap(infile.fileno(), 0, access=mmap.ACCESS_READ) as smv_file:
-                pos = smv_file.find(b'BND', 0)
-                while pos > 0:
-                    smv_file.seek(pos)
-                    line = smv_file.readline().decode().strip().split()
-                    if line[0] == 'BNDC':
-                        cell_centered = True
-                    else:
-                        cell_centered = False
-                    mesh_index = int(line[1]) - 1
+        line = line.split()
+        if line[0] == 'BNDC':
+            cell_centered = True
+        else:
+            cell_centered = False
+        mesh_index = int(line[1]) - 1
 
-                    filename = smv_file.readline().decode().strip()
-                    quantity = smv_file.readline().decode().strip()
-                    label = smv_file.readline().decode().strip()
-                    unit = smv_file.readline().decode().strip()
+        mesh = self.meshes[mesh_index]
 
-                    bid = int(filename.split('_')[-1][:-3])
+        filename = smv_file.readline().strip()
+        quantity = smv_file.readline().strip()
+        label = smv_file.readline().strip()
+        unit = smv_file.readline().strip()
 
-                    if bid not in boundaries:
-                        boundaries[bid] = Boundary(bid, self.root_path, cell_centered, quantity,
-                                                   label, unit)
-                    boundaries[bid]._add_subboundary(filename, self.meshes[mesh_index])
+        bid = int(filename.split('_')[-1][:-3])
 
-                    pos = smv_file.find(b'BND', pos + 1)
-            if len(boundaries) > 0:
-                self._boundaries = BoundaryCollection(boundaries.values())
-            else:
-                raise IOError("This simulation did not output any plot3d data.")
-        return self._boundaries
+        file_path = os.path.join(self.root_path, filename)
+
+        patches = dict()
+        total_dim_size = fdtype.FLOAT.itemsize
+
+        with open(file_path, 'rb') as infile:
+            # Offset of the binary file to the end of the file header.
+            offset = 3 * fdtype.new((('c', 30),)).itemsize
+            infile.seek(offset)
+
+            n_patches = fdtype.read(infile, fdtype.INT, 1)[0][0][0]
+            dtype_patches = fdtype.new((('i', 9),))
+            patch_infos = fdtype.read(infile, dtype_patches, n_patches)[0]
+
+            offset += fdtype.INT.itemsize + dtype_patches.itemsize * n_patches
+
+            for patch_info in patch_infos:
+                co = mesh.coordinates
+                dimension = Dimension(co[0][patch_info[0]], co[0][patch_info[1]],
+                                   co[1][patch_info[2]],
+                                   co[1][patch_info[3]], co[2][patch_info[4]],
+                                   co[2][patch_info[5]])
+                orientation = patch_info[6]
+                obst_id = patch_info[7] + 1
+                if obst_id not in patches:
+                    patches[obst_id] = list()
+                p = Patch(file_path, dimension, orientation, cell_centered, total_dim_size)
+                patches[obst_id].append(p)
+                total_dim_size += fdtype.new((('f', str(p.shape)),)).itemsize
+
+            t_n = (os.stat(file_path).st_size - offset) // total_dim_size
+
+            dtype_time = np.dtype(settings.FORTRAN_DATA_TYPE_FLOAT)
+            times = np.empty((t_n,), dtype=dtype_time)
+            for t in range(t_n):
+                infile.seek(offset + t * total_dim_size)
+                times[t] = fdtype.read(infile, fdtype.FLOAT, 1)[0][0][0]
+
+        for obst_id, patches in patches.items():
+            for patch in patches:
+                patch._post_init(t_n, total_dim_size)
+            self.obstructions[obst_id]._add_patches(bid, cell_centered, quantity, label, unit, mesh, patches, times, t_n)
 
     def _load_data_3d(self, smv_file: TextIO, line: str):
         """Loads the plot3d at current pointer position.
