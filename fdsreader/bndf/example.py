@@ -6,15 +6,16 @@ def main():
 
     mesh = sim.meshes[0]
 
-    obstruction = mesh.obstructions[2]
+    obstruction = sim.obstructions[1]
+    quantities = obstruction.quantities
 
-    boundary = sim.boundaries[0]
-    subboundary = boundary[mesh]
-    obstruction_data = subboundary[obstruction]
+    # boundary = obstruction.get_boundary_data(quantities[0])
+    # obstruction_data = boundary[mesh]
 
-    # print(mesh.obstructions)
-    # print(subboundary.obstruction_data)
-    # print(obstruction_data)
+    for obstruction in sim.obstructions.values():
+        bndf_data = obstruction.get_boundary_data(quantities[0])
+        if bndf_data is not None:
+            [face.shape for face in bndf_data.faces.values()]
 
 
 if __name__ == "__main__":

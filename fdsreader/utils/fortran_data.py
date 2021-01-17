@@ -64,9 +64,12 @@ def combine(*dtypes: np.dtype):
 
 
 # Commonly used datatypes
-# CHAR = new((('c', 1),))
+CHAR = new((('c', 1),))
 INT = new((('i', 1),))
 FLOAT = new((('f', 1),))
+# Border datatype to get the border of a fortran write
+PRE_BORDER = np.dtype(FORTRAN_DATA_TYPE_INTEGER)
+HAS_POST_BORDER = FORTRAN_BACKWARD
 
 
 def read(infile: BinaryIO, dtype: np.dtype, n: int):

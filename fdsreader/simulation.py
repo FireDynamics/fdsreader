@@ -104,9 +104,11 @@ class Simulation:
                     elif "BND" in keyword:
                         self._load_boundary_data(smv_file, keyword)
 
+            # POST INIT (post read)
             self.out_file_path = os.path.join(self.root_path, self.chid + ".out")
-
-            # Now combine the gathered temporary information into data collections
+            for obst in self.obstructions.values():
+                obst._post_init()
+            # Combine the gathered temporary information into data collections
             self.slices = SliceCollection(
                 Slice(self.root_path, slice_data[0]["cell_centered"], slice_data[1:]) for slice_data
                 in self.slices.values())
@@ -115,7 +117,7 @@ class Simulation:
 
             if settings.ENABLE_CACHING:
                 # Hash will be saved to simulation pickle file and compared to new hash when loading
-                # the pickled simulation again in the next run of the program.
+                # the pickled simulation again in the next run of the prpogram.
                 self._hash = create_hash(self.smv_file_path)
                 pickle.dump(self,
                             open(Simulation._get_pickle_filename(self.root_path, self.chid), 'wb'),
@@ -154,7 +156,7 @@ class Simulation:
                 smv_file.readline()
             coordinates[dim] = np.empty(grid_dimensions[dim], dtype=np.float32)
             for i in range(grid_dimensions[dim]):
-                coordinates[dim][i] = smv_file.readline().split()[1]
+                coordinates[dim][i] = round(float(smv_file.readline().split()[1]), 7)
 
         mesh = Mesh(coordinates, extents, mesh_id)
 
@@ -175,49 +177,52 @@ class Simulation:
         n = int(smv_file.readline().strip())
         for _ in range(n):
             line = smv_file.readline().strip().split()
-            extent = Extent(*[float(line[i]) for i in range(6)])
+            extents = [round(float(line[i]), 7) for i in range(6)]
             obst_id = int(line[6])
 
             side_surfaces = tuple(self.surfaces[int(line[i]) - 1] for i in range(7, 13))
             if len(line) > 13:
                 texture_origin = (float(line[13]), float(line[14]), float(line[15]))
-                temp_data.append((obst_id, extent, side_surfaces, texture_origin))
+                temp_data.append((obst_id, extents, side_surfaces, texture_origin))
             else:
-                temp_data.append((obst_id, extent, side_surfaces))
+                temp_data.append((obst_id, extents, side_surfaces))
 
-            for tmp in temp_data:
-                line = smv_file.readline().strip().split()
-                # Todo: What does bound index mean?
-                bound_indices = (int(line[0]), int(line[1]), int(line[2]), int(line[3]),
-                                 int(line[4]), int(line[5]))
-                color_index = int(line[6])
-                block_type = int(line[7])
-                if color_index == -3:
-                    rgba = tuple(float(line[i]) for i in range(8, 12))
-                else:
-                    rgba = ()
+        for tmp in temp_data:
+            line = smv_file.readline().strip().split()
+            # Todo: What does bound index mean?
+            bound_indices = (int(float(line[0])), int(float(line[1])), int(float(line[2])),
+                             int(float(line[3])), int(float(line[4])), int(float(line[5])))
+            color_index = int(line[6])
+            block_type = int(line[7])
+            if color_index == -3:
+                rgba = tuple(float(line[i]) for i in range(8, 12))
+            else:
+                rgba = ()
 
-                if len(tmp) == 4:
-                    obst_id, extent, side_surfaces, texture_origin = tmp
-                else:
-                    obst_id, extent, side_surfaces = tmp
-                    texture_origin = self.default_texture_origin
+            if len(tmp) == 4:
+                obst_id, extents, side_surfaces, texture_origin = tmp
+            else:
+                obst_id, extents, side_surfaces = tmp
+                texture_origin = self.default_texture_origin
 
-                if obst_id not in self.obstructions:
-                    self.obstructions[obst_id] = Obstruction(obst_id, side_surfaces, bound_indices,
-                                                             color_index, block_type,
-                                                             texture_origin, rgba=rgba)
-                self.obstructions[obst_id]._extents[mesh] = extent
+            if obst_id not in self.obstructions:
+                self.obstructions[obst_id] = Obstruction(obst_id, side_surfaces, bound_indices,
+                                                         color_index, block_type,
+                                                         texture_origin, rgba=rgba)
+            extents.insert(2, bound_indices[1] - bound_indices[0])
+            extents.insert(5, bound_indices[3] - bound_indices[2])
+            extents.insert(8, bound_indices[5] - bound_indices[4])
+            self.obstructions[obst_id]._extents[mesh] = Extent(*extents)
 
     def _load_vents(self, smv_file: TextIO, mesh: Mesh):
-        line = smv_file.readline()
+        line = smv_file.readline().split()
         n, n_dummies = int(line[0]), int(line[1])
 
         temp_data = list()
 
         def read_common_info():
             line = smv_file.readline().strip().split()
-            return line, Extent(*[float(line[i]) for i in range(6)]), int(line[6]), self.surfaces[
+            return line, [float(line[i]) for i in range(6)], int(line[6]), self.surfaces[
                 int(line[7])]
 
         def read_common_info2():
@@ -233,28 +238,31 @@ class Simulation:
 
         texture_origin = ()
         for _ in range(n - n_dummies):
-            line, extent, vent_id, surface = read_common_info()
+            line, extents, vent_id, surface = read_common_info()
             texture_origin = (float(line[8]), float(line[9]), float(line[10]))
-            temp_data.append((extent, vent_id, surface, texture_origin))
+            temp_data.append((extents, vent_id, surface, texture_origin))
 
         for _ in range(n_dummies):
-            _, extent, vent_id, surface = read_common_info()
-            temp_data.append((extent, vent_id, surface))
+            _, extents, vent_id, surface = read_common_info()
+            temp_data.append((extents, vent_id, surface))
 
         for v in range(n):
             if v < n - n_dummies:
-                extent, vent_id, surface, texture_origin = temp_data[v]
+                extents, vent_id, surface, texture_origin = temp_data[v]
             else:
-                extent, vent_id, surface = temp_data[v]
+                extents, vent_id, surface = temp_data[v]
             bound_indices, color_index, draw_type, rgba = read_common_info2()
-            if vent_id not in self.obstructions:
+            if vent_id not in self.ventilations:
                 self.ventilations[vent_id] = Ventilation(vent_id, surface, bound_indices,
                                                          color_index, draw_type, rgba=rgba,
                                                          texture_origin=texture_origin)
-            self.ventilations[vent_id]._add_subventilation(mesh, extent)
+            extents.insert(2, bound_indices[1] - bound_indices[0])
+            extents.insert(5, bound_indices[3] - bound_indices[2])
+            extents.insert(8, bound_indices[5] - bound_indices[4])
+            self.ventilations[vent_id]._add_subventilation(mesh, Extent(*extents))
 
         smv_file.readline()
-        assert smv_file.readline() == "CVENT"
+        assert "CVENT" in smv_file.readline()
 
         n = int(smv_file.readline().strip())
         temp_data.clear()
@@ -348,7 +356,6 @@ class Simulation:
         file_path = os.path.join(self.root_path, filename)
 
         patches = dict()
-        total_dim_size = fdtype.FLOAT.itemsize
 
         with open(file_path, 'rb') as infile:
             # Offset of the binary file to the end of the file header.
@@ -360,33 +367,45 @@ class Simulation:
             patch_infos = fdtype.read(infile, dtype_patches, n_patches)[0]
 
             offset += fdtype.INT.itemsize + dtype_patches.itemsize * n_patches
-
+            patch_offset = fdtype.FLOAT.itemsize + fdtype.PRE_BORDER.itemsize
             for patch_info in patch_infos:
                 co = mesh.coordinates
-                dimension = Dimension(co[0][patch_info[0]], co[0][patch_info[1]],
-                                   co[1][patch_info[2]],
-                                   co[1][patch_info[3]], co[2][patch_info[4]],
-                                   co[2][patch_info[5]])
+                x_min, x_max, y_min, y_max, z_min, z_max = (
+                    patch_info[0], patch_info[1], patch_info[2], patch_info[3], patch_info[4],
+                    patch_info[5])
+                co_x_min, co_x_max, co_y_min, co_y_max, co_z_min, co_z_max = (
+                    co['x'][x_min], co['x'][x_max], co['y'][y_min],
+                    co['y'][y_max], co['z'][z_min], co['z'][z_max])
+                dimension = Dimension(x_max - x_min, y_max - y_min, z_max - z_min)
                 orientation = patch_info[6]
+
+                ext = [co_x_min, co_x_max,
+                       (co_x_max - co_x_min) / dimension.x if dimension.x else 1,
+                       co_y_min, co_y_max,
+                       (co_y_max - co_y_min) / dimension.y if dimension.y else 1,
+                       co_z_min, co_z_max,
+                       (co_z_max - co_z_min) / dimension.z if dimension.z else 1]
+                extent = Extent(*ext)
                 obst_id = patch_info[7] + 1
                 if obst_id not in patches:
                     patches[obst_id] = list()
-                p = Patch(file_path, dimension, orientation, cell_centered, total_dim_size)
+                p = Patch(file_path, dimension, extent, orientation, cell_centered,
+                          patch_offset + offset)
                 patches[obst_id].append(p)
-                total_dim_size += fdtype.new((('f', str(p.shape)),)).itemsize
+                patch_offset += np.dtype(fdtype.new_raw((('f', str(p.shape)),))).itemsize
 
-            t_n = (os.stat(file_path).st_size - offset) // total_dim_size
+            times = list()
+            with open(file_path + ".bnd", 'r') as bnd_file:
+                for line in bnd_file:
+                    times.append(float(line.split()[0]))
+            times = np.array(times)
+            t_n = times.shape[0]
 
-            dtype_time = np.dtype(settings.FORTRAN_DATA_TYPE_FLOAT)
-            times = np.empty((t_n,), dtype=dtype_time)
-            for t in range(t_n):
-                infile.seek(offset + t * total_dim_size)
-                times[t] = fdtype.read(infile, fdtype.FLOAT, 1)[0][0][0]
-
-        for obst_id, patches in patches.items():
-            for patch in patches:
-                patch._post_init(t_n, total_dim_size)
-            self.obstructions[obst_id]._add_patches(bid, cell_centered, quantity, label, unit, mesh, patches, times, t_n)
+        for obst_id, p in patches.items():
+            for patch in p:
+                patch._post_init(t_n, patch_offset)
+            self.obstructions[obst_id]._add_patches(bid, cell_centered, quantity, label, unit, mesh,
+                                                    p, times, t_n)
 
     def _load_data_3d(self, smv_file: TextIO, line: str):
         """Loads the plot3d at current pointer position.
@@ -432,17 +451,17 @@ class Simulation:
         if double_quantity:
             if iso_id not in self.isosurfaces:
                 self.isosurfaces[iso_id] = Isosurface(iso_id,
-                                                 os.path.dirname(self.smv_file_path),
-                                                 double_quantity, quantity, label, unit,
-                                                 v_quantity=v_quantity, v_label=v_label,
-                                                 v_unit=v_unit)
+                                                      os.path.dirname(self.smv_file_path),
+                                                      double_quantity, quantity, label, unit,
+                                                      v_quantity=v_quantity, v_label=v_label,
+                                                      v_unit=v_unit)
             self.isosurfaces[iso_id]._add_subsurface(self.meshes[mesh_index], iso_filename,
-                                                viso_filename=viso_filename)
+                                                     viso_filename=viso_filename)
         else:
             if iso_id not in self.isosurfaces:
                 self.isosurfaces[iso_id] = Isosurface(iso_id,
-                                                 os.path.dirname(self.smv_file_path),
-                                                 double_quantity, quantity, label, unit)
+                                                      os.path.dirname(self.smv_file_path),
+                                                      double_quantity, quantity, label, unit)
             self.isosurfaces[iso_id]._add_subsurface(self.meshes[mesh_index], iso_filename)
 
     def clear_cache(self, clear_persistent_cache=False):

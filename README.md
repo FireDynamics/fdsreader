@@ -42,42 +42,50 @@ print(sim.meshes, sim.meshes[0].obstructions, sim.surfaces, sim.slices, sim.boun
     * (Entering alpha status after extensive private testing in pre-alpha stage)
     
 ### Pre-Alpha *(current stage)*
+* 0.4.8
+    * Complete rework of internal reading process (higher performance)
+    * Complete rework of bndf
+    * Bugfixes (obstructions, extents, simulation)
 * 0.4.7
     * Added cache clearing functionality
-    * Bugfixes for bndf
+    * Bugfixes
 * 0.4.6
-    * Added automatic caching for simulations (which significantly reduces simulation loading time) 
+    * Added automatic caching for simulations (significant loading time reduction) 
     * Reworked internal slcf data structure
     * Fixed isof reader (now correctly reads in data for all time steps)
     * Connected bndf data to obstructions
     * Simplified instantiation of Simulation objects  
 * 0.4.5
-    * Added Multimesh isof support
-    * Improved slcf and bndf stability
+    * Added multimesh isof support
+    * Improved slcf stability
 * 0.4.4
-    * Bugfixes for bndf and plot3d
+    * Bugfixes (bndf and plot3d)
 * 0.4.3
-    * Bugfixes for slcf and isof readers
+    * Bugfixes (slcf and isof)
 * 0.4.2
     * Completed API documentation
 * 0.4.1
-    * Fixed import issues 
+    * Bugfixes (python import issues) 
 * 0.4.0
-    * Added BNDF support (boundaries)
+    * Added bndf support (boundaries)
 * 0.3.0
-    * Added Multimesh Plot3D support
+    * Added multimesh plot3D support
 * 0.3.0
-    * Added basic Plot3D support
+    * Added basic plot3D support
 * 0.2.0
     * Added isof support (isosurfaces)
 * 0.1.2
     * Added numpy support for slices
 * 0.1.1
-    * Added multimesh slcf support (multimesh slices)
+    * Added multimesh slcf support
     * Added API documentation
     * Package available on PyPI
 * 0.1.0
-    * Added basic slcf support (slices)
+    * Added basic slcf support (2D + 3D slices)
+
+## Known bugs
+* Some issues with bndf
+* Particles reader
 
 ## Meta
 

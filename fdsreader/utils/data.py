@@ -16,6 +16,9 @@ class Quantity:
     def __eq__(self, other):
         return self.quantity == other.quantity
 
+    def __repr__(self):
+        return f"Quantity(label={self.label}, unit={self.unit}, quantity={self.quantity})"
+
 
 def create_hash(path: str):
     """Returns the md5 hash as string for the given file.
