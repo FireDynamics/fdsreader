@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Utilities &mdash; fdsreader [fdsreader, version 0.4.7dev1] documentation</title>
+  <title>Utilities &mdash; fdsreader [fdsreader, version 0.4.8dev0] documentation</title>
   
 
   
@@ -150,86 +150,25 @@
 <h1>Utilities<a class="headerlink" href="#utilities" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="apireference"></span><dl class="py class">
 <dt>
-<em class="property">class </em><code class="sig-prename descclassname">fdsreader.utils.fds_classes.mesh.</code><code class="sig-name descname">Mesh</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x_coordinates</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">y_coordinates</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">z_coordinates</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">mesh_id</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">mesh_index</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">smv_file</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>str<span class="p">, </span>mmap.mmap<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">pos</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">surfaces</span><span class="p">:</span> <span class="n">List<span class="p">[</span>fdsreader.utils.fds_classes.surface.Surface<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">default_texture_origin</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/fds_classes/mesh.html#Mesh"><span class="viewcode-link">[source]</span></a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">fdsreader.utils.fds_classes.mesh.</code><code class="sig-name descname">Mesh</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">coordinates</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>numpy.ndarray<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">extents</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">mesh_id</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/fds_classes/mesh.html#Mesh"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>3-dimensional Mesh of fixed, defined size.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>coordinates</strong> – Coordinate values for each of the 3 dimension.</p></li>
-<li><p><strong>extent</strong> – Extent object containing 3-dimensional extent information.</p></li>
+<li><p><strong>dimensions</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">Dimension</span></code> describing the size of the 3 dimensions regarding indices.</p></li>
+<li><p><strong>extent</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">Extent</span></code> object containing 3-dimensional extent information.</p></li>
 <li><p><strong>n</strong> – Number of elements for each of the 3 dimensions.</p></li>
 <li><p><strong>n_size</strong> – Total number of blocks in this mesh.</p></li>
-<li><p><strong>label</strong> – Label associated with this mesh.</p></li>
-<li><p><strong>id</strong> – Mesh id assigned to mesh.</p></li>
-<li><p><strong>index</strong> – Index of mesh in smv file.</p></li>
-<li><p><strong>obstructions</strong> – All obstructions inside of the mesh.</p></li>
-<li><p><strong>vents</strong> – All vents inside of the mesh.</p></li>
+<li><p><strong>id</strong> – Mesh id/label assigned to this mesh.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Parameters</dt>
 <dd class="field-even"><ul class="simple">
-<li><p><strong>x_coordinates</strong> – Coordinate values of x-axis.</p></li>
-<li><p><strong>y_coordinates</strong> – Coordinate values of y-axis.</p></li>
-<li><p><strong>z_coordinates</strong> – Coordinate values of z-axis.</p></li>
-<li><p><strong>mid</strong> – ID of this mesh.</p></li>
-<li><p><strong>smv_file</strong> – Either provide an initialized mmap object to read in additional data without having to open
-the smv_file again or the name of the smv-file containing the mesh information.</p></li>
-<li><p><strong>pos</strong> – The current file pointer position so the correct obstacles and ventilations for this mesh are read.</p></li>
-<li><p><strong>surfaces</strong> – List of surfaces available for obstacles and ventilations.</p></li>
+<li><p><strong>coordinates</strong> – Coordinate values of the three axes.</p></li>
+<li><p><strong>extents</strong> – Extent of the mesh in each dimension.</p></li>
+<li><p><strong>mesh_id</strong> – ID of this mesh.</p></li>
 </ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py class">
-<dt>
-<em class="property">class </em><code class="sig-prename descclassname">fdsreader.utils.fds_classes.obstruction.</code><code class="sig-name descname">Obstruction</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">oid</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">extent</span><span class="p">:</span> <span class="n">fdsreader.utils.extent.Extent</span></em>, <em class="sig-param"><span class="n">side_surfaces</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>fdsreader.utils.fds_classes.surface.Surface<span class="p">, </span>fdsreader.utils.fds_classes.surface.Surface<span class="p">, </span>fdsreader.utils.fds_classes.surface.Surface<span class="p">, </span>fdsreader.utils.fds_classes.surface.Surface<span class="p">, </span>fdsreader.utils.fds_classes.surface.Surface<span class="p">, </span>fdsreader.utils.fds_classes.surface.Surface<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">bound_indices</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">color_index</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">block_type</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">texture_origin</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">rgba</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Tuple<span class="p">[</span><span class="p">(</span><span class="p">)</span><span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/fds_classes/obstruction.html#Obstruction"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>A box-shaped obstruction with specific surfaces (materials) on each side.</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">ivar id</dt>
-<dd class="field-odd"><p>ID of the obstruction.</p>
-</dd>
-<dt class="field-even">ivar extent</dt>
-<dd class="field-even"><p>Tuple with three tuples containing minimum and maximum coordinate value on the
-corresponding dimension together forming a cuboid.</p>
-</dd>
-<dt class="field-odd">ivar side_surfaces</dt>
-<dd class="field-odd"><p>Tuple of six surfaces for each side of the cuboid.</p>
-</dd>
-<dt class="field-even">ivar bound_indices</dt>
-<dd class="field-even"><p>Indices used to define obstruction bounds in terms of mesh locations.</p>
-</dd>
-<dt class="field-odd">ivar color_index</dt>
-<dd class="field-odd"><p>Type of coloring used to color obstruction.</p>
-</dd>
-</dl>
-</div></blockquote>
-<p>-1 - default color</p>
-<p>-2 - invisible</p>
-<p>-3 - use red, green, blue and alpha (rgba attribute)</p>
-<dl class="simple">
-<dt>n&gt;0 - use n’th color table entry</dt><dd><dl class="field-list simple">
-<dt class="field-odd">ivar block_type</dt>
-<dd class="field-odd"><p>Defines how the obstruction is drawn.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>-1 - use surface to obtain blocktype</p>
-<p>0 - regular block</p>
-<dl class="simple">
-<dt>2 - outline</dt><dd><dl class="field-list simple">
-<dt class="field-odd">ivar texture_origin</dt>
-<dd class="field-odd"><p>Origin position of the texture provided by the surface. When the texture
-does have a pattern, for example windows or bricks, the texture_origin specifies where the
-pattern should begin.</p>
-</dd>
-<dt class="field-even">ivar rgba</dt>
-<dd class="field-even"><p>Optional color of the obstruction in form of a 4-element tuple
-(ranging from 0.0 to 1.0).</p>
-</dd>
-</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -255,43 +194,6 @@ TODO: Read in velocity</p>
 :ivar texture_map: Path to the texture map used for the surface.
 :ivar rgb: Color of the surface in form of a 3-element tuple.
 :ivar transparency: Transparency of the color (alpha channel).</p>
-</dd></dl>
-
-<dl class="py class">
-<dt>
-<em class="property">class </em><code class="sig-prename descclassname">fdsreader.utils.fds_classes.vent.</code><code class="sig-name descname">Ventilation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">extent</span><span class="p">:</span> <span class="n">fdsreader.utils.extent.Extent</span></em>, <em class="sig-param"><span class="n">vid</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">surface</span><span class="p">:</span> <span class="n">fdsreader.utils.fds_classes.surface.Surface</span></em>, <em class="sig-param"><span class="n">bound_indices</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">color_index</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">draw_type</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">rgba</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Tuple<span class="p">[</span><span class="p">(</span><span class="p">)</span><span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">texture_origin</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Tuple<span class="p">[</span><span class="p">(</span><span class="p">)</span><span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">circular_vent_origin</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Tuple<span class="p">[</span><span class="p">(</span><span class="p">)</span><span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">radius</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">- 1</span></em>, <em class="sig-param"><span class="n">open_time</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">- 1</span></em>, <em class="sig-param"><span class="n">close_time</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/fds_classes/vent.html#Ventilation"><span class="viewcode-link">[source]</span></a></dt>
-<dd><p>A ventilation can be used to model components of the ventilation system in a building, like a diffuser or a return.
-A ventilation can also be used as a means of applying a particular boundary condition to a rectangular patch on a</p>
-<blockquote>
-<div><p>solid surface.</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Variables</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>id</strong> – ID of the ventilation.</p></li>
-<li><p><strong>extent</strong> – Tuple with three tuples containing minimum and maximum coordinate value on the
-corresponding dimension.</p></li>
-<li><p><strong>surface</strong> – Surface object used for the ventilation.</p></li>
-<li><p><strong>bound_indices</strong> – Indices used to define ventilation bounds in terms of mesh locations.</p></li>
-<li><p><strong>color_index</strong> – Type of coloring used to color ventilation.
--99 or +99 - use default color
--n or +n - use n’th palette color
-&lt; 0 - do not draw boundary file over vent
-&gt; 0 - draw boundary file over vent</p></li>
-<li><p><strong>draw_type</strong> – Defines how the ventilation is drawn.
-0 - solid surface
-2 - outline
--2 - hidden</p></li>
-<li><p><strong>open_time</strong> – Point in time the ventilation should open.</p></li>
-<li><p><strong>close_time</strong> – Point in time the ventilation should close.</p></li>
-<li><p><strong>rgba</strong> – Color of the ventilation in form of a 4-element tuple (ranging from 0.0 to 1.0).</p></li>
-<li><p><strong>texture_origin</strong> – Origin position of the texture provided by the surface. When the texture does have a pattern,
-for example windows or bricks, the texture_origin specifies where the pattern should begin.</p></li>
-<li><p><strong>circular_vent_origin</strong> – Origin of the ventilation relative to bounding box.</p></li>
-<li><p><strong>radius</strong> – Radius of the ventilation circle.</p></li>
-</ul>
-</dd>
-</dl>
 </dd></dl>
 
 <p>Collection of internal utilities (convenience functions) for data handling.</p>
