@@ -1,3 +1,6 @@
+from . import _version
+__version__ = str(_version.Version)
+
 import logging
 
 from .simulation import Simulation

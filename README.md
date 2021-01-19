@@ -41,6 +41,8 @@ print(sim.meshes, sim.meshes[0].obstructions, sim.surfaces, sim.slices, sim.boun
     * (Entering alpha status after extensive private testing in pre-alpha stage)
     
 ### Pre-Alpha *(current stage)*
+* 0.4.10
+    * Bugfixes for slcf
 * 0.4.9
     * Bugfixes for bndf
     * Improved 2D-Slice functionality
