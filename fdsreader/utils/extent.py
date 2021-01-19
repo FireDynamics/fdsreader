@@ -16,7 +16,7 @@ class Extent:
         if len(args) % 3 != 0:
             ValueError("An invalid number of arguments were passed to the constructor.")
         for i in range(0, len(args), 3):
-            self._extents.append((round(float(args[i]), 7), round(float(args[i + 1]), 7)))
+            self._extents.append((float(args[i]), float(args[i + 1])))
             self._step_sizes.append(float(args[i + 2]))
 
         if skip_dimension in ('x', 1):
@@ -33,7 +33,7 @@ class Extent:
         return self._extents == other._extents and self._step_sizes == other._step_sizes
 
     def __repr__(self, *args, **kwargs):
-        return "Extent([{}, {}] x [{}, {}] x [{}, {}])".format(self.x_start, self.x_end,
+        return "Extent([{:.2f}, {:.2f}] x [{:.2f}, {:.2f}] x [{:.2f}, {:.2f}])".format(self.x_start, self.x_end,
                                                               self.y_start, self.y_end,
                                                               self.z_start, self.z_end)
 

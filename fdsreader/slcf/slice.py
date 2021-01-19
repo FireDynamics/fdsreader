@@ -4,9 +4,9 @@ from copy import deepcopy
 
 import numpy as np
 import logging
-from typing import Dict, Collection
+from typing import Dict, Collection, Tuple, Literal
 
-from fdsreader.utils import Dimension, Quantity, Mesh
+from fdsreader.utils import Dimension, Quantity, Mesh, Extent
 from fdsreader import settings
 import fdsreader.utils.fortran_data as fdtype
 
@@ -30,38 +30,43 @@ class SubSlice:
     :ivar root_path: Path to the directory containing the slice file.
     :ivar cell_centered: Indicates whether centered positioning for data is used.
     :ivar mesh: The mesh the subslice cuts through.
-    :ivar extent: Extent object containing 3-dimensional extent information. Values are indexes for
-        the actual grid values of the mesh.
+    :ivar extent: :class:`Extent` object containing 3-dimensional extent information.
     :ivar file_names: File names for the corresponding slice file depending on the quantity.
     """
 
     _offset = 3 * fdtype.new((('c', 30),)).itemsize + fdtype.new((('i', 6),)).itemsize
 
-    def __init__(self, filename: str, root_path: str, cell_centered: bool, dimension: Dimension,
-                 mesh: Mesh, times: np.ndarray):
+    def __init__(self, parent_slice: Slice, filename: str, dimension: Dimension, extent: Extent,
+                 mesh: Mesh, has_vector_data: bool):
         self.mesh = mesh
         self.dimension = dimension
-        self.root_path = root_path
-        self.cell_centered = cell_centered
+        self.extent = extent
+        self.parent_slice = parent_slice
 
         self.filename = filename
-        self._times = times
 
-        self.shape = self.dimension.shape(cell_centered=cell_centered)
-
-        if True:
+        if has_vector_data:
             self.vector_filenames = dict()
             self._vector_data = dict()
 
-    def _load_data(self, file_path: str, data_out: np.ndarray, t_n: int, fill_times: bool = False):
-        n = self.dimension.size(cell_centered=self.cell_centered)
+    @property
+    def shape(self) -> Tuple:
+        shape = self.dimension.shape(cell_centered=self.parent_slice.cell_centered)
+        if self.parent_slice.orientation == 1:
+            return shape[1], shape[2]
+        elif self.parent_slice.orientation == 2:
+            return shape[0], shape[2]
+        elif self.parent_slice.orientation == 3:
+            return shape[0], shape[1]
+        return shape
+
+    def _load_data(self, file_path: str, data_out: np.ndarray, t_n: int):
+        n = self.dimension.size(cell_centered=self.parent_slice.cell_centered)
         dtype_data = fdtype.combine(fdtype.FLOAT, fdtype.new((('f', n),)))
 
         with open(file_path, 'rb') as infile:
             infile.seek(self._offset)
             for i, data in enumerate(fdtype.read(infile, dtype_data, t_n)):
-                if fill_times:
-                    self._times[i] = data[0][0]
                 data_out[i, :] = data[1].reshape(self.shape)
 
     @property
@@ -70,11 +75,11 @@ class SubSlice:
         Method to lazy load the slice's data for a specific quantity.
         """
         if not hasattr(self, "_data"):
-            t_n = self._times.shape[0]
+            t_n = self.parent_slice.times.shape[0]
 
-            file_path = os.path.join(self.root_path, self.filename)
+            file_path = os.path.join(self.parent_slice.root_path, self.filename)
             self._data = np.empty((t_n,) + self.shape, dtype=np.float32)
-            self._load_data(file_path, self._data, t_n, fill_times=self._times[0] == -1)
+            self._load_data(file_path, self._data, t_n)
         return self._data
 
     @property
@@ -82,10 +87,11 @@ class SubSlice:
         if not hasattr(self, "_vector_data"):
             raise AttributeError("There is no vector data available for this slice.")
         if len(self._vector_data) == 0:
-            t_n = self._times.shape[0]
+            t_n = self.parent_slice.times.shape[0]
 
             for direction in ('u', 'v', 'w'):
-                file_path = os.path.join(self.root_path, self.vector_filenames[direction])
+                file_path = os.path.join(self.parent_slice.root_path,
+                                         self.vector_filenames[direction])
                 self._vector_data[direction] = np.empty((t_n,) + self.shape, dtype=np.float32)
                 self._load_data(file_path, self._vector_data[direction], t_n)
         return self._vector_data
@@ -98,52 +104,71 @@ class SubSlice:
         if hasattr(self, "_vector_data"):
             del self._vector_data
 
+    def __repr__(self):
+        return f"SubSlice(shape={self.shape}, mesh={self.mesh.id}, extent={self.extent})"
+
 
 class Slice(np.lib.mixins.NDArrayOperatorsMixin):
     """Slice file data container including metadata. Consists of multiple subslices, one for each
         mesh the slice cuts through.
 
     :ivar root_path: Path to the directory containing all slice files.
-    :ivar quantities: List with quantity objects containing information about the
-        quantities calculated for this slice with the corresponding label and unit.
     :ivar cell_centered: Indicates whether centered positioning for data is used.
+    :ivar quantity: Quantity object containing information about the quantity calculated for this
+        slice with the corresponding label and unit.
     :ivar times: Numpy array containing all times for which data has been recorded.
+    :ivar orientation: Orientation [1,2,3] of the slice in case it is 2D, 0 otherwise.
+    :ivar extent: :class:`Extent` object containing 3-dimensional extent information.
     """
 
-    def __init__(self, root_path: str, cell_centered: bool, multimesh_data: Collection[Dict]):
+    def __init__(self, root_path: str, cell_centered: bool, times: np.ndarray,
+                 multimesh_data: Collection[Dict]):
         self.root_path = root_path
         self.cell_centered = cell_centered
 
-        n = next(iter(multimesh_data))["extent"].size(cell_centered=self.cell_centered)
-        dtype_data = fdtype.combine(fdtype.FLOAT, fdtype.new((('f', n),)))
-        t_n = (os.stat(os.path.join(self.root_path, next(iter(multimesh_data))[
-            "filename"])).st_size - SubSlice._offset) // dtype_data.itemsize
-
-        self._times = np.empty((t_n,), dtype=np.float32)
-        self._times[0] = -1  # Mark as uninitialized
+        self.times = times
 
         # List of all subslices this slice consists of (one per mesh).
         self._subslices: Dict[Mesh, SubSlice] = dict()
 
         vector_temp = dict()
         for mesh_data in multimesh_data:
+            if "-VELOCITY" in mesh_data["quantity"]:
+                vector_temp[mesh_data["mesh"]] = dict()
+
+        for mesh_data in multimesh_data:
             if "-VELOCITY" not in mesh_data["quantity"]:
                 self.quantity = Quantity(mesh_data["quantity"], mesh_data["label"],
                                          mesh_data["unit"])
-                self._subslices[mesh_data["mesh"]] = SubSlice(mesh_data["filename"], self.root_path,
-                                                              self.cell_centered,
+                self._subslices[mesh_data["mesh"]] = SubSlice(self, mesh_data["filename"],
+                                                              mesh_data["dimension"],
                                                               mesh_data["extent"],
-                                                              mesh_data["mesh"], self._times)
+                                                              mesh_data["mesh"],
+                                                              mesh_data["mesh"] in vector_temp)
             else:
-                if mesh_data["mesh"] in vector_temp:
-                    vector_temp[mesh_data["mesh"]][mesh_data["quantity"]] = mesh_data["filename"]
-                else:
-                    vector_temp[mesh_data["mesh"]] = {mesh_data["quantity"]: mesh_data["filename"]}
+                vector_temp[mesh_data["mesh"]][mesh_data["quantity"]] = mesh_data["filename"]
 
         for mesh, vector_filenames in vector_temp.items():
             self._subslices[mesh].vector_filenames["u"] = vector_filenames["U-VELOCITY"]
             self._subslices[mesh].vector_filenames["v"] = vector_filenames["V-VELOCITY"]
             self._subslices[mesh].vector_filenames["w"] = vector_filenames["W-VELOCITY"]
+
+        vals = self._subslices.values()
+        self.extent = Extent(min(vals, key=lambda e: e.extent.x_start).extent.x_start,
+                             max(vals, key=lambda e: e.extent.x_end).extent.x_end, 0,
+                             min(vals, key=lambda e: e.extent.y_start).extent.y_start,
+                             max(vals, key=lambda e: e.extent.y_end).extent.y_end, 0,
+                             min(vals, key=lambda e: e.extent.z_start).extent.z_start,
+                             max(vals, key=lambda e: e.extent.z_end).extent.z_end, 0)
+
+        if self.extent.x_start == self.extent.x_end:
+            self.orientation = 1
+        elif self.extent.y_start == self.extent.y_end:
+            self.orientation = 2
+        elif self.extent.z_start == self.extent.z_end:
+            self.orientation = 3
+        else:
+            self.orientation = 0
 
         # If lazy loading has been disabled by the user, load the data instantaneously instead
         if not settings.LAZY_LOAD:
@@ -156,15 +181,18 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         return self._subslices[mesh]
 
     @property
-    def times(self):
-        if self._times is None:
-            raise AssertionError("Time data is not available before initializing the first"
-                                 " subslice. This indicates that this function has been called"
-                                 " mid-initialization, which should not happen!")
-        elif self._times[0] == -1:
-            # Implicitly load the data for one subslice, which (as a side effect) sets time data
-            _ = next(iter(self._subslices.values())).data
-        return self._times
+    def extent_dirs(self) -> Tuple[Literal['x', 'y', 'z'], Literal['x', 'y', 'z']]:
+        """The directions in which there is an extent. All three dimensions in case the slice is 3D.
+        """
+        ior = self.orientation
+        if ior == 0:
+            return ('x', 'y', 'z')
+        elif ior == 1:
+            return ('y', 'z')
+        elif ior == 2:
+            return ('x', 'z')
+        else:
+            return ('x', 'y')
 
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory.
@@ -223,5 +251,11 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         if not all(issubclass(t, self.__class__) for t in types):
             return NotImplemented
         return _HANDLED_FUNCTIONS[func](*args, **kwargs)
+
+    def __repr__(self):
+        if self.orientation == 0:  # 3D-Slice
+            return f"Slice([3D] cell_centered={self.cell_centered}, extent={self.extent}, times=[{self.times[0]:.2f},{self.times[1]:.2f},...,{self.times[-1]:.2f}])"
+        else:  # 2D-Slice
+            return f"Slice([2D] cell_centered={self.cell_centered}, extent={self.extent}, extent_dirs={self.extent_dirs}, orientation={self.orientation}, times=[{self.times[0]:.2f},{self.times[1]:.2f},...,{self.times[-1]:.2f}])"
 
 # __array_function__ implementations

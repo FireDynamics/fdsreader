@@ -47,7 +47,9 @@ def get_smv_file(path: str):
     elif os.path.isdir(path):
         files = scan_directory_smv(path)
         if len(files) > 1:
-            raise IOError()
+            raise IOError("There are multiple simulations in this path!")
+        elif len(files) == 0:
+            raise IOError("There are no simulations in this path!")
         return files[0]
     else:
         raise IOError("Path is invalid!")

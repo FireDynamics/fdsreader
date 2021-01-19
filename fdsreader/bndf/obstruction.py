@@ -11,7 +11,7 @@ class Patch:
     """Container for the actual data which is stored as rectangular plane with specific orientation
         and extent.
 
-    :ivar extent: Extent object containing 3-dimensional extent information.
+    :ivar extent: :class:`Extent` object containing 3-dimensional extent information.
     :ivar orientation: The direction the patch is facing (x={-1;1}, y={-2;2}, z={-3;3}).
     :ivar data: Numpy ndarray with the actual data.
     :ivar t_n: Total number of time steps for which output data has been written.
@@ -100,7 +100,7 @@ class Boundary:
         if len(patches) != 0:
             patches_cart = [[patches[0]]]
             orientation = abs(patches[0].orientation)
-            print(patches[0].orientation)
+            # print(patches[0].orientation)
             if orientation == 1:  # x
                 patches.sort(key=lambda p: (p.extent.y_start, p.extent.z_start))
             elif orientation == 2:  # y
@@ -148,9 +148,6 @@ class Boundary:
         self._faces: Dict[Literal[-3, -2, -1, 1, 2, 3], np.ndarray] = dict()
         for face in (-3, -2, -1, 1, 2, 3):
             patches = self.sort_patches_cartesian(patches_for_face[face])
-            if len(patches) != 0:
-                print([patch.extent for patch in patches_for_face[face]])
-            continue
             shape = [self.t_n, 0, 0]
             for patch in patches:
                 if abs(face) == 1:

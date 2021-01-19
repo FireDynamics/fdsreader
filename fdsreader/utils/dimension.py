@@ -31,7 +31,7 @@ class Dimension:
         return self.x == other.x and self.y == other.y and self.z == other.z
 
     def __repr__(self, *args, **kwargs):
-        return f"Dimension(shape={self.shape})"
+        return f"Dimension({self.x}, {self.y}, {self.z})"
 
     def __getitem__(self, dimension: Literal[0, 1, 2, 'x', 'y', 'z']):
         if type(dimension) == int:

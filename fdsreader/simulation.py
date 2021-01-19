@@ -1,5 +1,5 @@
 import os
-from typing import List, TextIO, Dict, AnyStr
+from typing import List, TextIO, Dict, AnyStr, Sequence, Tuple, Union
 
 import numpy as np
 import logging
@@ -110,7 +110,7 @@ class Simulation:
                 obst._post_init()
             # Combine the gathered temporary information into data collections
             self.slices = SliceCollection(
-                Slice(self.root_path, slice_data[0]["cell_centered"], slice_data[1:]) for slice_data
+                Slice(self.root_path, slice_data[0]["cell_centered"], slice_data[0]["times"], slice_data[1:]) for slice_data
                 in self.slices.values())
             self.data_3d = Plot3DCollection(self.data_3d.keys(), self.data_3d.values())
             self.isosurfaces = IsosurfaceCollection(self.isosurfaces.values())
@@ -156,7 +156,7 @@ class Simulation:
                 smv_file.readline()
             coordinates[dim] = np.empty(grid_dimensions[dim], dtype=np.float32)
             for i in range(grid_dimensions[dim]):
-                coordinates[dim][i] = round(float(smv_file.readline().split()[1]), 7)
+                coordinates[dim][i] = float(smv_file.readline().split()[1])
 
         mesh = Mesh(coordinates, extents, mesh_id)
 
@@ -177,7 +177,7 @@ class Simulation:
         n = int(smv_file.readline().strip())
         for _ in range(n):
             line = smv_file.readline().strip().split()
-            extents = [round(float(line[i]), 7) for i in range(6)]
+            extents = [float(line[i]) for i in range(6)]
             obst_id = int(line[6])
 
             side_surfaces = tuple(self.surfaces[int(line[i]) - 1] for i in range(7, 13))
@@ -315,22 +315,31 @@ class Simulation:
 
         slice_id = int(line.split('!')[1].strip().split()[0])
 
-        mesh_index = int(line.split('&')[0].strip().split()[1]) - 1
+        mesh_id = int(line.split('&')[0].strip().split()[1]) - 1
+        mesh = self.meshes[mesh_id]
 
         # Read in index ranges for x, y and z
-        index_ranges = [int(i.strip()) for i in
-                        line.split('&')[1].split('!')[0].strip().split()]
+        bound_indices = [int(i.strip()) for i in line.split('&')[1].split('!')[0].strip().split()]
+        extent, dimension = self._indices_to_extent(bound_indices, mesh)
 
         filename = smv_file.readline().strip()
         quantity = smv_file.readline().strip()
         label = smv_file.readline().strip()
         unit = smv_file.readline().strip()
 
+        file_path = os.path.join(self.root_path, filename)
+
+        times = list()
+        with open(file_path + ".bnd", 'r') as bnd_file:
+            for line in bnd_file:
+                times.append(float(line.split()[0]))
+        times = np.array(times)
+
         if slice_id not in self.slices:
-            self.slices[slice_id] = [{"cell_centered": cell_centered}]
+            self.slices[slice_id] = [{"cell_centered": cell_centered, "times": times}]
         self.slices[slice_id].append(
-            {"extent": Dimension(*index_ranges), "mesh": self.meshes[mesh_index],
-             "filename": filename, "quantity": quantity, "label": label, "unit": unit})
+            {"dimension": dimension, "extent": extent, "mesh": mesh, "filename": filename,
+             "quantity": quantity, "label": label, "unit": unit})
 
         logging.debug("Found SLICE with id: :i", slice_id)
 
@@ -342,9 +351,8 @@ class Simulation:
             cell_centered = True
         else:
             cell_centered = False
-        mesh_index = int(line[1]) - 1
-
-        mesh = self.meshes[mesh_index]
+        mesh_id = int(line[1]) - 1
+        mesh = self.meshes[mesh_id]
 
         filename = smv_file.readline().strip()
         quantity = smv_file.readline().strip()
@@ -363,32 +371,30 @@ class Simulation:
             infile.seek(offset)
 
             n_patches = fdtype.read(infile, fdtype.INT, 1)[0][0][0]
+
+            # print(n_patches)
+
             dtype_patches = fdtype.new((('i', 9),))
-            patch_infos = fdtype.read(infile, dtype_patches, n_patches)[0]
+            patch_infos = fdtype.read(infile, dtype_patches, n_patches)
 
             offset += fdtype.INT.itemsize + dtype_patches.itemsize * n_patches
             patch_offset = fdtype.FLOAT.itemsize + fdtype.PRE_BORDER.itemsize
             for patch_info in patch_infos:
-                co = mesh.coordinates
-                x_min, x_max, y_min, y_max, z_min, z_max = (
-                    patch_info[0], patch_info[1], patch_info[2], patch_info[3], patch_info[4],
-                    patch_info[5])
-                co_x_min, co_x_max, co_y_min, co_y_max, co_z_min, co_z_max = (
-                    co['x'][x_min], co['x'][x_max], co['y'][y_min],
-                    co['y'][y_max], co['z'][z_min], co['z'][z_max])
-                dimension = Dimension(x_max - x_min, y_max - y_min, z_max - z_min)
+                patch_info = patch_info[0]
+                # print(patch_info)
+                extent, dimension = self._indices_to_extent(patch_infos[:6], mesh)
                 orientation = patch_info[6]
 
-                ext = [co_x_min, co_x_max,
-                       (co_x_max - co_x_min) / dimension.x if dimension.x else 1,
-                       co_y_min, co_y_max,
-                       (co_y_max - co_y_min) / dimension.y if dimension.y else 1,
-                       co_z_min, co_z_max,
-                       (co_z_max - co_z_min) / dimension.z if dimension.z else 1]
-                extent = Extent(*ext)
-                obst_id = patch_info[7] + 1
+                obst_id = patch_info[7]
+
+                # print(obst_id)
+                if obst_id == 0:
+                    print("Obst-Id:", obst_id)
+                    continue
+
                 if obst_id not in patches:
                     patches[obst_id] = list()
+                # print(extent)
                 p = Patch(file_path, dimension, extent, orientation, cell_centered,
                           patch_offset + offset)
                 patches[obst_id].append(p)
@@ -463,6 +469,26 @@ class Simulation:
                                                       os.path.dirname(self.smv_file_path),
                                                       double_quantity, quantity, label, unit)
             self.isosurfaces[iso_id]._add_subsurface(self.meshes[mesh_index], iso_filename)
+
+    def _indices_to_extent(self, indices: Sequence[Union[int, str]], mesh: Mesh) -> Tuple[
+        Extent, Dimension]:
+        co = mesh.coordinates
+        x_min, x_max, y_min, y_max, z_min, z_max = (
+            int(indices[0]), int(indices[1]), int(indices[2]), int(indices[3]), int(indices[4]),
+            int(indices[5]))
+        co_x_min, co_x_max, co_y_min, co_y_max, co_z_min, co_z_max = (
+            co['x'][x_min], co['x'][x_max], co['y'][y_min],
+            co['y'][y_max], co['z'][z_min], co['z'][z_max])
+        dimension = Dimension(x_max - x_min, y_max - y_min, z_max - z_min)
+
+        ext = [co_x_min, co_x_max,
+               (co_x_max - co_x_min) / dimension.x if dimension.x else 1,
+               co_y_min, co_y_max,
+               (co_y_max - co_y_min) / dimension.y if dimension.y else 1,
+               co_z_min, co_z_max,
+               (co_z_max - co_z_min) / dimension.z if dimension.z else 1]
+        extent = Extent(*ext)
+        return extent, dimension
 
     def clear_cache(self, clear_persistent_cache=False):
         """Remove all data from the internal cache that has been loaded so far to free memory.

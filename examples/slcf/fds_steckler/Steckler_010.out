@@ -1,0 +1,781 @@
+
+ Fire Dynamics Simulator
+
+ Current Date     : January 19, 2021  07:06:47
+ Revision         : FDS6.7.5-0-g71f025606-release
+ Revision Date    : Thu Aug 20 16:19:01 2020 -0400
+ Compiler         : Intel ifort 19.1.1.216
+ Compilation Date : Fri 08/21/2020  04:51 PM
+
+ MPI Enabled;    Number of MPI Processes:       1
+ OpenMP Enabled; Number of OpenMP Threads:      4
+
+ MPI version: 3.1
+ MPI library version: Intel(R) MPI Library 2019 Update 7 for Windows* OS
+
+
+ Job TITLE        : Steckler Compartment, Test 10
+ Job ID string    : Steckler_010
+
+
+ Grid Dimensions, Mesh     1
+
+   Cells in the X Direction            36
+   Cells in the Y Direction            28
+   Cells in the Z Direction            22
+   Number of Grid Cells             22176
+
+
+ Physical Dimensions, Mesh     1
+
+   Length (m)                       3.600
+   Width  (m)                       2.800
+   Height (m)                       2.130
+   Initial Time Step (s)            0.107
+
+Total Number of Grid Cells         22176
+
+
+ Miscellaneous Parameters
+
+   Time Shrink Factor (s/s)          10.0
+   Simulation Start Time (s)          0.0
+   Simulation End Time (s)          100.0
+   LES Calculation
+   Eddy Viscosity:           Deardorff Model (C_DEARDORFF = 0.10)
+   Near-wall Eddy Viscosity: Smagorinsky with Van Driest damping (C_SMAGORINSKY = 0.20)
+   Turbulent Prandtl Number:         0.50
+   Turbulent Schmidt Number:         0.50
+   Ambient Temperature (C):         22.00
+
+
+ Mass Fraction Transformation Matrix to Convert Species Mixtures (Columns) to Primitive Species (Rows)
+
+                         AIR       METHANE   PRODUCTS
+   METHANE               0.000000  1.000000  0.000000
+   NITROGEN              0.761877  0.000000  0.720206
+   OXYGEN                0.230818  0.000000  0.000000
+   CARBON DIOXIDE        0.000591  0.000000  0.150605
+   CARBON MONOXIDE       0.000000  0.000000  0.000000
+   WATER VAPOR           0.006714  0.000000  0.129189
+   SOOT                  0.000000  0.000000  0.000000
+   HYDROGEN              0.000000  0.000000  0.000000
+
+
+ Primitive Species Information
+
+   METHANE
+   Gas Species
+   Molecular Weight (g/mol)            16.04246
+   Ambient Density (kg/m^3)            0.662
+   Enthalpy of Formation (J/kg)       -4.67E+06
+
+   NITROGEN
+   Gas Species
+   Molecular Weight (g/mol)            28.01340
+   Ambient Density (kg/m^3)            1.157
+   Enthalpy of Formation (J/kg)        0.00E+00
+
+   OXYGEN
+   Gas Species
+   Molecular Weight (g/mol)            31.99880
+   Ambient Density (kg/m^3)            1.321
+   Enthalpy of Formation (J/kg)        0.00E+00
+
+   CARBON DIOXIDE
+   Gas Species
+   Molecular Weight (g/mol)            44.00950
+   Ambient Density (kg/m^3)            1.817
+   Enthalpy of Formation (J/kg)       -8.94E+06
+
+   CARBON MONOXIDE
+   Gas Species
+   Molecular Weight (g/mol)            28.01010
+   Ambient Density (kg/m^3)            1.157
+   Enthalpy of Formation (J/kg)       -3.95E+06
+
+   WATER VAPOR
+   Gas Species
+   Molecular Weight (g/mol)            18.01528
+   Ambient Density (kg/m^3)            0.744
+   Enthalpy of Formation (J/kg)       -1.34E+07
+
+   SOOT
+   Gas Species
+   Molecular Weight (g/mol)            10.91042
+   Ambient Density (kg/m^3)            0.450
+   Enthalpy of Formation (J/kg)        0.00E+00
+
+   HYDROGEN
+   Gas Species
+   Molecular Weight (g/mol)             2.01588
+   Ambient Density (kg/m^3)            0.083
+   Enthalpy of Formation (J/kg)        0.00E+00
+
+
+ Tracked (Lumped) Species Information
+
+   AIR
+   Molecular Weight (g/mol)            28.73867
+   Ambient Density (kg/m^3)            1.187
+   Initial Mass Fraction               1.000
+   Enthalpy of Formation (J/kg)     -9.54E+04
+
+   Sub Species                    Mass Fraction     Mole Fraction
+   NITROGEN                       7.618773E-01      7.816024E-01
+   OXYGEN                         2.308178E-01      2.073015E-01
+   CARBON DIOXIDE                 5.910052E-04      3.859327E-04
+   WATER VAPOR                    6.713888E-03      1.071025E-02
+ 
+     Viscosity (kg/m/s) Ambient,  295 K:  1.80E-05
+                                  500 K:  2.61E-05
+                                 1000 K:  4.12E-05
+                                 1500 K:  5.37E-05
+   Therm. Cond. (W/m/K) Ambient,  295 K:  2.57E-02
+                                  500 K:  3.81E-02
+                                 1000 K:  6.69E-02
+                                 1500 K:  9.25E-02
+        Enthalpy (J/kg) Ambient,  295 K: -9.85E+04
+                                  500 K:  1.12E+05
+                                 1000 K:  6.62E+05
+                                 1500 K:  1.26E+06
+    Spec. Heat (J/kg/K) Ambient,  295 K:  1.02E+03
+                                  500 K:  1.04E+03
+                                 1000 K:  1.16E+03
+                                 1500 K:  1.23E+03
+   Diff. Coeff. (m^2/s) Ambient,  295 K:  2.01E-05
+                                  500 K:  4.96E-05
+                                 1000 K:  1.58E-04
+                                 1500 K:  3.10E-04
+
+   METHANE
+   Molecular Weight (g/mol)            16.04246
+   Ambient Density (kg/m^3)            0.662
+   Initial Mass Fraction               0.000
+   Enthalpy of Formation (J/kg)     -4.67E+06
+
+   Sub Species                    Mass Fraction     Mole Fraction
+   METHANE                        1.000000E+00      1.000000E+00
+ 
+     Viscosity (kg/m/s) Ambient,  295 K:  1.10E-05
+                                  500 K:  1.68E-05
+                                 1000 K:  2.73E-05
+                                 1500 K:  3.56E-05
+   Therm. Cond. (W/m/K) Ambient,  295 K:  3.49E-02
+                                  500 K:  6.96E-02
+                                 1000 K:  1.79E-01
+                                 1500 K:  2.88E-01
+        Enthalpy (J/kg) Ambient,  295 K: -4.66E+06
+                                  500 K: -4.14E+06
+                                 1000 K: -2.24E+06
+                                 1500 K:  3.48E+05
+    Spec. Heat (J/kg/K) Ambient,  295 K:  2.22E+03
+                                  500 K:  2.90E+03
+                                 1000 K:  4.59E+03
+                                 1500 K:  5.66E+03
+   Diff. Coeff. (m^2/s) Ambient,  295 K:  2.17E-05
+                                  500 K:  5.44E-05
+                                 1000 K:  1.75E-04
+                                 1500 K:  3.43E-04
+
+   PRODUCTS
+   Molecular Weight (g/mol)            27.54629
+   Ambient Density (kg/m^3)            1.137
+   Initial Mass Fraction               0.000
+   Enthalpy of Formation (J/kg)     -3.08E+06
+
+   Sub Species                    Mass Fraction     Mole Fraction
+   NITROGEN                       7.202063E-01      7.081972E-01
+   CARBON DIOXIDE                 1.506045E-01      9.426593E-02
+   CARBON MONOXIDE                0.000000E+00      0.000000E+00
+   WATER VAPOR                    1.291892E-01      1.975369E-01
+   SOOT                           0.000000E+00      0.000000E+00
+ 
+     Viscosity (kg/m/s) Ambient,  295 K:  1.61E-05
+                                  500 K:  2.37E-05
+                                 1000 K:  3.89E-05
+                                 1500 K:  5.15E-05
+   Therm. Cond. (W/m/K) Ambient,  295 K:  2.36E-02
+                                  500 K:  3.62E-02
+                                 1000 K:  6.76E-02
+                                 1500 K:  9.76E-02
+        Enthalpy (J/kg) Ambient,  295 K: -3.08E+06
+                                  500 K: -2.85E+06
+                                 1000 K: -2.23E+06
+                                 1500 K: -1.54E+06
+    Spec. Heat (J/kg/K) Ambient,  295 K:  1.12E+03
+                                  500 K:  1.17E+03
+                                 1000 K:  1.32E+03
+                                 1500 K:  1.43E+03
+   Diff. Coeff. (m^2/s) Ambient,  295 K:  1.99E-05
+                                  500 K:  5.00E-05
+                                 1000 K:  1.62E-04
+                                 1500 K:  3.19E-04
+
+
+ Gas Phase Reaction Information
+
+   Fuel                                           Heat of Combustion (kJ/kg)
+   METHANE                                                        50010.3475
+
+   Stoichiometry
+
+   Primitive Species Stoich. Coeff.
+   Species ID                                                          Molar
+   METHANE                                                         -1.000000
+   NITROGEN                                                         0.000000
+   OXYGEN                                                          -2.000000
+   CARBON DIOXIDE                                                   1.000000
+   WATER VAPOR                                                      2.000000
+
+   Tracked (Lumped) Species Stoich. Coeff.
+   Species ID                                             Molar         Mass
+   AIR                                                -9.647786   -17.283168
+   METHANE                                            -1.000000    -1.000000
+   PRODUCTS                                           10.647786    18.283168
+
+   Reaction Kinetics
+
+   Arrhenius Parameters
+   Pre-exponential:    Infinite
+   Activation Energy:  N/A
+
+   ODE Solver:  EXPLICIT EULER
+   Extinction Model:  EXTINCTION 2
+   Auto-Ignition Temperature (K):       0.0
+   Critical Flame Temperature (K):   1780.2
+
+
+ Material Information
+
+   1 INSULATION                                                  
+     Emissivity                      0.900
+     Density (kg/m3)                 200.0
+     Specific Heat (kJ/kg/K)      1.00E-01
+     Conductivity (W/m/K)          1.00E-01
+
+
+ Surface Conditions
+
+   0 INERT
+
+   1 BURNER
+     Wall or Vent Temperature (C)   100.0
+     HRR Per Unit Area (kW/m2)       1048.3
+     METHANE Mass Flux (kg/s/m2)   2.10E-02
+
+   2 FIBER BOARD (DEFAULT)
+     Material List
+          1  INSULATION
+     Layer  1
+        Thickness   (m):  0.01300
+        Density (kg/m3):   200.00
+        INSULATION, Mass fraction:    1.00
+     Total surface density     2.600 kg/m2
+     Reaction products considered from the first  0.50 layers.
+     Solid Phase Node, Layer, Coordinates(m):
+                    0      1       0.0000000
+                    1      1       0.0021667
+                    2      1       0.0065000
+                    3      1       0.0108333
+                    4      1       0.0130000
+     Exposed Backing
+
+   3 OPEN
+     Passive Vent to Atmosphere
+
+   4 MIRROR
+     Symmetry Plane
+
+   5 INTERPOLATED
+
+   6 PERIODIC
+
+   7 HVAC
+
+   8 MASSLESS TRACER
+
+   9 DROPLET
+
+  10 EVACUATION_OUTFLOW
+     Normal Velocity (m/s)         0.000
+
+  11 MASSLESS TARGET
+
+  12 PERIODIC FLOW ONLY
+
+
+ Device Coordinates
+
+     1 Coords:      2.500000      1.100000      0.020000, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+     2 Coords:      2.500000      1.100000      0.068605, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+     3 Coords:      2.500000      1.100000      0.117209, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+     4 Coords:      2.500000      1.100000      0.165814, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+     5 Coords:      2.500000      1.100000      0.214419, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+     6 Coords:      2.500000      1.100000      0.263023, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+     7 Coords:      2.500000      1.100000      0.311628, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+     8 Coords:      2.500000      1.100000      0.360233, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+     9 Coords:      2.500000      1.100000      0.408837, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    10 Coords:      2.500000      1.100000      0.457442, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    11 Coords:      2.500000      1.100000      0.506047, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    12 Coords:      2.500000      1.100000      0.554651, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    13 Coords:      2.500000      1.100000      0.603256, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    14 Coords:      2.500000      1.100000      0.651860, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    15 Coords:      2.500000      1.100000      0.700465, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    16 Coords:      2.500000      1.100000      0.749070, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    17 Coords:      2.500000      1.100000      0.797674, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    18 Coords:      2.500000      1.100000      0.846279, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    19 Coords:      2.500000      1.100000      0.894884, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    20 Coords:      2.500000      1.100000      0.943488, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    21 Coords:      2.500000      1.100000      0.992093, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    22 Coords:      2.500000      1.100000      1.040698, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    23 Coords:      2.500000      1.100000      1.089302, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    24 Coords:      2.500000      1.100000      1.137907, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    25 Coords:      2.500000      1.100000      1.186512, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    26 Coords:      2.500000      1.100000      1.235116, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    27 Coords:      2.500000      1.100000      1.283721, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    28 Coords:      2.500000      1.100000      1.332326, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    29 Coords:      2.500000      1.100000      1.380930, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    30 Coords:      2.500000      1.100000      1.429535, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    31 Coords:      2.500000      1.100000      1.478140, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    32 Coords:      2.500000      1.100000      1.526744, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    33 Coords:      2.500000      1.100000      1.575349, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    34 Coords:      2.500000      1.100000      1.623953, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    35 Coords:      2.500000      1.100000      1.672558, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    36 Coords:      2.500000      1.100000      1.721163, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    37 Coords:      2.500000      1.100000      1.769767, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    38 Coords:      2.500000      1.100000      1.818372, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    39 Coords:      2.500000      1.100000      1.866977, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    40 Coords:      2.500000      1.100000      1.915581, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    41 Coords:      2.500000      1.100000      1.964186, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    42 Coords:      2.500000      1.100000      2.012791, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    43 Coords:      2.500000      1.100000      2.061395, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    44 Coords:      2.500000      1.100000      2.110000, Make: null, ID: TC_Room, Quantity: TEMPERATURE
+    45 Coords:      2.850000      0.000000      0.020000, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    46 Coords:      2.850000      0.000000      0.068649, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    47 Coords:      2.850000      0.000000      0.117297, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    48 Coords:      2.850000      0.000000      0.165946, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    49 Coords:      2.850000      0.000000      0.214595, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    50 Coords:      2.850000      0.000000      0.263243, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    51 Coords:      2.850000      0.000000      0.311892, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    52 Coords:      2.850000      0.000000      0.360541, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    53 Coords:      2.850000      0.000000      0.409189, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    54 Coords:      2.850000      0.000000      0.457838, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    55 Coords:      2.850000      0.000000      0.506486, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    56 Coords:      2.850000      0.000000      0.555135, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    57 Coords:      2.850000      0.000000      0.603784, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    58 Coords:      2.850000      0.000000      0.652432, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    59 Coords:      2.850000      0.000000      0.701081, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    60 Coords:      2.850000      0.000000      0.749730, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    61 Coords:      2.850000      0.000000      0.798378, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    62 Coords:      2.850000      0.000000      0.847027, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    63 Coords:      2.850000      0.000000      0.895676, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    64 Coords:      2.850000      0.000000      0.944324, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    65 Coords:      2.850000      0.000000      0.992973, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    66 Coords:      2.850000      0.000000      1.041622, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    67 Coords:      2.850000      0.000000      1.090270, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    68 Coords:      2.850000      0.000000      1.138919, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    69 Coords:      2.850000      0.000000      1.187568, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    70 Coords:      2.850000      0.000000      1.236216, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    71 Coords:      2.850000      0.000000      1.284865, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    72 Coords:      2.850000      0.000000      1.333514, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    73 Coords:      2.850000      0.000000      1.382162, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    74 Coords:      2.850000      0.000000      1.430811, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    75 Coords:      2.850000      0.000000      1.479459, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    76 Coords:      2.850000      0.000000      1.528108, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    77 Coords:      2.850000      0.000000      1.576757, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    78 Coords:      2.850000      0.000000      1.625405, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    79 Coords:      2.850000      0.000000      1.674054, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    80 Coords:      2.850000      0.000000      1.722703, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    81 Coords:      2.850000      0.000000      1.771351, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    82 Coords:      2.850000      0.000000      1.820000, Make: null, ID: TC_Door, Quantity: TEMPERATURE
+    83 Coords:      2.850000      0.000000      0.020000, Make: null, ID: BP_Door, Quantity: VELOCITY
+    84 Coords:      2.850000      0.000000      0.068649, Make: null, ID: BP_Door, Quantity: VELOCITY
+    85 Coords:      2.850000      0.000000      0.117297, Make: null, ID: BP_Door, Quantity: VELOCITY
+    86 Coords:      2.850000      0.000000      0.165946, Make: null, ID: BP_Door, Quantity: VELOCITY
+    87 Coords:      2.850000      0.000000      0.214595, Make: null, ID: BP_Door, Quantity: VELOCITY
+    88 Coords:      2.850000      0.000000      0.263243, Make: null, ID: BP_Door, Quantity: VELOCITY
+    89 Coords:      2.850000      0.000000      0.311892, Make: null, ID: BP_Door, Quantity: VELOCITY
+    90 Coords:      2.850000      0.000000      0.360541, Make: null, ID: BP_Door, Quantity: VELOCITY
+    91 Coords:      2.850000      0.000000      0.409189, Make: null, ID: BP_Door, Quantity: VELOCITY
+    92 Coords:      2.850000      0.000000      0.457838, Make: null, ID: BP_Door, Quantity: VELOCITY
+    93 Coords:      2.850000      0.000000      0.506486, Make: null, ID: BP_Door, Quantity: VELOCITY
+    94 Coords:      2.850000      0.000000      0.555135, Make: null, ID: BP_Door, Quantity: VELOCITY
+    95 Coords:      2.850000      0.000000      0.603784, Make: null, ID: BP_Door, Quantity: VELOCITY
+    96 Coords:      2.850000      0.000000      0.652432, Make: null, ID: BP_Door, Quantity: VELOCITY
+    97 Coords:      2.850000      0.000000      0.701081, Make: null, ID: BP_Door, Quantity: VELOCITY
+    98 Coords:      2.850000      0.000000      0.749730, Make: null, ID: BP_Door, Quantity: VELOCITY
+    99 Coords:      2.850000      0.000000      0.798378, Make: null, ID: BP_Door, Quantity: VELOCITY
+   100 Coords:      2.850000      0.000000      0.847027, Make: null, ID: BP_Door, Quantity: VELOCITY
+   101 Coords:      2.850000      0.000000      0.895676, Make: null, ID: BP_Door, Quantity: VELOCITY
+   102 Coords:      2.850000      0.000000      0.944324, Make: null, ID: BP_Door, Quantity: VELOCITY
+   103 Coords:      2.850000      0.000000      0.992973, Make: null, ID: BP_Door, Quantity: VELOCITY
+   104 Coords:      2.850000      0.000000      1.041622, Make: null, ID: BP_Door, Quantity: VELOCITY
+   105 Coords:      2.850000      0.000000      1.090270, Make: null, ID: BP_Door, Quantity: VELOCITY
+   106 Coords:      2.850000      0.000000      1.138919, Make: null, ID: BP_Door, Quantity: VELOCITY
+   107 Coords:      2.850000      0.000000      1.187568, Make: null, ID: BP_Door, Quantity: VELOCITY
+   108 Coords:      2.850000      0.000000      1.236216, Make: null, ID: BP_Door, Quantity: VELOCITY
+   109 Coords:      2.850000      0.000000      1.284865, Make: null, ID: BP_Door, Quantity: VELOCITY
+   110 Coords:      2.850000      0.000000      1.333514, Make: null, ID: BP_Door, Quantity: VELOCITY
+   111 Coords:      2.850000      0.000000      1.382162, Make: null, ID: BP_Door, Quantity: VELOCITY
+   112 Coords:      2.850000      0.000000      1.430811, Make: null, ID: BP_Door, Quantity: VELOCITY
+   113 Coords:      2.850000      0.000000      1.479459, Make: null, ID: BP_Door, Quantity: VELOCITY
+   114 Coords:      2.850000      0.000000      1.528108, Make: null, ID: BP_Door, Quantity: VELOCITY
+   115 Coords:      2.850000      0.000000      1.576757, Make: null, ID: BP_Door, Quantity: VELOCITY
+   116 Coords:      2.850000      0.000000      1.625405, Make: null, ID: BP_Door, Quantity: VELOCITY
+   117 Coords:      2.850000      0.000000      1.674054, Make: null, ID: BP_Door, Quantity: VELOCITY
+   118 Coords:      2.850000      0.000000      1.722703, Make: null, ID: BP_Door, Quantity: VELOCITY
+   119 Coords:      2.850000      0.000000      1.771351, Make: null, ID: BP_Door, Quantity: VELOCITY
+   120 Coords:      2.850000      0.000000      1.820000, Make: null, ID: BP_Door, Quantity: VELOCITY
+   121 Coords:      2.500000      1.100000      1.065000, Make: null, ID: HGL Temp, Quantity: UPPER TEMPERATURE
+   122 Coords:      2.500000      1.100000      1.065000, Make: null, ID: HGL Height, Quantity: LAYER HEIGHT
+
+
+ Slice File Information, Mesh     1
+
+   Sampling Interval (s)             0.100
+
+   1 Nodes:   0  36  14  14   0  22, Quantity: TEMPERATURE
+   2 Nodes:   0  36  14  14   0  22, Quantity: U-VELOCITY
+   3 Nodes:   0  36  14  14   0  22, Quantity: V-VELOCITY
+   4 Nodes:   0  36  14  14   0  22, Quantity: W-VELOCITY
+
+
+ Radiation Model Information
+
+   Number of control angles  104
+   Time step increment         3
+   Angle increment             5
+   Theta band N_phi   Solid angle
+     1:        4     0.120
+     2:       12     0.114
+     3:       16     0.127
+     4:       20     0.120
+     5:       20     0.120
+     6:       16     0.127
+     7:       12     0.114
+     8:        4     0.120
+   Using gray gas absorption.
+   Mean beam length  0.100 m
+ 
+ 
+
+ Run Time Diagnostics
+
+       Time Step       1   January 19, 2021  07:06:47
+       Step Size:    0.107E+00 s, Total Time:       0.11 s
+       Pressure Iterations:      1
+       Maximum Velocity Error:  0.22E-02 on Mesh   1 at (  28  23  23)
+       Maximum Pressure Error:  0.20E+01 on Mesh   1 at (  15  15   1)
+       ---------------------------------------------------------------
+       Max CFL number:  0.28E-01 at (  15,  15,   1)
+       Max divergence:  0.28E-01 at (  14,  15,   1)
+       Min divergence: -0.11E-05 at (  34,  17,  12)
+       Max VN number:   0.16E-01 at (  15,  13,   9)
+       Radiation Loss to Boundaries:         0.006 kW
+ 
+       Time Step       2   January 19, 2021  07:06:47
+       Step Size:    0.107E+00 s, Total Time:       0.21 s
+       Pressure Iterations:      1
+       Maximum Velocity Error:  0.97E-02 on Mesh   1 at (  14  29   1)
+       Maximum Pressure Error:  0.44E+03 on Mesh   1 at (  15  14   1)
+       ---------------------------------------------------------------
+       Max CFL number:  0.44E-01 at (  15,  15,   1)
+       Max divergence:  0.14E+02 at (  15,  14,   1)
+       Min divergence: -0.11E-05 at (  34,  17,  12)
+       Max VN number:   0.16E-01 at (  15,  13,   9)
+       Total Heat Release Rate:             22.029 kW
+       Radiation Loss to Boundaries:         0.006 kW
+ 
+       Time Step       3   January 19, 2021  07:06:47
+       Step Size:    0.107E+00 s, Total Time:       0.32 s
+       Pressure Iterations:      1
+       Maximum Velocity Error:  0.11E-01 on Mesh   1 at (  14  29   1)
+       Maximum Pressure Error:  0.55E+02 on Mesh   1 at (  16  15   1)
+       ---------------------------------------------------------------
+       Max CFL number:  0.82E+00 at (  14,  15,   1)
+       Max divergence:  0.10E+02 at (  15,  14,   1)
+       Min divergence: -0.11E-05 at (  34,  17,  12)
+       Max VN number:   0.19E+00 at (  15,  14,   2)
+       Total Heat Release Rate:             34.456 kW
+       Radiation Loss to Boundaries:        -4.483 kW
+ 
+       Time Step       4   January 19, 2021  07:06:47
+       Step Size:    0.696E-01 s, Total Time:       0.39 s
+       Pressure Iterations:      4
+       Maximum Velocity Error:  0.44E-02 on Mesh   1 at (  14   0   1)
+       Maximum Pressure Error:  0.17E+04 on Mesh   1 at (  14  14   1)
+       ---------------------------------------------------------------
+       Max CFL number:  0.85E+00 at (  15,  14,   2)
+       Max divergence:  0.16E+01 at (  16,  13,   1)
+       Min divergence: -0.85E+01 at (  15,  14,   1)
+       Max VN number:   0.16E+00 at (  15,  14,   2)
+       Total Heat Release Rate:             31.106 kW
+       Radiation Loss to Boundaries:       -41.290 kW
+ 
+       Time Step       5   January 19, 2021  07:06:47
+       Step Size:    0.567E-01 s, Total Time:       0.45 s
+       Pressure Iterations:      1
+       Maximum Velocity Error:  0.57E-02 on Mesh   1 at (  29  13   1)
+       Maximum Pressure Error:  0.52E+03 on Mesh   1 at (  14  14   1)
+       ---------------------------------------------------------------
+       Max CFL number:  0.87E+00 at (  15,  14,   1)
+       Max divergence:  0.37E+01 at (  16,  15,   1)
+       Min divergence: -0.10E+01 at (  15,  15,   1)
+       Max VN number:   0.68E-01 at (  15,  14,   2)
+       Total Heat Release Rate:             10.654 kW
+       Radiation Loss to Boundaries:        -2.099 kW
+ 
+       Time Step       6   January 19, 2021  07:06:47
+       Step Size:    0.567E-01 s, Total Time:       0.50 s
+       Pressure Iterations:      1
+       Maximum Velocity Error:  0.38E-02 on Mesh   1 at (  29  12   1)
+       Maximum Pressure Error:  0.11E+03 on Mesh   1 at (  16  14   1)
+       ---------------------------------------------------------------
+       Max CFL number:  0.46E+00 at (  16,  15,   1)
+       Max divergence:  0.32E+01 at (  16,  15,   1)
+       Min divergence: -0.58E+00 at (  15,  14,   1)
+       Max VN number:   0.10E+00 at (  15,  14,   2)
+       Total Heat Release Rate:              8.952 kW
+       Radiation Loss to Boundaries:        -2.084 kW
+ 
+       Time Step       7   January 19, 2021  07:06:47
+       Step Size:    0.624E-01 s, Total Time:       0.57 s
+       Pressure Iterations:      1
+       Maximum Velocity Error:  0.36E-02 on Mesh   1 at (  14  29   1)
+       Maximum Pressure Error:  0.10E+02 on Mesh   1 at (  15  15   3)
+       ---------------------------------------------------------------
+       Max CFL number:  0.58E+00 at (  16,  15,   1)
+       Max divergence:  0.33E+01 at (  16,  14,   1)
+       Min divergence: -0.21E+00 at (  15,  14,   1)
+       Max VN number:   0.15E+00 at (  14,  15,   2)
+       Total Heat Release Rate:              8.778 kW
+       Radiation Loss to Boundaries:        -1.381 kW
+ 
+       Time Step       8   January 19, 2021  07:06:47
+       Step Size:    0.686E-01 s, Total Time:       0.64 s
+       Pressure Iterations:      1
+       Maximum Velocity Error:  0.69E-02 on Mesh   1 at (  14   0   1)
+       Maximum Pressure Error:  0.14E+03 on Mesh   1 at (  14  14   1)
+       ---------------------------------------------------------------
+       Max CFL number:  0.91E+00 at (  14,  15,   2)
+       Max divergence:  0.16E+02 at (  14,  14,   1)
+       Min divergence: -0.77E+00 at (  15,  14,   3)
+       Max VN number:   0.24E+00 at (  15,  15,   3)
+       Total Heat Release Rate:             18.541 kW
+       Radiation Loss to Boundaries:        -1.984 kW
+ 
+       Time Step       9   January 19, 2021  07:06:48
+       Step Size:    0.287E-01 s, Total Time:       0.66 s
+       Pressure Iterations:      1
+       Maximum Velocity Error:  0.91E-02 on Mesh   1 at (  14  29   1)
+       Maximum Pressure Error:  0.24E+03 on Mesh   1 at (  14  15   2)
+       ---------------------------------------------------------------
+       Max CFL number:  0.73E+00 at (  14,  14,   1)
+       Max divergence:  0.21E+02 at (  14,  15,   1)
+       Min divergence: -0.96E+00 at (  15,  14,   3)
+       Max VN number:   0.16E+00 at (  14,  14,   2)
+       Total Heat Release Rate:             27.612 kW
+       Radiation Loss to Boundaries:        -3.197 kW
+ 
+       Time Step      10   January 19, 2021  07:06:48
+       Step Size:    0.316E-01 s, Total Time:       0.70 s
+       Pressure Iterations:      1
+       Maximum Velocity Error:  0.48E-02 on Mesh   1 at (  14   0   1)
+       Maximum Pressure Error:  0.15E+04 on Mesh   1 at (  14  15   1)
+       ---------------------------------------------------------------
+       Max CFL number:  0.83E+00 at (  14,  15,   1)
+       Max divergence:  0.63E+01 at (  15,  15,   2)
+       Min divergence: -0.14E+01 at (  14,  14,   3)
+       Max VN number:   0.22E+00 at (  14,  15,   2)
+       Total Heat Release Rate:             25.211 kW
+       Radiation Loss to Boundaries:        -6.346 kW
+ 
+       Time Step      20   January 19, 2021  07:06:49
+       Step Size:    0.172E-01 s, Total Time:       0.93 s
+       Pressure Iterations:      1
+       Maximum Velocity Error:  0.87E-02 on Mesh   1 at (   1   1  23)
+       Maximum Pressure Error:  0.37E+03 on Mesh   1 at (  14  15   7)
+       ---------------------------------------------------------------
+       Max CFL number:  0.88E+00 at (  14,  14,   6)
+       Max divergence:  0.11E+02 at (  14,  15,   1)
+       Min divergence: -0.26E+01 at (  14,  14,   7)
+       Max VN number:   0.30E+00 at (  14,  14,   6)
+       Total Heat Release Rate:             69.977 kW
+       Radiation Loss to Boundaries:       -15.360 kW
+ 
+       Time Step      30   January 19, 2021  07:06:50
+       Step Size:    0.128E-01 s, Total Time:       1.07 s
+       Pressure Iterations:      1
+       Maximum Velocity Error:  0.50E-02 on Mesh   1 at (  14  15  23)
+       Maximum Pressure Error:  0.41E+03 on Mesh   1 at (  14  15  11)
+       ---------------------------------------------------------------
+       Max CFL number:  0.94E+00 at (  15,  15,  10)
+       Max divergence:  0.11E+02 at (  14,  15,   1)
+       Min divergence: -0.39E+01 at (  14,  15,  10)
+       Max VN number:   0.30E+00 at (  15,  14,   9)
+       Total Heat Release Rate:             51.261 kW
+       Radiation Loss to Boundaries:        -6.564 kW
+ 
+       Time Step      40   January 19, 2021  07:06:51
+       Step Size:    0.113E-01 s, Total Time:       1.19 s
+       Pressure Iterations:      1
+       Maximum Velocity Error:  0.44E-02 on Mesh   1 at (  15  14  23)
+       Maximum Pressure Error:  0.44E+03 on Mesh   1 at (  15  15  14)
+       ---------------------------------------------------------------
+       Max CFL number:  0.88E+00 at (  15,  14,  13)
+       Max divergence:  0.10E+02 at (  14,  15,   1)
+       Min divergence: -0.42E+01 at (  15,  14,  14)
+       Max VN number:   0.31E+00 at (  15,  14,  13)
+       Total Heat Release Rate:             41.620 kW
+       Radiation Loss to Boundaries:        -5.439 kW
+ 
+       Time Step      50   January 19, 2021  07:06:52
+       Step Size:    0.113E-01 s, Total Time:       1.30 s
+       Pressure Iterations:      1
+       Maximum Velocity Error:  0.24E-01 on Mesh   1 at (  15  14  23)
+       Maximum Pressure Error:  0.12E+04 on Mesh   1 at (  14  15   1)
+       ---------------------------------------------------------------
+       Max CFL number:  0.87E+00 at (  15,  14,  17)
+       Max divergence:  0.19E+02 at (  14,  14,   1)
+       Min divergence: -0.38E+01 at (  15,  14,  18)
+       Max VN number:   0.32E+00 at (  15,  14,  17)
+       Total Heat Release Rate:             45.917 kW
+       Radiation Loss to Boundaries:        -6.235 kW
+ 
+       Time Step      60   January 19, 2021  07:06:52
+       Step Size:    0.113E-01 s, Total Time:       1.42 s
+       Pressure Iterations:      2
+       Maximum Velocity Error:  0.33E-01 on Mesh   1 at (  14  15  23)
+       Maximum Pressure Error:  0.16E+04 on Mesh   1 at (  14  14   1)
+       ---------------------------------------------------------------
+       Max CFL number:  0.77E+00 at (  14,  14,  21)
+       Max divergence:  0.90E+01 at (  15,  14,   2)
+       Min divergence: -0.26E+01 at (  15,  15,  21)
+       Max VN number:   0.41E+00 at (  15,  15,  22)
+       Total Heat Release Rate:             41.177 kW
+       Radiation Loss to Boundaries:        -7.092 kW
+ 
+       Time Step      70   January 19, 2021  07:06:53
+       Step Size:    0.137E-01 s, Total Time:       1.55 s
+       Pressure Iterations:      2
+       Maximum Velocity Error:  0.22E-01 on Mesh   1 at (  12  14  23)
+       Maximum Pressure Error:  0.87E+03 on Mesh   1 at (  14  14   1)
+       ---------------------------------------------------------------
+       Max CFL number:  0.92E+00 at (  14,  15,  20)
+       Max divergence:  0.14E+02 at (  14,  14,   1)
+       Min divergence: -0.19E+01 at (  14,  14,   6)
+       Max VN number:   0.44E+00 at (  16,  14,  22)
+       Total Heat Release Rate:             49.127 kW
+       Radiation Loss to Boundaries:        -7.357 kW
+ 
+       Time Step      80   January 19, 2021  07:06:54
+       Step Size:    0.165E-01 s, Total Time:       1.70 s
+       Pressure Iterations:      2
+       Maximum Velocity Error:  0.28E-01 on Mesh   1 at (  14  15  23)
+       Maximum Pressure Error:  0.21E+03 on Mesh   1 at (  14  14   1)
+       ---------------------------------------------------------------
+       Max CFL number:  0.79E+00 at (  15,  15,  18)
+       Max divergence:  0.94E+01 at (  14,  14,   1)
+       Min divergence: -0.19E+01 at (  14,  14,   4)
+       Max VN number:   0.46E+00 at (  14,  13,  22)
+       Total Heat Release Rate:             46.826 kW
+       Radiation Loss to Boundaries:        -7.682 kW
+ 
+       Time Step      90   January 19, 2021  07:06:55
+       Step Size:    0.182E-01 s, Total Time:       1.88 s
+       Pressure Iterations:      2
+       Maximum Velocity Error:  0.12E-01 on Mesh   1 at (  17  14  23)
+       Maximum Pressure Error:  0.22E+03 on Mesh   1 at (  15  14   3)
+       ---------------------------------------------------------------
+       Max CFL number:  0.93E+00 at (  16,  14,   8)
+       Max divergence:  0.10E+02 at (  14,  15,   1)
+       Min divergence: -0.34E+01 at (  14,  14,   6)
+       Max VN number:   0.48E+00 at (  16,  14,  22)
+       Total Heat Release Rate:             55.779 kW
+       Radiation Loss to Boundaries:       -11.030 kW
+ 
+       Time Step     100   January 19, 2021  07:06:56
+       Step Size:    0.182E-01 s, Total Time:       2.07 s
+       Pressure Iterations:      2
+       Maximum Velocity Error:  0.16E-01 on Mesh   1 at (  13  13  23)
+       Maximum Pressure Error:  0.16E+03 on Mesh   1 at (  15  14   4)
+       ---------------------------------------------------------------
+       Max CFL number:  0.96E+00 at (  16,  14,  10)
+       Max divergence:  0.11E+02 at (  14,  14,   1)
+       Min divergence: -0.41E+01 at (  15,  14,   8)
+       Max VN number:   0.47E+00 at (  14,  14,  22)
+       Total Heat Release Rate:             63.314 kW
+       Radiation Loss to Boundaries:       -12.121 kW
+ 
+       Time Step     200   January 19, 2021  07:07:09
+       Step Size:    0.168E-01 s, Total Time:       3.62 s
+       Pressure Iterations:      2
+       Maximum Velocity Error:  0.19E-01 on Mesh   1 at (  16  15  23)
+       Maximum Pressure Error:  0.79E+02 on Mesh   1 at (  15  12   8)
+       ---------------------------------------------------------------
+       Max CFL number:  0.77E+00 at (  16,  15,  13)
+       Max divergence:  0.89E+01 at (  14,  15,   1)
+       Min divergence: -0.22E+01 at (  15,  14,   5)
+       Max VN number:   0.60E+00 at (  14,  14,  22)
+       Total Heat Release Rate:             40.750 kW
+       Radiation Loss to Boundaries:        -7.143 kW
+ 
+       Time Step     300   January 19, 2021  07:07:18
+       Step Size:    0.168E-01 s, Total Time:       5.25 s
+       Pressure Iterations:      2
+       Maximum Velocity Error:  0.13E-01 on Mesh   1 at (  14  14  23)
+       Maximum Pressure Error:  0.18E+03 on Mesh   1 at (  15  14   2)
+       ---------------------------------------------------------------
+       Max CFL number:  0.90E+00 at (  14,  14,   9)
+       Max divergence:  0.97E+01 at (  14,  15,   1)
+       Min divergence: -0.18E+01 at (  16,  14,  15)
+       Max VN number:   0.45E+00 at (  17,  16,  22)
+       Total Heat Release Rate:             47.386 kW
+       Radiation Loss to Boundaries:        -8.080 kW
+ 
+       Time Step     400   January 19, 2021  07:07:28
+       Step Size:    0.154E-01 s, Total Time:       6.88 s
+       Pressure Iterations:      2
+       Maximum Velocity Error:  0.96E-02 on Mesh   1 at (  14  15  23)
+       Maximum Pressure Error:  0.15E+03 on Mesh   1 at (  16  15  10)
+       ---------------------------------------------------------------
+       Max CFL number:  0.89E+00 at (  16,  15,  10)
+       Max divergence:  0.11E+02 at (  14,  14,   1)
+       Min divergence: -0.18E+01 at (  15,  15,   5)
+       Max VN number:   0.44E+00 at (  16,  15,  22)
+       Total Heat Release Rate:             37.587 kW
+       Radiation Loss to Boundaries:        -6.167 kW
+ 
+       Time Step     500   January 19, 2021  07:07:38
+       Step Size:    0.167E-01 s, Total Time:       8.55 s
+       Pressure Iterations:      2
+       Maximum Velocity Error:  0.14E-01 on Mesh   1 at (  13  15  23)
+       Maximum Pressure Error:  0.76E+02 on Mesh   1 at (  14  16  18)
+       ---------------------------------------------------------------
+       Max CFL number:  0.88E+00 at (  14,  16,  18)
+       Max divergence:  0.95E+01 at (  14,  14,   1)
+       Min divergence: -0.29E+01 at (  15,  15,   6)
+       Max VN number:   0.44E+00 at (  15,  14,  22)
+       Total Heat Release Rate:             45.358 kW
+       Radiation Loss to Boundaries:        -8.002 kW
+ 
+       Time Step     586   January 19, 2021  07:07:46
+       Step Size:    0.108E-01 s, Total Time:      10.00 s
+       Pressure Iterations:      1
+       Maximum Velocity Error:  0.33E-01 on Mesh   1 at (  16  16  23)
+       Maximum Pressure Error:  0.32E+03 on Mesh   1 at (  14  15   1)
+       ---------------------------------------------------------------
+       Max CFL number:  0.64E+00 at (  16,  14,  10)
+       Max divergence:  0.11E+02 at (  14,  14,   1)
+       Min divergence: -0.22E+01 at (  15,  15,   5)
+       Max VN number:   0.28E+00 at (  17,  15,  22)
+       Total Heat Release Rate:             52.788 kW
+       Radiation Loss to Boundaries:        -9.678 kW
+ 
+
+
+ Time Stepping Wall Clock Time (s):       59.176
+ Total Elapsed Wall Clock Time (s):       61.679
+
+STOP: FDS completed successfully (CHID: Steckler_010)

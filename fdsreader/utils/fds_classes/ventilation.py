@@ -6,8 +6,7 @@ from fdsreader.utils import Surface, Extent, Mesh
 class SubVentilation:
     """Part of a :class:`Ventilation`.
 
-    :ivar extent: Tuple with three tuples containing minimum and maximum coordinate value on the
-        corresponding dimension together forming a cuboid.
+    :ivar extent: :class:`Extent` object containing 3-dimensional extent information.
     :ivar mesh: The mesh that contains this part of the ventilation.
     """
 
@@ -23,8 +22,7 @@ class Ventilation:
         rectangular patch on a solid surface.
 
     :ivar id: ID of the ventilation.
-    :ivar extent: Tuple with three tuples containing minimum and maximum coordinate value on the
-     corresponding dimension.
+    :ivar extent: :class:`Extent` object containing 3-dimensional extent information.
     :ivar surface: Surface object used for the ventilation.
     :ivar bound_indices: Indices used to define ventilation bounds in terms of mesh locations.
     :ivar color_index: Type of coloring used to color ventilation.
