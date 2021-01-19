@@ -708,6 +708,7 @@ Total Number of Grid Cells         22176
        Total Heat Release Rate:             63.314 kW
        Radiation Loss to Boundaries:       -12.121 kW
  
+<<<<<<< HEAD
        Time Step     200   January 19, 2021  07:07:09
        Step Size:    0.168E-01 s, Total Time:       3.62 s
        Pressure Iterations:      2
@@ -779,3 +780,5 @@ Total Number of Grid Cells         22176
  Total Elapsed Wall Clock Time (s):       61.679
 
 STOP: FDS completed successfully (CHID: Steckler_010)
+=======
+>>>>>>> e4cbd32a74b7adfc84cf740b32dba956d6c1e3c4

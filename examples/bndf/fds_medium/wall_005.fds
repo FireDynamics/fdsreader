@@ -1,6 +1,10 @@
 &HEAD CHID='wall_test'
       /
+<<<<<<< HEAD
 &TIME T_END=0.1
+=======
+&TIME T_END=20
+>>>>>>> e4cbd32a74b7adfc84cf740b32dba956d6c1e3c4
 
 &MULT ID='mesh', DX=1, DY=0.8, I_UPPER=3, J_UPPER=5,/
 
@@ -26,18 +30,31 @@
 &SURF ID='Boden', MATL_ID='Stahlbeton',THICKNESS=0.2, BACKING="EXPOSED"/
 
 /Boden
+<<<<<<< HEAD
 /&OBST XB=-1,2,-1.2,2.4,-0.1,0, SURF_ID='Boden'/
+=======
+&OBST XB=-1,2,-1.2,2.4,-0.1,0, SURF_ID='Boden'/ 
+>>>>>>> e4cbd32a74b7adfc84cf740b32dba956d6c1e3c4
 
 /Decke
 &OBST XB=-1,2,-1.2,2.4,3,3.2, SURF_ID='Boden'/ 
 
 /Wand rechts
+<<<<<<< HEAD
 /&OBST XB=-0.85,-0.8,-1,2.4,0,3, SURF_ID='wall'/
 
 /Wand vorne
 /&OBST XB=-1,2,-1.2,-1,0,3, SURF_ID='wall'/
 
 /&OBST ID='Golf_brandfläche' XB= -0.3,1.1,0.4,1.7,0.4,0.45 /
+=======
+&OBST XB=-0.85,-0.8,-1,2.4,0,3, SURF_ID='wall'/ 
+
+/Wand vorne
+&OBST XB=-1,2,-1.2,-1,0,3, SURF_ID='wall'/ 
+
+&OBST ID='Golf_brandfläche' XB= -0.3,1.1,0.4,1.7,0.4,0.45 /
+>>>>>>> e4cbd32a74b7adfc84cf740b32dba956d6c1e3c4
 
 /Brand	
 &SPEC ID='PUR', LUMPED_COMPONENT_ONLY=.FALSE., FORMULA='C4.837353H7.917138N0.427652O1.745690' /
@@ -86,7 +103,11 @@
 	  SPEC_ID(17)='XYLENE', VOLUME_FRACTION(17)=0.000123/      
 
 
+<<<<<<< HEAD
 /&VENT XB=-0.3,1.1,0.4,1.7,0.45,0.45 SURF_ID='Brandfläche'/
+=======
+&VENT XB=-0.3,1.1,0.4,1.7,0.45,0.45 SURF_ID='Brandfläche'/
+>>>>>>> e4cbd32a74b7adfc84cf740b32dba956d6c1e3c4
 &REAC ID='Brandfläche', FUEL='PUR', SPEC_ID_NU = 'PUR','AIR','PRODUCTS', NU= -1,-4.043567,1./
 &SURF ID='Brandfläche',SPEC_ID='PUR', HRRPUA=2823.129, COLOR='RED', RAMP_Q='fire_ramp'/
 
@@ -114,6 +135,25 @@
 &SLCF PBZ=2, QUANTITY='TEMPERATURE', CELL_CENTERED=.TRUE./
 &SLCF PBZ=3, QUANTITY='TEMPERATURE', CELL_CENTERED=.TRUE./
 
+<<<<<<< HEAD
+=======
+/Mess-Punkt
+
+&PROF XYZ=-0.8,   0,1.5, QUANTITY='TEMPERATURE', IOR= 1 /
+&PROF XYZ=-0.8, 0.5,1.5, QUANTITY='TEMPERATURE', IOR= 1 /
+&PROF XYZ=-0.8,-0.5,1.5, QUANTITY='TEMPERATURE', IOR= 1 /
+
+
+
+&PROF XYZ=-0.8,   0,1, QUANTITY='TEMPERATURE', IOR= 1 /
+&PROF XYZ=-0.8, 0.5,1, QUANTITY='TEMPERATURE', IOR= 1 /
+&PROF XYZ=-0.8,-0.5,1, QUANTITY='TEMPERATURE', IOR= 1 /
+
+&PROF XYZ=-0.8,   0,0.5, QUANTITY='TEMPERATURE', IOR= 1 /
+&PROF XYZ=-0.8, 0.5,0.5, QUANTITY='TEMPERATURE', IOR= 1 /
+&PROF XYZ=-0.8,-0.5,0.5, QUANTITY='TEMPERATURE', IOR= 1 /
+
+>>>>>>> e4cbd32a74b7adfc84cf740b32dba956d6c1e3c4
 
 /Wall Temperature
 
