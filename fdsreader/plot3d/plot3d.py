@@ -45,7 +45,8 @@ class SubPlot3D:
             with open(self.file_path, 'rb') as infile:
                 dtype_data = fdtype.new((('f', self.mesh.extent.size(cell_centered=False) * 5),))
                 infile.seek(self._offset)
-                self._data = fdtype.read(infile, dtype_data, 1)[0][0].reshape(self.mesh.dimension.shape + (5,))
+                self._data = fdtype.read(infile, dtype_data, 1)[0][0].reshape(
+                    self.mesh.dimension.shape + (5,), order='F')
         return self._data
 
     def clear_cache(self):

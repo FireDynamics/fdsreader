@@ -189,7 +189,6 @@ class Simulation:
 
         for tmp in temp_data:
             line = smv_file.readline().strip().split()
-            # Todo: What does bound index mean?
             bound_indices = (int(float(line[0])), int(float(line[1])), int(float(line[2])),
                              int(float(line[3])), int(float(line[4])), int(float(line[5])))
             color_index = int(line[6])
@@ -365,14 +364,19 @@ class Simulation:
 
         patches = dict()
 
+        times = list()
+        with open(file_path + ".bnd", 'r') as bnd_file:
+            for line in bnd_file:
+                times.append(float(line.split()[0]))
+        times = np.array(times)
+        t_n = times.shape[0]
+
         with open(file_path, 'rb') as infile:
             # Offset of the binary file to the end of the file header.
             offset = 3 * fdtype.new((('c', 30),)).itemsize
             infile.seek(offset)
 
             n_patches = fdtype.read(infile, fdtype.INT, 1)[0][0][0]
-
-            # print(n_patches)
 
             dtype_patches = fdtype.new((('i', 9),))
             patch_infos = fdtype.read(infile, dtype_patches, n_patches)
@@ -381,35 +385,22 @@ class Simulation:
             patch_offset = fdtype.FLOAT.itemsize + fdtype.PRE_BORDER.itemsize
             for patch_info in patch_infos:
                 patch_info = patch_info[0]
-                # print(patch_info)
-                extent, dimension = self._indices_to_extent(patch_infos[:6], mesh)
+                extent, dimension = self._indices_to_extent(patch_info[:6], mesh)
                 orientation = patch_info[6]
-
                 obst_id = patch_info[7]
-
-                # print(obst_id)
+                # Skip obstacles with ID 0, which just gives the extent of the (whole) mesh faces
                 if obst_id == 0:
-                    print("Obst-Id:", obst_id)
                     continue
-
                 if obst_id not in patches:
                     patches[obst_id] = list()
-                # print(extent)
                 p = Patch(file_path, dimension, extent, orientation, cell_centered,
-                          patch_offset + offset)
+                          patch_offset + offset, t_n)
                 patches[obst_id].append(p)
                 patch_offset += np.dtype(fdtype.new_raw((('f', str(p.shape)),))).itemsize
 
-            times = list()
-            with open(file_path + ".bnd", 'r') as bnd_file:
-                for line in bnd_file:
-                    times.append(float(line.split()[0]))
-            times = np.array(times)
-            t_n = times.shape[0]
-
         for obst_id, p in patches.items():
             for patch in p:
-                patch._post_init(t_n, patch_offset)
+                patch._post_init(patch_offset)
             self.obstructions[obst_id]._add_patches(bid, cell_centered, quantity, label, unit, mesh,
                                                     p, times, t_n)
 
@@ -479,7 +470,7 @@ class Simulation:
         co_x_min, co_x_max, co_y_min, co_y_max, co_z_min, co_z_max = (
             co['x'][x_min], co['x'][x_max], co['y'][y_min],
             co['y'][y_max], co['z'][z_min], co['z'][z_max])
-        dimension = Dimension(x_max - x_min, y_max - y_min, z_max - z_min)
+        dimension = Dimension(x_max - x_min + 1, y_max - y_min + 1, z_max - z_min + 1)
 
         ext = [co_x_min, co_x_max,
                (co_x_max - co_x_min) / dimension.x if dimension.x else 1,

@@ -1,6 +1,6 @@
 from functools import reduce
 from operator import mul
-from typing import Tuple
+from typing import Tuple, List
 
 from typing_extensions import Literal
 
@@ -42,8 +42,25 @@ class Dimension:
         return reduce(mul, self.shape(cell_centered))
 
     def shape(self, cell_centered=False) -> Tuple[int, int, int]:
-        c = 0 if cell_centered else 1
+        c = -1 if cell_centered else 0
         x = self.x + c if self.x != 0 else 1
         y = self.y + c if self.y != 0 else 1
         z = self.z + c if self.z != 0 else 1
         return x, y, z
+
+    def as_tuple(self) -> Tuple:
+        """Gives the dimension in tuple notation (without empty extents).
+        """
+        if self.x == 0:
+            return self.y, self.z
+        elif self.y == 0:
+            return self.x, self.z
+        elif self.z == 0:
+            return self.x, self.y
+        else:
+            return self.x, self.y, self.z
+
+    def as_list(self) -> List:
+        """Gives the dimension in list notation (without empty extents).
+        """
+        return list(self.as_tuple())

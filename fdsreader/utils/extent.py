@@ -1,6 +1,6 @@
 from functools import reduce
 from operator import mul
-from typing import Tuple
+from typing import Tuple, List
 
 from typing_extensions import Literal
 
@@ -95,3 +95,20 @@ class Extent:
         """Gives the absolute extent in z-direction.
         """
         return self._extents[2][1]
+
+    def as_tuple(self) -> Tuple:
+        """Gives the extent in tuple notation (without empty extents).
+        """
+        if self.x_start == self.x_end:
+            return self.y_start, self.y_end, self.z_start, self.z_end
+        elif self.y_start == self.y_end:
+            return self.x_start, self.x_end, self.z_start, self.z_end
+        elif self.z_start == self.z_end:
+            return self.x_start, self.x_end, self.y_start, self.y_end
+        else:
+            return self.x_start, self.x_end, self.y_start, self.y_end, self.z_start, self.z_end
+
+    def as_list(self) -> List:
+        """Gives the extent in list notation (without empty extents).
+        """
+        return list(self.as_tuple())
