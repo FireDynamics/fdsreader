@@ -86,6 +86,14 @@ class Simulation:
                         self.fds_version = smv_file.readline().strip()
                     elif keyword == "CHID":
                         self.chid = smv_file.readline().strip()
+                    elif keyword == "CSVF":
+                        type_line = smv_file.readline().strip()
+                        if type_line == "hrr":
+                            self.hrr = self._load_HRR_data(smv_file)
+                        elif type_line == "steps":
+                            self.steps = self._load_step_data(smv_file)
+                        elif type == "devc":
+                            self.devc = self._load_DEVC_data(smv_file)
                     elif keyword == "HRRPUVCUT":
                         self.hrrpuv_cutoff = float(smv_file.readline().strip())
                     elif keyword == "TOFFSET":
@@ -104,13 +112,16 @@ class Simulation:
                     elif "BND" in keyword:
                         self._load_boundary_data(smv_file, keyword)
 
+                self.cpu = self._load_CPU_data()
+
             # POST INIT (post read)
             self.out_file_path = os.path.join(self.root_path, self.chid + ".out")
             for obst in self.obstructions.values():
                 obst._post_init()
             # Combine the gathered temporary information into data collections
             self.slices = SliceCollection(
-                Slice(self.root_path, slice_data[0]["cell_centered"], slice_data[0]["times"], slice_data[1:]) for slice_data
+                Slice(self.root_path, slice_data[0]["cell_centered"], slice_data[0]["times"],
+                      slice_data[1:]) for slice_data
                 in self.slices.values())
             self.data_3d = Plot3DCollection(self.data_3d.keys(), self.data_3d.values())
             self.isosurfaces = IsosurfaceCollection(self.isosurfaces.values())
@@ -177,15 +188,15 @@ class Simulation:
         n = int(smv_file.readline().strip())
         for _ in range(n):
             line = smv_file.readline().strip().split()
-            extents = [float(line[i]) for i in range(6)]
+            ext = [float(line[i]) for i in range(6)]
             obst_id = int(line[6])
 
             side_surfaces = tuple(self.surfaces[int(line[i]) - 1] for i in range(7, 13))
             if len(line) > 13:
                 texture_origin = (float(line[13]), float(line[14]), float(line[15]))
-                temp_data.append((obst_id, extents, side_surfaces, texture_origin))
+                temp_data.append((obst_id, Extent(*ext), side_surfaces, texture_origin))
             else:
-                temp_data.append((obst_id, extents, side_surfaces))
+                temp_data.append((obst_id, Extent(*ext), side_surfaces))
 
         for tmp in temp_data:
             line = smv_file.readline().strip().split()
@@ -199,19 +210,16 @@ class Simulation:
                 rgba = ()
 
             if len(tmp) == 4:
-                obst_id, extents, side_surfaces, texture_origin = tmp
+                obst_id, extent, side_surfaces, texture_origin = tmp
             else:
-                obst_id, extents, side_surfaces = tmp
+                obst_id, extent, side_surfaces = tmp
                 texture_origin = self.default_texture_origin
 
             if obst_id not in self.obstructions:
                 self.obstructions[obst_id] = Obstruction(obst_id, side_surfaces, bound_indices,
                                                          color_index, block_type,
                                                          texture_origin, rgba=rgba)
-            extents.insert(2, bound_indices[1] - bound_indices[0])
-            extents.insert(5, bound_indices[3] - bound_indices[2])
-            extents.insert(8, bound_indices[5] - bound_indices[4])
-            self.obstructions[obst_id]._extents[mesh] = Extent(*extents)
+            self.obstructions[obst_id]._extents[mesh] = extent
 
     def _load_vents(self, smv_file: TextIO, mesh: Mesh):
         line = smv_file.readline().split()
@@ -237,28 +245,25 @@ class Simulation:
 
         texture_origin = ()
         for _ in range(n - n_dummies):
-            line, extents, vent_id, surface = read_common_info()
+            line, ext, vent_id, surface = read_common_info()
             texture_origin = (float(line[8]), float(line[9]), float(line[10]))
-            temp_data.append((extents, vent_id, surface, texture_origin))
+            temp_data.append((Extent(*ext), vent_id, surface, texture_origin))
 
         for _ in range(n_dummies):
             _, extents, vent_id, surface = read_common_info()
-            temp_data.append((extents, vent_id, surface))
+            temp_data.append((Extent(*ext), vent_id, surface))
 
         for v in range(n):
             if v < n - n_dummies:
-                extents, vent_id, surface, texture_origin = temp_data[v]
+                extent, vent_id, surface, texture_origin = temp_data[v]
             else:
-                extents, vent_id, surface = temp_data[v]
+                extent, vent_id, surface = temp_data[v]
             bound_indices, color_index, draw_type, rgba = read_common_info2()
             if vent_id not in self.ventilations:
                 self.ventilations[vent_id] = Ventilation(vent_id, surface, bound_indices,
                                                          color_index, draw_type, rgba=rgba,
                                                          texture_origin=texture_origin)
-            extents.insert(2, bound_indices[1] - bound_indices[0])
-            extents.insert(5, bound_indices[3] - bound_indices[2])
-            extents.insert(8, bound_indices[5] - bound_indices[4])
-            self.ventilations[vent_id]._add_subventilation(mesh, Extent(*extents))
+            self.ventilations[vent_id]._add_subventilation(mesh, extent)
 
         smv_file.readline()
         assert "CVENT" in smv_file.readline()
@@ -365,10 +370,17 @@ class Simulation:
         patches = dict()
 
         times = list()
+        lower_bounds = list()
+        upper_bounds = list()
         with open(file_path + ".bnd", 'r') as bnd_file:
             for line in bnd_file:
-                times.append(float(line.split()[0]))
+                splits = line.split()
+                times.append(float(splits[0]))
+                lower_bounds.append(float(splits[1]))
+                upper_bounds.append(float(splits[2]))
         times = np.array(times)
+        lower_bounds = np.array(times, dtype=np.float32)
+        upper_bounds = np.array(times, dtype=np.float32)
         t_n = times.shape[0]
 
         with open(file_path, 'rb') as infile:
@@ -380,29 +392,32 @@ class Simulation:
 
             dtype_patches = fdtype.new((('i', 9),))
             patch_infos = fdtype.read(infile, dtype_patches, n_patches)
-
             offset += fdtype.INT.itemsize + dtype_patches.itemsize * n_patches
-            patch_offset = fdtype.FLOAT.itemsize + fdtype.PRE_BORDER.itemsize
+            patch_offset = fdtype.FLOAT.itemsize
+            cell_centered = False
             for patch_info in patch_infos:
                 patch_info = patch_info[0]
                 extent, dimension = self._indices_to_extent(patch_info[:6], mesh)
                 orientation = patch_info[6]
                 obst_id = patch_info[7]
-                # Skip obstacles with ID 0, which just gives the extent of the (whole) mesh faces
-                if obst_id == 0:
-                    continue
-                if obst_id not in patches:
-                    patches[obst_id] = list()
+                if orientation == 3 and obst_id != 0:
+                    print(obst_id, extent)
                 p = Patch(file_path, dimension, extent, orientation, cell_centered,
                           patch_offset + offset, t_n)
-                patches[obst_id].append(p)
-                patch_offset += np.dtype(fdtype.new_raw((('f', str(p.shape)),))).itemsize
+
+                # Skip obstacles with ID 0, which just gives the extent of the (whole) mesh faces
+                # These might be needed in case of "closed" mesh faces
+                if obst_id != 0:
+                    if obst_id not in patches:
+                        patches[obst_id] = list()
+                    patches[obst_id].append(p)
+                patch_offset += fdtype.new((('f', str(p.shape)),)).itemsize
 
         for obst_id, p in patches.items():
             for patch in p:
                 patch._post_init(patch_offset)
             self.obstructions[obst_id]._add_patches(bid, cell_centered, quantity, label, unit, mesh,
-                                                    p, times, t_n)
+                                                    p, times, t_n, lower_bounds, upper_bounds)
 
     def _load_data_3d(self, smv_file: TextIO, line: str):
         """Loads the plot3d at current pointer position.
@@ -461,6 +476,41 @@ class Simulation:
                                                       double_quantity, quantity, label, unit)
             self.isosurfaces[iso_id]._add_subsurface(self.meshes[mesh_index], iso_filename)
 
+    def _register_device(self, smv_file: TextIO):
+        pass
+
+    def _load_DEVC_data(self, smv_file: TextIO) -> Dict[str, np.ndarray]:
+        pass
+        # Wie soll die Datenstruktur bei Lines sein? Soll ein Device mit allen Punkten der Line
+        # erzeugt werden oder einzelne Devices für jeden Punkt? Sollen Devices mit Lines anders
+        # gespeichert werden als Devices die nur aus einem Punkt bestehen?
+        # Kann man bei XB auch mehr als eine Dimension auffüllen lassen? Hat man dann NxN Punkte?
+
+    def _load_HRR_data(self, smv_file: TextIO) -> Dict[str, np.ndarray]:
+        return self._load_CSV_file(smv_file.readline().strip())
+
+    def _load_step_data(self, smv_file: TextIO) -> Dict[str, np.ndarray]:
+        return self._load_CSV_file(smv_file.readline().strip())
+
+    def _load_CSV_file(self, filename) -> Dict[str, np.ndarray]:
+        file_path = os.path.join(self.root_path, filename)
+        with open(file_path, 'r') as infile:
+            infile.readline()
+            keys = infile.readline().split(',')
+            data = np.genfromtxt(infile, delimiter=',')
+            return {keys[i].strip(): data[i, :] for i in range(data.shape[0])}
+
+    def _load_CPU_data(self) -> Dict[str, float]:
+        file_path = os.path.join(self.root_path, self.chid + "_cpu.csv")
+        if os.path.exists(file_path):
+            with open(file_path, 'r') as infile:
+                keys = infile.readline().split(",")
+                values = infile.readline().split(",")
+                return {keys[i].strip(): float(values[i].strip()) for i in range(len(keys))}
+
+    def load_Line_data(self):
+        return
+
     def _indices_to_extent(self, indices: Sequence[Union[int, str]], mesh: Mesh) -> Tuple[
         Extent, Dimension]:
         co = mesh.coordinates
@@ -472,13 +522,7 @@ class Simulation:
             co['y'][y_max], co['z'][z_min], co['z'][z_max])
         dimension = Dimension(x_max - x_min + 1, y_max - y_min + 1, z_max - z_min + 1)
 
-        ext = [co_x_min, co_x_max,
-               (co_x_max - co_x_min) / dimension.x if dimension.x else 1,
-               co_y_min, co_y_max,
-               (co_y_max - co_y_min) / dimension.y if dimension.y else 1,
-               co_z_min, co_z_max,
-               (co_z_max - co_z_min) / dimension.z if dimension.z else 1]
-        extent = Extent(*ext)
+        extent = Extent(co_x_min, co_x_max, co_y_min, co_y_max, co_z_min, co_z_max)
         return extent, dimension
 
     def clear_cache(self, clear_persistent_cache=False):

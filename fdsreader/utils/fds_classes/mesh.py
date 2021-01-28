@@ -30,9 +30,8 @@ class Mesh:
             coordinates['z'].size - 1 if coordinates['z'].size - 1 > 1 else 0)
 
         self.n_size = self.dimension.size()
-        self.extent = Extent(extents['x'][0], extents['x'][1], self.dimension['x'],
-                             extents['y'][0], extents['y'][1], self.dimension['y'],
-                             extents['z'][0], extents['z'][1], self.dimension['z'])
+        self.extent = Extent(extents['x'][0], extents['x'][1], extents['y'][0], extents['y'][1],
+                             extents['z'][0], extents['z'][1])
 
     def __getitem__(self, dimension: Literal[0, 1, 2, 'x', 'y', 'z']) -> np.ndarray:
         """Get all values in given dimension.

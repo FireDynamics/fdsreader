@@ -11,26 +11,21 @@ class Extent:
 
     def __init__(self, *args, skip_dimension: Literal['x', 1, 'y', 2, 'z', 3, ''] = ''):
         self._extents = list()
-        self._step_sizes = list()
 
-        if len(args) % 3 != 0:
+        if len(args) % 2 != 0:
             ValueError("An invalid number of arguments were passed to the constructor.")
-        for i in range(0, len(args), 3):
+        for i in range(0, len(args), 2):
             self._extents.append((float(args[i]), float(args[i + 1])))
-            self._step_sizes.append(float(args[i + 2]))
 
         if skip_dimension in ('x', 1):
             self._extents.insert(0, (0, 0))
-            self._step_sizes.insert(0, 0)
         elif skip_dimension in ('y', 2):
             self._extents.insert(1, (0, 0))
-            self._step_sizes.insert(1, 0)
         elif skip_dimension in ('z', 3):
             self._extents.append((0, 0))
-            self._step_sizes.append(0)
 
     def __eq__(self, other):
-        return self._extents == other._extents and self._step_sizes == other._step_sizes
+        return self._extents == other._extents
 
     def __repr__(self, *args, **kwargs):
         return "Extent([{:.2f}, {:.2f}] x [{:.2f}, {:.2f}] x [{:.2f}, {:.2f}])".format(self.x_start, self.x_end,
@@ -41,24 +36,6 @@ class Extent:
         if type(dimension) == int:
             dimension = ('x', 'y', 'z')[dimension]
         return self.__dict__[dimension]
-
-    @property
-    def x(self):
-        """Gives the number of data points in x-direction (end is inclusive).
-        """
-        return round((self._extents[0][1] - self._extents[0][0]) / self._step_sizes[0]) + 1
-
-    @property
-    def y(self):
-        """Gives the number of data points in y-direction (end is inclusive).
-        """
-        return round((self._extents[1][1] - self._extents[1][0]) / self._step_sizes[0]) + 1
-
-    @property
-    def z(self):
-        """Gives the number of data points in z-direction (end is inclusive).
-        """
-        return round((self._extents[2][1] - self._extents[2][0]) / self._step_sizes[0]) + 1
 
     @property
     def x_start(self):
@@ -96,19 +73,23 @@ class Extent:
         """
         return self._extents[2][1]
 
-    def as_tuple(self) -> Tuple:
+    def as_tuple(self, reduced=True) -> Tuple:
         """Gives the extent in tuple notation (without empty extents).
-        """
-        if self.x_start == self.x_end:
-            return self.y_start, self.y_end, self.z_start, self.z_end
-        elif self.y_start == self.y_end:
-            return self.x_start, self.x_end, self.z_start, self.z_end
-        elif self.z_start == self.z_end:
-            return self.x_start, self.x_end, self.y_start, self.y_end
-        else:
-            return self.x_start, self.x_end, self.y_start, self.y_end, self.z_start, self.z_end
 
-    def as_list(self) -> List:
-        """Gives the extent in list notation (without empty extents).
+        :param reduced: Whether to leave out empty extents or not.
         """
-        return list(self.as_tuple())
+        if reduced:
+            if self.x_start == self.x_end:
+                return self.y_start, self.y_end, self.z_start, self.z_end
+            elif self.y_start == self.y_end:
+                return self.x_start, self.x_end, self.z_start, self.z_end
+            elif self.z_start == self.z_end:
+                return self.x_start, self.x_end, self.y_start, self.y_end
+        return self.x_start, self.x_end, self.y_start, self.y_end, self.z_start, self.z_end
+
+    def as_list(self, reduced:True) -> List:
+        """Gives the extent in list notation (without empty extents).
+
+        :param reduced: Whether to leave out empty extents or not.
+        """
+        return list(self.as_tuple(reduced))

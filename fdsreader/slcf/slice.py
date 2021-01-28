@@ -155,11 +155,11 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
 
         vals = self._subslices.values()
         self.extent = Extent(min(vals, key=lambda e: e.extent.x_start).extent.x_start,
-                             max(vals, key=lambda e: e.extent.x_end).extent.x_end, 0,
+                             max(vals, key=lambda e: e.extent.x_end).extent.x_end,
                              min(vals, key=lambda e: e.extent.y_start).extent.y_start,
-                             max(vals, key=lambda e: e.extent.y_end).extent.y_end, 0,
+                             max(vals, key=lambda e: e.extent.y_end).extent.y_end,
                              min(vals, key=lambda e: e.extent.z_start).extent.z_start,
-                             max(vals, key=lambda e: e.extent.z_end).extent.z_end, 0)
+                             max(vals, key=lambda e: e.extent.z_end).extent.z_end)
 
         if self.extent.x_start == self.extent.x_end:
             self.orientation = 1

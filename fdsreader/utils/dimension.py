@@ -17,11 +17,11 @@ class Dimension:
         dimensions = list(args)
 
         if skip_dimension in ('x', 1):
-            dimensions.insert(0, 0)
+            dimensions.insert(0, 1)
         elif skip_dimension in ('y', 2):
-            dimensions.insert(1, 0)
+            dimensions.insert(1, 1)
         elif skip_dimension in ('z', 3):
-            dimensions.append(0)
+            dimensions.append(1)
 
         self.x = dimensions[0]
         self.y = dimensions[1]
@@ -41,26 +41,36 @@ class Dimension:
     def size(self, cell_centered=False):
         return reduce(mul, self.shape(cell_centered))
 
-    def shape(self, cell_centered=False) -> Tuple[int, int, int]:
+    def shape(self, cell_centered=False) -> Tuple:
+        """Method to get the actual number of data points per dimension.
+        """
+        s = list()
         c = -1 if cell_centered else 0
-        x = self.x + c if self.x != 0 else 1
-        y = self.y + c if self.y != 0 else 1
-        z = self.z + c if self.z != 0 else 1
-        return x, y, z
+        if self.x != 1:
+            s.append(self.x + c)
+        if self.y != 1:
+            s.append(self.y + c)
+        if self.z != 1:
+            s.append(self.z + c)
+        return tuple(s)
 
-    def as_tuple(self) -> Tuple:
-        """Gives the dimension in tuple notation (without empty extents).
+    def as_tuple(self, reduced=True) -> Tuple:
+        """Gives the dimensions in tuple notation (optionally without empty dimensions).
+
+        :param reduced: Whether to leave out empty dimensions (size of 1) or not.
         """
-        if self.x == 0:
-            return self.y, self.z
-        elif self.y == 0:
-            return self.x, self.z
-        elif self.z == 0:
-            return self.x, self.y
-        else:
-            return self.x, self.y, self.z
+        if reduced:
+            if self.x == 1:
+                return self.y, self.z
+            elif self.y == 1:
+                return self.x, self.z
+            elif self.z == 1:
+                return self.x, self.y
+        return self.x, self.y, self.z
 
-    def as_list(self) -> List:
+    def as_list(self, reduced=True) -> List:
         """Gives the dimension in list notation (without empty extents).
+
+        :param reduced: Whether to leave out empty dimensions (size of 1) or not.
         """
-        return list(self.as_tuple())
+        return list(self.as_tuple(reduced))

@@ -33,14 +33,6 @@ class Patch:
         """Convenience function to calculate the shape of the array containing data for this patch.
         """
         return self.dimension.shape(self.cell_centered)
-        # Todo: Check this
-        if abs(self.orientation) == 1:
-            dim = tuple(map(add, self.dimension.shape(self.cell_centered), (0, 2, 2)))
-        elif abs(self.orientation) == 2:
-            dim = tuple(map(add, self.dimension.shape(self.cell_centered), (2, 0, 2)))
-        else:
-            dim = tuple(map(add, self.dimension.shape(self.cell_centered), (2, 2, 0)))
-        return dim
 
     def _post_init(self, time_offset: int):
         """Fully initialize the patch as soon as the number of timesteps is known.
@@ -53,17 +45,12 @@ class Patch:
         """
         if not hasattr(self, "_data"):
             self._data = np.empty((self.t_n,) + self.shape)
-            dtype_data = np.dtype(fdtype.new_raw((('f', str(self.shape)),)))
+            dtype_data = fdtype.new((('f', str(self.shape)),))
             with open(self.file_path, 'rb') as infile:
                 for t in range(self.t_n):
                     infile.seek(self.initial_offset + t * self.time_offset)
-                    d = np.fromfile(infile, dtype_data, 1)
-                    # print(t, d.shape)
-                    if d.shape[0] == 0:
-                        # Todo: There is one shape with less available time data, why?
-                        print(t, d.shape, self.orientation, self.time_offset)
-                        continue
-                    self._data[t, :] = d.reshape(d.shape, order='F')
+                    self._data[t, :] = np.fromfile(infile, dtype_data, 1)[0][1].reshape(self.shape,
+                                                                                        order='F')
         return self._data
 
     def clear_cache(self):
@@ -77,10 +64,13 @@ class Patch:
 
 
 class Boundary:
-    def __init__(self, cell_centered: bool, quantity: Quantity, times: np.ndarray, t_n: int):
+    def __init__(self, cell_centered: bool, quantity: Quantity, times: np.ndarray, t_n: int,
+                 lower_bounds: np.ndarray, upper_bounds: np.ndarray):
         self.cell_centered = cell_centered
         self.quantity = quantity
         self.times = times
+        self.lower_bounds = lower_bounds
+        self.upper_bounds = upper_bounds
         self.t_n = t_n
         self.extent = None
 
@@ -142,37 +132,24 @@ class Boundary:
                 patches_for_face[patch.orientation].append(patch)
 
         self._faces: Dict[Literal[-3, -2, -1, 1, 2, 3], np.ndarray] = dict()
-        for face in (-3, -2, -1, 1, 2, 3):
+        # for face in (-3, -2, -1, 1, 2, 3):
+        for face in (3,):
             patches = self.sort_patches_cartesian(patches_for_face[face])
-            # print(face, patches)
             if len(patches) == 0:
                 continue
 
-            if abs(face) == 1:
-                dim1 = 1
-                dim2 = 2
-            elif abs(face) == 2:
-                dim1 = 0
-                dim2 = 2
-            else:
-                dim1 = 0
-                dim2 = 1
-
-            shape_dim1 = sum([patch_row[0].shape[dim1] for patch_row in patches])
-            shape_dim2 = sum([patch.shape[dim2] for patch in patches[0]])
+            shape_dim1 = sum([patch_row[0].shape[0] for patch_row in patches])
+            shape_dim2 = sum([patch.shape[1] for patch in patches[0]])
             self._faces[face] = np.ndarray(shape=(self.t_n, shape_dim1, shape_dim2))
-
+            # print(patches)
             dim1_pos = 0
             dim2_pos = 0
             for patch_row in patches:
-                d1 = patch_row[0].shape[dim1]
+                d1 = patch_row[0].shape[0]
                 for patch in patch_row:
-                    d2 = patch.shape[dim2]
-                    try:
-                        self._faces[face][:, dim1_pos:dim1_pos + d1, dim2_pos:dim2_pos + d2] = np.squeeze(
-                        patch.data)
-                    except ValueError as e:
-                        print(dim1_pos,dim1_pos+d1, dim2_pos, dim2_pos+d2, patch.shape, patch_row)
+                    d2 = patch.shape[1]
+                    self._faces[face][:, dim1_pos:dim1_pos + d1,
+                    dim2_pos:dim2_pos + d2] = patch.data
                     dim2_pos += d2
                 dim1_pos += d1
                 dim2_pos = 0
@@ -231,17 +208,18 @@ class Obstruction:
     def _post_init(self):
         vals = self._extents.values()
         self.extent = Extent(
-            min(vals, key=lambda e: e.x_start).x_start, max(vals, key=lambda e: e.x_end).x_end, 0,
-            min(vals, key=lambda e: e.y_start).y_start, max(vals, key=lambda e: e.y_end).y_end, 0,
-            min(vals, key=lambda e: e.z_start).z_start, max(vals, key=lambda e: e.z_end).z_end, 0)
+            min(vals, key=lambda e: e.x_start).x_start, max(vals, key=lambda e: e.x_end).x_end,
+            min(vals, key=lambda e: e.y_start).y_start, max(vals, key=lambda e: e.y_end).y_end,
+            min(vals, key=lambda e: e.z_start).z_start, max(vals, key=lambda e: e.z_end).z_end)
         for boundary in self._boundary_data.values():
             boundary.extent = self.extent
 
     def _add_patches(self, bid: int, cell_centered: bool, quantity: str, label: str, unit: str,
-                     mesh: Mesh, patches: List[Patch], times: np.ndarray, t_n: int):
+                     mesh: Mesh, patches: List[Patch], times: np.ndarray, t_n: int,
+                     lower_bounds: np.ndarray, upper_bounds: np.ndarray):
         if bid not in self._boundary_data:
             self._boundary_data[bid] = Boundary(cell_centered, Quantity(quantity, label, unit),
-                                                times, t_n)
+                                                times, t_n, lower_bounds, upper_bounds)
         self._boundary_data[bid]._add_patches(mesh, patches)
 
         if not settings.LAZY_LOAD:
