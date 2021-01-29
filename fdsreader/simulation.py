@@ -99,6 +99,8 @@ class Simulation:
                     elif keyword == "TOFFSET":
                         offsets = smv_file.readline().strip().split()
                         self.default_texture_origin = tuple(float(offsets[i]) for i in range(3))
+                    elif keyword == "CLASS_OF_PARTICLES":
+                        self._load_particle_meta(smv_file)
                     elif "GRID" in keyword:
                         self.meshes.append(self._load_mesh(smv_file, keyword))
                     elif keyword == "SURFACE":
@@ -111,6 +113,8 @@ class Simulation:
                         self._load_data_3d(smv_file, keyword)
                     elif "BND" in keyword:
                         self._load_boundary_data(smv_file, keyword)
+                    elif "PRT5" in keyword:
+                        self._load_particles(smv_file, keyword)
 
                 self.cpu = self._load_CPU_data()
 
@@ -476,6 +480,12 @@ class Simulation:
                                                       double_quantity, quantity, label, unit)
             self.isosurfaces[iso_id]._add_subsurface(self.meshes[mesh_index], iso_filename)
 
+    def _load_particle_meta(self, smv_file: TextIO):
+        pass
+
+    def _load_particles(self, smv_file: TextIO, line: str):
+        pass
+
     def _register_device(self, smv_file: TextIO):
         pass
 
@@ -485,6 +495,7 @@ class Simulation:
         # erzeugt werden oder einzelne Devices für jeden Punkt? Sollen Devices mit Lines anders
         # gespeichert werden als Devices die nur aus einem Punkt bestehen?
         # Kann man bei XB auch mehr als eine Dimension auffüllen lassen? Hat man dann NxN Punkte?
+        # Wozu haben Devices eine Orientation?
 
     def _load_HRR_data(self, smv_file: TextIO) -> Dict[str, np.ndarray]:
         return self._load_CSV_file(smv_file.readline().strip())
