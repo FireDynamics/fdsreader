@@ -4,7 +4,7 @@ import numpy as np
 
 
 def main():
-    sim = Simulation("../../examples/bndf/fds_small")
+    sim = Simulation("../../examples/bndf/fds_data")
 
     quantity = sim.obstructions[1].quantities[0]
 
@@ -21,7 +21,6 @@ def main():
     if len(sim.obstructions.values()) > 1:
         fig, ax = plt.subplots(nrows=len(sim.obstructions), ncols=6)
         for i, obst in enumerate(sim.obstructions.values()):
-            print("\n", obst.id, obst.extent)
             bndf_data = obst.get_boundary_data(quantity)
             if bndf_data is None:
                 continue
@@ -41,7 +40,7 @@ def main():
     fig.subplots_adjust(right=0.8)
     cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
     fig.colorbar(im, cax=cbar_ax)
-    # plt.show()
+    plt.show()
 
 
 if __name__ == "__main__":

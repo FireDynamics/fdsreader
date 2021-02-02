@@ -1,7 +1,5 @@
 from typing import Iterable
 
-import numpy as np
-
 from fdsreader.plot3d import Plot3D
 from fdsreader.utils.data import FDSDataCollection
 

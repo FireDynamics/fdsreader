@@ -60,13 +60,13 @@ class SubSlice:
             return shape[0], shape[1]
         return shape
 
-    def _load_data(self, file_path: str, data_out: np.ndarray, t_n: int):
+    def _load_data(self, file_path: str, data_out: np.ndarray, n_t: int):
         n = self.dimension.size(cell_centered=self.parent_slice.cell_centered)
         dtype_data = fdtype.combine(fdtype.FLOAT, fdtype.new((('f', n),)))
 
         with open(file_path, 'rb') as infile:
             infile.seek(self._offset)
-            for i, data in enumerate(fdtype.read(infile, dtype_data, t_n)):
+            for i, data in enumerate(fdtype.read(infile, dtype_data, n_t)):
                 data_out[i, :] = data[1].reshape(self.shape, order='F')
 
     @property
@@ -75,11 +75,11 @@ class SubSlice:
         Method to lazy load the slice's data for a specific quantity.
         """
         if not hasattr(self, "_data"):
-            t_n = self.parent_slice.times.shape[0]
+            n_t = self.parent_slice.times.shape[0]
 
             file_path = os.path.join(self.parent_slice.root_path, self.filename)
-            self._data = np.empty((t_n,) + self.shape, dtype=np.float32)
-            self._load_data(file_path, self._data, t_n)
+            self._data = np.empty((n_t,) + self.shape, dtype=np.float32)
+            self._load_data(file_path, self._data, n_t)
         return self._data
 
     @property
@@ -87,13 +87,13 @@ class SubSlice:
         if not hasattr(self, "_vector_data"):
             raise AttributeError("There is no vector data available for this slice.")
         if len(self._vector_data) == 0:
-            t_n = self.parent_slice.times.shape[0]
+            n_t = self.parent_slice.times.shape[0]
 
             for direction in ('u', 'v', 'w'):
                 file_path = os.path.join(self.parent_slice.root_path,
                                          self.vector_filenames[direction])
-                self._vector_data[direction] = np.empty((t_n,) + self.shape, dtype=np.float32)
-                self._load_data(file_path, self._vector_data[direction], t_n)
+                self._vector_data[direction] = np.empty((n_t,) + self.shape, dtype=np.float32)
+                self._load_data(file_path, self._vector_data[direction], n_t)
         return self._vector_data
 
     def clear_cache(self):

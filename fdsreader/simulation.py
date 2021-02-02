@@ -8,12 +8,14 @@ import pickle
 from fdsreader.bndf import Obstruction, Patch
 from fdsreader.isof import Isosurface
 from fdsreader.isof.IsosurfaceCollection import IsosurfaceCollection
+from fdsreader.part import Particle
+from fdsreader.part.ParticleCollection import ParticleCollection
 from fdsreader.plot3d import Plot3D
 from fdsreader.plot3d.Plot3dCollection import Plot3DCollection
 from fdsreader.slcf import Slice
 from fdsreader.slcf.SliceCollection import SliceCollection
 from fdsreader.utils import Mesh, Dimension, Surface, Quantity, Ventilation, Extent
-from fdsreader.utils.data import create_hash, get_smv_file
+from fdsreader.utils.data import create_hash, get_smv_file, Device
 import fdsreader.utils.fortran_data as fdtype
 from fdsreader import settings
 
@@ -70,14 +72,17 @@ class Simulation:
 
             self.meshes: List[Mesh] = list()
             self.surfaces: List[Surface] = list()
-            self.obstructions: Dict[int, Obstruction] = dict()
-            self.ventilations: Dict[int, Ventilation] = dict()
+            self.obstructions: List[Obstruction] = list()
+            self.ventilations: Dict[Ventilation] = list()
 
             # First collect all meta-information for any FDS data to later combine the gathered
             # information into data collections
             self.slices = dict()
             self.data_3d = dict()
             self.isosurfaces = dict()
+            self.particles = None
+            self.devices: Dict[str, Union[Device, List[Device]]] = dict()
+            device_tmp = str()
 
             with open(self.smv_file_path, 'r') as smv_file:
                 for line in smv_file:
@@ -87,24 +92,38 @@ class Simulation:
                     elif keyword == "CHID":
                         self.chid = smv_file.readline().strip()
                     elif keyword == "CSVF":
-                        type_line = smv_file.readline().strip()
-                        if type_line == "hrr":
-                            self.hrr = self._load_HRR_data(smv_file)
-                        elif type_line == "steps":
-                            self.steps = self._load_step_data(smv_file)
-                        elif type == "devc":
-                            self.devc = self._load_DEVC_data(smv_file)
+                        csv_type = smv_file.readline().strip()
+                        filename = smv_file.readline().strip()
+                        file_path = os.path.join(self.root_path, filename)
+                        if csv_type == "hrr":
+                            self.hrr = self._load_HRR_data(file_path)
+                        elif csv_type == "steps":
+                            self.steps = self._load_step_data(file_path)
+                        elif csv_type == "devc":
+                            device_tmp = file_path
+                            self.devices["Time"] = Device(Quantity("Time", "Time", ""),
+                                                          (.0, .0, .0), (.0, .0, .0))
                     elif keyword == "HRRPUVCUT":
                         self.hrrpuv_cutoff = float(smv_file.readline().strip())
                     elif keyword == "TOFFSET":
                         offsets = smv_file.readline().strip().split()
                         self.default_texture_origin = tuple(float(offsets[i]) for i in range(3))
                     elif keyword == "CLASS_OF_PARTICLES":
-                        self._load_particle_meta(smv_file)
+                        times, particles = self._load_particle_meta(smv_file)
+                        self.particles = ParticleCollection(times, particles)
                     elif "GRID" in keyword:
                         self.meshes.append(self._load_mesh(smv_file, keyword))
                     elif keyword == "SURFACE":
                         self.surfaces.append(self._load_surface(smv_file))
+                    elif keyword == "DEVICE":
+                        name, device = self._register_device(smv_file)
+                        if name in self.devices:
+                            if type(self.devices) == list:
+                                self.devices[name].append(device)
+                            else:
+                                self.devices[name] = [self.devices[name], device]
+                        else:
+                            self.devices[name] = device
                     elif "SLC" in keyword:
                         self._load_slice(smv_file, keyword)
                     elif "ISOG" in keyword:
@@ -117,10 +136,12 @@ class Simulation:
                         self._load_particles(smv_file, keyword)
 
                 self.cpu = self._load_CPU_data()
+                if device_tmp != "":
+                    self._load_DEVC_data(device_tmp)
 
             # POST INIT (post read)
             self.out_file_path = os.path.join(self.root_path, self.chid + ".out")
-            for obst in self.obstructions.values():
+            for obst in self.obstructions:
                 obst._post_init()
             # Combine the gathered temporary information into data collections
             self.slices = SliceCollection(
@@ -129,6 +150,8 @@ class Simulation:
                 in self.slices.values())
             self.data_3d = Plot3DCollection(self.data_3d.keys(), self.data_3d.values())
             self.isosurfaces = IsosurfaceCollection(self.isosurfaces.values())
+            if self.particles is None:
+                self.particles = ParticleCollection(())
 
             if settings.ENABLE_CACHING:
                 # Hash will be saved to simulation pickle file and compared to new hash when loading
@@ -193,14 +216,14 @@ class Simulation:
         for _ in range(n):
             line = smv_file.readline().strip().split()
             ext = [float(line[i]) for i in range(6)]
-            obst_id = int(line[6])
+            obst_index = int(line[6]) - 1
 
             side_surfaces = tuple(self.surfaces[int(line[i]) - 1] for i in range(7, 13))
             if len(line) > 13:
                 texture_origin = (float(line[13]), float(line[14]), float(line[15]))
-                temp_data.append((obst_id, Extent(*ext), side_surfaces, texture_origin))
+                temp_data.append((obst_index, Extent(*ext), side_surfaces, texture_origin))
             else:
-                temp_data.append((obst_id, Extent(*ext), side_surfaces))
+                temp_data.append((obst_index, Extent(*ext), side_surfaces))
 
         for tmp in temp_data:
             line = smv_file.readline().strip().split()
@@ -214,16 +237,17 @@ class Simulation:
                 rgba = ()
 
             if len(tmp) == 4:
-                obst_id, extent, side_surfaces, texture_origin = tmp
+                obst_index, extent, side_surfaces, texture_origin = tmp
             else:
-                obst_id, extent, side_surfaces = tmp
+                obst_index, extent, side_surfaces = tmp
                 texture_origin = self.default_texture_origin
 
-            if obst_id not in self.obstructions:
-                self.obstructions[obst_id] = Obstruction(obst_id, side_surfaces, bound_indices,
-                                                         color_index, block_type,
-                                                         texture_origin, rgba=rgba)
-            self.obstructions[obst_id]._extents[mesh] = extent
+            if obst_index not in self.obstructions:
+                self.obstructions[obst_index] = Obstruction(obst_index, side_surfaces,
+                                                            bound_indices, color_index, block_type,
+                                                            texture_origin, rgba=rgba)
+            self.obstructions[obst_index]._extents[mesh] = extent
+            mesh.obstructions.append(self.obstructions[obst_index])
 
     def _load_vents(self, smv_file: TextIO, mesh: Mesh):
         line = smv_file.readline().split()
@@ -385,7 +409,7 @@ class Simulation:
         times = np.array(times)
         lower_bounds = np.array(times, dtype=np.float32)
         upper_bounds = np.array(times, dtype=np.float32)
-        t_n = times.shape[0]
+        n_t = times.shape[0]
 
         with open(file_path, 'rb') as infile:
             # Offset of the binary file to the end of the file header.
@@ -403,15 +427,14 @@ class Simulation:
                 patch_info = patch_info[0]
                 extent, dimension = self._indices_to_extent(patch_info[:6], mesh)
                 orientation = patch_info[6]
-                obst_id = patch_info[7]
-                if orientation == 3 and obst_id != 0:
-                    print(obst_id, extent)
+                obst_index = patch_info[7]
                 p = Patch(file_path, dimension, extent, orientation, cell_centered,
-                          patch_offset + offset, t_n)
+                          patch_offset + offset, n_t)
 
                 # Skip obstacles with ID 0, which just gives the extent of the (whole) mesh faces
                 # These might be needed in case of "closed" mesh faces
-                if obst_id != 0:
+                if obst_index != 0:
+                    obst_id = mesh.obstructions[obst_index - 1].id
                     if obst_id not in patches:
                         patches[obst_id] = list()
                     patches[obst_id].append(p)
@@ -421,7 +444,7 @@ class Simulation:
             for patch in p:
                 patch._post_init(patch_offset)
             self.obstructions[obst_id]._add_patches(bid, cell_centered, quantity, label, unit, mesh,
-                                                    p, times, t_n, lower_bounds, upper_bounds)
+                                                    p, times, n_t, lower_bounds, upper_bounds)
 
     def _load_data_3d(self, smv_file: TextIO, line: str):
         """Loads the plot3d at current pointer position.
@@ -480,47 +503,131 @@ class Simulation:
                                                       double_quantity, quantity, label, unit)
             self.isosurfaces[iso_id]._add_subsurface(self.meshes[mesh_index], iso_filename)
 
-    def _load_particle_meta(self, smv_file: TextIO):
-        pass
+    def _load_particle_meta(self, smv_file: TextIO) -> List[Particle]:
+        particle_class = smv_file.readline().strip()
+        particles = list()
+        while particle_class != "":
+            # Todo: What do these mean?
+            some_vals = smv_file.readline().strip().split()
+
+            n_q = int(smv_file.readline().strip())
+            quantities = list()
+            for _ in range(n_q):
+                quantity = smv_file.readline().strip()
+                label = smv_file.readline().strip()
+                unit = smv_file.readline().strip()
+                quantities.append(Quantity(quantity, label, unit))
+            particles.append(Particle(particle_class, quantities))
+            particle_class = smv_file.readline().strip()
+            print(particle_class)
+
+        # Read times of an arbitrary .prt5.bnd file
+        filename = next(file for file in os.listdir(self.root_path) if file.endswith(".prt5.bnd"))
+        file_path = os.path.join(self.root_path, filename)
+
+        with open(file_path, 'r') as bnd_file:
+            line = bnd_file.readline().strip().split()
+            n_classes = int(line[1])
+            times = list()
+            n_q = list()
+            for _ in range(n_classes):
+                line = bnd_file.readline().strip().split()
+                n_q.append(int(line[0]))
+                for _ in range(n_q[-1]):
+                    bnd_file.readline()
+            bnd_file.seek(0)
+
+            for line in bnd_file:
+                times.append(float(line.strip().split()[0]))
+                for i in range(n_classes):
+                    bnd_file.readline()
+                    for q in range(n_q[i]):
+                        line = bnd_file.readline().strip().split()
+                        particle = particles[i]
+                        quantity = particle.quantities[q].quantity
+                        particle.lower_bounds[quantity].append(float(line[0]))
+                        particle.upper_bounds[quantity].append(float(line[1]))
+
+        return particles
 
     def _load_particles(self, smv_file: TextIO, line: str):
-        pass
+        some_value = int(line.split()[1].strip())
 
-    def _register_device(self, smv_file: TextIO):
-        pass
+        self.n_t, self.times, self.n_particles, self.positions, self.tags, self.quantities = _read_multiple_prt5_files(
+            self.classes)
 
-    def _load_DEVC_data(self, smv_file: TextIO) -> Dict[str, np.ndarray]:
-        pass
-        # Wie soll die Datenstruktur bei Lines sein? Soll ein Device mit allen Punkten der Line
-        # erzeugt werden oder einzelne Devices für jeden Punkt? Sollen Devices mit Lines anders
-        # gespeichert werden als Devices die nur aus einem Punkt bestehen?
-        # Kann man bei XB auch mehr als eine Dimension auffüllen lassen? Hat man dann NxN Punkte?
-        # Wozu haben Devices eine Orientation?
+    def _register_device(self, smv_file: TextIO) -> Tuple[str, Device]:
+        line = smv_file.readline().strip().split('%')
+        name = line[0].strip()
+        quantity_label = line[1].strip()
+        line = smv_file.readline().strip().split('#')[0].split()
+        position = (float(line[0]), float(line[1]), float(line[2]))
+        orientation = (float(line[3]), float(line[4]), float(line[5]))
+        return name, Device(Quantity(name, quantity_label, ""), position, orientation)
 
-    def _load_HRR_data(self, smv_file: TextIO) -> Dict[str, np.ndarray]:
-        return self._load_CSV_file(smv_file.readline().strip())
+    def _load_DEVC_data(self, file_path: str):
+        with open(file_path, 'r') as infile:
+            units = infile.readline().split(',')
+            names = [name.replace('"', '').replace('\n', '').strip() for name in
+                     infile.readline().split(',')]
+            values = np.genfromtxt(infile, delimiter=',', dtype=np.float32, autostrip=True)
+            for k in range(len(names)):
+                devc = self.devices[names[k]]
+                devc.quantity.unit = units[k]
+                size = values.shape[0]
+                devc.data = np.empty((size,), dtype=np.float32)
+                for i in range(size):
+                    devc.data[i] = values[i][k]
 
-    def _load_step_data(self, smv_file: TextIO) -> Dict[str, np.ndarray]:
-        return self._load_CSV_file(smv_file.readline().strip())
+        line_path = file_path.replace("devc", "steps")
+        if os.path.exists(line_path):
+            with open(line_path, 'r') as infile:
+                infile.readline()
+                names = infile.readline().split(',')
+                data = np.genfromtxt(infile, delimiter=',', dtype=np.float32, autostrip=True)
+                for k, key in enumerate(names):
+                    if key in self.devices:
+                        devc = self.devices[key]
+                        for i in range(len(devc)):
+                            devc[i] = data[k, i]
 
-    def _load_CSV_file(self, filename) -> Dict[str, np.ndarray]:
-        file_path = os.path.join(self.root_path, filename)
+    def _load_HRR_data(self, file_path: str) -> Dict[str, np.ndarray]:
         with open(file_path, 'r') as infile:
             infile.readline()
             keys = infile.readline().split(',')
-            data = np.genfromtxt(infile, delimiter=',')
-            return {keys[i].strip(): data[i, :] for i in range(data.shape[0])}
+            values = np.genfromtxt(infile, delimiter=',', dtype=np.float32, autostrip=True)
+            return self._transform_csv_data(keys, values, [np.float32] * len(keys))
 
-    def _load_CPU_data(self) -> Dict[str, float]:
+    def _load_step_data(self, file_path: str) -> Dict[str, np.ndarray]:
+        with open(file_path, 'r') as infile:
+            infile.readline()
+            keys = infile.readline().split(',')
+            dtypes = [np.float32] * len(keys)
+            dtypes[0] = int
+            dtypes[1] = np.dtype("datetime64[ms]")
+            values = np.genfromtxt(infile, delimiter=',', dtype=dtypes, autostrip=True)
+            return self._transform_csv_data(keys, values, dtypes)
+
+    def _load_CPU_data(self) -> Dict[str, np.ndarray]:
         file_path = os.path.join(self.root_path, self.chid + "_cpu.csv")
         if os.path.exists(file_path):
             with open(file_path, 'r') as infile:
                 keys = infile.readline().split(",")
-                values = infile.readline().split(",")
-                return {keys[i].strip(): float(values[i].strip()) for i in range(len(keys))}
+                dtypes = [np.float32] * len(keys)
+                dtypes[0] = int
+                values = np.genfromtxt(infile, delimiter=',', dtype=dtypes, autostrip=True)
+                if len(values.shape) != 0:
+                    return self._transform_csv_data(keys, values, dtypes)
+                else:
+                    return self._transform_csv_data(keys, values.reshape((1,)), dtypes)
 
-    def load_Line_data(self):
-        return
+    def _transform_csv_data(self, keys, values, dtypes):
+        size = values.shape[0]
+        data = {keys[i]: np.empty((size,), dtype=dtypes[i]) for i in range(len(keys))}
+        for k, arr in enumerate(data.values()):
+            for i in range(size):
+                arr[i] = values[i][k]
+        return data
 
     def _indices_to_extent(self, indices: Sequence[Union[int, str]], mesh: Mesh) -> Tuple[
         Extent, Dimension]:
@@ -541,14 +648,12 @@ class Simulation:
 
         :param clear_persistent_cache: Whether to clear the persistent simulation cache as well.
         """
-        if hasattr(self, "_slices"):
-            self.slices.clear_cache()
-        if hasattr(self, "_boundaries"):
-            self._boundaries.clear_cache()  # Todo
-        if hasattr(self, "_plot3ds"):
-            self.data_3d.clear_cache()
-        if hasattr(self, "_isosurfaces"):
-            self.isosurfaces.clear_cache()
+        self.slices.clear_cache()
+        self.data_3d.clear_cache()
+        self.isosurfaces.clear_cache()
+        self.particles.clear_cache()
+        for obst in self.obstructions:
+            obst.clear_cache()
 
         if clear_persistent_cache:
             os.remove(Simulation._get_pickle_filename(self.root_path, self.chid))

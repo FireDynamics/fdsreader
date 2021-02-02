@@ -25,10 +25,6 @@ def main():
 
     sslc_data = subslice.data
 
-    print(subslice)
-    # print(subslice.shape)
-    # print(sslc_data)
-
     plt.imshow(subslice.data[-1])
     plt.colorbar()
     plt.show()

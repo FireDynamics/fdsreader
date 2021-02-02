@@ -5,6 +5,8 @@ import glob
 import hashlib
 import os
 from collections import Iterable
+from typing import Union, Tuple
+import numpy as np
 
 
 class Quantity:
@@ -18,6 +20,25 @@ class Quantity:
 
     def __repr__(self):
         return f"Quantity(label={self.label}, unit={self.unit}, quantity={self.quantity})"
+
+
+class Device:
+    def __init__(self, quantity: Quantity, position: Tuple[float, float, float],
+                 orientation: Tuple[float, float, float]):
+        self.quantity = quantity
+        self.position = position
+        self.orientation = orientation
+        self.data: Union[float, np.ndarray] = .0
+
+    @property
+    def name(self):
+        return self.quantity.quantity
+
+    def __eq__(self, other):
+        return self.name == other.name
+
+    def __repr__(self):
+        return f"Device(name={self.name}, position={self.position}, quantity={self.quantity}, mean={np.mean(self.data)})"
 
 
 def create_hash(path: str):
@@ -58,6 +79,7 @@ def get_smv_file(path: str):
 class FDSDataCollection:
     """(Abstract) Base class for any collection of FDS data.
     """
+
     def __init__(self, *elements: Iterable):
         self._elements = tuple(*elements)
 

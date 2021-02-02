@@ -16,7 +16,7 @@ class SubSurface:
     :ivar v_file_path: Path to the binary data file containing color data.
     :ivar n_vertices: The number of vertices for this subsurface.
     :ivar n_triangles: The number of triangles for this subsurface.
-    :ivar t_n: Total number of time steps for which output data has been written.
+    :ivar n_t: Total number of time steps for which output data has been written.
     :ivar _offset: Offset of the binary file to the end of the file header.
     """
 
@@ -121,6 +121,7 @@ class SubSurface:
                 dtype_triangles = fdtype.new((('i', 3 * n_triangles),))
                 dtype_surfaces = fdtype.new((('i', n_triangles),))
 
+                # Todo: Check for "order='F'"
                 vertices.append(
                     fdtype.read(infile, dtype_vertices, 1)[0][0].reshape((n_vertices, 3)))
                 triangles.append(
@@ -136,17 +137,17 @@ class SubSurface:
         self._triangles = np.array(triangles, dtype=object)
         self._surfaces = np.array(surfaces, dtype=object)
 
-        self.t_n = len(self.times)
+        self.n_t = len(self.times)
 
     def _load_vdata(self, infile: BinaryIO):
         """Loads all color data for all isosurfaces in a given viso file.
         """
-        self._colors = np.empty((self.t_n,), dtype=object)
+        self._colors = np.empty((self.n_t,), dtype=object)
         t_offset = fdtype.FLOAT.itemsize
         dtype_nverts = fdtype.new((('i', 4),)).itemsize
 
         infile.seek(fdtype.INT.itemsize * 2)
-        for t in range(self.t_n):
+        for t in range(self.n_t):
             infile.seek(t_offset, os.SEEK_CUR)
             n_vertices = fdtype.read(infile, dtype_nverts, 1)[0][0][2]
             self._colors[t] = fdtype.read(infile, fdtype.new((('f', n_vertices),)), 1)

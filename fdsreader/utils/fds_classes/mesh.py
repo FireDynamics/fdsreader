@@ -1,4 +1,4 @@
-from typing import Dict, Literal, Tuple, Sequence
+from typing import Dict, Literal, Tuple, List
 import numpy as np
 
 from fdsreader.utils import Dimension, Extent
@@ -32,6 +32,8 @@ class Mesh:
         self.n_size = self.dimension.size()
         self.extent = Extent(extents['x'][0], extents['x'][1], extents['y'][0], extents['y'][1],
                              extents['z'][0], extents['z'][1])
+
+        self.obstructions = list()
 
     def __getitem__(self, dimension: Literal[0, 1, 2, 'x', 'y', 'z']) -> np.ndarray:
         """Get all values in given dimension.
