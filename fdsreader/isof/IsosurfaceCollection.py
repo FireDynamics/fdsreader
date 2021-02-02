@@ -11,3 +11,6 @@ class IsosurfaceCollection(FDSDataCollection):
 
     def __init__(self, *isosurfaces: Iterable[Isosurface]):
         super().__init__(*isosurfaces)
+
+    def __repr__(self):
+        return "IsosurfaceCollection(" + super(IsosurfaceCollection, self).__repr__() + ")"

@@ -12,3 +12,6 @@ class Plot3DCollection(FDSDataCollection):
     def __init__(self, times: Iterable[float], *plot3ds: Iterable[Plot3D]):
         super().__init__(*plot3ds)
         self.times = list(times)
+
+    def __repr__(self):
+        return "Plot3DCollection(" + super(Plot3DCollection, self).__repr__() + ")"

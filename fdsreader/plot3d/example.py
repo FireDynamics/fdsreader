@@ -1,14 +1,10 @@
-from fdsreader import Simulation
+import fdsreader as fds
 
 
 def main():
-    smv_file_paths = scan_directory_smv("../../examples/plot3d/fds_data")
+    sim = fds.Simulation("../../examples/plot3d/fds_data")
 
-    sim = Simulation(smv_file_paths[0])
-
-    plot3d = sim.data_3d[0]
-
-    print(plot3d._subplots[0].get_data())
+    mesh = sim.meshes[0]
 
 
 if __name__ == "__main__":

@@ -18,6 +18,9 @@ class Quantity:
     def __eq__(self, other):
         return self.quantity == other.quantity
 
+    def __hash__(self):
+        return hash(self.label)
+
     def __repr__(self):
         return f"Quantity(label={self.label}, unit={self.unit}, quantity={self.quantity})"
 
@@ -94,6 +97,9 @@ class FDSDataCollection:
 
     def __contains__(self, value):
         return value in self._elements
+
+    def __repr__(self):
+        return "[" + str(self._elements) + "]"
 
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory.

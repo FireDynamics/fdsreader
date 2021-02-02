@@ -1,16 +1,9 @@
-import logging
-
 import matplotlib.pyplot as plt
 
 import fdsreader as fds
 
 
 def main():
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
-
-    # fds.settings.ENABLE_CACHING = False
-
     sim = fds.Simulation("C:\\Users\\janv1\\PycharmProjects\\fdsreader\\examples\\slcf\\fds_steckler")
 
     mesh = sim.meshes[0]

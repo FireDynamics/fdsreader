@@ -43,13 +43,12 @@ class Ventilation:
     :ivar radius: Radius of the ventilation circle.
     """
 
-    def __init__(self, vid: int, surface: Surface,
-                 bound_indices: Tuple[int, int, int, int, int, int], color_index: int,
-                 draw_type: int, rgba: Union[Tuple[()], Tuple[float, float, float, float]] = (),
+    def __init__(self, surface: Surface, bound_indices: Tuple[int, int, int, int, int, int],
+                 color_index: int, draw_type: int,
+                 rgba: Union[Tuple[()], Tuple[float, float, float, float]] = (),
                  texture_origin: Union[Tuple[()], Tuple[float, float, float]] = (),
                  circular_vent_origin: Union[Tuple[()], Tuple[float, float, float]] = (),
                  radius: float = -1):
-        self.id = vid
         self.surface = surface
         self.bound_indices = bound_indices
         self.color_index = color_index

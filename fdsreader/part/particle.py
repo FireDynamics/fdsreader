@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 
 from fdsreader.utils import Quantity
 
@@ -10,9 +10,10 @@ class Particle:
     :ivar quantities: List of all quantities for which data has been written out.
     """
 
-    def __init__(self, class_name: str, quantities: List[Quantity]):
+    def __init__(self, class_name: str, quantities: List[Quantity], color: Tuple[float, float, float]):
         self.class_name = class_name
         self.quantities = quantities
+        self.color = color
 
         self._positions = list()
         self._tags = list()
@@ -45,3 +46,6 @@ class Particle:
         """Remove all data from the internal cache that has been loaded so far to free memory.
         """
         del self._data
+
+    def __repr__(self):
+        return f"Particle(name={self.class_name}, quantities={self.quantities})"

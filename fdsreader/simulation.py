@@ -73,14 +73,14 @@ class Simulation:
             self.meshes: List[Mesh] = list()
             self.surfaces: List[Surface] = list()
             self.obstructions: List[Obstruction] = list()
-            self.ventilations: Dict[Ventilation] = list()
+            self.ventilations: List[Ventilation] = list()
 
             # First collect all meta-information for any FDS data to later combine the gathered
             # information into data collections
             self.slices = dict()
             self.data_3d = dict()
             self.isosurfaces = dict()
-            self.particles = None
+            self.particles = list()
             self.devices: Dict[str, Union[Device, List[Device]]] = dict()
             device_tmp = str()
 
@@ -109,8 +109,7 @@ class Simulation:
                         offsets = smv_file.readline().strip().split()
                         self.default_texture_origin = tuple(float(offsets[i]) for i in range(3))
                     elif keyword == "CLASS_OF_PARTICLES":
-                        times, particles = self._load_particle_meta(smv_file)
-                        self.particles = ParticleCollection(times, particles)
+                        self.particles.append(self.register_particle(smv_file))
                     elif "GRID" in keyword:
                         self.meshes.append(self._load_mesh(smv_file, keyword))
                     elif keyword == "SURFACE":
@@ -133,7 +132,7 @@ class Simulation:
                     elif "BND" in keyword:
                         self._load_boundary_data(smv_file, keyword)
                     elif "PRT5" in keyword:
-                        self._load_particles(smv_file, keyword)
+                        self._load_particle_data(smv_file, keyword)
 
                 self.cpu = self._load_CPU_data()
                 if device_tmp != "":
@@ -257,7 +256,7 @@ class Simulation:
 
         def read_common_info():
             line = smv_file.readline().strip().split()
-            return line, [float(line[i]) for i in range(6)], int(line[6]), self.surfaces[
+            return line, [float(line[i]) for i in range(6)], int(line[6]) - 1, self.surfaces[
                 int(line[7])]
 
         def read_common_info2():
@@ -273,25 +272,25 @@ class Simulation:
 
         texture_origin = ()
         for _ in range(n - n_dummies):
-            line, ext, vent_id, surface = read_common_info()
+            line, ext, vent_index, surface = read_common_info()
             texture_origin = (float(line[8]), float(line[9]), float(line[10]))
-            temp_data.append((Extent(*ext), vent_id, surface, texture_origin))
+            temp_data.append((Extent(*ext), vent_index, surface, texture_origin))
 
         for _ in range(n_dummies):
-            _, extents, vent_id, surface = read_common_info()
-            temp_data.append((Extent(*ext), vent_id, surface))
+            _, extents, vent_index, surface = read_common_info()
+            temp_data.append((Extent(*ext), vent_index, surface))
 
         for v in range(n):
             if v < n - n_dummies:
-                extent, vent_id, surface, texture_origin = temp_data[v]
+                extent, vent_index, surface, texture_origin = temp_data[v]
             else:
-                extent, vent_id, surface = temp_data[v]
+                extent, vent_index, surface = temp_data[v]
             bound_indices, color_index, draw_type, rgba = read_common_info2()
-            if vent_id not in self.ventilations:
-                self.ventilations[vent_id] = Ventilation(vent_id, surface, bound_indices,
-                                                         color_index, draw_type, rgba=rgba,
-                                                         texture_origin=texture_origin)
-            self.ventilations[vent_id]._add_subventilation(mesh, extent)
+            if vent_index not in self.ventilations:
+                self.ventilations.append(
+                    Ventilation(surface, bound_indices, color_index, draw_type, rgba=rgba,
+                                texture_origin=texture_origin))
+            self.ventilations[vent_index]._add_subventilation(mesh, extent)
 
         smv_file.readline()
         assert "CVENT" in smv_file.readline()
@@ -347,8 +346,8 @@ class Simulation:
 
         slice_id = int(line.split('!')[1].strip().split()[0])
 
-        mesh_id = int(line.split('&')[0].strip().split()[1]) - 1
-        mesh = self.meshes[mesh_id]
+        mesh_index = int(line.split('&')[0].strip().split()[1]) - 1
+        mesh = self.meshes[mesh_index]
 
         # Read in index ranges for x, y and z
         bound_indices = [int(i.strip()) for i in line.split('&')[1].split('!')[0].strip().split()]
@@ -383,8 +382,8 @@ class Simulation:
             cell_centered = True
         else:
             cell_centered = False
-        mesh_id = int(line[1]) - 1
-        mesh = self.meshes[mesh_id]
+        mesh_index = int(line[1]) - 1
+        mesh = self.meshes[mesh_index]
 
         filename = smv_file.readline().strip()
         quantity = smv_file.readline().strip()
@@ -503,28 +502,20 @@ class Simulation:
                                                       double_quantity, quantity, label, unit)
             self.isosurfaces[iso_id]._add_subsurface(self.meshes[mesh_index], iso_filename)
 
-    def _load_particle_meta(self, smv_file: TextIO) -> List[Particle]:
+    def register_particle(self, smv_file: TextIO) -> Particle:
         particle_class = smv_file.readline().strip()
-        particles = list()
-        while particle_class != "":
-            # Todo: What do these mean?
-            some_vals = smv_file.readline().strip().split()
+        color = tuple(float(c) for c in smv_file.readline().strip().split())
 
-            n_q = int(smv_file.readline().strip())
-            quantities = list()
-            for _ in range(n_q):
-                quantity = smv_file.readline().strip()
-                label = smv_file.readline().strip()
-                unit = smv_file.readline().strip()
-                quantities.append(Quantity(quantity, label, unit))
-            particles.append(Particle(particle_class, quantities))
-            particle_class = smv_file.readline().strip()
-            print(particle_class)
+        n_q = int(smv_file.readline().strip())
+        quantities = list()
+        for _ in range(n_q):
+            quantity = smv_file.readline().strip()
+            label = smv_file.readline().strip()
+            unit = smv_file.readline().strip()
+            quantities.append(Quantity(quantity, label, unit))
+        return Particle(particle_class, quantities, color)
 
-        # Read times of an arbitrary .prt5.bnd file
-        filename = next(file for file in os.listdir(self.root_path) if file.endswith(".prt5.bnd"))
-        file_path = os.path.join(self.root_path, filename)
-
+    def _load_particle_meta(self, particles: List[Particle], file_path: str) -> List[float]:
         with open(file_path, 'r') as bnd_file:
             line = bnd_file.readline().strip().split()
             n_classes = int(line[1])
@@ -547,14 +538,22 @@ class Simulation:
                         quantity = particle.quantities[q].quantity
                         particle.lower_bounds[quantity].append(float(line[0]))
                         particle.upper_bounds[quantity].append(float(line[1]))
+        return times
 
-        return particles
+    def _load_particle_data(self, smv_file: TextIO, line: str):
+        file_path = os.path.join(self.root_path, smv_file.readline().strip())
 
-    def _load_particles(self, smv_file: TextIO, line: str):
-        some_value = int(line.split()[1].strip())
+        if type(self.particles) == list:
+            times = self._load_particle_meta(self.particles, file_path + '.bnd')
+            self.particles = ParticleCollection(times, self.particles)
 
-        self.n_t, self.times, self.n_particles, self.positions, self.tags, self.quantities = _read_multiple_prt5_files(
-            self.classes)
+        mesh_index = int(line.split()[1].strip()) - 1
+        mesh = self.meshes[mesh_index]
+        self.particles._file_paths[mesh] = file_path
+
+        n_classes = int(smv_file.readline().strip())
+        for i in range(n_classes):
+            smv_file.readline()
 
     def _register_device(self, smv_file: TextIO) -> Tuple[str, Device]:
         line = smv_file.readline().strip().split('%')

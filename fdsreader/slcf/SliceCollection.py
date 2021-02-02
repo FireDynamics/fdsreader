@@ -11,3 +11,6 @@ class SliceCollection(FDSDataCollection):
 
     def __init__(self, *slices: Iterable[Slice]):
         super().__init__(*slices)
+
+    def __repr__(self):
+        return "SliceCollection(" + super(SliceCollection, self).__repr__() + ")"
