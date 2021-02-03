@@ -75,6 +75,8 @@ def get_smv_file(path: str):
         elif len(files) == 0:
             raise IOError("There are no simulations in this path!")
         return files[0]
+    elif os.path.isfile(path + ".smv"):
+        return path + ".smv"
     else:
         raise IOError("Path is invalid!")
 

@@ -47,7 +47,7 @@ class Simulation:
 
             pickle_file_path = Simulation._get_pickle_filename(root_path, chid)
 
-            if path and os.path.isfile(path):
+            if os.path.isfile(pickle_file_path):
                 with open(pickle_file_path) as f:
                     sim = pickle.load(f)
                 if not isinstance(sim, cls):
