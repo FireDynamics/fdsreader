@@ -69,5 +69,20 @@ class ParticleCollection(FDSDataCollection):
                         for q, quantity in enumerate(particle.quantities):
                             particle._data[quantity.quantity].append(data_raw[:, q])
 
+    def __getitem__(self, key):
+        if type(key) == int:
+            return self._elements[key]
+        for particle in self:
+            if particle.class_name == key:
+                return particle
+
+    def __contains__(self, value):
+        if value in self._elements:
+            return True
+        for particle in self:
+            if particle.class_name == value:
+                return True
+        return False
+
     def __repr__(self):
         return "ParticleCollection(" + super(ParticleCollection, self).__repr__() + ")"

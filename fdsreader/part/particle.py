@@ -26,18 +26,24 @@ class Particle:
 
     @property
     def data(self):
+        """
+        """
         if len(self._positions) == 0:
             self._init_callback()
         return self._data
 
     @property
     def tags(self):
+        """
+        """
         if len(self._positions) == 0:
             self._init_callback()
         return self._tags
 
     @property
     def positions(self):
+        """
+        """
         if len(self._positions) == 0:
             self._init_callback()
         return self._positions
