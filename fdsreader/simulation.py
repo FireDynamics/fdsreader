@@ -18,6 +18,7 @@ from fdsreader.utils import Mesh, Dimension, Surface, Quantity, Ventilation, Ext
 from fdsreader.utils.data import create_hash, get_smv_file, Device
 import fdsreader.utils.fortran_data as fdtype
 from fdsreader import settings
+from fdsreader._version import __version__
 
 
 class Simulation:
@@ -50,7 +51,7 @@ class Simulation:
             if os.path.isfile(pickle_file_path):
                 with open(pickle_file_path) as f:
                     sim = pickle.load(f)
-                if not isinstance(sim, cls):
+                if not isinstance(sim, cls) or sim.reader_version != __version__:
                     os.remove(pickle_file_path)
                 else:
                     if sim._hash == create_hash(smv_file_path):
@@ -66,6 +67,8 @@ class Simulation:
         """
         # Check if the file has already been instantiated via a cached pickle file
         if not hasattr(self, "_hash"):
+            self.reader_version = __version__
+
             self.smv_file_path = get_smv_file(path)
 
             self.root_path = os.path.dirname(self.smv_file_path)
@@ -423,7 +426,7 @@ class Simulation:
             patch_infos = fdtype.read(infile, dtype_patches, n_patches)
             offset += fdtype.INT.itemsize + dtype_patches.itemsize * n_patches
             patch_offset = fdtype.FLOAT.itemsize
-            cell_centered = False
+            # cell_centered = False
             for patch_info in patch_infos:
                 patch_info = patch_info[0]
                 extent, dimension = self._indices_to_extent(patch_info[:6], mesh)
@@ -439,7 +442,7 @@ class Simulation:
                     if obst_id not in patches:
                         patches[obst_id] = list()
                     patches[obst_id].append(p)
-                patch_offset += fdtype.new((('f', str(p.shape)),)).itemsize
+                patch_offset += fdtype.new((('f', str(p.dimension.shape(cell_centered=False))),)).itemsize
 
         for obst_id, p in patches.items():
             for patch in p:

@@ -27,7 +27,7 @@ def main():
             for j, face in enumerate((-3, -2, -1, 1, 2, 3)):
                 pass
                 if face in bndf_data.faces:
-                    im = ax[i, j].imshow(bndf_data.faces[face][-1], vmin=vmin, vmax=vmax)
+                    im = ax[i, j].imshow(bndf_data.faces[face][-1].T, origin="lower", vmin=vmin, vmax=vmax)
     else:
         obst = sim.obstructions[1]
         fig, ax = plt.subplots(ncols=6)
@@ -35,7 +35,7 @@ def main():
         for j, face in enumerate((-3, -2, -1, 1, 2, 3)):
             pass
             if face in bndf_data.faces:
-                im = ax[j].imshow(bndf_data.faces[face][-1], vmin=vmin, vmax=vmax)
+                im = ax[j].imshow(bndf_data.faces[face][-1].T, origin="lower", vmin=vmin, vmax=vmax)
 
     fig.subplots_adjust(right=0.8)
     cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])

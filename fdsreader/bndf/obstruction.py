@@ -34,6 +34,12 @@ class Patch:
         """
         return self.dimension.shape(self.cell_centered)
 
+    @property
+    def size(self) -> int:
+        """Convenience function to calculate the number of data points in the array for this patch.
+        """
+        return self.dimension.size(self.cell_centered)
+
     def _post_init(self, time_offset: int):
         """Fully initialize the patch as soon as the number of timesteps is known.
         """
@@ -45,12 +51,12 @@ class Patch:
         """
         if not hasattr(self, "_data"):
             self._data = np.empty((self.n_t,) + self.shape)
-            dtype_data = fdtype.new((('f', str(self.shape)),))
+            dtype_data = fdtype.new((('f', self.dimension.size(cell_centered=False)),))
             with open(self.file_path, 'rb') as infile:
                 for t in range(self.n_t):
                     infile.seek(self.initial_offset + t * self.time_offset)
-                    self._data[t, :] = np.fromfile(infile, dtype_data, 1)[0][1].reshape(self.shape,
-                                                                                        order='F')
+                    self._data[t, :] = np.fromfile(infile, dtype_data, 1)[0][1].reshape(
+                        self.dimension.shape(cell_centered=False), order='F')[:-1, :-1]
         return self._data
 
     def clear_cache(self):
@@ -239,7 +245,8 @@ class Obstruction:
     def get_boundary_data(self, quantity: Union[Quantity, str]):
         if type(quantity) == str:
             return next(x for x in self._boundary_data.values() if
-                        x.quantity.quantity.lower() == quantity.lower())
+                        x.quantity.quantity.lower() == quantity.lower() or
+                        x.quantity.label.lower() == quantity.lower())
         return next((x for x in self._boundary_data.values() if x.quantity == quantity), None)
 
     @property

@@ -63,7 +63,7 @@ class SubSlice:
         with open(file_path, 'rb') as infile:
             infile.seek(self._offset)
             for i, data in enumerate(fdtype.read(infile, dtype_data, n_t)):
-                data_out[i, :] = data[1].reshape(self.shape, order='F')
+                data_out[i, :] = np.asfortranarray(data[1])
 
     @property
     def data(self) -> np.ndarray:
