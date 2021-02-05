@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>fdsreader.isof.isosurface &mdash; fdsreader [fdsreader, version 0.5.0] documentation</title>
+  <title>fdsreader.isof.isosurface &mdash; fdsreader [fdsreader, version 0.5.1] documentation</title>
   
 
   
@@ -204,13 +204,14 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_load_data</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span>
 
-<div class="viewcode-block" id="SubSurface.triangles"><a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.SubSurface.triangles">[docs]</a>    <span class="k">def</span> <span class="nf">triangles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">triangles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Property to lazy load all triangles of any level.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_triangles&quot;</span><span class="p">):</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_load_data</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_triangles</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_triangles</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">surfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -353,6 +354,18 @@
         <span class="sd">&quot;&quot;&quot;Returns the :class:`SubSurface` that contains data for the given mesh.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subsurfaces</span><span class="p">[</span><span class="n">mesh</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">subsurface</span><span class="o">.</span><span class="n">vertices</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">subsurface</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subsurfaces</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">surfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">subsurface</span><span class="o">.</span><span class="n">surfaces</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">subsurface</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subsurfaces</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">triangles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">subsurface</span><span class="o">.</span><span class="n">triangles</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">subsurface</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subsurfaces</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">has_color_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

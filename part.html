@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Search &mdash; fdsreader [fdsreader, version 0.5.1] documentation</title>
+  <title>Slice files &mdash; fdsreader [fdsreader, version 0.5.1] documentation</title>
   
 
   
@@ -20,7 +20,6 @@
   
 
   
-    
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -35,9 +34,8 @@
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-    <script type="text/javascript" src="_static/searchtools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="#" /> 
+    <link rel="search" title="Search" href="search.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -64,7 +62,7 @@
 
           
 <div role="search">
-  <form id="rtd-search-form" class="wy-form" action="#" method="get">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
@@ -83,7 +81,10 @@
             
             
               <!-- Local TOC -->
-              <div class="local-toc"></div>
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">Slice files</a></li>
+</ul>
+</div>
             
           
         </div>
@@ -128,7 +129,7 @@
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Search</li>
+      <li>Slice files</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -145,18 +146,45 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <noscript>
-  <div id="fallback" class="admonition warning">
-    <p class="last">
-      Please activate JavaScript to enable the search functionality.
-    </p>
-  </div>
-  </noscript>
+  <div class="section" id="slice-files">
+<h1>Slice files<a class="headerlink" href="#slice-files" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="apireference"></span><dl class="py class">
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">fdsreader.part.particle.</code><code class="sig-name descname">Particle</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">class_name</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">quantities</span><span class="p">:</span> <span class="n">List<span class="p">[</span>fdsreader.utils.data.Quantity<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">color</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/part/particle.html#Particle"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Container to store particle data from particle simulations with FDS.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>class_name</strong> – Name of the particle class defined in the FDS input-file.</p></li>
+<li><p><strong>quantities</strong> – List of all quantities for which data has been written out.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt>
+<code class="sig-name descname">clear_cache</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/part/particle.html#Particle.clear_cache"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Remove all data from the internal cache that has been loaded so far to free memory.</p>
+</dd></dl>
 
-  
-  <div id="search-results">
-  
-  </div>
+<dl class="py method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">data</code></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">positions</code></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">tags</code></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
 
            </div>
            
@@ -201,14 +229,7 @@
   
   
     
-  
-  <script type="text/javascript">
-    jQuery(function() { Search.loadIndex("searchindex.js"); });
-  </script>
-  
-  <script type="text/javascript" id="searchindexloader"></script>
    
-
 
 </body>
 </html>

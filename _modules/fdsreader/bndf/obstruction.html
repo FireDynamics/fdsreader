@@ -1,0 +1,460 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>fdsreader.bndf.obstruction &mdash; fdsreader [fdsreader, version 0.5.1] documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> fdsreader
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">fdsreader</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>fdsreader.bndf.obstruction</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for fdsreader.bndf.obstruction</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">add</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Literal</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">fdsreader.utils</span> <span class="kn">import</span> <span class="n">Surface</span><span class="p">,</span> <span class="n">Mesh</span><span class="p">,</span> <span class="n">Extent</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Dimension</span>
+<span class="kn">import</span> <span class="nn">fdsreader.utils.fortran_data</span> <span class="k">as</span> <span class="nn">fdtype</span>
+<span class="kn">from</span> <span class="nn">fdsreader</span> <span class="kn">import</span> <span class="n">settings</span>
+
+
+<div class="viewcode-block" id="Patch"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Patch">[docs]</a><span class="k">class</span> <span class="nc">Patch</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Container for the actual data which is stored as rectangular plane with specific orientation</span>
+<span class="sd">        and extent.</span>
+
+<span class="sd">    :ivar extent: :class:`Extent` object containing 3-dimensional extent information.</span>
+<span class="sd">    :ivar orientation: The direction the patch is facing (x={-1;1}, y={-2;2}, z={-3;3}).</span>
+<span class="sd">    :ivar data: Numpy ndarray with the actual data.</span>
+<span class="sd">    :ivar n_t: Total number of time steps for which output data has been written.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dimension</span><span class="p">:</span> <span class="n">Dimension</span><span class="p">,</span> <span class="n">extent</span><span class="p">:</span> <span class="n">Extent</span><span class="p">,</span> <span class="n">orientation</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">cell_centered</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">initial_offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_t</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_path</span> <span class="o">=</span> <span class="n">file_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span> <span class="o">=</span> <span class="n">dimension</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extent</span> <span class="o">=</span> <span class="n">extent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span> <span class="o">=</span> <span class="n">orientation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cell_centered</span> <span class="o">=</span> <span class="n">cell_centered</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initial_offset</span> <span class="o">=</span> <span class="n">initial_offset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_offset</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_t</span> <span class="o">=</span> <span class="n">n_t</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Convenience function to calculate the shape of the array containing data for this patch.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cell_centered</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_post_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fully initialize the patch as soon as the number of timesteps is known.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_offset</span> <span class="o">=</span> <span class="n">time_offset</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Method to load the quantity data for a single patch for a single timestep.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_data&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_t</span><span class="p">,)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">dtype_data</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)),))</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_t</span><span class="p">):</span>
+                    <span class="n">infile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_offset</span> <span class="o">+</span> <span class="n">t</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_offset</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">t</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_data</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                                                                                        <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
+
+<div class="viewcode-block" id="Patch.clear_cache"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Patch.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_data&quot;</span><span class="p">):</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span></div>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Patch(shape=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">, orientation=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">orientation</span><span class="si">}</span><span class="s2">, extent=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="si">}</span><span class="s2">)&quot;</span></div>
+
+
+<div class="viewcode-block" id="Boundary"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Boundary">[docs]</a><span class="k">class</span> <span class="nc">Boundary</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cell_centered</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">times</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">n_t</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">lower_bounds</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cell_centered</span> <span class="o">=</span> <span class="n">cell_centered</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quantity</span> <span class="o">=</span> <span class="n">quantity</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">times</span> <span class="o">=</span> <span class="n">times</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span> <span class="o">=</span> <span class="n">lower_bounds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">upper_bounds</span> <span class="o">=</span> <span class="n">upper_bounds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_t</span> <span class="o">=</span> <span class="n">n_t</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extent</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_patches</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Mesh</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Patch</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_add_patches</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">,</span> <span class="n">patches</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Patch</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_patches</span><span class="p">[</span><span class="n">mesh</span><span class="p">]</span> <span class="o">=</span> <span class="n">patches</span>
+
+<div class="viewcode-block" id="Boundary.sort_patches_cartesian"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Boundary.sort_patches_cartesian">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">sort_patches_cartesian</span><span class="p">(</span><span class="n">patches_in</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Patch</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;Returns all patches (of same orientation!) sorted in cartesian coordinates.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">patches</span> <span class="o">=</span> <span class="n">patches_in</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">patches</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">patches_cart</span> <span class="o">=</span> <span class="p">[[</span><span class="n">patches</span><span class="p">[</span><span class="mi">0</span><span class="p">]]]</span>
+            <span class="n">orientation</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">patches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">orientation</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># x</span>
+                <span class="n">patches</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">extent</span><span class="o">.</span><span class="n">y_start</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">extent</span><span class="o">.</span><span class="n">z_start</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">orientation</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># y</span>
+                <span class="n">patches</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">extent</span><span class="o">.</span><span class="n">x_start</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">extent</span><span class="o">.</span><span class="n">z_start</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">orientation</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>  <span class="c1"># z</span>
+                <span class="n">patches</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">extent</span><span class="o">.</span><span class="n">x_start</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">extent</span><span class="o">.</span><span class="n">y_start</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">patch</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                    <span class="k">if</span> <span class="n">patch</span><span class="o">.</span><span class="n">extent</span><span class="o">.</span><span class="n">y_start</span> <span class="o">==</span> <span class="n">patches_cart</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">extent</span><span class="o">.</span><span class="n">y_start</span><span class="p">:</span>
+                        <span class="n">patches_cart</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">patch</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">patches_cart</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">patch</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">patch</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                    <span class="k">if</span> <span class="n">patch</span><span class="o">.</span><span class="n">extent</span><span class="o">.</span><span class="n">x_start</span> <span class="o">==</span> <span class="n">patches_cart</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">extent</span><span class="o">.</span><span class="n">x_start</span><span class="p">:</span>
+                        <span class="n">patches_cart</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">patch</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">patches_cart</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">patch</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">patches_cart</span>
+        <span class="k">return</span> <span class="n">patches</span></div>
+
+<div class="viewcode-block" id="Boundary.get_patches_in_mesh"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Boundary.get_patches_in_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">get_patches_in_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_patches</span><span class="p">[</span><span class="n">mesh</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;_data&quot;</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">patch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_patches</span><span class="p">[</span><span class="n">mesh</span><span class="p">]:</span>
+                <span class="n">_</span> <span class="o">=</span> <span class="n">patch</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_patches</span><span class="p">[</span><span class="n">mesh</span><span class="p">]</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">faces</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_faces&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_faces</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_faces</span>
+
+    <span class="k">def</span> <span class="nf">_prepare_faces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">patches_for_face</span> <span class="o">=</span> <span class="p">{</span><span class="o">-</span><span class="mi">3</span><span class="p">:</span> <span class="nb">list</span><span class="p">(),</span> <span class="o">-</span><span class="mi">2</span><span class="p">:</span> <span class="nb">list</span><span class="p">(),</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="nb">list</span><span class="p">(),</span> <span class="mi">1</span><span class="p">:</span> <span class="nb">list</span><span class="p">(),</span> <span class="mi">2</span><span class="p">:</span> <span class="nb">list</span><span class="p">(),</span> <span class="mi">3</span><span class="p">:</span> <span class="nb">list</span><span class="p">()}</span>
+        <span class="k">for</span> <span class="n">patches</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_patches</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">patch</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">:</span>
+                <span class="n">patches_for_face</span><span class="p">[</span><span class="n">patch</span><span class="o">.</span><span class="n">orientation</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">patch</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_faces</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">face</span> <span class="ow">in</span> <span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+            <span class="n">patches</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sort_patches_cartesian</span><span class="p">(</span><span class="n">patches_for_face</span><span class="p">[</span><span class="n">face</span><span class="p">])</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">patches</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">shape_dim1</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">patch_row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">patch_row</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">])</span>
+            <span class="n">shape_dim2</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">patch</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">patch</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_faces</span><span class="p">[</span><span class="n">face</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_t</span><span class="p">,</span> <span class="n">shape_dim1</span><span class="p">,</span> <span class="n">shape_dim2</span><span class="p">))</span>
+            <span class="n">dim1_pos</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">dim2_pos</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">patch_row</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">:</span>
+                <span class="n">d1</span> <span class="o">=</span> <span class="n">patch_row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">patch</span> <span class="ow">in</span> <span class="n">patch_row</span><span class="p">:</span>
+                    <span class="n">d2</span> <span class="o">=</span> <span class="n">patch</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_faces</span><span class="p">[</span><span class="n">face</span><span class="p">][:,</span> <span class="n">dim1_pos</span><span class="p">:</span><span class="n">dim1_pos</span> <span class="o">+</span> <span class="n">d1</span><span class="p">,</span>
+                    <span class="n">dim2_pos</span><span class="p">:</span><span class="n">dim2_pos</span> <span class="o">+</span> <span class="n">d2</span><span class="p">]</span> <span class="o">=</span> <span class="n">patch</span><span class="o">.</span><span class="n">data</span>
+                    <span class="n">dim2_pos</span> <span class="o">+=</span> <span class="n">d2</span>
+                <span class="n">dim1_pos</span> <span class="o">+=</span> <span class="n">d1</span>
+                <span class="n">dim2_pos</span> <span class="o">=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="Boundary.clear_cache"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Boundary.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">patches</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_patches</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">patch</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">:</span>
+                <span class="n">patch</span><span class="o">.</span><span class="n">clear_cache</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="o">==</span> <span class="n">Mesh</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_patches_in_mesh</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">faces</span><span class="p">[</span><span class="n">item</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Boundary(quantity=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">quantity</span><span class="si">}</span><span class="s2">, cell_centered=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cell_centered</span><span class="si">}</span><span class="s2">)&quot;</span></div>
+
+
+<div class="viewcode-block" id="Obstruction"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Obstruction">[docs]</a><span class="k">class</span> <span class="nc">Obstruction</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;A box-shaped obstruction with specific surfaces (materials) on each side.</span>
+
+<span class="sd">    :ivar id: ID of the obstruction.</span>
+<span class="sd">    :ivar side_surfaces: Tuple of six surfaces for each side of the cuboid.</span>
+<span class="sd">    :ivar bound_indices: Indices used to define obstruction bounds in terms of mesh locations.</span>
+<span class="sd">    :ivar color_index: Type of coloring used to color obstruction.</span>
+<span class="sd">     \n-1 - default color</span>
+<span class="sd">     \n-2 - invisible</span>
+<span class="sd">     \n-3 - use red, green, blue and alpha (rgba attribute)</span>
+<span class="sd">     \nn&gt;0 - use n’th color table entry</span>
+<span class="sd">    :ivar block_type: Defines how the obstruction is drawn.</span>
+<span class="sd">     \n-1 - use surface to obtain blocktype</span>
+<span class="sd">     \n0 - regular block</span>
+<span class="sd">     \n2 - outline</span>
+<span class="sd">    :ivar texture_origin: Origin position of the texture provided by the surface. When the texture</span>
+<span class="sd">        does have a pattern, for example windows or bricks, the texture_origin specifies where the</span>
+<span class="sd">        pattern should begin.</span>
+<span class="sd">    :ivar rgba: Optional color of the obstruction in form of a 4-element tuple</span>
+<span class="sd">        (ranging from 0.0 to 1.0).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oid</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">side_surfaces</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Surface</span><span class="p">,</span> <span class="n">Surface</span><span class="p">,</span> <span class="n">Surface</span><span class="p">,</span> <span class="n">Surface</span><span class="p">,</span> <span class="n">Surface</span><span class="p">,</span> <span class="n">Surface</span><span class="p">],</span>
+                 <span class="n">bound_indices</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">color_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                 <span class="n">block_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">texture_origin</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+                 <span class="n">rgba</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[()],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">()):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">oid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">side_surfaces</span> <span class="o">=</span> <span class="n">side_surfaces</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bound_indices</span> <span class="o">=</span> <span class="n">bound_indices</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">color_index</span> <span class="o">=</span> <span class="n">color_index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">block_type</span> <span class="o">=</span> <span class="n">block_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">texture_origin</span> <span class="o">=</span> <span class="n">texture_origin</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rgba</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rgba</span> <span class="o">=</span> <span class="n">rgba</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_extents</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Mesh</span><span class="p">,</span> <span class="n">Extent</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extent</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Boundary</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_post_init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extents</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extent</span> <span class="o">=</span> <span class="n">Extent</span><span class="p">(</span>
+            <span class="nb">min</span><span class="p">(</span><span class="n">vals</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">x_start</span><span class="p">)</span><span class="o">.</span><span class="n">x_start</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">vals</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">x_end</span><span class="p">)</span><span class="o">.</span><span class="n">x_end</span><span class="p">,</span>
+            <span class="nb">min</span><span class="p">(</span><span class="n">vals</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">y_start</span><span class="p">)</span><span class="o">.</span><span class="n">y_start</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">vals</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">y_end</span><span class="p">)</span><span class="o">.</span><span class="n">y_end</span><span class="p">,</span>
+            <span class="nb">min</span><span class="p">(</span><span class="n">vals</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">z_start</span><span class="p">)</span><span class="o">.</span><span class="n">z_start</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">vals</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">z_end</span><span class="p">)</span><span class="o">.</span><span class="n">z_end</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">boundary</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">boundary</span><span class="o">.</span><span class="n">extent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extent</span>
+
+    <span class="k">def</span> <span class="nf">_add_patches</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bid</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">cell_centered</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                     <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">,</span> <span class="n">patches</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Patch</span><span class="p">],</span> <span class="n">times</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">n_t</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                     <span class="n">lower_bounds</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">bid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="p">[</span><span class="n">bid</span><span class="p">]</span> <span class="o">=</span> <span class="n">Boundary</span><span class="p">(</span><span class="n">cell_centered</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">(</span><span class="n">quantity</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">unit</span><span class="p">),</span>
+                                                <span class="n">times</span><span class="p">,</span> <span class="n">n_t</span><span class="p">,</span> <span class="n">lower_bounds</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="p">[</span><span class="n">bid</span><span class="p">]</span><span class="o">.</span><span class="n">_add_patches</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">patches</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">LAZY_LOAD</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="p">[</span><span class="n">bid</span><span class="p">]</span><span class="o">.</span><span class="n">get_patches_in_mesh</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">quantities</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Quantity</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Get a list of all quantities for which boundary data exists.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">b</span><span class="o">.</span><span class="n">quantity</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+
+<div class="viewcode-block" id="Obstruction.get_boundary_data"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Obstruction.get_boundary_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_boundary_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Quantity</span><span class="p">,</span> <span class="nb">str</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">quantity</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span>
+                        <span class="n">x</span><span class="o">.</span><span class="n">quantity</span><span class="o">.</span><span class="n">quantity</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">quantity</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+        <span class="k">return</span> <span class="nb">next</span><span class="p">((</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">quantity</span> <span class="o">==</span> <span class="n">quantity</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">has_boundary_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="Obstruction.clear_cache"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Obstruction.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">bndf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">bndf</span><span class="o">.</span><span class="n">clear_cache</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="o">==</span> <span class="n">Quantity</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_boundary_data</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="p">[</span><span class="n">item</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">id</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Obstruction(id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">, extent=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span> \
+               <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;, Quantities=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">quantities</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_boundary_data</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, FZJ IAS-7 (Prof. Dr. Lukas Arnold, Jan Vogelsang)
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

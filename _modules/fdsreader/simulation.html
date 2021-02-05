@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>fdsreader.simulation &mdash; fdsreader [fdsreader, version 0.5.0] documentation</title>
+  <title>fdsreader.simulation &mdash; fdsreader [fdsreader, version 0.5.1] documentation</title>
   
 
   
@@ -218,8 +218,8 @@
 
             <span class="bp">self</span><span class="o">.</span><span class="n">meshes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Mesh</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">surfaces</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Surface</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">obstructions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Obstruction</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ventilations</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Ventilation</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obstructions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Obstruction</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ventilations</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Ventilation</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
             <span class="c1"># First collect all meta-information for any FDS data to later combine the gathered</span>
             <span class="c1"># information into data collections</span>
@@ -286,6 +286,8 @@
 
             <span class="c1"># POST INIT (post read)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">out_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chid</span> <span class="o">+</span> <span class="s2">&quot;.out&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ventilations</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Ventilation</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ventilations</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obstructions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Obstruction</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obstructions</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
             <span class="k">for</span> <span class="n">obst</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">obstructions</span><span class="p">:</span>
                 <span class="n">obst</span><span class="o">.</span><span class="n">_post_init</span><span class="p">()</span>
             <span class="c1"># Combine the gathered temporary information into data collections</span>
@@ -433,9 +435,9 @@
                 <span class="n">extent</span><span class="p">,</span> <span class="n">vent_index</span><span class="p">,</span> <span class="n">surface</span> <span class="o">=</span> <span class="n">temp_data</span><span class="p">[</span><span class="n">v</span><span class="p">]</span>
             <span class="n">bound_indices</span><span class="p">,</span> <span class="n">color_index</span><span class="p">,</span> <span class="n">draw_type</span><span class="p">,</span> <span class="n">rgba</span> <span class="o">=</span> <span class="n">read_common_info2</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">vent_index</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ventilations</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">ventilations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="n">Ventilation</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">bound_indices</span><span class="p">,</span> <span class="n">color_index</span><span class="p">,</span> <span class="n">draw_type</span><span class="p">,</span> <span class="n">rgba</span><span class="o">=</span><span class="n">rgba</span><span class="p">,</span>
-                                <span class="n">texture_origin</span><span class="o">=</span><span class="n">texture_origin</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ventilations</span><span class="p">[</span><span class="n">vent_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ventilation</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">bound_indices</span><span class="p">,</span> <span class="n">color_index</span><span class="p">,</span>
+                                                            <span class="n">draw_type</span><span class="p">,</span> <span class="n">rgba</span><span class="o">=</span><span class="n">rgba</span><span class="p">,</span>
+                                                            <span class="n">texture_origin</span><span class="o">=</span><span class="n">texture_origin</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ventilations</span><span class="p">[</span><span class="n">vent_index</span><span class="p">]</span><span class="o">.</span><span class="n">_add_subventilation</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">extent</span><span class="p">)</span>
 
         <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>

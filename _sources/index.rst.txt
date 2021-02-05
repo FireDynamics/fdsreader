@@ -13,4 +13,6 @@ Welcome to the official FDSReader API documentation!
 .. include::  isof.rst
 .. include::  plot3d.rst
 .. include::  slcf.rst
+.. include::  bndf.rst
+.. include::  part.rst
 .. include::  utils.rst

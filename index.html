@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Welcome to the official FDSReader API documentation! &mdash; fdsreader [fdsreader, version 0.5.0] documentation</title>
+  <title>Welcome to the official FDSReader API documentation! &mdash; fdsreader [fdsreader, version 0.5.1] documentation</title>
   
 
   
@@ -86,6 +86,8 @@
 <li><a class="reference internal" href="#isosurface-files">Isosurface files</a></li>
 <li><a class="reference internal" href="#plot3d-files">Plot3D files</a></li>
 <li><a class="reference internal" href="#slice-files">Slice files</a></li>
+<li><a class="reference internal" href="#id3">Slice files</a></li>
+<li><a class="reference internal" href="#id5">Slice files</a></li>
 <li><a class="reference internal" href="#utilities">Utilities</a></li>
 </ul>
 </li>
@@ -233,7 +235,22 @@ the same directory.</p>
 
 <dl class="py method">
 <dt>
+<em class="property">property </em><code class="sig-name descname">surfaces</code></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt>
 <em class="property">property </em><code class="sig-name descname">times</code></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">triangles</code></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">vertices</code></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -282,7 +299,7 @@ The list has the size n_triangles, while the indices correspond to indices of th
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname">triangles</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/isof/isosurface.html#SubSurface.triangles"><span class="viewcode-link">[source]</span></a></dt>
+<em class="property">property </em><code class="sig-name descname">triangles</code></dt>
 <dd><p>Property to lazy load all triangles of any level.</p>
 </dd></dl>
 
@@ -464,9 +481,185 @@ slice with the corresponding label and unit.</p></li>
 </dd></dl>
 
 </div>
+<div class="section" id="id3">
+<h2>Slice files<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="id4"></span><dl class="py class">
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">fdsreader.bndf.obstruction.</code><code class="sig-name descname">Boundary</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cell_centered</span><span class="p">:</span> <span class="n">bool</span></em>, <em class="sig-param"><span class="n">quantity</span><span class="p">:</span> <span class="n">fdsreader.utils.data.Quantity</span></em>, <em class="sig-param"><span class="n">times</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">n_t</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">lower_bounds</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">upper_bounds</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Boundary"><span class="viewcode-link">[source]</span></a></dt>
+<dd><dl class="py method">
+<dt>
+<code class="sig-name descname">clear_cache</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Boundary.clear_cache"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Remove all data from the internal cache that has been loaded so far to free memory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">faces</code></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">get_patches_in_mesh</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mesh</span><span class="p">:</span> <span class="n">fdsreader.utils.fds_classes.mesh.Mesh</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Boundary.get_patches_in_mesh"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">static </em><code class="sig-name descname">sort_patches_cartesian</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">patches_in</span><span class="p">:</span> <span class="n">List<span class="p">[</span>fdsreader.bndf.obstruction.Patch<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Boundary.sort_patches_cartesian"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Returns all patches (of same orientation!) sorted in cartesian coordinates.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">fdsreader.bndf.obstruction.</code><code class="sig-name descname">Obstruction</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">oid</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">side_surfaces</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>fdsreader.utils.fds_classes.surface.Surface<span class="p">, </span>fdsreader.utils.fds_classes.surface.Surface<span class="p">, </span>fdsreader.utils.fds_classes.surface.Surface<span class="p">, </span>fdsreader.utils.fds_classes.surface.Surface<span class="p">, </span>fdsreader.utils.fds_classes.surface.Surface<span class="p">, </span>fdsreader.utils.fds_classes.surface.Surface<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">bound_indices</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">color_index</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">block_type</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">texture_origin</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">rgba</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Tuple<span class="p">[</span><span class="p">(</span><span class="p">)</span><span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Obstruction"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>A box-shaped obstruction with specific surfaces (materials) on each side.</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">ivar id</dt>
+<dd class="field-odd"><p>ID of the obstruction.</p>
+</dd>
+<dt class="field-even">ivar side_surfaces</dt>
+<dd class="field-even"><p>Tuple of six surfaces for each side of the cuboid.</p>
+</dd>
+<dt class="field-odd">ivar bound_indices</dt>
+<dd class="field-odd"><p>Indices used to define obstruction bounds in terms of mesh locations.</p>
+</dd>
+<dt class="field-even">ivar color_index</dt>
+<dd class="field-even"><p>Type of coloring used to color obstruction.</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>-1 - default color</p>
+<p>-2 - invisible</p>
+<p>-3 - use red, green, blue and alpha (rgba attribute)</p>
+<dl class="simple">
+<dt>n&gt;0 - use n’th color table entry</dt><dd><dl class="field-list simple">
+<dt class="field-odd">ivar block_type</dt>
+<dd class="field-odd"><p>Defines how the obstruction is drawn.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>-1 - use surface to obtain blocktype</p>
+<p>0 - regular block</p>
+<dl class="simple">
+<dt>2 - outline</dt><dd><dl class="field-list simple">
+<dt class="field-odd">ivar texture_origin</dt>
+<dd class="field-odd"><p>Origin position of the texture provided by the surface. When the texture
+does have a pattern, for example windows or bricks, the texture_origin specifies where the
+pattern should begin.</p>
+</dd>
+<dt class="field-even">ivar rgba</dt>
+<dd class="field-even"><p>Optional color of the obstruction in form of a 4-element tuple
+(ranging from 0.0 to 1.0).</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt>
+<code class="sig-name descname">clear_cache</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Obstruction.clear_cache"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Remove all data from the internal cache that has been loaded so far to free memory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname">get_boundary_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">quantity</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>fdsreader.utils.data.Quantity<span class="p">, </span>str<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Obstruction.get_boundary_data"><span class="viewcode-link">[source]</span></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">has_boundary_data</code></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">quantities</code></dt>
+<dd><p>Get a list of all quantities for which boundary data exists.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">fdsreader.bndf.obstruction.</code><code class="sig-name descname">Patch</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_path</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">dimension</span><span class="p">:</span> <span class="n">fdsreader.utils.dimension.Dimension</span></em>, <em class="sig-param"><span class="n">extent</span><span class="p">:</span> <span class="n">fdsreader.utils.extent.Extent</span></em>, <em class="sig-param"><span class="n">orientation</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">cell_centered</span><span class="p">:</span> <span class="n">bool</span></em>, <em class="sig-param"><span class="n">initial_offset</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">n_t</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Patch"><span class="viewcode-link">[source]</span></a></dt>
+<dd><dl class="simple">
+<dt>Container for the actual data which is stored as rectangular plane with specific orientation</dt><dd><p>and extent.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>extent</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">Extent</span></code> object containing 3-dimensional extent information.</p></li>
+<li><p><strong>orientation</strong> – The direction the patch is facing (x={-1;1}, y={-2;2}, z={-3;3}).</p></li>
+<li><p><strong>data</strong> – Numpy ndarray with the actual data.</p></li>
+<li><p><strong>n_t</strong> – Total number of time steps for which output data has been written.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt>
+<code class="sig-name descname">clear_cache</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Patch.clear_cache"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Remove all data from the internal cache that has been loaded so far to free memory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">data</code></dt>
+<dd><p>Method to load the quantity data for a single patch for a single timestep.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">shape</code></dt>
+<dd><p>Convenience function to calculate the shape of the array containing data for this patch.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="id5">
+<h2>Slice files<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="id6"></span><dl class="py class">
+<dt>
+<em class="property">class </em><code class="sig-prename descclassname">fdsreader.part.particle.</code><code class="sig-name descname">Particle</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">class_name</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">quantities</span><span class="p">:</span> <span class="n">List<span class="p">[</span>fdsreader.utils.data.Quantity<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">color</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/part/particle.html#Particle"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Container to store particle data from particle simulations with FDS.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>class_name</strong> – Name of the particle class defined in the FDS input-file.</p></li>
+<li><p><strong>quantities</strong> – List of all quantities for which data has been written out.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt>
+<code class="sig-name descname">clear_cache</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/part/particle.html#Particle.clear_cache"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Remove all data from the internal cache that has been loaded so far to free memory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">data</code></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">positions</code></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">tags</code></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
 <div class="section" id="utilities">
 <h2>Utilities<a class="headerlink" href="#utilities" title="Permalink to this headline">¶</a></h2>
-<span class="target" id="id3"></span><dl class="py class">
+<span class="target" id="id7"></span><dl class="py class">
 <dt>
 <em class="property">class </em><code class="sig-prename descclassname">fdsreader.utils.fds_classes.mesh.</code><code class="sig-name descname">Mesh</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">coordinates</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>numpy.ndarray<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">extents</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">mesh_id</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/fds_classes/mesh.html#Mesh"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>3-dimensional Mesh of fixed, defined size.</p>
