@@ -58,6 +58,7 @@ class SubSurface:
                 self._load_data(infile)
         return self._vertices
 
+    @property
     def triangles(self):
         """Property to lazy load all triangles of any level.
         """
@@ -207,6 +208,18 @@ class Isosurface:
         """Returns the :class:`SubSurface` that contains data for the given mesh.
         """
         return self._subsurfaces[mesh]
+
+    @property
+    def vertices(self):
+        return {key: subsurface.vertices for key, subsurface in self._subsurfaces.items()}
+
+    @property
+    def surfaces(self):
+        return {key: subsurface.surfaces for key, subsurface in self._subsurfaces.items()}
+
+    @property
+    def triangles(self):
+        return {key: subsurface.triangles for key, subsurface in self._subsurfaces.items()}
 
     @property
     def has_color_data(self):

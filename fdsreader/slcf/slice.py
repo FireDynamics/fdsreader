@@ -52,11 +52,7 @@ class SubSlice:
     @property
     def shape(self) -> Tuple:
         shape = self.dimension.shape(cell_centered=self.parent_slice.cell_centered)
-        if self.parent_slice.orientation == 1:
-            return shape[1], shape[2]
-        elif self.parent_slice.orientation == 2:
-            return shape[0], shape[2]
-        elif self.parent_slice.orientation == 3:
+        if self.parent_slice.orientation != 0:
             return shape[0], shape[1]
         return shape
 

@@ -2,13 +2,13 @@ from fdsreader import Simulation
 
 
 def main():
-    sim = Simulation("C:\\Users\\janv1\\Desktop\\fds\\sample_data\\fds_demo")
+    sim = Simulation("../../examples/isof/fds_data")
 
-    mesh = sim.meshes[1]
+    mesh = sim.meshes[0]
 
     isosurfaces = sim.isosurfaces
 
-    print(isosurfaces[0].get_subsurface(mesh).vertices[20].shape)
+    print(isosurfaces[0].vertices[mesh])
 
 
 if __name__ == "__main__":

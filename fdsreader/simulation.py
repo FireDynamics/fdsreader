@@ -72,8 +72,8 @@ class Simulation:
 
             self.meshes: List[Mesh] = list()
             self.surfaces: List[Surface] = list()
-            self.obstructions: List[Obstruction] = list()
-            self.ventilations: List[Ventilation] = list()
+            self.obstructions: Dict[int, Obstruction] = dict()
+            self.ventilations: Dict[int, Ventilation] = dict()
 
             # First collect all meta-information for any FDS data to later combine the gathered
             # information into data collections
@@ -140,6 +140,8 @@ class Simulation:
 
             # POST INIT (post read)
             self.out_file_path = os.path.join(self.root_path, self.chid + ".out")
+            self.ventilations: List[Ventilation] = list(self.ventilations.values())
+            self.obstructions: List[Obstruction] = list(self.obstructions.values())
             for obst in self.obstructions:
                 obst._post_init()
             # Combine the gathered temporary information into data collections
@@ -287,9 +289,9 @@ class Simulation:
                 extent, vent_index, surface = temp_data[v]
             bound_indices, color_index, draw_type, rgba = read_common_info2()
             if vent_index not in self.ventilations:
-                self.ventilations.append(
-                    Ventilation(surface, bound_indices, color_index, draw_type, rgba=rgba,
-                                texture_origin=texture_origin))
+                self.ventilations[vent_index] = Ventilation(surface, bound_indices, color_index,
+                                                            draw_type, rgba=rgba,
+                                                            texture_origin=texture_origin)
             self.ventilations[vent_index]._add_subventilation(mesh, extent)
 
         smv_file.readline()

@@ -10,7 +10,7 @@ def main():
 
     vmin = np.finfo(np.float32).max
     vmax = np.finfo(np.float32).min
-    for obst in sim.obstructions.values():
+    for obst in sim.obstructions:
         bndf_data = obst.get_boundary_data(quantity)
         vmin = np.min((np.min(bndf_data.lower_bounds), vmin))
         vmax = np.max((np.max(bndf_data.upper_bounds), vmax))
@@ -18,9 +18,9 @@ def main():
     vmax = np.max((25, vmax))
 
     plt.title(quantity.label + "in" + quantity.unit)
-    if len(sim.obstructions.values()) > 1:
+    if len(sim.obstructions) > 1:
         fig, ax = plt.subplots(nrows=len(sim.obstructions), ncols=6)
-        for i, obst in enumerate(sim.obstructions.values()):
+        for i, obst in enumerate(sim.obstructions):
             bndf_data = obst.get_boundary_data(quantity)
             if bndf_data is None:
                 continue

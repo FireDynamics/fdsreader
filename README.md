@@ -41,6 +41,8 @@ print(sim.meshes, sim.meshes[0].obstructions, sim.surfaces, sim.slices, sim.boun
     * (Entering alpha status after extensive private testing in pre-alpha stage)
     
 ### Pre-Alpha *(current stage)*
+* 0.5.1
+    * Several bugfixes and improvements
 * 0.5.0
     * Preparing for alpha release
     * Usability improvements for simulation

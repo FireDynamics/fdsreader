@@ -17,8 +17,8 @@ def main():
     subslice = slc[mesh]
 
     sslc_data = subslice.data
-
-    plt.imshow(subslice.data[-1])
+    # Todo: Animation
+    plt.imshow(sslc_data[-1].T, origin="lower")
     plt.colorbar()
     plt.show()
 
