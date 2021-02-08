@@ -1,4 +1,3 @@
-from operator import add
 from typing import List, Dict, Tuple, Union, Literal
 import numpy as np
 
@@ -55,8 +54,12 @@ class Patch:
             with open(self.file_path, 'rb') as infile:
                 for t in range(self.n_t):
                     infile.seek(self.initial_offset + t * self.time_offset)
-                    self._data[t, :] = np.fromfile(infile, dtype_data, 1)[0][1].reshape(
-                        self.dimension.shape(cell_centered=False), order='F')[:-1, :-1]
+                    data = np.fromfile(infile, dtype_data, 1)[0][1].reshape(
+                        self.dimension.shape(cell_centered=False), order='F')
+                    if self.cell_centered:
+                        self._data[t, :] = data[:-1, :-1]
+                    else:
+                        self._data[t, :] = data
         return self._data
 
     def clear_cache(self):
@@ -71,19 +74,22 @@ class Patch:
 
 class Boundary:
     def __init__(self, cell_centered: bool, quantity: Quantity, times: np.ndarray, n_t: int,
-                 lower_bounds: np.ndarray, upper_bounds: np.ndarray):
+                 lower_bounds: np.ndarray, upper_bounds: np.ndarray, initial_mesh: Mesh):
         self.cell_centered = cell_centered
         self.quantity = quantity
         self.times = times
-        self.lower_bounds = lower_bounds
-        self.upper_bounds = upper_bounds
+        self.lower_bounds = {initial_mesh: lower_bounds}
+        self.upper_bounds = {initial_mesh: upper_bounds}
         self.n_t = n_t
         self.extent = None
 
         self._patches: Dict[Mesh, List[Patch]] = dict()
 
-    def _add_patches(self, mesh: Mesh, patches: List[Patch]):
+    def _add_patches(self, mesh: Mesh, patches: List[Patch], lower_bounds: np.ndarray,
+                     upper_bounds: np.ndarray, ):
         self._patches[mesh] = patches
+        self.lower_bounds[mesh] = lower_bounds
+        self.upper_bounds[mesh] = upper_bounds
 
     @staticmethod
     def sort_patches_cartesian(patches_in: List[Patch]):
@@ -130,6 +136,20 @@ class Boundary:
         if not hasattr(self, "_faces"):
             self._prepare_faces()
         return self._faces
+
+    @property
+    def vmin(self):
+        curr_min = min(np.min(b) for b in self.lower_bounds.values())
+        if curr_min == 0.0:
+            return min(min(np.min(p.data) for p in ps) for ps in self._patches.values())
+        return curr_min
+
+    @property
+    def vmax(self):
+        curr_max = max(np.max(b) for b in self.upper_bounds.values())
+        if curr_max == np.float32(-1e33):
+            return max(max(np.max(p.data) for p in ps) for ps in self._patches.values())
+        return curr_max
 
     def _prepare_faces(self):
         patches_for_face = {-3: list(), -2: list(), -1: list(), 1: list(), 2: list(), 3: list()}
@@ -230,8 +250,8 @@ class Obstruction:
                      lower_bounds: np.ndarray, upper_bounds: np.ndarray):
         if bid not in self._boundary_data:
             self._boundary_data[bid] = Boundary(cell_centered, Quantity(quantity, label, unit),
-                                                times, n_t, lower_bounds, upper_bounds)
-        self._boundary_data[bid]._add_patches(mesh, patches)
+                                                times, n_t, lower_bounds, upper_bounds, mesh)
+        self._boundary_data[bid]._add_patches(mesh, patches, lower_bounds, upper_bounds)
 
         if not settings.LAZY_LOAD:
             self._boundary_data[bid].get_patches_in_mesh(mesh)

@@ -411,8 +411,8 @@ class Simulation:
                 lower_bounds.append(float(splits[1]))
                 upper_bounds.append(float(splits[2]))
         times = np.array(times)
-        lower_bounds = np.array(times, dtype=np.float32)
-        upper_bounds = np.array(times, dtype=np.float32)
+        lower_bounds = np.array(lower_bounds, dtype=np.float32)
+        upper_bounds = np.array(upper_bounds, dtype=np.float32)
         n_t = times.shape[0]
 
         with open(file_path, 'rb') as infile:
