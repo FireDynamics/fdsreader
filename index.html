@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Welcome to the official FDSReader API documentation! &mdash; fdsreader [fdsreader, version 0.5.2] documentation</title>
+  <title>Welcome to the official FDSReader API documentation! &mdash; fdsreader [fdsreader, version 0.5.3] documentation</title>
   
 
   
@@ -485,7 +485,7 @@ slice with the corresponding label and unit.</p></li>
 <h2>Slice files<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="id4"></span><dl class="py class">
 <dt>
-<em class="property">class </em><code class="sig-prename descclassname">fdsreader.bndf.obstruction.</code><code class="sig-name descname">Boundary</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cell_centered</span><span class="p">:</span> <span class="n">bool</span></em>, <em class="sig-param"><span class="n">quantity</span><span class="p">:</span> <span class="n">fdsreader.utils.data.Quantity</span></em>, <em class="sig-param"><span class="n">times</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">n_t</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">lower_bounds</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">upper_bounds</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Boundary"><span class="viewcode-link">[source]</span></a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">fdsreader.bndf.obstruction.</code><code class="sig-name descname">Boundary</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cell_centered</span><span class="p">:</span> <span class="n">bool</span></em>, <em class="sig-param"><span class="n">quantity</span><span class="p">:</span> <span class="n">fdsreader.utils.data.Quantity</span></em>, <em class="sig-param"><span class="n">times</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">n_t</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">lower_bounds</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">upper_bounds</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">initial_mesh</span><span class="p">:</span> <span class="n">fdsreader.utils.fds_classes.mesh.Mesh</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Boundary"><span class="viewcode-link">[source]</span></a></dt>
 <dd><dl class="py method">
 <dt>
 <code class="sig-name descname">clear_cache</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Boundary.clear_cache"><span class="viewcode-link">[source]</span></a></dt>
@@ -507,6 +507,16 @@ slice with the corresponding label and unit.</p></li>
 <em class="property">static </em><code class="sig-name descname">sort_patches_cartesian</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">patches_in</span><span class="p">:</span> <span class="n">List<span class="p">[</span>fdsreader.bndf.obstruction.Patch<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Boundary.sort_patches_cartesian"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Returns all patches (of same orientation!) sorted in cartesian coordinates.</p>
 </dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">vmax</code></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property">property </em><code class="sig-name descname">vmin</code></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
