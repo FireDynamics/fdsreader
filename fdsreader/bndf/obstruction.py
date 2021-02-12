@@ -264,9 +264,9 @@ class Obstruction:
 
     def get_boundary_data(self, quantity: Union[Quantity, str]):
         if type(quantity) == str:
-            return next(x for x in self._boundary_data.values() if
+            return next((x for x in self._boundary_data.values() if
                         x.quantity.quantity.lower() == quantity.lower() or
-                        x.quantity.label.lower() == quantity.lower())
+                        x.quantity.label.lower() == quantity.lower()), None)
         return next((x for x in self._boundary_data.values() if x.quantity == quantity), None)
 
     @property

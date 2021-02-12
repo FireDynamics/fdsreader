@@ -1,7 +1,10 @@
+import operator
 import os
-from typing import BinaryIO, Dict
+from functools import reduce
+from typing import BinaryIO, Dict, Union, List, Tuple
 
 import numpy as np
+from pyvista import PolyData
 
 from fdsreader.utils import Quantity, Mesh
 from fdsreader import settings
@@ -20,7 +23,7 @@ class SubSurface:
     :ivar _offset: Offset of the binary file to the end of the file header.
     """
 
-    def __init__(self, mesh: Mesh, iso_filepath: str, viso_filepath: str = ""):
+    def __init__(self, mesh: Mesh, iso_filepath: str, times: List, viso_filepath: str = ""):
         self.mesh = mesh
 
         self.file_path = iso_filepath
@@ -37,7 +40,7 @@ class SubSurface:
             self._offset = fdtype.INT.itemsize * 3 + dtype_header_levels.itemsize + \
                            dtype_header_zeros.itemsize
 
-            self.times = list()
+            self.times = times
             self.n_vertices = list()
             self.n_triangles = list()
 
@@ -103,9 +106,9 @@ class SubSurface:
         dtype_time = fdtype.new((('f', 1), ('i', 1)))
         dtype_dims = fdtype.new((('i', 2),))
 
-        vertices = list()
-        triangles = list()
-        surfaces = list()
+        self._vertices = list()
+        self._triangles = list()
+        self._surfaces = list()
 
         infile.seek(self._offset)
         time_data = fdtype.read(infile, dtype_time, 1)
@@ -123,20 +126,23 @@ class SubSurface:
                 dtype_surfaces = fdtype.new((('i', n_triangles),))
 
                 # Todo: Check for "order='F'"
-                vertices.append(
-                    fdtype.read(infile, dtype_vertices, 1)[0][0].reshape((n_vertices, 3)))
-                triangles.append(
-                    fdtype.read(infile, dtype_triangles, 1)[0][0].reshape((n_triangles, 3)))
-                surfaces.append(fdtype.read(infile, dtype_surfaces, 1)[0][0])
-
+                self._vertices.append(
+                    fdtype.read(infile, dtype_vertices, 1)[0][0].reshape((n_vertices, 3)).astype(
+                        float))
+                self._triangles.append(
+                    fdtype.read(infile, dtype_triangles, 1)[0][0].reshape((n_triangles, 3)).astype(
+                        int) - 1)
+                self._surfaces.append(fdtype.read(infile, dtype_surfaces, 1)[0][0].astype(int) - 1)
                 self.n_vertices.append(n_vertices)
                 self.n_triangles.append(n_triangles)
+            else:
+                self._vertices.append(np.empty((0, 3)))
+                self._triangles.append(np.empty((0, 3)))
+                self._surfaces.append(np.empty((0,)))
+                self.n_vertices.append(0)
+                self.n_triangles.append(0)
 
             time_data = fdtype.read(infile, dtype_time, 1)
-
-        self._vertices = np.array(vertices, dtype=object)
-        self._triangles = np.array(triangles, dtype=object)
-        self._surfaces = np.array(surfaces, dtype=object)
 
         self.n_t = len(self.times)
 
@@ -187,7 +193,7 @@ class Isosurface:
         self.quantity = Quantity(quantity, label, unit)
         self._double_quantity = double_quantity
 
-        self._times = None
+        self._times = list()
 
         self._subsurfaces: Dict[Mesh, SubSurface] = dict()
 
@@ -196,42 +202,112 @@ class Isosurface:
 
     def _add_subsurface(self, mesh: Mesh, iso_filename: str, viso_filename: str = "") -> SubSurface:
         if viso_filename != "":
-            subsurface = SubSurface(mesh, os.path.join(self.root_path, iso_filename),
+            subsurface = SubSurface(mesh, os.path.join(self.root_path, iso_filename), self._times,
                                     os.path.join(self.root_path, viso_filename))
         else:
-            subsurface = SubSurface(mesh, os.path.join(self.root_path, iso_filename))
+            subsurface = SubSurface(mesh, os.path.join(self.root_path, iso_filename), self._times)
         self._subsurfaces[mesh] = subsurface
 
         return subsurface
 
-    def __getitem__(self, mesh: Mesh):
+    def __getitem__(self, mesh: Mesh) -> SubSurface:
         """Returns the :class:`SubSurface` that contains data for the given mesh.
         """
         return self._subsurfaces[mesh]
 
     @property
-    def vertices(self):
+    def vertices(self) -> Dict[Mesh, List[np.ndarray]]:
         return {key: subsurface.vertices for key, subsurface in self._subsurfaces.items()}
 
     @property
-    def surfaces(self):
-        return {key: subsurface.surfaces for key, subsurface in self._subsurfaces.items()}
-
-    @property
-    def triangles(self):
+    def triangles(self) -> Dict[Mesh, List[np.ndarray]]:
         return {key: subsurface.triangles for key, subsurface in self._subsurfaces.items()}
 
     @property
-    def has_color_data(self):
+    def surfaces(self) -> Dict[Mesh, List[np.ndarray]]:
+        return {key: subsurface.surfaces for key, subsurface in self._subsurfaces.items()}
+
+    def to_global(self, time: Union[int, float]) -> Tuple[np.ndarray, List[np.ndarray]]:
+        """Creates an array containing all global vertices and a list containing numpy arrays with
+            triangles for each surface level.
+
+        :param time: Either the index of the timestep or an actual time value. In the latter case
+            data for the nearest matching timestep will be used.
+        """
+        if type(time) == float:
+            time = self.get_nearest_timestep(time)
+
+        if time > len(self.times):
+            time = len(self.times) - 1
+        if time < 0:
+            time = 0
+
+        n_vertices = sum(
+            x[time].shape[0] if len(x[time].shape) > 0 else 0 for x in self.vertices.values())
+        vertices = np.empty((n_vertices, 3))
+        verts_counter = 0
+        for mesh in self._subsurfaces.keys():
+            tmp = verts_counter
+            verts = self.vertices[mesh][time]
+            verts_counter += verts.shape[0]
+            vertices[tmp:verts_counter] = verts + tmp
+
+        triangles = list()
+        num_levels = max(
+            max(np.max(t) if t.shape[0] != 0 else 0 for t in s) for s in self.surfaces.values()) + 1
+        for surf in range(num_levels):
+            n_triangles = sum(np.count_nonzero(s[time] == surf) for s in self.surfaces.values())
+            triangles.append(np.empty((n_triangles, 3), dtype=int))
+            tris_counter = 0
+            if n_triangles > 0:
+                for mesh in self._subsurfaces.keys():
+                    tmp = tris_counter
+                    tris = self.triangles[mesh][time][self.surfaces[mesh][time] == surf]
+                    tris_counter += tris.shape[0]
+                    triangles[surf][tmp:tris_counter] = tris + tmp
+
+        return vertices, triangles
+
+    def get_pyvista_mesh(self, vertices: np.ndarray, triangles: np.ndarray) -> PolyData:
+        """Creates a PyVista mesh from the data.
+        """
+        return PolyData(vertices, triangles)
+
+    def join_pyvista_meshes(self, meshes: List[PolyData]):
+        return reduce(operator.add, meshes)
+
+    def export(self, file_path: str, time: Union[int, float]):
+        """Export the isosurface for a single timestep into one of many formats.
+
+        :param file_path: Absolute path to the the file which should we written. The file ending
+            denotes the file format to export to (supports pretty much every common format).
+        :param time: Either the index of the timestep or an actual time value. In the latter case
+            data for the nearest matching timestep will be used.
+        """
+        if "vtk" in file_path or "vtp" in file_path:
+            return self.get_pyvista_mesh(time).save(file_path)
+        else:
+            return self.get_pyvista_mesh(time).save_meshio(file_path)
+
+    def get_nearest_timestep(self, time: float) -> int:
+        idx = np.searchsorted(self.times, time, side="left")
+        if time > 0 and (idx == len(self.times) or np.math.fabs(
+                time - self.times[idx - 1]) < np.math.fabs(time - self.times[idx])):
+            return idx - 1
+        else:
+            return idx
+
+    @property
+    def has_color_data(self) -> bool:
         """Defines whether there is color data for this isosurface or not.
         """
         return self._double_quantity
 
     @property
-    def times(self):
-        if not hasattr(self, "_times"):
+    def times(self) -> List[float]:
+        if len(self._times) == 0:
             # Implicitly load the data for one subsurface and read times
-            _ = self._subsurfaces[0].vertices
+            _ = next(iter(self._subsurfaces.values())).vertices
         return self._times
 
     def clear_cache(self):

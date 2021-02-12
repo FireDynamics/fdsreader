@@ -10,8 +10,8 @@ from fdsreader.isof import Isosurface
 from fdsreader.isof.IsosurfaceCollection import IsosurfaceCollection
 from fdsreader.part import Particle
 from fdsreader.part.ParticleCollection import ParticleCollection
-from fdsreader.plot3d import Plot3D
-from fdsreader.plot3d.Plot3dCollection import Plot3DCollection
+from fdsreader.pl3d import Plot3D
+from fdsreader.pl3d.Plot3dCollection import Plot3DCollection
 from fdsreader.slcf import Slice
 from fdsreader.slcf.SliceCollection import SliceCollection
 from fdsreader.utils import Mesh, Dimension, Surface, Quantity, Ventilation, Extent
@@ -130,7 +130,7 @@ class Simulation:
                         self._load_slice(smv_file, keyword)
                     elif "ISOG" in keyword:
                         self._load_isosurface(smv_file, keyword)
-                    elif keyword == "PL3D":
+                    elif "PL3D" in keyword:
                         self._load_data_3d(smv_file, keyword)
                     elif "BND" in keyword:
                         self._load_boundary_data(smv_file, keyword)
@@ -451,7 +451,7 @@ class Simulation:
                                                     p, times, n_t, lower_bounds, upper_bounds)
 
     def _load_data_3d(self, smv_file: TextIO, line: str):
-        """Loads the plot3d at current pointer position.
+        """Loads the pl3d at current pointer position.
         """
         # Todo: Also read SMOKG3D data?
         line = line.strip().split()

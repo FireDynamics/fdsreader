@@ -41,6 +41,12 @@ print(sim.meshes, sim.meshes[0].obstructions, sim.surfaces, sim.slices, sim.boun
     * (Entering alpha status after extensive private testing in pre-alpha stage)
     
 ### Pre-Alpha *(current stage)*
+* 0.6.0
+    * Added part example
+    * Added pl3d example
+    * Added slcf example
+    * Added two bndf examples
+    * Added isof example
 * 0.5.3
     * Usability improvements for bndf
 * 0.5.2
@@ -76,7 +82,7 @@ print(sim.meshes, sim.meshes[0].obstructions, sim.surfaces, sim.slices, sim.boun
     * Added multimesh isof support
     * Improved slcf stability
 * 0.4.4
-    * Bugfixes (bndf and plot3d)
+    * Bugfixes (bndf and pl3d)
 * 0.4.3
     * Bugfixes (slcf and isof)
 * 0.4.2
@@ -86,9 +92,9 @@ print(sim.meshes, sim.meshes[0].obstructions, sim.surfaces, sim.slices, sim.boun
 * 0.4.0
     * Added bndf support (boundaries)
 * 0.3.0
-    * Added multimesh plot3D support
+    * Added multimesh pl3d support
 * 0.3.0
-    * Added basic plot3D support
+    * Added basic pl3d support
 * 0.2.0
     * Added isof support (isosurfaces)
 * 0.1.2

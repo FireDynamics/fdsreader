@@ -55,7 +55,7 @@ class ParticleCollection(FDSDataCollection):
                         dtype_positions = fdtype.new((('f', 3 * n_particles),))
                         particle._positions.append(
                             fdtype.read(infile, dtype_positions, 1)[0][0].reshape(
-                                (n_particles, 3), order='F'))
+                                (n_particles, 3), order='F').astype(float))
 
                         # Read tags
                         dtype_tags = fdtype.new((('i', n_particles),))
@@ -67,7 +67,7 @@ class ParticleCollection(FDSDataCollection):
                         data_raw = fdtype.read(infile, dtype_data, 1)[0][0].reshape(
                             (n_particles, len(particle.quantities)), order='F')
                         for q, quantity in enumerate(particle.quantities):
-                            particle._data[quantity.quantity].append(data_raw[:, q])
+                            particle._data[quantity.quantity].append(data_raw[:, q].astype(float))
 
     def __getitem__(self, key):
         if type(key) == int:

@@ -24,10 +24,14 @@ class Mesh:
         """
         self.id = mesh_id
         self.coordinates = coordinates
+        # self.dimension = Dimension(
+        #     coordinates['x'].size - 1 if coordinates['x'].size - 1 > 1 else 0,
+        #     coordinates['y'].size - 1 if coordinates['y'].size - 1 > 1 else 0,
+        #     coordinates['z'].size - 1 if coordinates['z'].size - 1 > 1 else 0)
         self.dimension = Dimension(
-            coordinates['x'].size - 1 if coordinates['x'].size - 1 > 1 else 0,
-            coordinates['y'].size - 1 if coordinates['y'].size - 1 > 1 else 0,
-            coordinates['z'].size - 1 if coordinates['z'].size - 1 > 1 else 0)
+            coordinates['x'].size if coordinates['x'].size > 0 else 1,
+            coordinates['y'].size if coordinates['y'].size > 0 else 1,
+            coordinates['z'].size if coordinates['z'].size > 0 else 1)
 
         self.n_size = self.dimension.size()
         self.extent = Extent(extents['x'][0], extents['x'][1], extents['y'][0], extents['y'][1],
