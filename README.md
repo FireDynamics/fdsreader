@@ -18,7 +18,7 @@ import fdsreader as fds
 sim = fds.Simulation("./sample_data")
 
 # Examples of data that can be easily accessed
-print(sim.meshes, sim.meshes[0].obstructions, sim.surfaces, sim.slices, sim.boundaries, sim.data_3d, sim.isosurfaces)
+print(sim.meshes, sim.surfaces, sim.slices, sim.data_3d, sim.isosurfaces, sim.particles, sim.obstructions, sim.obstructions[0].get_boundary_data("temperature"))
 ```
 
 ### Data structure
@@ -36,11 +36,13 @@ print(sim.meshes, sim.meshes[0].obstructions, sim.surfaces, sim.slices, sim.boun
 * (unreleased) 0.9.0
     * (Entering beta status after extensive testing with selected participants in alpha stage)
     
-### Alpha *(01/2021)*
+### Alpha *(02/2021)*
 * (unreleased) 0.x.0
     * (Entering alpha status after extensive private testing in pre-alpha stage)
     
 ### Pre-Alpha *(current stage)*
+* 0.6.1
+    * Added multimesh part support
 * 0.6.0
     * Added part example
     * Added pl3d example

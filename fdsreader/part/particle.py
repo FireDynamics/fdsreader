@@ -1,6 +1,6 @@
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
-from fdsreader.utils import Quantity
+from fdsreader.utils import Quantity, Mesh
 
 
 class Particle:
@@ -8,15 +8,18 @@ class Particle:
 
     :ivar class_name: Name of the particle class defined in the FDS input-file.
     :ivar quantities: List of all quantities for which data has been written out.
+    :ivar color: Color assigned to the particle.
+    :ivar n_particles: Number of existing particles for each timestep per mesh.
     """
 
     def __init__(self, class_name: str, quantities: List[Quantity], color: Tuple[float, float, float]):
         self.class_name = class_name
         self.quantities = quantities
         self.color = color
+        self.n_particles: Dict[Mesh, List[int]] = dict()
 
-        self._positions = list()
-        self._tags = list()
+        self._positions = None
+        self._tags = None
         self._data = {q.quantity: [] for q in self.quantities}
 
         self.lower_bounds = {q.quantity: [] for q in self.quantities}
@@ -28,7 +31,7 @@ class Particle:
     def data(self):
         """
         """
-        if len(self._positions) == 0:
+        if self._positions is None:
             self._init_callback()
         return self._data
 
@@ -36,7 +39,7 @@ class Particle:
     def tags(self):
         """
         """
-        if len(self._positions) == 0:
+        if self._positions is None:
             self._init_callback()
         return self._tags
 
@@ -44,7 +47,7 @@ class Particle:
     def positions(self):
         """
         """
-        if len(self._positions) == 0:
+        if self._positions is None:
             self._init_callback()
         return self._positions
 

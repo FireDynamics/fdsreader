@@ -442,7 +442,8 @@ class Simulation:
                     if obst_id not in patches:
                         patches[obst_id] = list()
                     patches[obst_id].append(p)
-                patch_offset += fdtype.new((('f', str(p.dimension.shape(cell_centered=False))),)).itemsize
+                patch_offset += fdtype.new(
+                    (('f', str(p.dimension.shape(cell_centered=False))),)).itemsize
 
         for obst_id, p in patches.items():
             for patch in p:
@@ -520,26 +521,29 @@ class Simulation:
             quantities.append(Quantity(quantity, label, unit))
         return Particle(particle_class, quantities, color)
 
-    def _load_particle_meta(self, particles: List[Particle], file_path: str) -> List[float]:
+    def _load_particle_meta(self, particles: Union[List[Particle], ParticleCollection], file_path: str, mesh: Mesh) -> \
+    List[float]:
         with open(file_path, 'r') as bnd_file:
             line = bnd_file.readline().strip().split()
             n_classes = int(line[1])
             times = list()
             n_q = list()
-            for _ in range(n_classes):
+            for i in range(n_classes):
                 line = bnd_file.readline().strip().split()
                 n_q.append(int(line[0]))
                 for _ in range(n_q[-1]):
                     bnd_file.readline()
+                particles[i].n_particles[mesh] = list()
             bnd_file.seek(0)
 
             for line in bnd_file:
                 times.append(float(line.strip().split()[0]))
                 for i in range(n_classes):
-                    bnd_file.readline()
+                    particle = particles[i]
+                    particle.n_particles[mesh].append(
+                        int(bnd_file.readline().strip().split()[1].strip()))
                     for q in range(n_q[i]):
                         line = bnd_file.readline().strip().split()
-                        particle = particles[i]
                         quantity = particle.quantities[q].quantity
                         particle.lower_bounds[quantity].append(float(line[0]))
                         particle.upper_bounds[quantity].append(float(line[1]))
@@ -548,12 +552,13 @@ class Simulation:
     def _load_particle_data(self, smv_file: TextIO, line: str):
         file_path = os.path.join(self.root_path, smv_file.readline().strip())
 
-        if type(self.particles) == list:
-            times = self._load_particle_meta(self.particles, file_path + '.bnd')
-            self.particles = ParticleCollection(times, self.particles)
-
         mesh_index = int(line.split()[1].strip()) - 1
         mesh = self.meshes[mesh_index]
+
+        times = self._load_particle_meta(self.particles, file_path + '.bnd', mesh)
+        if type(self.particles) == list:
+            self.particles = ParticleCollection(times, self.particles)
+
         self.particles._file_paths[mesh] = file_path
 
         n_classes = int(smv_file.readline().strip())

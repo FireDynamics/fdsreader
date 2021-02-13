@@ -9,16 +9,16 @@ def main():
 
     size_quantity = "PARTICLE DIAMETER"
     temp_quantity = "PARTICLE TEMPERATURE"
-    color_data = particles.data[temp_quantity]
+    color_data = particles.data[size_quantity]
 
     plotter = pv.Plotter()
     plotter.open_movie("anim.mp4")
 
     t_0 = next(i for i, pos in enumerate(particles.positions) if pos.shape[0] != 0)
 
-    actor = plotter.add_mesh(pv.PolyData(particles.positions[t_0]), scalars=color_data[t_0],
+    actor = plotter.add_mesh(pv.PolyData(particles.positions[t_0]), scalars=color_data[t_0],  # .delaunay_2d(alpha=1.0)
                              render_points_as_spheres=True, point_size=15)
-    plotter.add_scalar_bar(title=temp_quantity)
+    plotter.add_scalar_bar(title=size_quantity)
     plotter.show(auto_close=False)
     plotter.write_frame()
 
@@ -26,7 +26,7 @@ def main():
         if particles.positions[t].shape[0] == 0:
             continue
         plotter.remove_actor(actor)
-        actor = plotter.add_mesh(pv.PolyData(particles.positions[t]), scalars=color_data[t],
+        actor = plotter.add_mesh(pv.PolyData(particles.positions[t]), scalars=color_data[t],  # .delaunay_2d(alpha=1.0)
                                  render_points_as_spheres=True, point_size=15)
         plotter.remove_scalar_bar()
         plotter.add_scalar_bar(title=temp_quantity)
