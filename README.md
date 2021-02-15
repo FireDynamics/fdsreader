@@ -2,12 +2,14 @@
 > Fast and easy-to-use Python reader for FDS data
 
 [![Build Status](https://travis-ci.com/FireDynamics/fdsreader.svg?branch=master)](https://travis-ci.com/FireDynamics/fdsreader)
+[![PyPI version](https://badge.fury.io/py/fdsreader.png)](https://badge.fury.io/py/fdsreader)
+
 
 ## Installation
 
 The package is available on PyPI and can be installed using pip:  
 ```sh
-python -m pip install --upgrade fdsreader
+pip install fdsreader
 ```
 
 ## Usage example
@@ -41,6 +43,8 @@ print(sim.meshes, sim.surfaces, sim.slices, sim.data_3d, sim.isosurfaces, sim.pa
     * (Entering alpha status after extensive private testing in pre-alpha stage)
     
 ### Pre-Alpha *(current stage)*
+* 0.6.2
+    * Improved documentation
 * 0.6.1
     * Added multimesh part support
 * 0.6.0

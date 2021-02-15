@@ -1,4 +1,4 @@
-Welcome to the official FDSReader API documentation!
+FDSReader documentation!
 ====================================================
 
 .. toctree::
