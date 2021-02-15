@@ -3,11 +3,11 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Slice files &mdash; fdsreader [fdsreader, version 0.5.3] documentation</title>
+  <title>Slice files &mdash; fdsreader [fdsreader, version 0.6.1] documentation</title>
   
 
   
@@ -16,7 +16,10 @@
 
   
   
+
   
+  
+
   
 
   
@@ -29,13 +32,14 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Slice files" href="part.html" />
+    <link rel="prev" title="Slice files" href="slcf.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -49,7 +53,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> fdsreader
+            <a href="index.html" class="icon icon-home"> fdsreader
           
 
           
@@ -80,11 +84,17 @@
               
             
             
-              <!-- Local TOC -->
-              <div class="local-toc"><ul>
-<li><a class="reference internal" href="#">Slice files</a></li>
+              <p class="caption"><span class="caption-text">FDSReader</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="simulation.html">Simulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="isof.html">Isosurface files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pl3d.html">Plot3D files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slcf.html">Slice files</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Slice files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="part.html">Slice files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Utilities</a></li>
 </ul>
-</div>
+
             
           
         </div>
@@ -123,6 +133,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -134,7 +146,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
         
       </li>
     
@@ -148,46 +160,100 @@
             
   <div class="section" id="slice-files">
 <h1>Slice files<a class="headerlink" href="#slice-files" title="Permalink to this headline">¶</a></h1>
-<span class="target" id="apireference"></span><dl class="py class">
+<p><strong>Classes:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Boundary</span></code>(cell_centered, quantity, times, …)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Obstruction</span></code>(oid, side_surfaces, …)</p></td>
+<td><p>A box-shaped obstruction with specific surfaces (materials) on each side.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Patch</span></code>(file_path, dimension, extent, …)</p></td>
+<td><p>Container for the actual data which is stored as rectangular plane with specific orientation</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
 <dt>
-<em class="property">class </em><code class="sig-prename descclassname">fdsreader.bndf.obstruction.</code><code class="sig-name descname">Boundary</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cell_centered</span><span class="p">:</span> <span class="n">bool</span></em>, <em class="sig-param"><span class="n">quantity</span><span class="p">:</span> <span class="n">fdsreader.utils.data.Quantity</span></em>, <em class="sig-param"><span class="n">times</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">n_t</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">lower_bounds</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">upper_bounds</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">initial_mesh</span><span class="p">:</span> <span class="n">fdsreader.utils.fds_classes.mesh.Mesh</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Boundary"><span class="viewcode-link">[source]</span></a></dt>
-<dd><dl class="py method">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.bndf.obstruction.</span></code><code class="sig-name descname"><span class="pre">Boundary</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell_centered</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.data.Quantity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">times</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_t</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_bounds</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_bounds</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_mesh</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.fds_classes.mesh.Mesh</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Boundary"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p><strong>Methods:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_cache</span></code>()</p></td>
+<td><p>Remove all data from the internal cache that has been loaded so far to free memory.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_patches_in_mesh</span></code>(mesh)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_patches_cartesian</span></code>(patches_in)</p></td>
+<td><p>Returns all patches (of same orientation!) sorted in cartesian coordinates.</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Attributes:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">faces</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmax</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmin</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
 <dt>
-<code class="sig-name descname">clear_cache</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Boundary.clear_cache"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-name descname"><span class="pre">clear_cache</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Boundary.clear_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Remove all data from the internal cache that has been loaded so far to free memory.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt>
-<em class="property">property </em><code class="sig-name descname">faces</code></dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">faces</span></code></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname">get_patches_in_mesh</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mesh</span><span class="p">:</span> <span class="n">fdsreader.utils.fds_classes.mesh.Mesh</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Boundary.get_patches_in_mesh"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-name descname"><span class="pre">get_patches_in_mesh</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.fds_classes.mesh.Mesh</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Boundary.get_patches_in_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt>
-<em class="property">static </em><code class="sig-name descname">sort_patches_cartesian</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">patches_in</span><span class="p">:</span> <span class="n">List<span class="p">[</span>fdsreader.bndf.obstruction.Patch<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Boundary.sort_patches_cartesian"><span class="viewcode-link">[source]</span></a></dt>
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">sort_patches_cartesian</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">patches_in</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.bndf.obstruction.Patch</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Boundary.sort_patches_cartesian"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Returns all patches (of same orientation!) sorted in cartesian coordinates.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt>
-<em class="property">property </em><code class="sig-name descname">vmax</code></dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">vmax</span></code></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt>
-<em class="property">property </em><code class="sig-name descname">vmin</code></dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">vmin</span></code></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt>
-<em class="property">class </em><code class="sig-prename descclassname">fdsreader.bndf.obstruction.</code><code class="sig-name descname">Obstruction</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">oid</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">side_surfaces</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>fdsreader.utils.fds_classes.surface.Surface<span class="p">, </span>fdsreader.utils.fds_classes.surface.Surface<span class="p">, </span>fdsreader.utils.fds_classes.surface.Surface<span class="p">, </span>fdsreader.utils.fds_classes.surface.Surface<span class="p">, </span>fdsreader.utils.fds_classes.surface.Surface<span class="p">, </span>fdsreader.utils.fds_classes.surface.Surface<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">bound_indices</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">color_index</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">block_type</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">texture_origin</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">rgba</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Tuple<span class="p">[</span><span class="p">(</span><span class="p">)</span><span class="p">]</span><span class="p">, </span>Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">, </span>float<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Obstruction"><span class="viewcode-link">[source]</span></a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.bndf.obstruction.</span></code><code class="sig-name descname"><span class="pre">Obstruction</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">oid</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">side_surfaces</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.utils.fds_classes.surface.Surface</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.fds_classes.surface.Surface</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.fds_classes.surface.Surface</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.fds_classes.surface.Surface</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.fds_classes.surface.Surface</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.fds_classes.surface.Surface</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bound_indices</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_index</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texture_origin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rgba</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">(</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Obstruction"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>A box-shaped obstruction with specific surfaces (materials) on each side.</p>
 <blockquote>
 <div><dl class="field-list simple">
@@ -232,25 +298,55 @@ pattern should begin.</p>
 </dl>
 </dd>
 </dl>
+<p><strong>Methods:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_cache</span></code>()</p></td>
+<td><p>Remove all data from the internal cache that has been loaded so far to free memory.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_boundary_data</span></code>(quantity)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Attributes:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">has_boundary_data</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">quantities</span></code></p></td>
+<td><p>Get a list of all quantities for which boundary data exists.</p></td>
+</tr>
+</tbody>
+</table>
 <dl class="py method">
 <dt>
-<code class="sig-name descname">clear_cache</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Obstruction.clear_cache"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-name descname"><span class="pre">clear_cache</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Obstruction.clear_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Remove all data from the internal cache that has been loaded so far to free memory.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname">get_boundary_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">quantity</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>fdsreader.utils.data.Quantity<span class="p">, </span>str<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Obstruction.get_boundary_data"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-name descname"><span class="pre">get_boundary_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">,</span> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Obstruction.get_boundary_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt>
-<em class="property">property </em><code class="sig-name descname">has_boundary_data</code></dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">has_boundary_data</span></code></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt>
-<em class="property">property </em><code class="sig-name descname">quantities</code></dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">quantities</span></code></dt>
 <dd><p>Get a list of all quantities for which boundary data exists.</p>
 </dd></dl>
 
@@ -258,7 +354,7 @@ pattern should begin.</p>
 
 <dl class="py class">
 <dt>
-<em class="property">class </em><code class="sig-prename descclassname">fdsreader.bndf.obstruction.</code><code class="sig-name descname">Patch</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_path</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">dimension</span><span class="p">:</span> <span class="n">fdsreader.utils.dimension.Dimension</span></em>, <em class="sig-param"><span class="n">extent</span><span class="p">:</span> <span class="n">fdsreader.utils.extent.Extent</span></em>, <em class="sig-param"><span class="n">orientation</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">cell_centered</span><span class="p">:</span> <span class="n">bool</span></em>, <em class="sig-param"><span class="n">initial_offset</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">n_t</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Patch"><span class="viewcode-link">[source]</span></a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.bndf.obstruction.</span></code><code class="sig-name descname"><span class="pre">Patch</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimension</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.dimension.Dimension</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extent</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.extent.Extent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_centered</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_offset</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_t</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Patch"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><dl class="simple">
 <dt>Container for the actual data which is stored as rectangular plane with specific orientation</dt><dd><p>and extent.</p>
 </dd>
@@ -273,27 +369,57 @@ pattern should begin.</p>
 </ul>
 </dd>
 </dl>
+<p><strong>Methods:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_cache</span></code>()</p></td>
+<td><p>Remove all data from the internal cache that has been loaded so far to free memory.</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Attributes:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></p></td>
+<td><p>Method to load the quantity data for a single patch for a single timestep.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code></p></td>
+<td><p>Convenience function to calculate the shape of the array containing data for this patch.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">size</span></code></p></td>
+<td><p>Convenience function to calculate the number of data points in the array for this patch.</p></td>
+</tr>
+</tbody>
+</table>
 <dl class="py method">
 <dt>
-<code class="sig-name descname">clear_cache</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Patch.clear_cache"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-name descname"><span class="pre">clear_cache</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Patch.clear_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Remove all data from the internal cache that has been loaded so far to free memory.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt>
-<em class="property">property </em><code class="sig-name descname">data</code></dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">data</span></code></dt>
 <dd><p>Method to load the quantity data for a single patch for a single timestep.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt>
-<em class="property">property </em><code class="sig-name descname">shape</code></dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">shape</span></code></dt>
 <dd><p>Convenience function to calculate the shape of the array containing data for this patch.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt>
-<em class="property">property </em><code class="sig-name descname">size</code></dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">size</span></code></dt>
 <dd><p>Convenience function to calculate the number of data points in the array for this patch.</p>
 </dd></dl>
 
@@ -306,28 +432,29 @@ pattern should begin.</p>
            
           </div>
           <footer>
-  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="part.html" class="btn btn-neutral float-right" title="Slice files" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="slcf.html" class="btn btn-neutral float-left" title="Slice files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2020, FZJ IAS-7 (Prof. Dr. Lukas Arnold, Jan Vogelsang)
+        &#169; Copyright 2020, FZJ IAS-7 (Prof. Dr. Lukas Arnold, Jan Vogelsang).
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 

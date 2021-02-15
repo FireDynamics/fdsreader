@@ -3,11 +3,11 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Slice files &mdash; fdsreader [fdsreader, version 0.5.3] documentation</title>
+  <title>Slice files &mdash; fdsreader [fdsreader, version 0.6.1] documentation</title>
   
 
   
@@ -16,7 +16,10 @@
 
   
   
+
   
+  
+
   
 
   
@@ -29,13 +32,14 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Slice files" href="bndf.html" />
+    <link rel="prev" title="Plot3D files" href="pl3d.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -49,7 +53,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> fdsreader
+            <a href="index.html" class="icon icon-home"> fdsreader
           
 
           
@@ -80,11 +84,17 @@
               
             
             
-              <!-- Local TOC -->
-              <div class="local-toc"><ul>
-<li><a class="reference internal" href="#">Slice files</a></li>
+              <p class="caption"><span class="caption-text">FDSReader</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="simulation.html">Simulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="isof.html">Isosurface files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pl3d.html">Plot3D files</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Slice files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bndf.html">Slice files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="part.html">Slice files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Utilities</a></li>
 </ul>
-</div>
+
             
           
         </div>
@@ -123,6 +133,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -134,7 +146,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
         
       </li>
     
@@ -148,9 +160,36 @@
             
   <div class="section" id="slice-files">
 <h1>Slice files<a class="headerlink" href="#slice-files" title="Permalink to this headline">¶</a></h1>
-<span class="target" id="apireference"></span><dl class="py class">
+<p><strong>Classes:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Slice</span></code>(root_path, cell_centered, times, …)</p></td>
+<td><p>Slice file data container including metadata. Consists of multiple subslices, one for each</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SubSlice</span></code>(parent_slice, filename, dimension, …)</p></td>
+<td><p>Part of a slice that cuts through a single mesh.</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Functions:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">implements</span></code>(np_function)</p></td>
+<td><p>Decorator to register an __array_function__ implementation for Slices.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
 <dt>
-<em class="property">class </em><code class="sig-prename descclassname">fdsreader.slcf.slice.</code><code class="sig-name descname">Slice</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">root_path</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">cell_centered</span><span class="p">:</span> <span class="n">bool</span></em>, <em class="sig-param"><span class="n">times</span><span class="p">:</span> <span class="n">numpy.ndarray</span></em>, <em class="sig-param"><span class="n">multimesh_data</span><span class="p">:</span> <span class="n">Collection<span class="p">[</span>Dict<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice"><span class="viewcode-link">[source]</span></a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.slcf.slice.</span></code><code class="sig-name descname"><span class="pre">Slice</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_centered</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">times</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multimesh_data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Collection</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><dl class="simple">
 <dt>Slice file data container including metadata. Consists of multiple subslices, one for each</dt><dd><p>mesh the slice cuts through.</p>
 </dd>
@@ -168,21 +207,48 @@ slice with the corresponding label and unit.</p></li>
 </ul>
 </dd>
 </dl>
+<p><strong>Methods:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_cache</span></code>()</p></td>
+<td><p>Remove all data from the internal cache that has been loaded so far to free memory.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean</span></code>()</p></td>
+<td><p>Calculates the mean over the whole slice.</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Attributes:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">extent_dirs</span></code></p></td>
+<td><p>The directions in which there is an extent.</p></td>
+</tr>
+</tbody>
+</table>
 <dl class="py method">
 <dt>
-<code class="sig-name descname">clear_cache</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice.clear_cache"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-name descname"><span class="pre">clear_cache</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice.clear_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Remove all data from the internal cache that has been loaded so far to free memory.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt>
-<em class="property">property </em><code class="sig-name descname">extent_dirs</code></dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">extent_dirs</span></code></dt>
 <dd><p>The directions in which there is an extent. All three dimensions in case the slice is 3D.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname">mean</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice.mean"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-name descname"><span class="pre">mean</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice.mean"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Calculates the mean over the whole slice.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -195,7 +261,7 @@ slice with the corresponding label and unit.</p></li>
 
 <dl class="py class">
 <dt>
-<em class="property">class </em><code class="sig-prename descclassname">fdsreader.slcf.slice.</code><code class="sig-name descname">SubSlice</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent_slice</span><span class="p">:</span> <span class="n">fdsreader.slcf.slice.Slice</span></em>, <em class="sig-param"><span class="n">filename</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">dimension</span><span class="p">:</span> <span class="n">fdsreader.utils.dimension.Dimension</span></em>, <em class="sig-param"><span class="n">extent</span><span class="p">:</span> <span class="n">fdsreader.utils.extent.Extent</span></em>, <em class="sig-param"><span class="n">mesh</span><span class="p">:</span> <span class="n">fdsreader.utils.fds_classes.mesh.Mesh</span></em>, <em class="sig-param"><span class="n">has_vector_data</span><span class="p">:</span> <span class="n">bool</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#SubSlice"><span class="viewcode-link">[source]</span></a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.slcf.slice.</span></code><code class="sig-name descname"><span class="pre">SubSlice</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent_slice</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.slcf.slice.Slice</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimension</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.dimension.Dimension</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extent</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.extent.Extent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.fds_classes.mesh.Mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_vector_data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#SubSlice"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Part of a slice that cuts through a single mesh.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
@@ -208,33 +274,63 @@ slice with the corresponding label and unit.</p></li>
 </ul>
 </dd>
 </dl>
+<p><strong>Methods:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_cache</span></code>()</p></td>
+<td><p>Remove all data from the internal cache that has been loaded so far to free memory.</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Attributes:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></p></td>
+<td><p>Method to lazy load the slice’s data for a specific quantity.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vector_data</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
 <dl class="py method">
 <dt>
-<code class="sig-name descname">clear_cache</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#SubSlice.clear_cache"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-name descname"><span class="pre">clear_cache</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#SubSlice.clear_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Remove all data from the internal cache that has been loaded so far to free memory.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt>
-<em class="property">property </em><code class="sig-name descname">data</code></dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">data</span></code></dt>
 <dd><p>Method to lazy load the slice’s data for a specific quantity.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt>
-<em class="property">property </em><code class="sig-name descname">shape</code></dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">shape</span></code></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt>
-<em class="property">property </em><code class="sig-name descname">vector_data</code></dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">vector_data</span></code></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py function">
 <dt>
-<code class="sig-prename descclassname">fdsreader.slcf.slice.</code><code class="sig-name descname">implements</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">np_function</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#implements"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-prename descclassname"><span class="pre">fdsreader.slcf.slice.</span></code><code class="sig-name descname"><span class="pre">implements</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">np_function</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#implements"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Decorator to register an __array_function__ implementation for Slices.</p>
 </dd></dl>
 
@@ -245,28 +341,29 @@ slice with the corresponding label and unit.</p></li>
            
           </div>
           <footer>
-  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="bndf.html" class="btn btn-neutral float-right" title="Slice files" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="pl3d.html" class="btn btn-neutral float-left" title="Plot3D files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2020, FZJ IAS-7 (Prof. Dr. Lukas Arnold, Jan Vogelsang)
+        &#169; Copyright 2020, FZJ IAS-7 (Prof. Dr. Lukas Arnold, Jan Vogelsang).
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 

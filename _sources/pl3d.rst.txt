@@ -1,7 +1,7 @@
-Slice files
-___________
+Plot3D files
+____________
 
-.. automodule:: fdsreader.slcf.slice
+.. automodule:: fdsreader.pl3d.pl3d
    :autosummary:
    :members:
    :undoc-members:
