@@ -1,7 +1,7 @@
-Slice files
-___________
+Simulation
+__________
 
-.. automodule:: fdsreader.slcf.slice
+.. automodule:: fdsreader.simulation
    :autosummary:
    :members:
    :undoc-members:

@@ -34,7 +34,8 @@ release = str(__version__)
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
-    'sphinx_rtd_theme'
+    'sphinx_rtd_theme',
+    'autodocsumm'
 ]
 
 autoclass_content = 'both'

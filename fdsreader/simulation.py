@@ -11,7 +11,7 @@ from fdsreader.isof.IsosurfaceCollection import IsosurfaceCollection
 from fdsreader.part import Particle
 from fdsreader.part.ParticleCollection import ParticleCollection
 from fdsreader.pl3d import Plot3D
-from fdsreader.pl3d.Plot3dCollection import Plot3DCollection
+from fdsreader.pl3d.Pl3dCollection import Plot3DCollection
 from fdsreader.slcf import Slice
 from fdsreader.slcf.SliceCollection import SliceCollection
 from fdsreader.utils import Mesh, Dimension, Surface, Quantity, Ventilation, Extent
@@ -112,7 +112,7 @@ class Simulation:
                         offsets = smv_file.readline().strip().split()
                         self.default_texture_origin = tuple(float(offsets[i]) for i in range(3))
                     elif keyword == "CLASS_OF_PARTICLES":
-                        self.particles.append(self.register_particle(smv_file))
+                        self.particles.append(self._register_particle(smv_file))
                     elif "GRID" in keyword:
                         self.meshes.append(self._load_mesh(smv_file, keyword))
                     elif keyword == "SURFACE":
@@ -508,7 +508,7 @@ class Simulation:
                                                       double_quantity, quantity, label, unit)
             self.isosurfaces[iso_id]._add_subsurface(self.meshes[mesh_index], iso_filename)
 
-    def register_particle(self, smv_file: TextIO) -> Particle:
+    def _register_particle(self, smv_file: TextIO) -> Particle:
         particle_class = smv_file.readline().strip()
         color = tuple(float(c) for c in smv_file.readline().strip().split())
 
@@ -521,8 +521,8 @@ class Simulation:
             quantities.append(Quantity(quantity, label, unit))
         return Particle(particle_class, quantities, color)
 
-    def _load_particle_meta(self, particles: Union[List[Particle], ParticleCollection], file_path: str, mesh: Mesh) -> \
-    List[float]:
+    def _load_particle_meta(self, particles: Union[List[Particle], ParticleCollection],
+                            file_path: str, mesh: Mesh) -> List[float]:
         with open(file_path, 'r') as bnd_file:
             line = bnd_file.readline().strip().split()
             n_classes = int(line[1])

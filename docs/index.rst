@@ -2,16 +2,20 @@ FDSReader documentation!
 ====================================================
 
 .. toctree::
-   :maxdepth: 4
-   :caption: Contents:
+   :maxdepth: 1
+   :caption: FDSReader
 
-.. automodule:: fdsreader.simulation
-    :members:
-    :undoc-members:
-    :noindex:
+   simulation
+   isof
+   pl3d
+   slcf
+   bndf
+   part
+   utils
 
+.. include::  simulation.rst
 .. include::  isof.rst
-.. include::  plot3d.rst
+.. include::  pl3d.rst
 .. include::  slcf.rst
 .. include::  bndf.rst
 .. include::  part.rst

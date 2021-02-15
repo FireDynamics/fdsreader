@@ -1,1 +1,1 @@
-from .plot3d import Plot3D
+from .pl3d import Plot3D
