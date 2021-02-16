@@ -28,6 +28,8 @@ More advanced examples can be found in the respective data type directories insi
 ### Data structure
 ![Data structure](https://raw.githubusercontent.com/FireDynamics/fdsreader/master/docs/img/data-structure.svg)
 
+Beware that not all attributes and methods are covered in this diagram. For a complete  
+documentation of all classes check the API Documentation below.  
 
 ## API Documentation
 [https://firedynamics.github.io/fdsreader/](https://firedynamics.github.io/fdsreader/)

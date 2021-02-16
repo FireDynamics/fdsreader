@@ -20,7 +20,6 @@ class SubSurface:
     :ivar n_vertices: The number of vertices for this subsurface.
     :ivar n_triangles: The number of triangles for this subsurface.
     :ivar n_t: Total number of time steps for which output data has been written.
-    :ivar _offset: Offset of the binary file to the end of the file header.
     """
 
     def __init__(self, mesh: Mesh, iso_filepath: str, times: List, viso_filepath: str = ""):
@@ -182,8 +181,7 @@ class Isosurface:
     :ivar quantity: Quantity object containing information about the quantity calculated for this
         isosurface with the corresponding label and unit.
     :ivar v_quantity: Information about the color quantity.
-    :ivar levels: All isosurface levels
-    :ivar _double_quantity: Defines whether there is color data for this isosurface or not.
+    :ivar levels: All isosurface levels.
     """
 
     def __init__(self, isosurface_id: int, root_path: str, double_quantity: bool, quantity: str,

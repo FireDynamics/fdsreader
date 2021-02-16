@@ -11,7 +11,7 @@ from fdsreader.isof.IsosurfaceCollection import IsosurfaceCollection
 from fdsreader.part import Particle
 from fdsreader.part.ParticleCollection import ParticleCollection
 from fdsreader.pl3d import Plot3D
-from fdsreader.pl3d.Pl3dCollection import Plot3DCollection
+from fdsreader.pl3d.Plot3dCollection import Plot3DCollection
 from fdsreader.slcf import Slice
 from fdsreader.slcf.SliceCollection import SliceCollection
 from fdsreader.utils import Mesh, Dimension, Surface, Quantity, Ventilation, Extent
@@ -33,6 +33,16 @@ class Simulation:
     :ivar out_file_path: Path to the .out file of the simulation.
     :ivar surfaces: List containing all surfaces defined in this simulation.
     :ivar meshes: List containing all meshes (grids) defined in this simulation.
+    :ivar obstructions: List containing all obstructions defined in this simulation.
+    :ivar ventilations: List containing all ventilations defined in this simulation.
+    :ivar slices: All defined slices combined into a :class:`ParticleCollection`.
+    :ivar data_3d: All defined 3D plotting data combined into a :class:`Plot3DCollection`.
+    :ivar isosurfaces: All defined isosurfaces combined into a :class:`IsosurfaceCollection`.
+    :ivar particles: All defined particles combined into a :class:`ParticleCollection`.
+    :ivar devices: List containing all devices defined in this simulation.
+    :ivar cpu: Dictionary mapping .csv header keys to numpy arrays containing cpu data.
+    :ivar hrr: Dictionary mapping .csv header keys to numpy arrays containing hrr data.
+    :ivar steps: Dictionary mapping .csv header keys to numpy arrays containing steps data.
     """
 
     def __new__(cls, path: str):
@@ -75,8 +85,8 @@ class Simulation:
 
             self.meshes: List[Mesh] = list()
             self.surfaces: List[Surface] = list()
-            self.obstructions: Dict[int, Obstruction] = dict()
-            self.ventilations: Dict[int, Ventilation] = dict()
+            self.obstructions = dict()
+            self.ventilations = dict()
 
             # First collect all meta-information for any FDS data to later combine the gathered
             # information into data collections

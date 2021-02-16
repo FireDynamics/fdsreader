@@ -1,5 +1,5 @@
-Slice files
-___________
+Particles
+_________
 
 .. automodule:: fdsreader.part.particle
    :autosummary:

@@ -235,6 +235,7 @@ class Obstruction:
         pattern should begin.
     :ivar rgba: Optional color of the obstruction in form of a 4-element tuple
         (ranging from 0.0 to 1.0).
+    :ivar extent: :class:`Extent` object containing 3-dimensional extent information.
     """
 
     def __init__(self, oid: int,
