@@ -23,12 +23,31 @@ sim = fds.Simulation("./sample_data")
 print(sim.meshes, sim.surfaces, sim.slices, sim.data_3d, sim.isosurfaces, sim.particles, sim.obstructions, sim.obstructions[0].get_boundary_data("temperature"))
 ```
 
+More advanced examples can be found in the respective data type directories inside of the examples directory.  
+
 ### Data structure
 ![Data structure](https://raw.githubusercontent.com/FireDynamics/fdsreader/master/docs/img/data-structure.svg)
 
 
 ## API Documentation
 [https://firedynamics.github.io/fdsreader/](https://firedynamics.github.io/fdsreader/)
+
+## Meta
+
+*  Jan Vogelsang – j.vogelsang@fz-juelich.de
+*  Prof. Dr. Lukas Arnold - l.arnold@fz-juelich.de
+
+Distributed under the LGPLv3 (GNU Lesser General Public License v3) license. See ``LICENSE`` for more information.
+
+[https://github.com/FireDynamics/fdsreader](https://github.com/FireDynamics/fdsreader)
+
+## Contributing
+
+1. Fork it (<https://github.com/FireDynamics/fdsreader/fork>)
+2. Create your feature branch (`git checkout -b feature/fooBar`)
+3. Commit your changes (`git commit -am 'Add some fooBar'`)
+4. Push to the branch (`git push origin feature/fooBar`)
+5. Create a new Pull Request
 
 ## Release History
 * (unreleased) 1.0.0
@@ -111,24 +130,3 @@ print(sim.meshes, sim.surfaces, sim.slices, sim.data_3d, sim.isosurfaces, sim.pa
     * Package available on PyPI
 * 0.1.0
     * Added basic slcf support (2D + 3D slices)
-
-## Known bugs
-* Some issues with bndf
-* Particles reader
-
-## Meta
-
-*  Jan Vogelsang – j.vogelsang@fz-juelich.de
-*  Prof. Dr. Lukas Arnold - l.arnold@fz-juelich.de
-
-Distributed under the LGPLv3 (GNU Lesser General Public License v3) license. See ``LICENSE`` for more information.
-
-[https://github.com/FireDynamics/fdsreader](https://github.com/FireDynamics/fdsreader)
-
-## Contributing
-
-1. Fork it (<https://github.com/FireDynamics/fdsreader/fork>)
-2. Create your feature branch (`git checkout -b feature/fooBar`)
-3. Commit your changes (`git commit -am 'Add some fooBar'`)
-4. Push to the branch (`git push origin feature/fooBar`)
-5. Create a new Pull Request
