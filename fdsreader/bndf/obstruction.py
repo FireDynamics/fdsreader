@@ -10,21 +10,22 @@ class Patch:
     """Container for the actual data which is stored as rectangular plane with specific orientation
         and extent.
 
+    :ivar dimension: :class:`Dimension` object containing information about steps in each dimension.
     :ivar extent: :class:`Extent` object containing 3-dimensional extent information.
     :ivar orientation: The direction the patch is facing (x={-1;1}, y={-2;2}, z={-3;3}).
-    :ivar data: Numpy ndarray with the actual data.
+    :ivar cell_centered: Indicates whether centered positioning for data is used.
     :ivar n_t: Total number of time steps for which output data has been written.
     """
 
     def __init__(self, file_path: str, dimension: Dimension, extent: Extent, orientation: int,
-                 cell_centered: bool, initial_offset: int, n_t: int):
+                 cell_centered: bool, _initial_offset: int, n_t: int):
         self.file_path = file_path
         self.dimension = dimension
         self.extent = extent
         self.orientation = orientation
         self.cell_centered = cell_centered
-        self.initial_offset = initial_offset
-        self.time_offset = -1
+        self._initial_offset = _initial_offset
+        self._time_offset = -1
         self.n_t = n_t
 
     @property
@@ -42,18 +43,18 @@ class Patch:
     def _post_init(self, time_offset: int):
         """Fully initialize the patch as soon as the number of timesteps is known.
         """
-        self.time_offset = time_offset
+        self._time_offset = time_offset
 
     @property
     def data(self):
-        """Method to load the quantity data for a single patch for a single timestep.
+        """Method to load the quantity data for a single patch.
         """
         if not hasattr(self, "_data"):
             self._data = np.empty((self.n_t,) + self.shape)
             dtype_data = fdtype.new((('f', self.dimension.size(cell_centered=False)),))
             with open(self.file_path, 'rb') as infile:
                 for t in range(self.n_t):
-                    infile.seek(self.initial_offset + t * self.time_offset)
+                    infile.seek(self._initial_offset + t * self._time_offset)
                     data = np.fromfile(infile, dtype_data, 1)[0][1].reshape(
                         self.dimension.shape(cell_centered=False), order='F')
                     if self.cell_centered:
@@ -73,6 +74,18 @@ class Patch:
 
 
 class Boundary:
+    """Container for the actual data which is stored as rectangular plane with specific orientation
+        and extent.
+
+    :ivar quantity: Quantity object containing information about the quantity calculated for this
+        :class:`Obstruction` with the corresponding label and unit.
+    :ivar times: Numpy array containing all times for which data has been recorded.
+    :ivar cell_centered: Indicates whether centered positioning for data is used.
+    :ivar lower_bounds: Dictionary with lower bounds for each timestep with meshes as keys.
+    :ivar upper_bounds: Dictionary with upper bounds for each timestep with meshes as keys.
+    :ivar n_t: Total number of time steps for which output data has been written.
+    """
+
     def __init__(self, cell_centered: bool, quantity: Quantity, times: np.ndarray, n_t: int,
                  lower_bounds: np.ndarray, upper_bounds: np.ndarray, initial_mesh: Mesh):
         self.cell_centered = cell_centered
@@ -121,8 +134,8 @@ class Boundary:
             return patches_cart
         return patches
 
-    def get_patches_in_mesh(self, mesh: Mesh):
-        """
+    def get_patches_in_mesh(self, mesh: Mesh) -> List[Patch]:
+        """Gets all patches in a specific mesh.
         """
         if not hasattr(self._patches[mesh][0], "_data"):
             for patch in self._patches[mesh]:
@@ -131,21 +144,25 @@ class Boundary:
 
     @property
     def faces(self) -> Dict[Literal[-3, -2, -1, 1, 2, 3], np.ndarray]:
-        """
+        """Global/combines faces for all 6 orientations.
         """
         if not hasattr(self, "_faces"):
             self._prepare_faces()
         return self._faces
 
     @property
-    def vmin(self):
+    def vmin(self) -> float:
+        """Minimum value of all patches in any time step.
+        """
         curr_min = min(np.min(b) for b in self.lower_bounds.values())
         if curr_min == 0.0:
             return min(min(np.min(p.data) for p in ps) for ps in self._patches.values())
         return curr_min
 
     @property
-    def vmax(self):
+    def vmax(self) -> float:
+        """Maximum value of all patches in any time step.
+        """
         curr_max = max(np.max(b) for b in self.upper_bounds.values())
         if curr_max == np.float32(-1e33):
             return max(max(np.max(p.data) for p in ps) for ps in self._patches.values())
@@ -186,6 +203,9 @@ class Boundary:
                 patch.clear_cache()
 
     def __getitem__(self, item):
+        """Either gets all patches in a mesh [type(item)==Mesh] or all faces with a specific
+            orientation [type(item)==int].
+        """
         if type(item) == Mesh:
             return self.get_patches_in_mesh(item)
         else:
@@ -263,14 +283,18 @@ class Obstruction:
         return [b.quantity for b in self._boundary_data.values()]
 
     def get_boundary_data(self, quantity: Union[Quantity, str]):
+        """Gets the boundary data for a specific quantity.
+        """
         if type(quantity) == str:
             return next((x for x in self._boundary_data.values() if
-                        x.quantity.quantity.lower() == quantity.lower() or
-                        x.quantity.label.lower() == quantity.lower()), None)
+                         x.quantity.quantity.lower() == quantity.lower() or
+                         x.quantity.label.lower() == quantity.lower()), None)
         return next((x for x in self._boundary_data.values() if x.quantity == quantity), None)
 
     @property
     def has_boundary_data(self):
+        """Whether boundary data has been output in the simulation.
+        """
         return len(self._boundary_data) != 0
 
     def clear_cache(self):

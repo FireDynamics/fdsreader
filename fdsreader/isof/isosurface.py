@@ -125,7 +125,6 @@ class SubSurface:
                 dtype_triangles = fdtype.new((('i', 3 * n_triangles),))
                 dtype_surfaces = fdtype.new((('i', n_triangles),))
 
-                # Todo: Check for "order='F'"
                 self._vertices.append(
                     fdtype.read(infile, dtype_vertices, 1)[0][0].reshape((n_vertices, 3)).astype(
                         float))
@@ -180,7 +179,8 @@ class Isosurface:
 
     :ivar id: The ID of this isosurface.
     :ivar root_path: Path to the directory containing all isosurface files.
-    :ivar quantity: Information about the quantity.
+    :ivar quantity: Quantity object containing information about the quantity calculated for this
+        isosurface with the corresponding label and unit.
     :ivar v_quantity: Information about the color quantity.
     :ivar levels: All isosurface levels
     :ivar _double_quantity: Defines whether there is color data for this isosurface or not.
@@ -217,15 +217,21 @@ class Isosurface:
 
     @property
     def vertices(self) -> Dict[Mesh, List[np.ndarray]]:
-        return {key: subsurface.vertices for key, subsurface in self._subsurfaces.items()}
+        """Gets all vertices per mesh.
+        """
+        return {mesh: subsurface.vertices for mesh, subsurface in self._subsurfaces.items()}
 
     @property
     def triangles(self) -> Dict[Mesh, List[np.ndarray]]:
-        return {key: subsurface.triangles for key, subsurface in self._subsurfaces.items()}
+        """Gets all triangles per mesh.
+        """
+        return {mesh: subsurface.triangles for mesh, subsurface in self._subsurfaces.items()}
 
     @property
     def surfaces(self) -> Dict[Mesh, List[np.ndarray]]:
-        return {key: subsurface.surfaces for key, subsurface in self._subsurfaces.items()}
+        """Gets all surfaces per mesh.
+        """
+        return {mesh: subsurface.surfaces for mesh, subsurface in self._subsurfaces.items()}
 
     def to_global(self, time: Union[int, float]) -> Tuple[np.ndarray, List[np.ndarray]]:
         """Creates an array containing all global vertices and a list containing numpy arrays with
@@ -271,12 +277,15 @@ class Isosurface:
     def get_pyvista_mesh(self, vertices: np.ndarray, triangles: np.ndarray) -> PolyData:
         """Creates a PyVista mesh from the data.
         """
+        triangles = np.hstack(np.append(np.full((triangles.shape[0], 1), 3), triangles, axis=1))
         return PolyData(vertices, triangles)
 
-    def join_pyvista_meshes(self, meshes: List[PolyData]):
+    def join_pyvista_meshes(self, meshes: List[PolyData]) -> PolyData:
+        """Combines multiple PyVista meshes.
+        """
         return reduce(operator.add, meshes)
 
-    def export(self, file_path: str, time: Union[int, float]):
+    def export(self, file_path: str, mesh: PolyData):
         """Export the isosurface for a single timestep into one of many formats.
 
         :param file_path: Absolute path to the the file which should we written. The file ending
@@ -285,11 +294,13 @@ class Isosurface:
             data for the nearest matching timestep will be used.
         """
         if "vtk" in file_path or "vtp" in file_path:
-            return self.get_pyvista_mesh(time).save(file_path)
+            return mesh.save(file_path)
         else:
-            return self.get_pyvista_mesh(time).save_meshio(file_path)
+            return mesh.save_meshio(file_path)
 
     def get_nearest_timestep(self, time: float) -> int:
+        """Calculates the nearest timestep for which data has been output.
+        """
         idx = np.searchsorted(self.times, time, side="left")
         if time > 0 and (idx == len(self.times) or np.math.fabs(
                 time - self.times[idx - 1]) < np.math.fabs(time - self.times[idx])):
@@ -305,6 +316,8 @@ class Isosurface:
 
     @property
     def times(self) -> List[float]:
+        """List containing all times for which data has been recorded.
+        """
         if len(self._times) == 0:
             # Implicitly load the data for one subsurface and read times
             _ = next(iter(self._subsurfaces.values())).vertices

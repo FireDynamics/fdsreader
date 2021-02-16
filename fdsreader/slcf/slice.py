@@ -27,11 +27,9 @@ def implements(np_function):
 class SubSlice:
     """Part of a slice that cuts through a single mesh.
 
-    :ivar root_path: Path to the directory containing the slice file.
-    :ivar cell_centered: Indicates whether centered positioning for data is used.
     :ivar mesh: The mesh the subslice cuts through.
     :ivar extent: :class:`Extent` object containing 3-dimensional extent information.
-    :ivar file_names: File names for the corresponding slice file depending on the quantity.
+    :ivar dimension: :class:`Dimension` object containing information about steps in each dimension.
     """
 
     _offset = 3 * fdtype.new((('c', 30),)).itemsize + fdtype.new((('i', 6),)).itemsize
@@ -50,7 +48,9 @@ class SubSlice:
             self._vector_data = dict()
 
     @property
-    def shape(self) -> Tuple:
+    def shape(self) -> Tuple[int, int]:
+        """2D-shape of the slice.
+        """
         shape = self.dimension.shape(cell_centered=self.parent_slice.cell_centered)
         if self.parent_slice.orientation != 0:
             return shape[0], shape[1]
@@ -63,12 +63,11 @@ class SubSlice:
         with open(file_path, 'rb') as infile:
             infile.seek(self._offset)
             for i, data in enumerate(fdtype.read(infile, dtype_data, n_t)):
-                data_out[i, :] = np.asfortranarray(data[1])
+                data_out[i, :] = data[1].reshape(self.shape, order='F')
 
     @property
     def data(self) -> np.ndarray:
-        """
-        Method to lazy load the slice's data for a specific quantity.
+        """Method to lazy load the slice's data for a specific quantity.
         """
         if not hasattr(self, "_data"):
             n_t = self.parent_slice.times.shape[0]
@@ -80,6 +79,8 @@ class SubSlice:
 
     @property
     def vector_data(self) -> Dict[str, np.ndarray]:
+        """Method to lazy load the slice's vector data for a specific quantity if it exists.
+        """
         if not hasattr(self, "_vector_data"):
             raise AttributeError("There is no vector data available for this slice.")
         if len(self._vector_data) == 0:

@@ -25,19 +25,18 @@ def implements(np_function):
 class SubPlot3D:
     """Subplot of a pl3d output for a single mesh.
 
-    :ivar file_path: Path to the binary data file.
     :ivar mesh: The mesh containing the data.
     """
     # Offset of the binary file to the end of the file header.
     _offset = fdtype.new((('i', 3),)).itemsize + fdtype.new((('i', 4),)).itemsize
 
     def __init__(self, file_path: str, mesh: Mesh):
-        self.file_path = file_path
+        self.file_path = file_path  # Path to the binary data file
         self.mesh = mesh
 
     @property
     def data(self) -> np.ndarray:
-        """Method to lazy load the 3D data for a single mesh.
+        """Method to lazy load the 3D data for each quantity of a single mesh.
 
         :returns: 4D numpy array wiht (x,y,z,q) as dimensions, while q represents the 5 quantities.
         """
@@ -71,7 +70,7 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
         self.time = time
         self.quantities = quantities
 
-        # List of all subplots this slice consists of (one per mesh).
+        # List of all subplots this Plot3D consists of (one per mesh).
         self._subplots: Dict[Mesh, SubPlot3D] = dict()
 
     def _add_subplot(self, filename: str, mesh: Mesh) -> SubPlot3D:

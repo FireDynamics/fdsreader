@@ -5,11 +5,13 @@ import glob
 import hashlib
 import os
 from collections import Iterable
-from typing import Union, Tuple
+from typing import Tuple
 import numpy as np
 
 
 class Quantity:
+    """Object containing information about a quantity with the corresponding label and unit.
+    """
     def __init__(self, quantity: str, label: str, unit: str):
         self.label = label
         self.unit = unit
@@ -26,12 +28,14 @@ class Quantity:
 
 
 class Device:
+    """Represents a single Device.
+    """
     def __init__(self, quantity: Quantity, position: Tuple[float, float, float],
                  orientation: Tuple[float, float, float]):
         self.quantity = quantity
         self.position = position
         self.orientation = orientation
-        self.data: Union[float, np.ndarray] = .0
+        self.data: np.ndarray = None
 
     @property
     def name(self):

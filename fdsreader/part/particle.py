@@ -1,5 +1,7 @@
 from typing import List, Tuple, Dict
 
+import numpy as np
+
 from fdsreader.utils import Quantity, Mesh
 
 
@@ -10,6 +12,8 @@ class Particle:
     :ivar quantities: List of all quantities for which data has been written out.
     :ivar color: Color assigned to the particle.
     :ivar n_particles: Number of existing particles for each timestep per mesh.
+    :ivar lower_bounds: Dictionary with lower bounds for each timestep with quantities as keys.
+    :ivar upper_bounds: Dictionary with upper bounds for each timestep with quantities as keys.
     """
 
     def __init__(self, class_name: str, quantities: List[Quantity], color: Tuple[float, float, float]):
@@ -28,24 +32,27 @@ class Particle:
         self._init_callback = None
 
     @property
-    def data(self):
-        """
+    def data(self) -> Dict[str, List[np.ndarray]]:
+        """Dictionary with quantities as keys and a list with a numpy array for each timestep which
+            contains data for each particle in that timestep.
         """
         if self._positions is None:
             self._init_callback()
         return self._data
 
     @property
-    def tags(self):
-        """
+    def tags(self) -> List[np.ndarray]:
+        """List with a numpy array for each timestep which contains a tag for each particle in that
+            timestep.
         """
         if self._positions is None:
             self._init_callback()
         return self._tags
 
     @property
-    def positions(self):
-        """
+    def positions(self) -> List[np.ndarray]:
+        """List with a numpy array for each timestep which contains the position of each particle in
+            that timestep.
         """
         if self._positions is None:
             self._init_callback()

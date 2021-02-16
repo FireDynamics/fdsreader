@@ -24,10 +24,6 @@ class Mesh:
         """
         self.id = mesh_id
         self.coordinates = coordinates
-        # self.dimension = Dimension(
-        #     coordinates['x'].size - 1 if coordinates['x'].size - 1 > 1 else 0,
-        #     coordinates['y'].size - 1 if coordinates['y'].size - 1 > 1 else 0,
-        #     coordinates['z'].size - 1 if coordinates['z'].size - 1 > 1 else 0)
         self.dimension = Dimension(
             coordinates['x'].size if coordinates['x'].size > 0 else 1,
             coordinates['y'].size if coordinates['y'].size > 0 else 1,

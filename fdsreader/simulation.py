@@ -454,7 +454,6 @@ class Simulation:
     def _load_data_3d(self, smv_file: TextIO, line: str):
         """Loads the pl3d at current pointer position.
         """
-        # Todo: Also read SMOKG3D data?
         line = line.strip().split()
 
         time = float(line[1])
