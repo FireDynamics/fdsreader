@@ -1,5 +1,5 @@
-Slice files
-___________
+Boundary files
+______________
 
 .. automodule:: fdsreader.bndf.obstruction
    :autosummary:

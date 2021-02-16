@@ -89,8 +89,8 @@
 <li class="toctree-l1"><a class="reference internal" href="isof.html">Isosurface files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pl3d.html">Plot3D files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slcf.html">Slice files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="bndf.html">Slice files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="part.html">Slice files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bndf.html">Boundary files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="part.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="utils.html">Utilities</a></li>
 </ul>
 
@@ -166,8 +166,8 @@
 <li class="toctree-l1"><a class="reference internal" href="isof.html">Isosurface files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pl3d.html">Plot3D files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slcf.html">Slice files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="bndf.html">Slice files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="part.html">Slice files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bndf.html">Boundary files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="part.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="utils.html">Utilities</a></li>
 </ul>
 </div>
@@ -189,6 +189,16 @@
 <li><p><strong>out_file_path</strong> – Path to the .out file of the simulation.</p></li>
 <li><p><strong>surfaces</strong> – List containing all surfaces defined in this simulation.</p></li>
 <li><p><strong>meshes</strong> – List containing all meshes (grids) defined in this simulation.</p></li>
+<li><p><strong>obstructions</strong> – List containing all obstructions defined in this simulation.</p></li>
+<li><p><strong>ventilations</strong> – List containing all ventilations defined in this simulation.</p></li>
+<li><p><strong>slices</strong> – All defined slices combined into a <code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleCollection</span></code>.</p></li>
+<li><p><strong>data_3d</strong> – All defined 3D plotting data combined into a <code class="xref py py-class docutils literal notranslate"><span class="pre">Plot3DCollection</span></code>.</p></li>
+<li><p><strong>isosurfaces</strong> – All defined isosurfaces combined into a <code class="xref py py-class docutils literal notranslate"><span class="pre">IsosurfaceCollection</span></code>.</p></li>
+<li><p><strong>particles</strong> – All defined particles combined into a <code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleCollection</span></code>.</p></li>
+<li><p><strong>devices</strong> – List containing all devices defined in this simulation.</p></li>
+<li><p><strong>cpu</strong> – Dictionary mapping .csv header keys to numpy arrays containing cpu data.</p></li>
+<li><p><strong>hrr</strong> – Dictionary mapping .csv header keys to numpy arrays containing hrr data.</p></li>
+<li><p><strong>steps</strong> – Dictionary mapping .csv header keys to numpy arrays containing steps data.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Parameters</dt>
@@ -243,8 +253,7 @@ the same directory.</p>
 <li><p><strong>quantity</strong> – Quantity object containing information about the quantity calculated for this
 isosurface with the corresponding label and unit.</p></li>
 <li><p><strong>v_quantity</strong> – Information about the color quantity.</p></li>
-<li><p><strong>levels</strong> – All isosurface levels</p></li>
-<li><p><strong>_double_quantity</strong> – Defines whether there is color data for this isosurface or not.</p></li>
+<li><p><strong>levels</strong> – All isosurface levels.</p></li>
 </ul>
 </dd>
 </dl>
@@ -399,7 +408,6 @@ data for the nearest matching timestep will be used.</p>
 <li><p><strong>n_vertices</strong> – The number of vertices for this subsurface.</p></li>
 <li><p><strong>n_triangles</strong> – The number of triangles for this subsurface.</p></li>
 <li><p><strong>n_t</strong> – Total number of time steps for which output data has been written.</p></li>
-<li><p><strong>_offset</strong> – Offset of the binary file to the end of the file header.</p></li>
 </ul>
 </dd>
 </dl>
@@ -795,8 +803,8 @@ slice with the corresponding label and unit.</p></li>
 </dd></dl>
 
 </div>
-<div class="section" id="id1">
-<h2>Slice files<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="boundary-files">
+<h2>Boundary files<a class="headerlink" href="#boundary-files" title="Permalink to this headline">¶</a></h2>
 <p><strong>Classes:</strong></p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -953,6 +961,9 @@ pattern should begin.</p>
 <dd class="field-even"><p>Optional color of the obstruction in form of a 4-element tuple
 (ranging from 0.0 to 1.0).</p>
 </dd>
+<dt class="field-odd">ivar extent</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Extent</span></code> object containing 3-dimensional extent information.</p>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -1087,8 +1098,8 @@ pattern should begin.</p>
 </dd></dl>
 
 </div>
-<div class="section" id="id2">
-<h2>Slice files<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="particles">
+<h2>Particles<a class="headerlink" href="#particles" title="Permalink to this headline">¶</a></h2>
 <p><strong>Classes:</strong></p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -1179,64 +1190,10 @@ timestep.</p>
 </div>
 <div class="section" id="utilities">
 <h2>Utilities<a class="headerlink" href="#utilities" title="Permalink to this headline">¶</a></h2>
-<p><strong>Classes:</strong></p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Extent</span></code>(*args, skip_dimension, 1, y, 2, z, 3, ] =)</p></td>
-<td><p>Three-dimensional value-based extent with support for a missing dimension (2D).</p></td>
-</tr>
-</tbody>
-</table>
 <dl class="py class">
 <dt>
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.utils.extent.</span></code><code class="sig-name descname"><span class="pre">Extent</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_dimension</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">x</span><span class="p"><span class="pre">,</span> </span><span class="pre">1</span><span class="p"><span class="pre">,</span> </span><span class="pre">y</span><span class="p"><span class="pre">,</span> </span><span class="pre">2</span><span class="p"><span class="pre">,</span> </span><span class="pre">z</span><span class="p"><span class="pre">,</span> </span><span class="pre">3</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/extent.html#Extent"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Three-dimensional value-based extent with support for a missing dimension (2D).</p>
-<p><strong>Methods:</strong></p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">as_list</span></code>([reduced])</p></td>
-<td><p>Gives the extent in list notation (without empty extents).</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">as_tuple</span></code>([reduced])</p></td>
-<td><p>Gives the extent in tuple notation (without empty extents).</p></td>
-</tr>
-</tbody>
-</table>
-<p><strong>Attributes:</strong></p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">x_end</span></code></p></td>
-<td><p>Gives the absolute extent in x-direction.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">x_start</span></code></p></td>
-<td><p>Gives the absolute extent in x-direction.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_end</span></code></p></td>
-<td><p>Gives the absolute extent in y-direction.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_start</span></code></p></td>
-<td><p>Gives the absolute extent in y-direction.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">z_end</span></code></p></td>
-<td><p>Gives the absolute extent in z-direction.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">z_start</span></code></p></td>
-<td><p>Gives the absolute extent in z-direction.</p></td>
-</tr>
-</tbody>
-</table>
 <dl class="py method">
 <dt>
 <code class="sig-name descname"><span class="pre">as_list</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reduced</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><a class="reference internal" href="_modules/fdsreader/utils/extent.html#Extent.as_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
@@ -1297,18 +1254,6 @@ timestep.</p>
 
 </dd></dl>
 
-<p><strong>Classes:</strong></p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Dimension</span></code>(*args, skip_dimension, 1, y, 2, z, …)</p></td>
-<td><p>Three-dimensional index-based extent with support for a missing dimension (2D).</p></td>
-</tr>
-</tbody>
-</table>
 <dl class="py class">
 <dt>
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.utils.dimension.</span></code><code class="sig-name descname"><span class="pre">Dimension</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_dimension</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">x</span><span class="p"><span class="pre">,</span> </span><span class="pre">1</span><span class="p"><span class="pre">,</span> </span><span class="pre">y</span><span class="p"><span class="pre">,</span> </span><span class="pre">2</span><span class="p"><span class="pre">,</span> </span><span class="pre">z</span><span class="p"><span class="pre">,</span> </span><span class="pre">3</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/dimension.html#Dimension"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
@@ -1322,27 +1267,6 @@ timestep.</p>
 </ul>
 </dd>
 </dl>
-<p><strong>Methods:</strong></p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">as_list</span></code>([reduced])</p></td>
-<td><p>Gives the dimension in list notation (without empty extents).</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">as_tuple</span></code>([reduced])</p></td>
-<td><p>Gives the dimensions in tuple notation (optionally without empty dimensions).</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code>([cell_centered])</p></td>
-<td><p>Method to get the actual number of data points per dimension.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">size</span></code>([cell_centered])</p></td>
-<td><p></p></td>
-</tr>
-</tbody>
-</table>
 <dl class="py method">
 <dt>
 <code class="sig-name descname"><span class="pre">as_list</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reduced</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><a class="reference internal" href="_modules/fdsreader/utils/dimension.html#Dimension.as_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
@@ -1378,18 +1302,6 @@ timestep.</p>
 
 </dd></dl>
 
-<p><strong>Classes:</strong></p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mesh</span></code>(coordinates, numpy.ndarray], extents, …)</p></td>
-<td><p>3-dimensional Mesh of fixed, defined size.</p></td>
-</tr>
-</tbody>
-</table>
 <dl class="py class">
 <dt>
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.utils.fds_classes.mesh.</span></code><code class="sig-name descname"><span class="pre">Mesh</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coordinates</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extents</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/fds_classes/mesh.html#Mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
@@ -1415,18 +1327,6 @@ timestep.</p>
 </dl>
 </dd></dl>
 
-<p><strong>Classes:</strong></p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Surface</span></code>(name, tmpm, material_emissivity, …)</p></td>
-<td><p>Surface objects describe what bounding surfaces consist of. Boundary conditions for</p></td>
-</tr>
-</tbody>
-</table>
 <dl class="py class">
 <dt>
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.utils.fds_classes.surface.</span></code><code class="sig-name descname"><span class="pre">Surface</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmpm</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">material_emissivity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">surface_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texture_width</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texture_height</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texture_map</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rgb</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transparency</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/fds_classes/surface.html#Surface"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
@@ -1450,21 +1350,6 @@ timestep.</p>
 :ivar transparency: Transparency of the color (alpha channel).</p>
 </dd></dl>
 
-<p><strong>Classes:</strong></p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SubVentilation</span></code>(mesh, extent)</p></td>
-<td><p>Part of a <code class="xref py py-class docutils literal notranslate"><span class="pre">Ventilation</span></code>.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Ventilation</span></code>(surface, bound_indices, int, …)</p></td>
-<td><p>A ventilation can be used to model components of the ventilation system in a building, like a</p></td>
-</tr>
-</tbody>
-</table>
 <dl class="py class">
 <dt>
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.utils.fds_classes.ventilation.</span></code><code class="sig-name descname"><span class="pre">SubVentilation</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.fds_classes.mesh.Mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extent</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.extent.Extent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/fds_classes/ventilation.html#SubVentilation"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
@@ -1517,58 +1402,10 @@ for example windows or bricks, the texture_origin specifies where the pattern sh
 </dd></dl>
 
 <p>Collection of internal utilities (convenience functions) for data handling.</p>
-<p><strong>Classes:</strong></p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Device</span></code>(quantity, position, float, float], …)</p></td>
-<td><p>Represents a single Device.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">FDSDataCollection</span></code>(*elements)</p></td>
-<td><p>(Abstract) Base class for any collection of FDS data.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity</span></code>(quantity, label, unit)</p></td>
-<td><p>Object containing information about a quantity with the corresponding label and unit.</p></td>
-</tr>
-</tbody>
-</table>
-<p><strong>Functions:</strong></p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_hash</span></code>(path)</p></td>
-<td><p>Returns the md5 hash as string for the given file.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_smv_file</span></code>(path)</p></td>
-<td><p>Get the .smv file in a given directory.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">scan_directory_smv</span></code>(directory)</p></td>
-<td><p>Scanning a directory non-recursively for smv-files.</p></td>
-</tr>
-</tbody>
-</table>
 <dl class="py class">
 <dt>
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.utils.data.</span></code><code class="sig-name descname"><span class="pre">Device</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.data.Quantity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/data.html#Device"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Represents a single Device.</p>
-<p><strong>Attributes:</strong></p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span></code></p></td>
-<td><p></p></td>
-</tr>
-</tbody>
-</table>
 <dl class="py method">
 <dt>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">name</span></code></dt>
@@ -1580,18 +1417,6 @@ for example windows or bricks, the texture_origin specifies where the pattern sh
 <dt>
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.utils.data.</span></code><code class="sig-name descname"><span class="pre">FDSDataCollection</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">elements</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">collections.abc.Iterable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/data.html#FDSDataCollection"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>(Abstract) Base class for any collection of FDS data.</p>
-<p><strong>Methods:</strong></p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_cache</span></code>()</p></td>
-<td><p>Remove all data from the internal cache that has been loaded so far to free memory.</p></td>
-</tr>
-</tbody>
-</table>
 <dl class="py method">
 <dt>
 <code class="sig-name descname"><span class="pre">clear_cache</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/data.html#FDSDataCollection.clear_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>

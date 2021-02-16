@@ -88,8 +88,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../isof.html">Isosurface files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pl3d.html">Plot3D files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slcf.html">Slice files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../bndf.html">Slice files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../part.html">Slice files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../bndf.html">Boundary files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../part.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../utils.html">Utilities</a></li>
 </ul>
 
@@ -170,7 +170,7 @@
 <span class="kn">from</span> <span class="nn">fdsreader.part</span> <span class="kn">import</span> <span class="n">Particle</span>
 <span class="kn">from</span> <span class="nn">fdsreader.part.ParticleCollection</span> <span class="kn">import</span> <span class="n">ParticleCollection</span>
 <span class="kn">from</span> <span class="nn">fdsreader.pl3d</span> <span class="kn">import</span> <span class="n">Plot3D</span>
-<span class="kn">from</span> <span class="nn">fdsreader.pl3d.Pl3dCollection</span> <span class="kn">import</span> <span class="n">Plot3DCollection</span>
+<span class="kn">from</span> <span class="nn">fdsreader.pl3d.Plot3dCollection</span> <span class="kn">import</span> <span class="n">Plot3DCollection</span>
 <span class="kn">from</span> <span class="nn">fdsreader.slcf</span> <span class="kn">import</span> <span class="n">Slice</span>
 <span class="kn">from</span> <span class="nn">fdsreader.slcf.SliceCollection</span> <span class="kn">import</span> <span class="n">SliceCollection</span>
 <span class="kn">from</span> <span class="nn">fdsreader.utils</span> <span class="kn">import</span> <span class="n">Mesh</span><span class="p">,</span> <span class="n">Dimension</span><span class="p">,</span> <span class="n">Surface</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Ventilation</span><span class="p">,</span> <span class="n">Extent</span>
@@ -192,6 +192,16 @@
 <span class="sd">    :ivar out_file_path: Path to the .out file of the simulation.</span>
 <span class="sd">    :ivar surfaces: List containing all surfaces defined in this simulation.</span>
 <span class="sd">    :ivar meshes: List containing all meshes (grids) defined in this simulation.</span>
+<span class="sd">    :ivar obstructions: List containing all obstructions defined in this simulation.</span>
+<span class="sd">    :ivar ventilations: List containing all ventilations defined in this simulation.</span>
+<span class="sd">    :ivar slices: All defined slices combined into a :class:`ParticleCollection`.</span>
+<span class="sd">    :ivar data_3d: All defined 3D plotting data combined into a :class:`Plot3DCollection`.</span>
+<span class="sd">    :ivar isosurfaces: All defined isosurfaces combined into a :class:`IsosurfaceCollection`.</span>
+<span class="sd">    :ivar particles: All defined particles combined into a :class:`ParticleCollection`.</span>
+<span class="sd">    :ivar devices: List containing all devices defined in this simulation.</span>
+<span class="sd">    :ivar cpu: Dictionary mapping .csv header keys to numpy arrays containing cpu data.</span>
+<span class="sd">    :ivar hrr: Dictionary mapping .csv header keys to numpy arrays containing hrr data.</span>
+<span class="sd">    :ivar steps: Dictionary mapping .csv header keys to numpy arrays containing steps data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
@@ -234,8 +244,8 @@
 
             <span class="bp">self</span><span class="o">.</span><span class="n">meshes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Mesh</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">surfaces</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Surface</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">obstructions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Obstruction</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ventilations</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Ventilation</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obstructions</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ventilations</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
             <span class="c1"># First collect all meta-information for any FDS data to later combine the gathered</span>
             <span class="c1"># information into data collections</span>
