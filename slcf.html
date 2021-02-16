@@ -266,11 +266,9 @@ slice with the corresponding label and unit.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>root_path</strong> – Path to the directory containing the slice file.</p></li>
-<li><p><strong>cell_centered</strong> – Indicates whether centered positioning for data is used.</p></li>
 <li><p><strong>mesh</strong> – The mesh the subslice cuts through.</p></li>
 <li><p><strong>extent</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">Extent</span></code> object containing 3-dimensional extent information.</p></li>
-<li><p><strong>file_names</strong> – File names for the corresponding slice file depending on the quantity.</p></li>
+<li><p><strong>dimension</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">Dimension</span></code> object containing information about steps in each dimension.</p></li>
 </ul>
 </dd>
 </dl>
@@ -297,10 +295,10 @@ slice with the corresponding label and unit.</p></li>
 <td><p>Method to lazy load the slice’s data for a specific quantity.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code></p></td>
-<td><p></p></td>
+<td><p>2D-shape of the slice.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vector_data</span></code></p></td>
-<td><p></p></td>
+<td><p>Method to lazy load the slice’s vector data for a specific quantity if it exists.</p></td>
 </tr>
 </tbody>
 </table>
@@ -319,12 +317,14 @@ slice with the corresponding label and unit.</p></li>
 <dl class="py method">
 <dt>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">shape</span></code></dt>
-<dd></dd></dl>
+<dd><p>2D-shape of the slice.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">vector_data</span></code></dt>
-<dd></dd></dl>
+<dd><p>Method to lazy load the slice’s vector data for a specific quantity if it exists.</p>
+</dd></dl>
 
 </dd></dl>
 

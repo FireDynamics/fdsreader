@@ -36,9 +36,3 @@ _________
    :members:
    :undoc-members:
    :noindex:
-
-.. automodule:: fdsreader.utils.fortran_data
-   :autosummary:
-   :members:
-   :undoc-members:
-   :noindex:

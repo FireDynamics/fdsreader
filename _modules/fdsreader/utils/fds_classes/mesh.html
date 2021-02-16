@@ -183,10 +183,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">mesh_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="n">coordinates</span>
-        <span class="c1"># self.dimension = Dimension(</span>
-        <span class="c1">#     coordinates[&#39;x&#39;].size - 1 if coordinates[&#39;x&#39;].size - 1 &gt; 1 else 0,</span>
-        <span class="c1">#     coordinates[&#39;y&#39;].size - 1 if coordinates[&#39;y&#39;].size - 1 &gt; 1 else 0,</span>
-        <span class="c1">#     coordinates[&#39;z&#39;].size - 1 if coordinates[&#39;z&#39;].size - 1 &gt; 1 else 0)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span> <span class="o">=</span> <span class="n">Dimension</span><span class="p">(</span>
             <span class="n">coordinates</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="k">if</span> <span class="n">coordinates</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span><span class="p">,</span>
             <span class="n">coordinates</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="k">if</span> <span class="n">coordinates</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span><span class="p">,</span>

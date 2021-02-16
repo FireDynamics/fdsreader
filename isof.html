@@ -187,7 +187,8 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>id</strong> – The ID of this isosurface.</p></li>
 <li><p><strong>root_path</strong> – Path to the directory containing all isosurface files.</p></li>
-<li><p><strong>quantity</strong> – Information about the quantity.</p></li>
+<li><p><strong>quantity</strong> – Quantity object containing information about the quantity calculated for this
+isosurface with the corresponding label and unit.</p></li>
 <li><p><strong>v_quantity</strong> – Information about the color quantity.</p></li>
 <li><p><strong>levels</strong> – All isosurface levels</p></li>
 <li><p><strong>_double_quantity</strong> – Defines whether there is color data for this isosurface or not.</p></li>
@@ -204,17 +205,17 @@
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_cache</span></code>()</p></td>
 <td><p>Remove all data from the internal cache that has been loaded so far to free memory.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">export</span></code>(file_path, time)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">export</span></code>(file_path, mesh)</p></td>
 <td><p>Export the isosurface for a single timestep into one of many formats.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_nearest_timestep</span></code>(time)</p></td>
-<td><p></p></td>
+<td><p>Calculates the nearest timestep for which data has been output.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_pyvista_mesh</span></code>(vertices, triangles)</p></td>
 <td><p>Creates a PyVista mesh from the data.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">join_pyvista_meshes</span></code>(meshes)</p></td>
-<td><p></p></td>
+<td><p>Combines multiple PyVista meshes.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_global</span></code>(time)</p></td>
 <td><p>Creates an array containing all global vertices and a list containing numpy arrays with</p></td>
@@ -232,16 +233,16 @@
 <td><p>Defines whether there is color data for this isosurface or not.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">surfaces</span></code></p></td>
-<td><p></p></td>
+<td><p>Gets all surfaces per mesh.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">times</span></code></p></td>
-<td><p></p></td>
+<td><p>List containing all times for which data has been recorded.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">triangles</span></code></p></td>
-<td><p></p></td>
+<td><p>Gets all triangles per mesh.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vertices</span></code></p></td>
-<td><p></p></td>
+<td><p>Gets all vertices per mesh.</p></td>
 </tr>
 </tbody>
 </table>
@@ -253,7 +254,7 @@
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname"><span class="pre">export</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/isof/isosurface.html#Isosurface.export"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">export</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pyvista.core.pointset.PolyData</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/isof/isosurface.html#Isosurface.export"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Export the isosurface for a single timestep into one of many formats.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -270,7 +271,8 @@ data for the nearest matching timestep will be used.</p></li>
 <dl class="py method">
 <dt>
 <code class="sig-name descname"><span class="pre">get_nearest_timestep</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">int</span><a class="reference internal" href="_modules/fdsreader/isof/isosurface.html#Isosurface.get_nearest_timestep"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd></dd></dl>
+<dd><p>Calculates the nearest timestep for which data has been output.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt>
@@ -286,18 +288,21 @@ data for the nearest matching timestep will be used.</p></li>
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname"><span class="pre">join_pyvista_meshes</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meshes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">pyvista.core.pointset.PolyData</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/isof/isosurface.html#Isosurface.join_pyvista_meshes"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd></dd></dl>
+<code class="sig-name descname"><span class="pre">join_pyvista_meshes</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meshes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">pyvista.core.pointset.PolyData</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">pyvista.core.pointset.PolyData</span><a class="reference internal" href="_modules/fdsreader/isof/isosurface.html#Isosurface.join_pyvista_meshes"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Combines multiple PyVista meshes.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">surfaces</span></code></dt>
-<dd></dd></dl>
+<dd><p>Gets all surfaces per mesh.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">times</span></code></dt>
-<dd></dd></dl>
+<dd><p>List containing all times for which data has been recorded.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt>
@@ -317,12 +322,14 @@ data for the nearest matching timestep will be used.</p>
 <dl class="py method">
 <dt>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">triangles</span></code></dt>
-<dd></dd></dl>
+<dd><p>Gets all triangles per mesh.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">vertices</span></code></dt>
-<dd></dd></dl>
+<dd><p>Gets all vertices per mesh.</p>
+</dd></dl>
 
 </dd></dl>
 

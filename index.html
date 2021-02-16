@@ -240,7 +240,8 @@ the same directory.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>id</strong> – The ID of this isosurface.</p></li>
 <li><p><strong>root_path</strong> – Path to the directory containing all isosurface files.</p></li>
-<li><p><strong>quantity</strong> – Information about the quantity.</p></li>
+<li><p><strong>quantity</strong> – Quantity object containing information about the quantity calculated for this
+isosurface with the corresponding label and unit.</p></li>
 <li><p><strong>v_quantity</strong> – Information about the color quantity.</p></li>
 <li><p><strong>levels</strong> – All isosurface levels</p></li>
 <li><p><strong>_double_quantity</strong> – Defines whether there is color data for this isosurface or not.</p></li>
@@ -257,17 +258,17 @@ the same directory.</p>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_cache</span></code>()</p></td>
 <td><p>Remove all data from the internal cache that has been loaded so far to free memory.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">export</span></code>(file_path, time)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">export</span></code>(file_path, mesh)</p></td>
 <td><p>Export the isosurface for a single timestep into one of many formats.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_nearest_timestep</span></code>(time)</p></td>
-<td><p></p></td>
+<td><p>Calculates the nearest timestep for which data has been output.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_pyvista_mesh</span></code>(vertices, triangles)</p></td>
 <td><p>Creates a PyVista mesh from the data.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">join_pyvista_meshes</span></code>(meshes)</p></td>
-<td><p></p></td>
+<td><p>Combines multiple PyVista meshes.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_global</span></code>(time)</p></td>
 <td><p>Creates an array containing all global vertices and a list containing numpy arrays with</p></td>
@@ -285,16 +286,16 @@ the same directory.</p>
 <td><p>Defines whether there is color data for this isosurface or not.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">surfaces</span></code></p></td>
-<td><p></p></td>
+<td><p>Gets all surfaces per mesh.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">times</span></code></p></td>
-<td><p></p></td>
+<td><p>List containing all times for which data has been recorded.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">triangles</span></code></p></td>
-<td><p></p></td>
+<td><p>Gets all triangles per mesh.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vertices</span></code></p></td>
-<td><p></p></td>
+<td><p>Gets all vertices per mesh.</p></td>
 </tr>
 </tbody>
 </table>
@@ -306,7 +307,7 @@ the same directory.</p>
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname"><span class="pre">export</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/isof/isosurface.html#Isosurface.export"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">export</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pyvista.core.pointset.PolyData</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/isof/isosurface.html#Isosurface.export"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Export the isosurface for a single timestep into one of many formats.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -323,7 +324,8 @@ data for the nearest matching timestep will be used.</p></li>
 <dl class="py method">
 <dt>
 <code class="sig-name descname"><span class="pre">get_nearest_timestep</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">int</span><a class="reference internal" href="_modules/fdsreader/isof/isosurface.html#Isosurface.get_nearest_timestep"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd></dd></dl>
+<dd><p>Calculates the nearest timestep for which data has been output.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt>
@@ -339,18 +341,21 @@ data for the nearest matching timestep will be used.</p></li>
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname"><span class="pre">join_pyvista_meshes</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meshes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">pyvista.core.pointset.PolyData</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/isof/isosurface.html#Isosurface.join_pyvista_meshes"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd></dd></dl>
+<code class="sig-name descname"><span class="pre">join_pyvista_meshes</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meshes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">pyvista.core.pointset.PolyData</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">pyvista.core.pointset.PolyData</span><a class="reference internal" href="_modules/fdsreader/isof/isosurface.html#Isosurface.join_pyvista_meshes"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Combines multiple PyVista meshes.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">surfaces</span></code></dt>
-<dd></dd></dl>
+<dd><p>Gets all surfaces per mesh.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">times</span></code></dt>
-<dd></dd></dl>
+<dd><p>List containing all times for which data has been recorded.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt>
@@ -370,12 +375,14 @@ data for the nearest matching timestep will be used.</p>
 <dl class="py method">
 <dt>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">triangles</span></code></dt>
-<dd></dd></dl>
+<dd><p>Gets all triangles per mesh.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">vertices</span></code></dt>
-<dd></dd></dl>
+<dd><p>Gets all vertices per mesh.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -558,10 +565,7 @@ calculated for this Plot3D with the corresponding label and unit.</p></li>
 <dd><p>Subplot of a pl3d output for a single mesh.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>file_path</strong> – Path to the binary data file.</p></li>
-<li><p><strong>mesh</strong> – The mesh containing the data.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>mesh</strong> – The mesh containing the data.</p>
 </dd>
 </dl>
 <p><strong>Methods:</strong></p>
@@ -584,7 +588,7 @@ calculated for this Plot3D with the corresponding label and unit.</p></li>
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></p></td>
-<td><p>Method to lazy load the 3D data for a single mesh.</p></td>
+<td><p>Method to lazy load the 3D data for each quantity of a single mesh.</p></td>
 </tr>
 </tbody>
 </table>
@@ -597,7 +601,7 @@ calculated for this Plot3D with the corresponding label and unit.</p></li>
 <dl class="py method">
 <dt>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">data</span></code></dt>
-<dd><p>Method to lazy load the 3D data for a single mesh.</p>
+<dd><p>Method to lazy load the 3D data for each quantity of a single mesh.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>4D numpy array wiht (x,y,z,q) as dimensions, while q represents the 5 quantities.</p>
@@ -722,11 +726,9 @@ slice with the corresponding label and unit.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>root_path</strong> – Path to the directory containing the slice file.</p></li>
-<li><p><strong>cell_centered</strong> – Indicates whether centered positioning for data is used.</p></li>
 <li><p><strong>mesh</strong> – The mesh the subslice cuts through.</p></li>
 <li><p><strong>extent</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">Extent</span></code> object containing 3-dimensional extent information.</p></li>
-<li><p><strong>file_names</strong> – File names for the corresponding slice file depending on the quantity.</p></li>
+<li><p><strong>dimension</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">Dimension</span></code> object containing information about steps in each dimension.</p></li>
 </ul>
 </dd>
 </dl>
@@ -753,10 +755,10 @@ slice with the corresponding label and unit.</p></li>
 <td><p>Method to lazy load the slice’s data for a specific quantity.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code></p></td>
-<td><p></p></td>
+<td><p>2D-shape of the slice.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vector_data</span></code></p></td>
-<td><p></p></td>
+<td><p>Method to lazy load the slice’s vector data for a specific quantity if it exists.</p></td>
 </tr>
 </tbody>
 </table>
@@ -775,12 +777,14 @@ slice with the corresponding label and unit.</p></li>
 <dl class="py method">
 <dt>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">shape</span></code></dt>
-<dd></dd></dl>
+<dd><p>2D-shape of the slice.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">vector_data</span></code></dt>
-<dd></dd></dl>
+<dd><p>Method to lazy load the slice’s vector data for a specific quantity if it exists.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -801,7 +805,7 @@ slice with the corresponding label and unit.</p></li>
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Boundary</span></code>(cell_centered, quantity, times, …)</p></td>
-<td><p></p></td>
+<td><p>Container for the actual data which is stored as rectangular plane with specific orientation</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Obstruction</span></code>(oid, side_surfaces, …)</p></td>
 <td><p>A box-shaped obstruction with specific surfaces (materials) on each side.</p></td>
@@ -814,7 +818,24 @@ slice with the corresponding label and unit.</p></li>
 <dl class="py class">
 <dt>
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.bndf.obstruction.</span></code><code class="sig-name descname"><span class="pre">Boundary</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell_centered</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.data.Quantity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">times</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_t</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_bounds</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_bounds</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_mesh</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.fds_classes.mesh.Mesh</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Boundary"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p><strong>Methods:</strong></p>
+<dd><dl class="simple">
+<dt>Container for the actual data which is stored as rectangular plane with specific orientation</dt><dd><p>and extent.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>quantity</strong> – Quantity object containing information about the quantity calculated for this
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Obstruction</span></code> with the corresponding label and unit.</p></li>
+<li><p><strong>times</strong> – Numpy array containing all times for which data has been recorded.</p></li>
+<li><p><strong>cell_centered</strong> – Indicates whether centered positioning for data is used.</p></li>
+<li><p><strong>lower_bounds</strong> – Dictionary with lower bounds for each timestep with meshes as keys.</p></li>
+<li><p><strong>upper_bounds</strong> – Dictionary with upper bounds for each timestep with meshes as keys.</p></li>
+<li><p><strong>n_t</strong> – Total number of time steps for which output data has been written.</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Methods:</strong></p>
 <table class="longtable docutils align-default">
 <colgroup>
 <col style="width: 10%" />
@@ -825,7 +846,7 @@ slice with the corresponding label and unit.</p></li>
 <td><p>Remove all data from the internal cache that has been loaded so far to free memory.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_patches_in_mesh</span></code>(mesh)</p></td>
-<td><p></p></td>
+<td><p>Gets all patches in a specific mesh.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_patches_cartesian</span></code>(patches_in)</p></td>
 <td><p>Returns all patches (of same orientation!) sorted in cartesian coordinates.</p></td>
@@ -840,13 +861,13 @@ slice with the corresponding label and unit.</p></li>
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">faces</span></code></p></td>
-<td><p></p></td>
+<td><p>Global/combines faces for all 6 orientations.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmax</span></code></p></td>
-<td><p></p></td>
+<td><p>Maximum value of all patches in any time step.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmin</span></code></p></td>
-<td><p></p></td>
+<td><p>Minimum value of all patches in any time step.</p></td>
 </tr>
 </tbody>
 </table>
@@ -859,12 +880,14 @@ slice with the corresponding label and unit.</p></li>
 <dl class="py method">
 <dt>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">faces</span></code></dt>
-<dd></dd></dl>
+<dd><p>Global/combines faces for all 6 orientations.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname"><span class="pre">get_patches_in_mesh</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.fds_classes.mesh.Mesh</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Boundary.get_patches_in_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd></dd></dl>
+<code class="sig-name descname"><span class="pre">get_patches_in_mesh</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.fds_classes.mesh.Mesh</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.bndf.obstruction.Patch</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Boundary.get_patches_in_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Gets all patches in a specific mesh.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt>
@@ -875,12 +898,14 @@ slice with the corresponding label and unit.</p></li>
 <dl class="py method">
 <dt>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">vmax</span></code></dt>
-<dd></dd></dl>
+<dd><p>Maximum value of all patches in any time step.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">vmin</span></code></dt>
-<dd></dd></dl>
+<dd><p>Minimum value of all patches in any time step.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -942,7 +967,7 @@ pattern should begin.</p>
 <td><p>Remove all data from the internal cache that has been loaded so far to free memory.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_boundary_data</span></code>(quantity)</p></td>
-<td><p></p></td>
+<td><p>Gets the boundary data for a specific quantity.</p></td>
 </tr>
 </tbody>
 </table>
@@ -954,7 +979,7 @@ pattern should begin.</p>
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">has_boundary_data</span></code></p></td>
-<td><p></p></td>
+<td><p>Whether boundary data has been output in the simulation.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">quantities</span></code></p></td>
 <td><p>Get a list of all quantities for which boundary data exists.</p></td>
@@ -970,12 +995,14 @@ pattern should begin.</p>
 <dl class="py method">
 <dt>
 <code class="sig-name descname"><span class="pre">get_boundary_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">,</span> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Obstruction.get_boundary_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd></dd></dl>
+<dd><p>Gets the boundary data for a specific quantity.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">has_boundary_data</span></code></dt>
-<dd></dd></dl>
+<dd><p>Whether boundary data has been output in the simulation.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt>
@@ -987,7 +1014,7 @@ pattern should begin.</p>
 
 <dl class="py class">
 <dt>
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.bndf.obstruction.</span></code><code class="sig-name descname"><span class="pre">Patch</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimension</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.dimension.Dimension</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extent</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.extent.Extent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_centered</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_offset</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_t</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Patch"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.bndf.obstruction.</span></code><code class="sig-name descname"><span class="pre">Patch</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimension</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.dimension.Dimension</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extent</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.extent.Extent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_centered</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_initial_offset</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_t</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Patch"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><dl class="simple">
 <dt>Container for the actual data which is stored as rectangular plane with specific orientation</dt><dd><p>and extent.</p>
 </dd>
@@ -995,9 +1022,10 @@ pattern should begin.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
 <dd class="field-odd"><ul class="simple">
+<li><p><strong>dimension</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">Dimension</span></code> object containing information about steps in each dimension.</p></li>
 <li><p><strong>extent</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">Extent</span></code> object containing 3-dimensional extent information.</p></li>
 <li><p><strong>orientation</strong> – The direction the patch is facing (x={-1;1}, y={-2;2}, z={-3;3}).</p></li>
-<li><p><strong>data</strong> – Numpy ndarray with the actual data.</p></li>
+<li><p><strong>cell_centered</strong> – Indicates whether centered positioning for data is used.</p></li>
 <li><p><strong>n_t</strong> – Total number of time steps for which output data has been written.</p></li>
 </ul>
 </dd>
@@ -1022,7 +1050,7 @@ pattern should begin.</p>
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></p></td>
-<td><p>Method to load the quantity data for a single patch for a single timestep.</p></td>
+<td><p>Method to load the quantity data for a single patch.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code></p></td>
 <td><p>Convenience function to calculate the shape of the array containing data for this patch.</p></td>
@@ -1041,7 +1069,7 @@ pattern should begin.</p>
 <dl class="py method">
 <dt>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">data</span></code></dt>
-<dd><p>Method to load the quantity data for a single patch for a single timestep.</p>
+<dd><p>Method to load the quantity data for a single patch.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1084,6 +1112,8 @@ pattern should begin.</p>
 <li><p><strong>quantities</strong> – List of all quantities for which data has been written out.</p></li>
 <li><p><strong>color</strong> – Color assigned to the particle.</p></li>
 <li><p><strong>n_particles</strong> – Number of existing particles for each timestep per mesh.</p></li>
+<li><p><strong>lower_bounds</strong> – Dictionary with lower bounds for each timestep with quantities as keys.</p></li>
+<li><p><strong>upper_bounds</strong> – Dictionary with upper bounds for each timestep with quantities as keys.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1107,13 +1137,13 @@ pattern should begin.</p>
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></p></td>
-<td><p></p></td>
+<td><p>Dictionary with quantities as keys and a list with a numpy array for each timestep which contains data for each particle in that timestep.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">positions</span></code></p></td>
-<td><p></p></td>
+<td><p>List with a numpy array for each timestep which contains the position of each particle in that timestep.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tags</span></code></p></td>
-<td><p></p></td>
+<td><p>List with a numpy array for each timestep which contains a tag for each particle in that timestep.</p></td>
 </tr>
 </tbody>
 </table>
@@ -1126,17 +1156,23 @@ pattern should begin.</p>
 <dl class="py method">
 <dt>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">data</span></code></dt>
-<dd></dd></dl>
+<dd><p>Dictionary with quantities as keys and a list with a numpy array for each timestep which
+contains data for each particle in that timestep.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">positions</span></code></dt>
-<dd></dd></dl>
+<dd><p>List with a numpy array for each timestep which contains the position of each particle in
+that timestep.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">tags</span></code></dt>
-<dd></dd></dl>
+<dd><p>List with a numpy array for each timestep which contains a tag for each particle in that
+timestep.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -1166,7 +1202,7 @@ pattern should begin.</p>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">as_list</span></code>(reduced)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">as_list</span></code>([reduced])</p></td>
 <td><p>Gives the extent in list notation (without empty extents).</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">as_tuple</span></code>([reduced])</p></td>
@@ -1203,7 +1239,7 @@ pattern should begin.</p>
 </table>
 <dl class="py method">
 <dt>
-<code class="sig-name descname"><span class="pre">as_list</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reduced</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">True</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><a class="reference internal" href="_modules/fdsreader/utils/extent.html#Extent.as_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">as_list</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reduced</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><a class="reference internal" href="_modules/fdsreader/utils/extent.html#Extent.as_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Gives the extent in list notation (without empty extents).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1489,13 +1525,13 @@ for example windows or bricks, the texture_origin specifies where the pattern sh
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Device</span></code>(quantity, position, float, float], …)</p></td>
-<td><p></p></td>
+<td><p>Represents a single Device.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">FDSDataCollection</span></code>(*elements)</p></td>
 <td><p>(Abstract) Base class for any collection of FDS data.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity</span></code>(quantity, label, unit)</p></td>
-<td><p></p></td>
+<td><p>Object containing information about a quantity with the corresponding label and unit.</p></td>
 </tr>
 </tbody>
 </table>
@@ -1520,7 +1556,8 @@ for example windows or bricks, the texture_origin specifies where the pattern sh
 <dl class="py class">
 <dt>
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.utils.data.</span></code><code class="sig-name descname"><span class="pre">Device</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.data.Quantity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/data.html#Device"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p><strong>Attributes:</strong></p>
+<dd><p>Represents a single Device.</p>
+<p><strong>Attributes:</strong></p>
 <table class="longtable docutils align-default">
 <colgroup>
 <col style="width: 10%" />
@@ -1566,7 +1603,8 @@ for example windows or bricks, the texture_origin specifies where the pattern sh
 <dl class="py class">
 <dt>
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.utils.data.</span></code><code class="sig-name descname"><span class="pre">Quantity</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/data.html#Quantity"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd></dd></dl>
+<dd><p>Object containing information about a quantity with the corresponding label and unit.</p>
+</dd></dl>
 
 <dl class="py function">
 <dt>
@@ -1597,92 +1635,6 @@ the same directory.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>A list containing the path to each smv-file found in the directory.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<p><strong>Functions:</strong></p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">combine</span></code>(*dtypes)</p></td>
-<td><p>Combines multiple numpy dtypes into one.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">new</span></code>(data_structure)</p></td>
-<td><p>Creates a fortran-compliant numpy dtype to read in binary fortran data.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">new_raw</span></code>(data_structure)</p></td>
-<td><p>Creates the string definition for a fortran-compliant numpy dtype to read in binary fortran data.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code>(infile, dtype, n)</p></td>
-<td><p>Convenience function to read in binary data from a file using a numpy dtype.</p></td>
-</tr>
-</tbody>
-</table>
-<dl class="py function">
-<dt>
-<code class="sig-prename descclassname"><span class="pre">fdsreader.utils.fortran_data.</span></code><code class="sig-name descname"><span class="pre">combine</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">dtypes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.dtype</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/fortran_data.html#combine"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Combines multiple numpy dtypes into one.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>dtypes</strong> – An arbitrary amount of numpy dtype objects can be provided.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The newly created numpy dtype.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt>
-<code class="sig-prename descclassname"><span class="pre">fdsreader.utils.fortran_data.</span></code><code class="sig-name descname"><span class="pre">new</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_structure</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.dtype</span><a class="reference internal" href="_modules/fdsreader/utils/fortran_data.html#new"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Creates a fortran-compliant numpy dtype to read in binary fortran data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>data_structure</strong> – Tuple consisting of tuples with 2 elements each where the first element
-is a char (‘i’, ‘f’ or ‘c’) representing the primitive data type to be used and the second
-element an integer representing the number of times this data type was written out in Fortran.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The newly created fortran-compliant numpy dtype with the desired structure.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt>
-<code class="sig-prename descclassname"><span class="pre">fdsreader.utils.fortran_data.</span></code><code class="sig-name descname"><span class="pre">new_raw</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_structure</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="reference internal" href="_modules/fdsreader/utils/fortran_data.html#new_raw"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Creates the string definition for a fortran-compliant numpy dtype to read in binary fortran data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>data_structure</strong> – Tuple consisting of tuples with 2 elements each where the first element
-is a char (‘i’, ‘f’, ‘c’ or ‘{}’) representing the primitive data type to be used and the
-second element an integer representing the number of times this data type was written out in
-Fortran.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The definition string for a fortran-compliant numpy dtype with the desired structure.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt>
-<code class="sig-prename descclassname"><span class="pre">fdsreader.utils.fortran_data.</span></code><code class="sig-name descname"><span class="pre">read</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infile</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">BinaryIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.dtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/fortran_data.html#read"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Convenience function to read in binary data from a file using a numpy dtype.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>infile</strong> – Already opened binary IO stream.</p></li>
-<li><p><strong>dtype</strong> – Numpy dtype object.</p></li>
-<li><p><strong>n</strong> – The number of times a dtype object should be read in from the stream.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Read in data.</p>
 </dd>
 </dl>
 </dd></dl>

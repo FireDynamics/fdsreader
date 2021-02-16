@@ -244,10 +244,7 @@ calculated for this Plot3D with the corresponding label and unit.</p></li>
 <dd><p>Subplot of a pl3d output for a single mesh.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>file_path</strong> – Path to the binary data file.</p></li>
-<li><p><strong>mesh</strong> – The mesh containing the data.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>mesh</strong> – The mesh containing the data.</p>
 </dd>
 </dl>
 <p><strong>Methods:</strong></p>
@@ -270,7 +267,7 @@ calculated for this Plot3D with the corresponding label and unit.</p></li>
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></p></td>
-<td><p>Method to lazy load the 3D data for a single mesh.</p></td>
+<td><p>Method to lazy load the 3D data for each quantity of a single mesh.</p></td>
 </tr>
 </tbody>
 </table>
@@ -283,7 +280,7 @@ calculated for this Plot3D with the corresponding label and unit.</p></li>
 <dl class="py method">
 <dt>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">data</span></code></dt>
-<dd><p>Method to lazy load the 3D data for a single mesh.</p>
+<dd><p>Method to lazy load the 3D data for each quantity of a single mesh.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>4D numpy array wiht (x,y,z,q) as dimensions, while q represents the 5 quantities.</p>

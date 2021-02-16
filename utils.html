@@ -182,7 +182,7 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">as_list</span></code>(reduced)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">as_list</span></code>([reduced])</p></td>
 <td><p>Gives the extent in list notation (without empty extents).</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">as_tuple</span></code>([reduced])</p></td>
@@ -219,7 +219,7 @@
 </table>
 <dl class="py method">
 <dt>
-<code class="sig-name descname"><span class="pre">as_list</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reduced</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">True</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><a class="reference internal" href="_modules/fdsreader/utils/extent.html#Extent.as_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">as_list</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reduced</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><a class="reference internal" href="_modules/fdsreader/utils/extent.html#Extent.as_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Gives the extent in list notation (without empty extents).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -505,13 +505,13 @@ for example windows or bricks, the texture_origin specifies where the pattern sh
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Device</span></code>(quantity, position, float, float], …)</p></td>
-<td><p></p></td>
+<td><p>Represents a single Device.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">FDSDataCollection</span></code>(*elements)</p></td>
 <td><p>(Abstract) Base class for any collection of FDS data.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Quantity</span></code>(quantity, label, unit)</p></td>
-<td><p></p></td>
+<td><p>Object containing information about a quantity with the corresponding label and unit.</p></td>
 </tr>
 </tbody>
 </table>
@@ -536,7 +536,8 @@ for example windows or bricks, the texture_origin specifies where the pattern sh
 <dl class="py class">
 <dt>
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.utils.data.</span></code><code class="sig-name descname"><span class="pre">Device</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.data.Quantity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">position</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/data.html#Device"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p><strong>Attributes:</strong></p>
+<dd><p>Represents a single Device.</p>
+<p><strong>Attributes:</strong></p>
 <table class="longtable docutils align-default">
 <colgroup>
 <col style="width: 10%" />
@@ -582,7 +583,8 @@ for example windows or bricks, the texture_origin specifies where the pattern sh
 <dl class="py class">
 <dt>
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.utils.data.</span></code><code class="sig-name descname"><span class="pre">Quantity</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/data.html#Quantity"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd></dd></dl>
+<dd><p>Object containing information about a quantity with the corresponding label and unit.</p>
+</dd></dl>
 
 <dl class="py function">
 <dt>
@@ -613,92 +615,6 @@ the same directory.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>A list containing the path to each smv-file found in the directory.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<p><strong>Functions:</strong></p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">combine</span></code>(*dtypes)</p></td>
-<td><p>Combines multiple numpy dtypes into one.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">new</span></code>(data_structure)</p></td>
-<td><p>Creates a fortran-compliant numpy dtype to read in binary fortran data.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">new_raw</span></code>(data_structure)</p></td>
-<td><p>Creates the string definition for a fortran-compliant numpy dtype to read in binary fortran data.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code>(infile, dtype, n)</p></td>
-<td><p>Convenience function to read in binary data from a file using a numpy dtype.</p></td>
-</tr>
-</tbody>
-</table>
-<dl class="py function">
-<dt>
-<code class="sig-prename descclassname"><span class="pre">fdsreader.utils.fortran_data.</span></code><code class="sig-name descname"><span class="pre">combine</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">dtypes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.dtype</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/fortran_data.html#combine"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Combines multiple numpy dtypes into one.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>dtypes</strong> – An arbitrary amount of numpy dtype objects can be provided.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The newly created numpy dtype.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt>
-<code class="sig-prename descclassname"><span class="pre">fdsreader.utils.fortran_data.</span></code><code class="sig-name descname"><span class="pre">new</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_structure</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.dtype</span><a class="reference internal" href="_modules/fdsreader/utils/fortran_data.html#new"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Creates a fortran-compliant numpy dtype to read in binary fortran data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>data_structure</strong> – Tuple consisting of tuples with 2 elements each where the first element
-is a char (‘i’, ‘f’ or ‘c’) representing the primitive data type to be used and the second
-element an integer representing the number of times this data type was written out in Fortran.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The newly created fortran-compliant numpy dtype with the desired structure.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt>
-<code class="sig-prename descclassname"><span class="pre">fdsreader.utils.fortran_data.</span></code><code class="sig-name descname"><span class="pre">new_raw</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_structure</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="reference internal" href="_modules/fdsreader/utils/fortran_data.html#new_raw"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Creates the string definition for a fortran-compliant numpy dtype to read in binary fortran data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>data_structure</strong> – Tuple consisting of tuples with 2 elements each where the first element
-is a char (‘i’, ‘f’, ‘c’ or ‘{}’) representing the primitive data type to be used and the
-second element an integer representing the number of times this data type was written out in
-Fortran.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The definition string for a fortran-compliant numpy dtype with the desired structure.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt>
-<code class="sig-prename descclassname"><span class="pre">fdsreader.utils.fortran_data.</span></code><code class="sig-name descname"><span class="pre">read</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infile</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">BinaryIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.dtype</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/fortran_data.html#read"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Convenience function to read in binary data from a file using a numpy dtype.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>infile</strong> – Already opened binary IO stream.</p></li>
-<li><p><strong>dtype</strong> – Numpy dtype object.</p></li>
-<li><p><strong>n</strong> – The number of times a dtype object should be read in from the stream.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Read in data.</p>
 </dd>
 </dl>
 </dd></dl>

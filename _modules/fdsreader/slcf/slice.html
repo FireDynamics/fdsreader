@@ -186,11 +186,9 @@
 <div class="viewcode-block" id="SubSlice"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.slice.SubSlice">[docs]</a><span class="k">class</span> <span class="nc">SubSlice</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Part of a slice that cuts through a single mesh.</span>
 
-<span class="sd">    :ivar root_path: Path to the directory containing the slice file.</span>
-<span class="sd">    :ivar cell_centered: Indicates whether centered positioning for data is used.</span>
 <span class="sd">    :ivar mesh: The mesh the subslice cuts through.</span>
 <span class="sd">    :ivar extent: :class:`Extent` object containing 3-dimensional extent information.</span>
-<span class="sd">    :ivar file_names: File names for the corresponding slice file depending on the quantity.</span>
+<span class="sd">    :ivar dimension: :class:`Dimension` object containing information about steps in each dimension.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">_offset</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="mi">30</span><span class="p">),))</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">+</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">),))</span><span class="o">.</span><span class="n">itemsize</span>
@@ -209,7 +207,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_vector_data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;2D-shape of the slice.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">cell_centered</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_slice</span><span class="o">.</span><span class="n">cell_centered</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_slice</span><span class="o">.</span><span class="n">orientation</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -222,12 +222,11 @@
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
             <span class="n">infile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_offset</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_data</span><span class="p">,</span> <span class="n">n_t</span><span class="p">)):</span>
-                <span class="n">data_out</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asfortranarray</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">data_out</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Method to lazy load the slice&#39;s data for a specific quantity.</span>
+        <span class="sd">&quot;&quot;&quot;Method to lazy load the slice&#39;s data for a specific quantity.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_data&quot;</span><span class="p">):</span>
             <span class="n">n_t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_slice</span><span class="o">.</span><span class="n">times</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -239,6 +238,8 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">vector_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Method to lazy load the slice&#39;s vector data for a specific quantity if it exists.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_vector_data&quot;</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;There is no vector data available for this slice.&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_vector_data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>

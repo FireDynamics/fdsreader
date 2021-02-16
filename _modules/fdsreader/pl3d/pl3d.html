@@ -184,19 +184,18 @@
 <div class="viewcode-block" id="SubPlot3D"><a class="viewcode-back" href="../../../pl3d.html#fdsreader.pl3d.pl3d.SubPlot3D">[docs]</a><span class="k">class</span> <span class="nc">SubPlot3D</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Subplot of a pl3d output for a single mesh.</span>
 
-<span class="sd">    :ivar file_path: Path to the binary data file.</span>
 <span class="sd">    :ivar mesh: The mesh containing the data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Offset of the binary file to the end of the file header.</span>
     <span class="n">_offset</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),))</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">+</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),))</span><span class="o">.</span><span class="n">itemsize</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">file_path</span> <span class="o">=</span> <span class="n">file_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_path</span> <span class="o">=</span> <span class="n">file_path</span>  <span class="c1"># Path to the binary data file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="n">mesh</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Method to lazy load the 3D data for a single mesh.</span>
+        <span class="sd">&quot;&quot;&quot;Method to lazy load the 3D data for each quantity of a single mesh.</span>
 
 <span class="sd">        :returns: 4D numpy array wiht (x,y,z,q) as dimensions, while q represents the 5 quantities.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -230,7 +229,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">time</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">quantities</span> <span class="o">=</span> <span class="n">quantities</span>
 
-        <span class="c1"># List of all subplots this slice consists of (one per mesh).</span>
+        <span class="c1"># List of all subplots this Plot3D consists of (one per mesh).</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Mesh</span><span class="p">,</span> <span class="n">SubPlot3D</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_add_subplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SubPlot3D</span><span class="p">:</span>
