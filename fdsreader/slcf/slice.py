@@ -1,10 +1,10 @@
-from __future__ import annotations
 import os
 from copy import deepcopy
 
 import numpy as np
 import logging
-from typing import Dict, Collection, Tuple, Literal
+from typing import Dict, Collection, Tuple
+from typing_extensions import Literal
 
 from fdsreader.utils import Dimension, Quantity, Mesh, Extent
 from fdsreader import settings
@@ -34,7 +34,7 @@ class SubSlice:
 
     _offset = 3 * fdtype.new((('c', 30),)).itemsize + fdtype.new((('i', 6),)).itemsize
 
-    def __init__(self, parent_slice: Slice, filename: str, dimension: Dimension, extent: Extent,
+    def __init__(self, parent_slice, filename: str, dimension: Dimension, extent: Extent,
                  mesh: Mesh, has_vector_data: bool):
         self.mesh = mesh
         self.dimension = dimension
@@ -178,18 +178,19 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         return self._subslices[mesh]
 
     @property
-    def extent_dirs(self) -> Tuple[Literal['x', 'y', 'z'], Literal['x', 'y', 'z']]:
+    def extent_dirs(self) -> Tuple[
+        Literal['x', 'y', 'z'], Literal['x', 'y', 'z'], Literal['x', 'y', 'z']]:
         """The directions in which there is an extent. All three dimensions in case the slice is 3D.
         """
         ior = self.orientation
         if ior == 0:
-            return ('x', 'y', 'z')
+            return 'x', 'y', 'z'
         elif ior == 1:
-            return ('y', 'z')
+            return 'y', 'z'
         elif ior == 2:
-            return ('x', 'z')
+            return 'x', 'z'
         else:
-            return ('x', 'y')
+            return 'x', 'y'
 
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory.

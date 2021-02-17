@@ -1,4 +1,5 @@
-from typing import Dict, Literal, Tuple, List
+from typing import Dict, Tuple
+from typing_extensions import Literal
 import numpy as np
 
 from fdsreader.utils import Dimension, Extent
