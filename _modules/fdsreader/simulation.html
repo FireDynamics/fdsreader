@@ -165,6 +165,7 @@
 <span class="kn">import</span> <span class="nn">pickle</span>
 
 <span class="kn">from</span> <span class="nn">fdsreader.bndf</span> <span class="kn">import</span> <span class="n">Obstruction</span><span class="p">,</span> <span class="n">Patch</span>
+<span class="kn">from</span> <span class="nn">fdsreader.bndf.ObstructionCollection</span> <span class="kn">import</span> <span class="n">ObstructionCollection</span>
 <span class="kn">from</span> <span class="nn">fdsreader.isof</span> <span class="kn">import</span> <span class="n">Isosurface</span>
 <span class="kn">from</span> <span class="nn">fdsreader.isof.IsosurfaceCollection</span> <span class="kn">import</span> <span class="n">IsosurfaceCollection</span>
 <span class="kn">from</span> <span class="nn">fdsreader.part</span> <span class="kn">import</span> <span class="n">Particle</span>
@@ -192,9 +193,9 @@
 <span class="sd">    :ivar out_file_path: Path to the .out file of the simulation.</span>
 <span class="sd">    :ivar surfaces: List containing all surfaces defined in this simulation.</span>
 <span class="sd">    :ivar meshes: List containing all meshes (grids) defined in this simulation.</span>
-<span class="sd">    :ivar obstructions: List containing all obstructions defined in this simulation.</span>
 <span class="sd">    :ivar ventilations: List containing all ventilations defined in this simulation.</span>
-<span class="sd">    :ivar slices: All defined slices combined into a :class:`ParticleCollection`.</span>
+<span class="sd">    :ivar obstructions: All defined obstructions combined into a :class:`ObstructionCollection`.</span>
+<span class="sd">    :ivar slices: All defined slices combined into a :class:`SliceCollection`.</span>
 <span class="sd">    :ivar data_3d: All defined 3D plotting data combined into a :class:`Plot3DCollection`.</span>
 <span class="sd">    :ivar isosurfaces: All defined isosurfaces combined into a :class:`IsosurfaceCollection`.</span>
 <span class="sd">    :ivar particles: All defined particles combined into a :class:`ParticleCollection`.</span>
@@ -313,7 +314,7 @@
             <span class="c1"># POST INIT (post read)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">out_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chid</span> <span class="o">+</span> <span class="s2">&quot;.out&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ventilations</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Ventilation</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ventilations</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">obstructions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Obstruction</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obstructions</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">obstructions</span> <span class="o">=</span> <span class="n">ObstructionCollection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obstructions</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
             <span class="k">for</span> <span class="n">obst</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">obstructions</span><span class="p">:</span>
                 <span class="n">obst</span><span class="o">.</span><span class="n">_post_init</span><span class="p">()</span>
             <span class="c1"># Combine the gathered temporary information into data collections</span>
