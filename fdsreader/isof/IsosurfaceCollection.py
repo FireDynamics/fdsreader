@@ -13,13 +13,12 @@ class IsosurfaceCollection(FDSDataCollection):
         super().__init__(*isosurfaces)
 
     def get_by_quantity(self, quantity: Union[str, Quantity]):
+        """Get the isosurface for a specific quantity.
         """
-        """
-        if type(quantity) == str:
-            return next((x for x in self if
-                        x.quantity.quantity.lower() == quantity.lower() or
-                        x.quantity.label.lower() == quantity.lower()), None)
-        return next((x for x in self if x.quantity == quantity), None)
+        if type(quantity) != str:
+            quantity = quantity.quantity
+        return next((x for x in self if x.quantity.quantity.lower() == quantity.lower() or
+                     x.quantity.label.lower() == quantity.lower()), None)
 
     def __repr__(self):
         return "IsosurfaceCollection(" + super(IsosurfaceCollection, self).__repr__() + ")"

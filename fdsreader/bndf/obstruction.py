@@ -287,11 +287,11 @@ class Obstruction:
     def get_boundary_data(self, quantity: Union[Quantity, str]):
         """Gets the boundary data for a specific quantity.
         """
-        if type(quantity) == str:
-            return next((x for x in self._boundary_data.values() if
-                         x.quantity.quantity.lower() == quantity.lower() or
-                         x.quantity.label.lower() == quantity.lower()), None)
-        return next((x for x in self._boundary_data.values() if x.quantity == quantity), None)
+        if type(quantity) != str:
+            quantity = quantity.quantity
+        return next((x for x in self._boundary_data.values() if
+                     x.quantity.quantity.lower() == quantity.lower() or
+                     x.quantity.label.lower() == quantity.lower()), None)
 
     @property
     def has_boundary_data(self):

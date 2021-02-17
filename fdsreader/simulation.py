@@ -6,6 +6,7 @@ import numpy as np
 import pickle
 
 from fdsreader.bndf import Obstruction, Patch
+from fdsreader.bndf.ObstructionCollection import ObstructionCollection
 from fdsreader.isof import Isosurface
 from fdsreader.isof.IsosurfaceCollection import IsosurfaceCollection
 from fdsreader.part import Particle
@@ -33,9 +34,9 @@ class Simulation:
     :ivar out_file_path: Path to the .out file of the simulation.
     :ivar surfaces: List containing all surfaces defined in this simulation.
     :ivar meshes: List containing all meshes (grids) defined in this simulation.
-    :ivar obstructions: List containing all obstructions defined in this simulation.
     :ivar ventilations: List containing all ventilations defined in this simulation.
-    :ivar slices: All defined slices combined into a :class:`ParticleCollection`.
+    :ivar obstructions: All defined obstructions combined into a :class:`ObstructionCollection`.
+    :ivar slices: All defined slices combined into a :class:`SliceCollection`.
     :ivar data_3d: All defined 3D plotting data combined into a :class:`Plot3DCollection`.
     :ivar isosurfaces: All defined isosurfaces combined into a :class:`IsosurfaceCollection`.
     :ivar particles: All defined particles combined into a :class:`ParticleCollection`.
@@ -154,7 +155,7 @@ class Simulation:
             # POST INIT (post read)
             self.out_file_path = os.path.join(self.root_path, self.chid + ".out")
             self.ventilations: List[Ventilation] = list(self.ventilations.values())
-            self.obstructions: List[Obstruction] = list(self.obstructions.values())
+            self.obstructions = ObstructionCollection(self.obstructions.values())
             for obst in self.obstructions:
                 obst._post_init()
             # Combine the gathered temporary information into data collections
