@@ -67,7 +67,7 @@ class SubSlice:
 
     @property
     def data(self) -> np.ndarray:
-        """Method to lazy load the slice's data for a specific quantity.
+        """Method to lazy load the slice's data.
         """
         if not hasattr(self, "_data"):
             n_t = self.parent_slice.times.shape[0]
@@ -79,7 +79,7 @@ class SubSlice:
 
     @property
     def vector_data(self) -> Dict[str, np.ndarray]:
-        """Method to lazy load the slice's vector data for a specific quantity if it exists.
+        """Method to lazy load the slice's vector data if it exists.
         """
         if not hasattr(self, "_vector_data"):
             raise AttributeError("There is no vector data available for this slice.")

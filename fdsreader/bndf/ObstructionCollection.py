@@ -13,7 +13,7 @@ class ObstructionCollection(FDSDataCollection):
     def __init__(self, *obstructions: Iterable[Obstruction]):
         super().__init__(*obstructions)
 
-    def get_boundary_data_by_quantity(self, quantity: Union[str, Quantity]) -> List[Boundary]:
+    def filter_by_quantity(self, quantity: Union[str, Quantity]) -> List[Boundary]:
         """Filters all obstructions for its boundary data by a specific quantity.
         """
         if type(quantity) != str:
