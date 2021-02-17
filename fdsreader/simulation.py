@@ -1,8 +1,8 @@
 import os
 from typing import List, TextIO, Dict, AnyStr, Sequence, Tuple, Union
+import logging
 
 import numpy as np
-import logging
 import pickle
 
 from fdsreader.bndf import Obstruction, Patch
