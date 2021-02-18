@@ -221,8 +221,6 @@ class Simulation:
         assert smv_file.readline().strip() == "VENT"
         self._load_vents(smv_file, mesh)
 
-        # TODO: Offset und closed/open vents
-
         return mesh
 
     def _load_obstructions(self, smv_file: TextIO, mesh: Mesh):

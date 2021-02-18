@@ -502,6 +502,9 @@ fabric.properties
 *.pyproj
 
 # CUSTOM
-/examples/*
+/examples/
+!/examples/*/
 !/examples/**/*.py
-!*.fds
+!/examples/**/*.fds
+
+/docs/build/
