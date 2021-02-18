@@ -118,12 +118,14 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
     :ivar extent: :class:`Extent` object containing 3-dimensional extent information.
     """
 
-    def __init__(self, root_path: str, cell_centered: bool, times: np.ndarray,
+    def __init__(self, root_path: str, slice_id: str, cell_centered: bool, times: np.ndarray,
                  multimesh_data: Collection[Dict]):
         self.root_path = root_path
         self.cell_centered = cell_centered
 
         self.times = times
+
+        self.id = slice_id
 
         # List of all subslices this slice consists of (one per mesh).
         self._subslices: Dict[Mesh, SubSlice] = dict()

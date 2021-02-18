@@ -32,6 +32,10 @@ class Particle:
         self._init_callback = None
 
     @property
+    def id(self):
+        return self.class_name
+
+    @property
     def data(self) -> Dict[str, List[np.ndarray]]:
         """Dictionary with quantities as keys and a list with a numpy array for each timestep which
             contains data for each particle in that timestep.

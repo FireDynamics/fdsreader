@@ -160,9 +160,9 @@ class Simulation:
                 obst._post_init()
             # Combine the gathered temporary information into data collections
             self.slices = SliceCollection(
-                Slice(self.root_path, slice_data[0]["cell_centered"], slice_data[0]["times"],
-                      slice_data[1:]) for slice_data
-                in self.slices.values())
+                Slice(self.root_path, slice_data[0]["id"], slice_data[0]["cell_centered"],
+                      slice_data[0]["times"], slice_data[1:]) for slice_data in
+                self.slices.values())
             self.data_3d = Plot3DCollection(self.data_3d.keys(), self.data_3d.values())
             self.isosurfaces = IsosurfaceCollection(self.isosurfaces.values())
             if self.particles is None:
@@ -360,7 +360,9 @@ class Simulation:
         else:
             cell_centered = False
 
-        slice_id = int(line.split('!')[1].strip().split()[0])
+        slice_index = int(line.split('!')[1].strip().split()[0])
+
+        slice_id = line.split('%')[1].split('&')[0].strip() if '%' in line else ""
 
         mesh_index = int(line.split('&')[0].strip().split()[1]) - 1
         mesh = self.meshes[mesh_index]
@@ -382,13 +384,14 @@ class Simulation:
                 times.append(float(line.split()[0]))
         times = np.array(times)
 
-        if slice_id not in self.slices:
-            self.slices[slice_id] = [{"cell_centered": cell_centered, "times": times}]
-        self.slices[slice_id].append(
+        if slice_index not in self.slices:
+            self.slices[slice_index] = [
+                {"cell_centered": cell_centered, "times": times, "id": slice_id}]
+        self.slices[slice_index].append(
             {"dimension": dimension, "extent": extent, "mesh": mesh, "filename": filename,
              "quantity": quantity, "label": label, "unit": unit})
 
-        logging.debug("Found SLICE with id: :i", slice_id)
+        logging.debug("Found SLICE with id: :i", slice_index)
 
     def _load_boundary_data(self, smv_file: TextIO, line: str):
         """Loads the boundary data at current pointer position.

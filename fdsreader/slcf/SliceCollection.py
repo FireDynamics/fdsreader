@@ -20,5 +20,10 @@ class SliceCollection(FDSDataCollection):
         return [x for x in self if x.quantity.quantity.lower() == quantity.lower() or
                 x.quantity.label.lower() == quantity.lower()]
 
+    def get_by_id(self, slice_id: str):
+        """Get the slice with corresponding id if it exists.
+        """
+        return next((slc for slc in self if slc.id == slice_id), None)
+
     def __repr__(self):
         return "SliceCollection(" + super(SliceCollection, self).__repr__() + ")"
