@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>fdsreader.bndf.obstruction &mdash; fdsreader [fdsreader, version 0.6.2] documentation</title>
+  <title>fdsreader.bndf.obstruction &mdash; fdsreader [fdsreader, version 0.6.3] documentation</title>
   
 
   
@@ -405,7 +405,9 @@
                  <span class="n">rgba</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[()],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">()):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">oid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">side_surfaces</span> <span class="o">=</span> <span class="n">side_surfaces</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bound_indices</span> <span class="o">=</span> <span class="n">bound_indices</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bound_indices</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">bound_indices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">bound_indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                              <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">bound_indices</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">bound_indices</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span>
+                              <span class="s1">&#39;z&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">bound_indices</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">bound_indices</span><span class="p">[</span><span class="mi">5</span><span class="p">])}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">color_index</span> <span class="o">=</span> <span class="n">color_index</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">block_type</span> <span class="o">=</span> <span class="n">block_type</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">texture_origin</span> <span class="o">=</span> <span class="n">texture_origin</span>
@@ -413,7 +415,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">rgba</span> <span class="o">=</span> <span class="n">rgba</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_extents</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Mesh</span><span class="p">,</span> <span class="n">Extent</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">extent</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="p">:</span> <span class="n">Extent</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Boundary</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
