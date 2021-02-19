@@ -64,6 +64,8 @@ Distributed under the LGPLv3 (GNU Lesser General Public License v3) license. See
     * (Entering alpha status after extensive private testing in pre-alpha stage)
     
 ### Pre-Alpha *(current stage)*
+* 0.6.3
+    * Convenience functions (filters, obstruction masks, ...)
 * 0.6.2
     * Improved documentation
 * 0.6.1

@@ -240,8 +240,9 @@ class Simulation:
 
         for tmp in temp_data:
             line = smv_file.readline().strip().split()
-            bound_indices = (int(float(line[0])), int(float(line[1])), int(float(line[2])),
-                             int(float(line[3])), int(float(line[4])), int(float(line[5])))
+            bound_indices = (
+            int(float(line[0])) - 1, int(float(line[1])) - 1, int(float(line[2])) - 1,
+            int(float(line[3])) - 1, int(float(line[4])) - 1, int(float(line[5])) - 1)
             color_index = int(line[6])
             block_type = int(line[7])
             if color_index == -3:

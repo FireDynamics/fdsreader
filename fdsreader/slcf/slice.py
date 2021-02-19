@@ -86,7 +86,7 @@ class SubSlice:
         if len(self._vector_data) == 0:
             n_t = self.parent_slice.times.shape[0]
 
-            for direction in ('u', 'v', 'w'):
+            for direction in self.vector_filenames.keys():
                 file_path = os.path.join(self.parent_slice.root_path,
                                          self.vector_filenames[direction])
                 self._vector_data[direction] = np.empty((n_t,) + self.shape, dtype=np.float32)
@@ -148,9 +148,12 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                 vector_temp[mesh_data["mesh"]][mesh_data["quantity"]] = mesh_data["filename"]
 
         for mesh, vector_filenames in vector_temp.items():
-            self._subslices[mesh].vector_filenames["u"] = vector_filenames["U-VELOCITY"]
-            self._subslices[mesh].vector_filenames["v"] = vector_filenames["V-VELOCITY"]
-            self._subslices[mesh].vector_filenames["w"] = vector_filenames["W-VELOCITY"]
+            if "U-VELOCITY" in vector_filenames:
+                self._subslices[mesh].vector_filenames["u"] = vector_filenames["U-VELOCITY"]
+            if "V-VELOCITY" in vector_filenames:
+                self._subslices[mesh].vector_filenames["v"] = vector_filenames["V-VELOCITY"]
+            if "W-VELOCITY" in vector_filenames:
+                self._subslices[mesh].vector_filenames["w"] = vector_filenames["W-VELOCITY"]
 
         vals = self._subslices.values()
         self.extent = Extent(min(vals, key=lambda e: e.extent.x_start).extent.x_start,

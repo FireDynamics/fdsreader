@@ -246,7 +246,9 @@ class Obstruction:
                  rgba: Union[Tuple[()], Tuple[float, float, float, float]] = ()):
         self.id = oid
         self.side_surfaces = side_surfaces
-        self.bound_indices = bound_indices
+        self.bound_indices = {'x': (bound_indices[0], bound_indices[1]),
+                              'y': (bound_indices[2], bound_indices[3]),
+                              'z': (bound_indices[4], bound_indices[5])}
         self.color_index = color_index
         self.block_type = block_type
         self.texture_origin = texture_origin
@@ -254,7 +256,7 @@ class Obstruction:
             self.rgba = rgba
 
         self._extents: Dict[Mesh, Extent] = dict()
-        self.extent = tuple()
+        self.extent: Extent = tuple()
 
         self._boundary_data: Dict[int, Boundary] = dict()
 
