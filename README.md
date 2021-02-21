@@ -60,12 +60,15 @@ Distributed under the LGPLv3 (GNU Lesser General Public License v3) license. See
     * (Entering beta status after extensive testing with selected participants in alpha stage)
     
 ### Alpha *(02/2021)*
-* (unreleased) 0.x.0
+* (unreleased) 0.7.0
     * (Entering alpha status after extensive private testing in pre-alpha stage)
     
 ### Pre-Alpha *(current stage)*
+* 0.6.4
+    * Added more convenience functions (mainly filters)
+    * Added color-data isof support
 * 0.6.3
-    * Convenience functions (filters, obstruction masks, ...)
+    * Added some convenience functions (filters, obstruction masks, ...)
 * 0.6.2
     * Improved documentation
 * 0.6.1

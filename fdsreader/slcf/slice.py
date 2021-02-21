@@ -197,6 +197,16 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         else:
             return 'x', 'y'
 
+    def get_nearest_timestep(self, time: float) -> int:
+        """Calculates the nearest timestep for which data has been output for this slice.
+        """
+        idx = np.searchsorted(self.times, time, side="left")
+        if time > 0 and (idx == len(self.times) or np.math.fabs(
+                time - self.times[idx - 1]) < np.math.fabs(time - self.times[idx])):
+            return idx - 1
+        else:
+            return idx
+
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory.
         """

@@ -13,7 +13,7 @@ class IsosurfaceCollection(FDSDataCollection):
         super().__init__(*isosurfaces)
 
     def filter_by_quantity(self, quantity: Union[str, Quantity]) -> List[Isosurface]:
-        """Get the isosurface for a specific quantity.
+        """Filters all isosurfaces by a specific quantity.
         """
         if type(quantity) != str:
             quantity = quantity.quantity

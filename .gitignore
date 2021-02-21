@@ -489,7 +489,7 @@ pip-selfcheck.json
 ## File-based project format:
 ## Plugin-specific files:
 # IntelliJ
-/out/
+out/
 # mpeltonen/sbt-idea plugin
 .idea_modules/
 # JIRA plugin
@@ -502,9 +502,9 @@ fabric.properties
 *.pyproj
 
 # CUSTOM
-/examples/
-!/examples/*/
-!/examples/**/*.py
-!/examples/**/*.fds
+examples/
+!examples/*/
+!examples/**/*.py
+!examples/**/*.fds
 
 /docs/build/

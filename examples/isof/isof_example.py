@@ -8,7 +8,7 @@ def main():
 
     isosurface = sim.isosurfaces.filter_by_quantity("TEMP")[0]
 
-    vertices, triangles = isosurface.to_global(len(isosurface.times) - 1)
+    vertices, triangles, _ = isosurface.to_global(len(isosurface.times) - 1)
 
     level1 = isosurface.get_pyvista_mesh(vertices, triangles[2])
     level2 = isosurface.get_pyvista_mesh(vertices, triangles[1])

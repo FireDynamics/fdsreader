@@ -10,7 +10,9 @@ def main():
     mesh = sim.meshes[1]
     extent = mesh.extent
 
+    # Select the last available timestep
     t = -1
+    # Load 3D data for that timestep
     pl_t1 = sim.data_3d[t]
 
     # Create 3D grid

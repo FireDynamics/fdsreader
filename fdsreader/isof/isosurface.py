@@ -1,7 +1,7 @@
 import operator
 import os
 from functools import reduce
-from typing import BinaryIO, Dict, Union, List, Tuple
+from typing import BinaryIO, Dict, Union, List, Tuple, Optional
 
 import numpy as np
 from pyvista import PolyData
@@ -31,10 +31,7 @@ class SubSurface:
 
         with open(self.file_path, 'rb') as infile:
             nlevels = fdtype.read(infile, fdtype.INT, 3)[2][0][0]
-
             dtype_header_levels = fdtype.new((('f', nlevels),))
-            self.levels = fdtype.read(infile, dtype_header_levels, 1)[0]
-
             dtype_header_zeros = fdtype.combine(fdtype.INT, fdtype.new((('i', 2),)))
             self._offset = fdtype.INT.itemsize * 3 + dtype_header_levels.itemsize + \
                            dtype_header_zeros.itemsize
@@ -111,14 +108,12 @@ class SubSurface:
 
         infile.seek(self._offset)
         time_data = fdtype.read(infile, dtype_time, 1)
-
         while time_data.size != 0:
             self.times.append(time_data[0][0][0])
 
             dims_data = fdtype.read(infile, dtype_dims, 1)
             n_vertices = dims_data[0][0][0]
             n_triangles = dims_data[0][0][1]
-
             if n_vertices > 0:
                 dtype_vertices = fdtype.new((('f', 3 * n_vertices),))
                 dtype_triangles = fdtype.new((('i', 3 * n_triangles),))
@@ -148,14 +143,16 @@ class SubSurface:
         """Loads all color data for all isosurfaces in a given viso file.
         """
         self._colors = np.empty((self.n_t,), dtype=object)
-        t_offset = fdtype.FLOAT.itemsize
-        dtype_nverts = fdtype.new((('i', 4),)).itemsize
+        dtype_nverts = fdtype.new((('i', 4),))
 
         infile.seek(fdtype.INT.itemsize * 2)
-        for t in range(self.n_t):
-            infile.seek(t_offset, os.SEEK_CUR)
+        t = fdtype.read(infile, fdtype.FLOAT, 1)
+        while t.size != 0:
+            time_index = self.times.index(t[0][0][0])
             n_vertices = fdtype.read(infile, dtype_nverts, 1)[0][0][2]
-            self._colors[t] = fdtype.read(infile, fdtype.new((('f', n_vertices),)), 1)
+            if n_vertices > 0:
+                self._colors[time_index] = fdtype.read(infile, fdtype.new((('f', n_vertices),)), 1)
+            t = fdtype.read(infile, fdtype.FLOAT, 1)
 
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory.
@@ -177,19 +174,19 @@ class Isosurface:
         list of triangles. Can optionally have additional color data for the surfaces.
 
     :ivar id: The ID of this isosurface.
-    :ivar root_path: Path to the directory containing all isosurface files.
     :ivar quantity: Quantity object containing information about the quantity calculated for this
         isosurface with the corresponding label and unit.
     :ivar v_quantity: Information about the color quantity.
     :ivar levels: All isosurface levels.
     """
 
-    def __init__(self, isosurface_id: int, root_path: str, double_quantity: bool, quantity: str,
-                 label: str, unit: str, v_quantity: str = "", v_label: str = "", v_unit: str = ""):
+    def __init__(self, isosurface_id: int, double_quantity: bool, quantity: str,
+                 label: str, unit: str, levels: List[float], v_quantity: str = "",
+                 v_label: str = "", v_unit: str = ""):
         self.id = isosurface_id
-        self.root_path = root_path
         self.quantity = Quantity(quantity, label, unit)
         self._double_quantity = double_quantity
+        self.levels = levels
 
         self._times = list()
 
@@ -198,12 +195,12 @@ class Isosurface:
         if self._double_quantity:
             self.v_quantity = Quantity(v_quantity, v_label, v_unit)
 
-    def _add_subsurface(self, mesh: Mesh, iso_filename: str, viso_filename: str = "") -> SubSurface:
-        if viso_filename != "":
-            subsurface = SubSurface(mesh, os.path.join(self.root_path, iso_filename), self._times,
-                                    os.path.join(self.root_path, viso_filename))
+    def _add_subsurface(self, mesh: Mesh, iso_file_path: str,
+                        viso_file_path: str = "") -> SubSurface:
+        if viso_file_path != "":
+            subsurface = SubSurface(mesh, iso_file_path, self._times, viso_file_path)
         else:
-            subsurface = SubSurface(mesh, os.path.join(self.root_path, iso_filename), self._times)
+            subsurface = SubSurface(mesh, iso_file_path, self._times)
         self._subsurfaces[mesh] = subsurface
 
         return subsurface
@@ -231,7 +228,8 @@ class Isosurface:
         """
         return {mesh: subsurface.surfaces for mesh, subsurface in self._subsurfaces.items()}
 
-    def to_global(self, time: Union[int, float]) -> Tuple[np.ndarray, List[np.ndarray]]:
+    def to_global(self, time: Union[int, float]) -> Tuple[
+        np.ndarray, List[np.ndarray], Optional[np.ndarray]]:
         """Creates an array containing all global vertices and a list containing numpy arrays with
             triangles for each surface level.
 
@@ -249,16 +247,21 @@ class Isosurface:
         n_vertices = sum(
             x[time].shape[0] if len(x[time].shape) > 0 else 0 for x in self.vertices.values())
         vertices = np.empty((n_vertices, 3))
+
+        colors = np.empty((n_vertices,)) if self.has_color_data else None
         verts_counter = 0
         for mesh in self._subsurfaces.keys():
             tmp = verts_counter
-            verts = self.vertices[mesh][time]
+            verts = self[mesh].vertices[time]
             verts_counter += verts.shape[0]
-            vertices[tmp:verts_counter] = verts + tmp
+            vertices[tmp:verts_counter] = verts
+            if self.has_color_data:
+                colors[tmp: verts_counter] = self[mesh].colors[time]
 
         triangles = list()
         num_levels = max(
             max(np.max(t) if t.shape[0] != 0 else 0 for t in s) for s in self.surfaces.values()) + 1
+        verts_counter = 0
         for surf in range(num_levels):
             n_triangles = sum(np.count_nonzero(s[time] == surf) for s in self.surfaces.values())
             triangles.append(np.empty((n_triangles, 3), dtype=int))
@@ -268,9 +271,10 @@ class Isosurface:
                     tmp = tris_counter
                     tris = self.triangles[mesh][time][self.surfaces[mesh][time] == surf]
                     tris_counter += tris.shape[0]
-                    triangles[surf][tmp:tris_counter] = tris + tmp
+                    triangles[surf][tmp:tris_counter] = tris + verts_counter
+                    verts_counter += self[mesh].vertices[time].shape[0]
 
-        return vertices, triangles
+        return vertices, triangles, colors
 
     def get_pyvista_mesh(self, vertices: np.ndarray, triangles: np.ndarray) -> PolyData:
         """Creates a PyVista mesh from the data.
@@ -297,7 +301,7 @@ class Isosurface:
             return mesh.save_meshio(file_path)
 
     def get_nearest_timestep(self, time: float) -> int:
-        """Calculates the nearest timestep for which data has been output.
+        """Calculates the nearest timestep for which data has been output for this isosurface.
         """
         idx = np.searchsorted(self.times, time, side="left")
         if time > 0 and (idx == len(self.times) or np.math.fabs(

@@ -241,8 +241,8 @@ class Simulation:
         for tmp in temp_data:
             line = smv_file.readline().strip().split()
             bound_indices = (
-            int(float(line[0])) - 1, int(float(line[1])) - 1, int(float(line[2])) - 1,
-            int(float(line[3])) - 1, int(float(line[4])) - 1, int(float(line[5])) - 1)
+                int(float(line[0])) - 1, int(float(line[1])) - 1, int(float(line[2])) - 1,
+                int(float(line[3])) - 1, int(float(line[4])) - 1, int(float(line[5])) - 1)
             color_index = int(line[6])
             block_type = int(line[7])
             if color_index == -3:
@@ -493,9 +493,10 @@ class Simulation:
 
         iso_filename = smv_file.readline().strip()
         iso_id = int(iso_filename.split('_')[-1][:-4])
+        iso_file_path = os.path.join(self.root_path, iso_filename)
 
         if double_quantity:
-            viso_filename = smv_file.readline().strip()
+            viso_file_path = os.path.join(self.root_path, smv_file.readline().strip())
         quantity = smv_file.readline().strip()
         label = smv_file.readline().strip()
         unit = smv_file.readline().strip()
@@ -504,21 +505,24 @@ class Simulation:
             v_label = smv_file.readline().strip()
             v_unit = smv_file.readline().strip()
 
+        if iso_id not in self.isosurfaces:
+            with open(iso_file_path, 'rb') as infile:
+                nlevels = fdtype.read(infile, fdtype.INT, 3)[2][0][0]
+
+                dtype_header_levels = fdtype.new((('f', nlevels),))
+                levels = fdtype.read(infile, dtype_header_levels, 1)[0]
         if double_quantity:
             if iso_id not in self.isosurfaces:
-                self.isosurfaces[iso_id] = Isosurface(iso_id,
-                                                      os.path.dirname(self.smv_file_path),
-                                                      double_quantity, quantity, label, unit,
-                                                      v_quantity=v_quantity, v_label=v_label,
-                                                      v_unit=v_unit)
-            self.isosurfaces[iso_id]._add_subsurface(self.meshes[mesh_index], iso_filename,
-                                                     viso_filename=viso_filename)
+                self.isosurfaces[iso_id] = Isosurface(iso_id, double_quantity, quantity, label,
+                                                      unit, levels, v_quantity=v_quantity,
+                                                      v_label=v_label, v_unit=v_unit)
+            self.isosurfaces[iso_id]._add_subsurface(self.meshes[mesh_index], iso_file_path,
+                                                     viso_file_path=viso_file_path)
         else:
             if iso_id not in self.isosurfaces:
-                self.isosurfaces[iso_id] = Isosurface(iso_id,
-                                                      os.path.dirname(self.smv_file_path),
-                                                      double_quantity, quantity, label, unit)
-            self.isosurfaces[iso_id]._add_subsurface(self.meshes[mesh_index], iso_filename)
+                self.isosurfaces[iso_id] = Isosurface(iso_id, double_quantity, quantity, label,
+                                                      unit, levels)
+            self.isosurfaces[iso_id]._add_subsurface(self.meshes[mesh_index], iso_file_path)
 
     def _register_particle(self, smv_file: TextIO) -> Particle:
         particle_class = smv_file.readline().strip()
