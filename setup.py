@@ -2,15 +2,16 @@ import os
 
 import setuptools
 
-with open("README.md", "r") as rf:
-    long_description = rf.read()
+base_dir = os.path.dirname(os.path.realpath(__file__))
 
-requirementPath = "./requirements.txt"
-with open(requirementPath) as f:
+with open(os.path.join(base_dir, "README.md"), 'r') as f:
+    long_description = f.read()
+
+with open(os.path.join(base_dir, "requirements.txt"), 'r') as f:
     install_requires = f.read().splitlines()
 
 setuptools.setup(
-    name="fdsreader", # Replace with your own username
+    name="fdsreader",
     use_incremental=True,
     setup_requires=['incremental'],
     author="FZJ IAS-7 (Prof. Dr. Lukas Arnold, Jan Vogelsang)",
