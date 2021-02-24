@@ -34,43 +34,49 @@ class SubSlice:
 
     _offset = 3 * fdtype.new((('c', 30),)).itemsize + fdtype.new((('i', 6),)).itemsize
 
-    def __init__(self, parent_slice, filename: str, dimension: Dimension, extent: Extent,
-                 mesh: Mesh, has_vector_data: bool):
+    def __init__(self, parent_slc, filename: str, dimension: Dimension, extent: Extent, mesh: Mesh):
         self.mesh = mesh
         self.dimension = dimension
         self.extent = extent
-        self.parent_slice = parent_slice
+        self.parent_slice = parent_slc
 
         self.filename = filename
 
-        if has_vector_data:
-            self.vector_filenames = dict()
-            self._vector_data = dict()
+        self.vector_filenames = dict()
+        self._vector_data = dict()
 
     @property
     def shape(self) -> Tuple[int, int]:
         """2D-shape of the slice.
         """
-        shape = self.dimension.shape(cell_centered=self.parent_slice.cell_centered)
+        # shape = self.dimension.shape(cell_centered=self.parent_slice.cell_centered)
+        shape = self.dimension.shape(cell_centered=False)
         if self.parent_slice.orientation != 0:
             return shape[0], shape[1]
         return shape
 
+    @property
+    def orientation(self):
+        """Orientation [1,2,3] of the slice in case it is 2D, 0 otherwise.
+        """
+        return self.parent_slice.orientation
+
     def _load_data(self, file_path: str, data_out: np.ndarray, n_t: int):
-        n = self.dimension.size(cell_centered=self.parent_slice.cell_centered)
+        n = self.dimension.size(cell_centered=False)
         dtype_data = fdtype.combine(fdtype.FLOAT, fdtype.new((('f', n),)))
 
         with open(file_path, 'rb') as infile:
             infile.seek(self._offset)
             for i, data in enumerate(fdtype.read(infile, dtype_data, n_t)):
                 data_out[i, :] = data[1].reshape(self.shape, order='F')
+        print(dtype_data.itemsize * n_t + self._offset, os.stat(file_path).st_size)
 
     @property
     def data(self) -> np.ndarray:
         """Method to lazy load the slice's data.
         """
         if not hasattr(self, "_data"):
-            n_t = self.parent_slice.times.shape[0]
+            n_t = self.parent_slice.n_t
 
             file_path = os.path.join(self.parent_slice.root_path, self.filename)
             self._data = np.empty((n_t,) + self.shape, dtype=np.float32)
@@ -114,6 +120,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
     :ivar quantity: Quantity object containing information about the quantity calculated for this
         slice with the corresponding label and unit.
     :ivar times: Numpy array containing all times for which data has been recorded.
+    :ivar n_t: Total number of time steps for which output data has been written.
     :ivar orientation: Orientation [1,2,3] of the slice in case it is 2D, 0 otherwise.
     :ivar extent: :class:`Extent` object containing 3-dimensional extent information.
     """
@@ -124,6 +131,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         self.cell_centered = cell_centered
 
         self.times = times
+        self.n_t = len(times)
 
         self.id = slice_id
 
@@ -136,15 +144,15 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                 vector_temp[mesh_data["mesh"]] = dict()
 
         for mesh_data in multimesh_data:
-            if "-VELOCITY" not in mesh_data["quantity"]:
+            if mesh_data["mesh"] not in self._subslices:
                 self.quantity = Quantity(mesh_data["quantity"], mesh_data["label"],
                                          mesh_data["unit"])
                 self._subslices[mesh_data["mesh"]] = SubSlice(self, mesh_data["filename"],
                                                               mesh_data["dimension"],
                                                               mesh_data["extent"],
-                                                              mesh_data["mesh"],
-                                                              mesh_data["mesh"] in vector_temp)
-            else:
+                                                              mesh_data["mesh"])
+
+            if "-VELOCITY" in mesh_data["quantity"]:
                 vector_temp[mesh_data["mesh"]][mesh_data["quantity"]] = mesh_data["filename"]
 
         for mesh, vector_filenames in vector_temp.items():
@@ -212,6 +220,55 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         """
         for subslice in self._subslices.values():
             subslice.clear_cache()
+
+    def sort_subslices_cartesian(self):
+        """Returns all subslices sorted in cartesian coordinates.
+        """
+        slices = list(self._subslices.values())
+        slices_cart = [[slices[0]]]
+        orientation = abs(slices[0].orientation)
+        if orientation == 1:  # x
+            slices.sort(key=lambda p: (p.extent.y_start, p.extent.z_start))
+        elif orientation == 2:  # y
+            slices.sort(key=lambda p: (p.extent.x_start, p.extent.z_start))
+        elif orientation == 3:  # z
+            slices.sort(key=lambda p: (p.extent.x_start, p.extent.y_start))
+
+        if orientation == 1:
+            for slc in slices[1:]:
+                if slc.extent.y_start == slices_cart[-1][-1].extent.y_start:
+                    slices_cart[-1].append(slc)
+                else:
+                    slices_cart.append([slc])
+        else:
+            for slc in slices[1:]:
+                if slc.extent.x_start == slices_cart[-1][-1].extent.x_start:
+                    slices_cart[-1].append(slc)
+                else:
+                    slices_cart.append([slc])
+        return slices_cart
+
+    def to_global(self) -> np.ndarray:
+        """Creates a global numpy ndarray from all subslices.
+            Note: This method will only return valid output if evenly sized and spaced meshes were
+            used in the simulation. Other cases will require individual custom combination logic.
+        """
+        slices = self.sort_subslices_cartesian()
+
+        shape_dim1 = sum([slice_row[0].shape[0] for slice_row in slices])
+        shape_dim2 = sum([slice.shape[1] for slice in slices[0]])
+        slc_array = np.empty(shape=(self.n_t, shape_dim1, shape_dim2))
+        dim1_pos = 0
+        dim2_pos = 0
+        for slice_row in slices:
+            d1 = slice_row[0].shape[0]
+            for slice in slice_row:
+                d2 = slice.shape[1]
+                slc_array[:, dim1_pos:dim1_pos + d1, dim2_pos:dim2_pos + d2] = slice.data
+                dim2_pos += d2
+            dim1_pos += d1
+            dim2_pos = 0
+        return slc_array
 
     def mean(self):
         """Calculates the mean over the whole slice.

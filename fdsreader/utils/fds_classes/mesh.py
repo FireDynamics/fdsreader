@@ -15,6 +15,7 @@ class Mesh:
     :ivar n_size: Total number of blocks in this mesh.
     :ivar id: Mesh id/label assigned to this mesh.
     """
+    id = None  # Needed for hash to work
 
     def __init__(self, coordinates: Dict[str, np.ndarray], extents: Dict[str, Tuple[float, float]],
                  mesh_id: str):

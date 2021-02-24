@@ -183,7 +183,7 @@ class Boundary:
 
             shape_dim1 = sum([patch_row[0].shape[0] for patch_row in patches])
             shape_dim2 = sum([patch.shape[1] for patch in patches[0]])
-            self._faces[face] = np.ndarray(shape=(self.n_t, shape_dim1, shape_dim2))
+            self._faces[face] = np.empty(shape=(self.n_t, shape_dim1, shape_dim2))
             dim1_pos = 0
             dim2_pos = 0
             for patch_row in patches:
