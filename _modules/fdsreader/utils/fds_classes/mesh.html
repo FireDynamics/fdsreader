@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>fdsreader.utils.fds_classes.mesh &mdash; fdsreader [fdsreader, version 0.6.5dev0] documentation</title>
+  <title>fdsreader.utils.fds_classes.mesh &mdash; fdsreader [fdsreader, version 0.6.6] documentation</title>
   
 
   
@@ -174,6 +174,7 @@
 <span class="sd">    :ivar n_size: Total number of blocks in this mesh.</span>
 <span class="sd">    :ivar id: Mesh id/label assigned to this mesh.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Needed for hash to work</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">extents</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
                  <span class="n">mesh_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
