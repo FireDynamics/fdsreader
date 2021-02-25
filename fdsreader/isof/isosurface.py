@@ -1,10 +1,8 @@
 import operator
-import os
 from functools import reduce
 from typing import BinaryIO, Dict, Union, List, Tuple, Optional
 
 import numpy as np
-from pyvista import PolyData
 
 from fdsreader.utils import Quantity, Mesh
 from fdsreader import settings
@@ -276,18 +274,35 @@ class Isosurface:
 
         return vertices, triangles, colors
 
-    def get_pyvista_mesh(self, vertices: np.ndarray, triangles: np.ndarray) -> PolyData:
+    def get_pyvista_mesh(self, vertices: np.ndarray, triangles: np.ndarray):
         """Creates a PyVista mesh from the data.
         """
-        triangles = np.hstack(np.append(np.full((triangles.shape[0], 1), 3), triangles, axis=1))
-        return PolyData(vertices, triangles)
+        try:
+            from pyvista import PolyData
 
-    def join_pyvista_meshes(self, meshes: List[PolyData]) -> PolyData:
+            triangles = np.hstack(np.append(np.full((triangles.shape[0], 1), 3), triangles, axis=1))
+            return PolyData(vertices, triangles)
+        except ImportError:
+            raise ImportError("The 'get_pyvista_mesh' method requires the PyVista python-package to"
+                              " be installed. Consider installing it via 'pip install pyvista'.")
+
+    def join_pyvista_meshes(self, meshes: List):
         """Combines multiple PyVista meshes.
-        """
-        return reduce(operator.add, meshes)
 
-    def export(self, file_path: str, mesh: PolyData):
+        :returns: The combined mesh of class PolyData.
+        """
+        try:
+            from pyvista import PolyData
+
+            assert all(type(mesh) == PolyData for mesh in
+                       meshes), "Argument 'meshes' has to be a sequence of type pyvista.Polydata"
+
+            return reduce(operator.add, meshes)
+        except ImportError:
+            raise ImportError("The 'join_pyvista_meshes' method requires the PyVista python-package"
+                              " to be installed. Consider installing it via 'pip install pyvista'.")
+
+    def export(self, file_path: str, mesh):
         """Export the isosurface for a single timestep into one of many formats.
 
         :param file_path: Absolute path to the the file which should we written. The file ending
@@ -295,10 +310,26 @@ class Isosurface:
         :param time: Either the index of the timestep or an actual time value. In the latter case
             data for the nearest matching timestep will be used.
         """
-        if "vtk" in file_path or "vtp" in file_path:
-            return mesh.save(file_path)
-        else:
-            return mesh.save_meshio(file_path)
+        try:
+            from pyvista import PolyData
+
+            assert type(mesh) == PolyData, "Argument 'mesh' has to be of type pyvista.Polydata"
+
+            if "vtk" in file_path or "vtp" in file_path:
+                return mesh.save(file_path)
+            else:
+                try:
+                    import meshio
+
+                    return mesh.save_meshio(file_path)
+                except ImportError:
+                    raise ImportError("The 'export' method requires the Meshio python-package to be"
+                                      " installed. "
+                                      "Consider installing it via 'pip install meshio'.")
+
+        except ImportError:
+            raise ImportError("The 'export' method requires the PyVista python-package to be"
+                              " installed. Consider installing it via 'pip install pyvista'.")
 
     def get_nearest_timestep(self, time: float) -> int:
         """Calculates the nearest timestep for which data has been output for this isosurface.
