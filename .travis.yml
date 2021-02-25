@@ -21,10 +21,19 @@ jobs:
           edge: true
           local_dir: ./docs/build/
           keep_history: true
-    - stage: test
+    - stage: test36
       python: '3.6'
+      install: pip install fdsreader
+      script: python -m unittest discover
+    - stage: test37
       python: '3.7'
+      install: pip install fdsreader
+      script: python -m unittest discover
+    - stage: test38
       python: '3.8'
+      install: pip install fdsreader
+      script: python -m unittest discover
+    - stage: test39
       python: '3.9'
       install: pip install fdsreader
       script: python -m unittest discover
