@@ -60,13 +60,12 @@ Distributed under the LGPLv3 (GNU Lesser General Public License v3) license. See
     * (Entering beta status after extensive testing with selected participants in alpha stage)
     
 ### Alpha *(02/2021)*
-* (unreleased) 0.7.0
+* (unreleased) 0.8.0
     * (Entering alpha status after extensive private testing in pre-alpha stage)
     
 ### Pre-Alpha *(current stage)*
-* 0.6.7
+* 0.7.0
     * Added automatic version compatibility testing
-* 0.6.6
     * Usability improvements for slcf
 * 0.6.5
     * Bugfixes
