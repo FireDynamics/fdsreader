@@ -64,6 +64,8 @@ Distributed under the LGPLv3 (GNU Lesser General Public License v3) license. See
     * (Entering alpha status after extensive private testing in pre-alpha stage)
     
 ### Pre-Alpha *(current stage)*
+* 0.7.1
+    * Made PyVista (Vtk) requirement optional
 * 0.7.0
     * Added automatic version compatibility testing
     * Usability improvements for slcf
