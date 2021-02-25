@@ -1,31 +1,31 @@
 language: python
-python:
-  - '3.6'
-  - '3.7'
-  - '3.8'
-  - '3.9'
-install: pip install fdsreader
-script: python -m unittest discover
+python: 3.8
+install: pip install -r requirements.txt
+script:
+  - cd $TRAVIS_BUILD_DIR
+  - sphinx-build -b html docs docs/build
+  - touch docs/build/.nojekyll
+  - python setup.py sdist bdist_wheel
+deploy:
+  - provider: pypi
+    user: "__token__"
+    password: $PYPI_TOKEN
+    repository: testpypi
+    skip_existing: true
+  - provider: pages:git
+    verbose: true
+    token: $GITHUB_TOKEN
+    edge: true
+    local_dir: ./docs/build/
+    keep_history: true
 
 jobs:
   include:
-    - stage: deploy
-      python: 3.8
-      install: pip install -r requirements.txt
-      script:
-        - cd $TRAVIS_BUILD_DIR
-        - sphinx-build -b html docs docs/build
-        - touch docs/build/.nojekyll
-        - python setup.py sdist bdist_wheel
-      deploy:
-        - provider: pypi
-          user: "__token__"
-          password: $PYPI_TOKEN
-          repository: testpypi
-          skip_existing: true
-        - provider: pages:git
-          verbose: true
-          token: $GITHUB_TOKEN
-          edge: true
-          local_dir: ./docs/build/
-          keep_history: true
+    - stage: test
+      python:
+        - '3.6'
+        - '3.7'
+        - '3.8'
+        - '3.9'
+      install: pip install fdsreader
+      script: python -m unittest discover
