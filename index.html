@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>FDSReader documentation! &mdash; fdsreader [fdsreader, version 0.7.0] documentation</title>
+  <title>FDSReader documentation! &mdash; fdsreader [fdsreader, version 0.7.1] documentation</title>
   
 
   
@@ -315,7 +315,7 @@ isosurface with the corresponding label and unit.</p></li>
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname"><span class="pre">export</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pyvista.core.pointset.PolyData</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/isof/isosurface.html#Isosurface.export"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">export</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/isof/isosurface.html#Isosurface.export"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Export the isosurface for a single timestep into one of many formats.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -337,7 +337,7 @@ data for the nearest matching timestep will be used.</p></li>
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname"><span class="pre">get_pyvista_mesh</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertices</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triangles</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">pyvista.core.pointset.PolyData</span><a class="reference internal" href="_modules/fdsreader/isof/isosurface.html#Isosurface.get_pyvista_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">get_pyvista_mesh</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vertices</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triangles</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/isof/isosurface.html#Isosurface.get_pyvista_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Creates a PyVista mesh from the data.</p>
 </dd></dl>
 
@@ -349,8 +349,13 @@ data for the nearest matching timestep will be used.</p></li>
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname"><span class="pre">join_pyvista_meshes</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meshes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">pyvista.core.pointset.PolyData</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">pyvista.core.pointset.PolyData</span><a class="reference internal" href="_modules/fdsreader/isof/isosurface.html#Isosurface.join_pyvista_meshes"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">join_pyvista_meshes</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meshes</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/isof/isosurface.html#Isosurface.join_pyvista_meshes"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Combines multiple PyVista meshes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The combined mesh of class PolyData.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">

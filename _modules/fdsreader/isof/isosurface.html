@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>fdsreader.isof.isosurface &mdash; fdsreader [fdsreader, version 0.7.0] documentation</title>
+  <title>fdsreader.isof.isosurface &mdash; fdsreader [fdsreader, version 0.7.1] documentation</title>
   
 
   
@@ -158,12 +158,10 @@
             
   <h1>Source code for fdsreader.isof.isosurface</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">operator</span>
-<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">reduce</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">BinaryIO</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">pyvista</span> <span class="kn">import</span> <span class="n">PolyData</span>
 
 <span class="kn">from</span> <span class="nn">fdsreader.utils</span> <span class="kn">import</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Mesh</span>
 <span class="kn">from</span> <span class="nn">fdsreader</span> <span class="kn">import</span> <span class="n">settings</span>
@@ -435,18 +433,35 @@
 
         <span class="k">return</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">triangles</span><span class="p">,</span> <span class="n">colors</span></div>
 
-<div class="viewcode-block" id="Isosurface.get_pyvista_mesh"><a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.Isosurface.get_pyvista_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">get_pyvista_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vertices</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">triangles</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PolyData</span><span class="p">:</span>
+<div class="viewcode-block" id="Isosurface.get_pyvista_mesh"><a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.Isosurface.get_pyvista_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">get_pyvista_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vertices</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">triangles</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Creates a PyVista mesh from the data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">triangles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">triangles</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">3</span><span class="p">),</span> <span class="n">triangles</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">PolyData</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">triangles</span><span class="p">)</span></div>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">pyvista</span> <span class="kn">import</span> <span class="n">PolyData</span>
 
-<div class="viewcode-block" id="Isosurface.join_pyvista_meshes"><a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.Isosurface.join_pyvista_meshes">[docs]</a>    <span class="k">def</span> <span class="nf">join_pyvista_meshes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meshes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">PolyData</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">PolyData</span><span class="p">:</span>
+            <span class="n">triangles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">triangles</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">3</span><span class="p">),</span> <span class="n">triangles</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">PolyData</span><span class="p">(</span><span class="n">vertices</span><span class="p">,</span> <span class="n">triangles</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;The &#39;get_pyvista_mesh&#39; method requires the PyVista python-package to&quot;</span>
+                              <span class="s2">&quot; be installed. Consider installing it via &#39;pip install pyvista&#39;.&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Isosurface.join_pyvista_meshes"><a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.Isosurface.join_pyvista_meshes">[docs]</a>    <span class="k">def</span> <span class="nf">join_pyvista_meshes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meshes</span><span class="p">:</span> <span class="n">List</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Combines multiple PyVista meshes.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">reduce</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">add</span><span class="p">,</span> <span class="n">meshes</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Isosurface.export"><a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.Isosurface.export">[docs]</a>    <span class="k">def</span> <span class="nf">export</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">PolyData</span><span class="p">):</span>
+<span class="sd">        :returns: The combined mesh of class PolyData.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">pyvista</span> <span class="kn">import</span> <span class="n">PolyData</span>
+
+            <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span> <span class="o">==</span> <span class="n">PolyData</span> <span class="k">for</span> <span class="n">mesh</span> <span class="ow">in</span>
+                       <span class="n">meshes</span><span class="p">),</span> <span class="s2">&quot;Argument &#39;meshes&#39; has to be a sequence of type pyvista.Polydata&quot;</span>
+
+            <span class="k">return</span> <span class="n">reduce</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">add</span><span class="p">,</span> <span class="n">meshes</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;The &#39;join_pyvista_meshes&#39; method requires the PyVista python-package&quot;</span>
+                              <span class="s2">&quot; to be installed. Consider installing it via &#39;pip install pyvista&#39;.&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Isosurface.export"><a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.Isosurface.export">[docs]</a>    <span class="k">def</span> <span class="nf">export</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Export the isosurface for a single timestep into one of many formats.</span>
 
 <span class="sd">        :param file_path: Absolute path to the the file which should we written. The file ending</span>
@@ -454,10 +469,26 @@
 <span class="sd">        :param time: Either the index of the timestep or an actual time value. In the latter case</span>
 <span class="sd">            data for the nearest matching timestep will be used.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="s2">&quot;vtk&quot;</span> <span class="ow">in</span> <span class="n">file_path</span> <span class="ow">or</span> <span class="s2">&quot;vtp&quot;</span> <span class="ow">in</span> <span class="n">file_path</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">mesh</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">mesh</span><span class="o">.</span><span class="n">save_meshio</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span></div>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">pyvista</span> <span class="kn">import</span> <span class="n">PolyData</span>
+
+            <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span> <span class="o">==</span> <span class="n">PolyData</span><span class="p">,</span> <span class="s2">&quot;Argument &#39;mesh&#39; has to be of type pyvista.Polydata&quot;</span>
+
+            <span class="k">if</span> <span class="s2">&quot;vtk&quot;</span> <span class="ow">in</span> <span class="n">file_path</span> <span class="ow">or</span> <span class="s2">&quot;vtp&quot;</span> <span class="ow">in</span> <span class="n">file_path</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">mesh</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="kn">import</span> <span class="nn">meshio</span>
+
+                    <span class="k">return</span> <span class="n">mesh</span><span class="o">.</span><span class="n">save_meshio</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;The &#39;export&#39; method requires the Meshio python-package to be&quot;</span>
+                                      <span class="s2">&quot; installed. &quot;</span>
+                                      <span class="s2">&quot;Consider installing it via &#39;pip install meshio&#39;.&quot;</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;The &#39;export&#39; method requires the PyVista python-package to be&quot;</span>
+                              <span class="s2">&quot; installed. Consider installing it via &#39;pip install pyvista&#39;.&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Isosurface.get_nearest_timestep"><a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.Isosurface.get_nearest_timestep">[docs]</a>    <span class="k">def</span> <span class="nf">get_nearest_timestep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Calculates the nearest timestep for which data has been output for this isosurface.</span>
