@@ -69,7 +69,7 @@ class SubSlice:
             infile.seek(self._offset)
             for i, data in enumerate(fdtype.read(infile, dtype_data, n_t)):
                 data_out[i, :] = data[1].reshape(self.shape, order='F')
-        print(dtype_data.itemsize * n_t + self._offset, os.stat(file_path).st_size)
+        # print(dtype_data.itemsize * n_t + self._offset, os.stat(file_path).st_size)
 
     @property
     def data(self) -> np.ndarray:

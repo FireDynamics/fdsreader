@@ -64,8 +64,10 @@ Distributed under the LGPLv3 (GNU Lesser General Public License v3) license. See
     * (Entering alpha status after extensive private testing in pre-alpha stage)
     
 ### Pre-Alpha *(current stage)*
+* 0.6.7
+    * Added automatic version compatibility testing
 * 0.6.6
-    * Bugfixes for slcf
+    * Usability improvements for slcf
 * 0.6.5
     * Bugfixes
 * 0.6.4

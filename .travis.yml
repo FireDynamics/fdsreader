@@ -1,32 +1,32 @@
 language: python
 python:
-- '3.8'
-install:
-# - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-# - bash miniconda.sh -b -p $HOME/miniconda
-# - source "$HOME/miniconda/etc/profile.d/conda.sh"
-# - hash -r
-# - conda config --set always_yes yes --set changeps1 no
-# - conda update -q conda
-# Useful for debugging any issues with conda
-# - conda info -a
-# - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION
-# - conda activate test-environment
-- pip install -r requirements.txt
-script:
-- cd $TRAVIS_BUILD_DIR
-- sphinx-build -b html docs docs/build
-- touch docs/build/.nojekyll
-- python setup.py sdist bdist_wheel
-deploy:
-  - provider: pypi
-    user: "__token__"
-    password: $PYPI_TOKEN
-    repository: testpypi
-    skip_existing: true
-  - provider: pages:git
-    verbose: true
-    token: $GITHUB_TOKEN
-    edge: true
-    local_dir: ./docs/build/
-    keep_history: true
+  - '3.6'
+  - '3.7'
+  - '3.8'
+  - '3.9'
+  - '3.10'
+install: pip install fdsreader
+script: python -m unittest discover
+
+jobs:
+  include:
+    - stage: deploy
+      python: 3.8
+      install: pip install -r requirements.txt
+      script:
+        - cd $TRAVIS_BUILD_DIR
+        - sphinx-build -b html docs docs/build
+        - touch docs/build/.nojekyll
+        - python setup.py sdist bdist_wheel
+      deploy:
+        - provider: pypi
+          user: "__token__"
+          password: $PYPI_TOKEN
+          repository: testpypi
+          skip_existing: true
+        - provider: pages:git
+          verbose: true
+          token: $GITHUB_TOKEN
+          edge: true
+          local_dir: ./docs/build/
+          keep_history: true
