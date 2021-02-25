@@ -1,39 +1,30 @@
-language: python
-python: '3.8'
-install: pip install -r requirements.txt
-script:
-  - cd $TRAVIS_BUILD_DIR
-  - sphinx-build -b html docs docs/build
-  - touch docs/build/.nojekyll
-  - python setup.py sdist bdist_wheel
-deploy:
-  - provider: pypi
-    user: "__token__"
-    password: $PYPI_TOKEN
-    repository: testpypi
-    skip_existing: false
-  - provider: pages:git
-    verbose: true
-    token: $GITHUB_TOKEN
-    edge: true
-    local_dir: ./docs/build/
-    keep_history: true
-
 jobs:
   include:
-    - stage: test36
-      python: '3.6'
-      install: pip install fdsreader
-      script: python -m unittest discover
-    - stage: test37
-      python: '3.7'
-      install: pip install fdsreader
-      script: python -m unittest discover
-    - stage: test38
+    - stage: deploy
+      language: python
       python: '3.8'
-      install: pip install fdsreader
-      script: python -m unittest discover
-    - stage: test39
+      install: pip install -r requirements.txt
+      script:
+        - cd $TRAVIS_BUILD_DIR
+        - sphinx-build -b html docs docs/build
+        - touch docs/build/.nojekyll
+        - python setup.py sdist bdist_wheel
+      deploy:
+        - provider: pypi
+          user: "__token__"
+          password: $PYPI_TOKEN
+          repository: testpypi
+          skip_existing: false
+        - provider: pages:git
+          verbose: true
+          token: $GITHUB_TOKEN
+          edge: true
+          local_dir: ./docs/build/
+          keep_history: true
+    - stage: test
+      python: '3.6'
+      python: '3.7'
+      python: '3.8'
       python: '3.9'
       install: pip install fdsreader
       script: python -m unittest discover
