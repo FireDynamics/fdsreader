@@ -647,6 +647,8 @@ class Simulation:
                     return self._transform_csv_data(keys, values.reshape((1,)), dtypes)
 
     def _transform_csv_data(self, keys, values, dtypes):
+        return None
+        # Todo
         size = values.shape[0]
         data = {keys[i]: np.empty((size,), dtype=dtypes[i]) for i in range(len(keys))}
         for k, arr in enumerate(data.values()):

@@ -3,7 +3,7 @@ from copy import deepcopy
 
 import numpy as np
 import logging
-from typing import Dict, Collection, Tuple
+from typing import Dict, Collection, Tuple, Union
 from typing_extensions import Literal
 
 from fdsreader.utils import Dimension, Quantity, Mesh, Extent
@@ -49,8 +49,7 @@ class SubSlice:
     def shape(self) -> Tuple[int, int]:
         """2D-shape of the slice.
         """
-        # shape = self.dimension.shape(cell_centered=self.parent_slice.cell_centered)
-        shape = self.dimension.shape(cell_centered=False)
+        shape = self.dimension.shape(cell_centered=self.parent_slice.cell_centered)
         if self.parent_slice.orientation != 0:
             return shape[0], shape[1]
         return shape
@@ -61,26 +60,28 @@ class SubSlice:
         """
         return self.parent_slice.orientation
 
-    def _load_data(self, file_path: str, data_out: np.ndarray, n_t: int):
+    def _load_data(self, file_path: str, data_out: np.ndarray):
+        # Both cases (cell_centered True/False) output the same number of data points
         n = self.dimension.size(cell_centered=False)
         dtype_data = fdtype.combine(fdtype.FLOAT, fdtype.new((('f', n),)))
 
         with open(file_path, 'rb') as infile:
             infile.seek(self._offset)
-            for i, data in enumerate(fdtype.read(infile, dtype_data, n_t)):
-                data_out[i, :] = data[1].reshape(self.shape, order='F')
-        # print(dtype_data.itemsize * n_t + self._offset, os.stat(file_path).st_size)
+            for t, data in enumerate(fdtype.read(infile, dtype_data, self.parent_slice.n_t)):
+                data = data[1].reshape(self.dimension.shape(cell_centered=False), order='F')
+                if self.parent_slice.cell_centered:
+                    data_out[t, :] = data[:-1, :-1]  # Ignore ghost points
+                else:
+                    data_out[t, :] = data
 
     @property
     def data(self) -> np.ndarray:
         """Method to lazy load the slice's data.
         """
         if not hasattr(self, "_data"):
-            n_t = self.parent_slice.n_t
-
             file_path = os.path.join(self.parent_slice.root_path, self.filename)
-            self._data = np.empty((n_t,) + self.shape, dtype=np.float32)
-            self._load_data(file_path, self._data, n_t)
+            self._data = np.empty((self.parent_slice.n_t,) + self.shape, dtype=np.float32)
+            self._load_data(file_path, self._data)
         return self._data
 
     @property
@@ -90,13 +91,12 @@ class SubSlice:
         if not hasattr(self, "_vector_data"):
             raise AttributeError("There is no vector data available for this slice.")
         if len(self._vector_data) == 0:
-            n_t = self.parent_slice.times.shape[0]
-
             for direction in self.vector_filenames.keys():
                 file_path = os.path.join(self.parent_slice.root_path,
                                          self.vector_filenames[direction])
-                self._vector_data[direction] = np.empty((n_t,) + self.shape, dtype=np.float32)
-                self._load_data(file_path, self._vector_data[direction], n_t)
+                self._vector_data[direction] = np.empty((self.parent_slice.n_t,) + self.shape,
+                                                        dtype=np.float32)
+                self._load_data(file_path, self._vector_data[direction])
         return self._vector_data
 
     def clear_cache(self):
@@ -185,10 +185,15 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             for _, subslice in self._subslices.items():
                 _ = subslice.data
 
-    def __getitem__(self, mesh: Mesh):
+    def __getitem__(self, key: Union[int, Mesh]):
         """Returns the :class:`SubSlice` that cuts through the given mesh.
         """
-        return self._subslices[mesh]
+        if type(key) == int:
+            return tuple(self._subslices.values())[key]
+        return self._subslices[key]
+
+    def __len__(self):
+        return len(self._subslices)
 
     @property
     def extent_dirs(self) -> Tuple[
@@ -256,15 +261,23 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         slices = self.sort_subslices_cartesian()
 
         shape_dim1 = sum([slice_row[0].shape[0] for slice_row in slices])
-        shape_dim2 = sum([slice.shape[1] for slice in slices[0]])
+        if not self.cell_centered:
+            shape_dim1 -= len(slices) - 1
+        shape_dim2 = sum([slc.shape[1] for slc in slices[0]])
+        if not self.cell_centered:
+            shape_dim2 -= len(slices[0]) - 1
         slc_array = np.empty(shape=(self.n_t, shape_dim1, shape_dim2))
         dim1_pos = 0
         dim2_pos = 0
-        for slice_row in slices:
+        for i, slice_row in enumerate(slices):
             d1 = slice_row[0].shape[0]
-            for slice in slice_row:
-                d2 = slice.shape[1]
-                slc_array[:, dim1_pos:dim1_pos + d1, dim2_pos:dim2_pos + d2] = slice.data
+            if not self.cell_centered:
+                d1 -= 1 if i + 1 != len(slices) else 0
+            for j, slc in enumerate(slice_row):
+                d2 = slc.shape[1]
+                if not self.cell_centered:
+                    d2 -= 1 if j + 1 != len(slice_row) else 0
+                slc_array[:, dim1_pos:dim1_pos + d1, dim2_pos:dim2_pos + d2] = slc.data[:, :d1, :d2]
                 dim2_pos += d2
             dim1_pos += d1
             dim2_pos = 0

@@ -104,6 +104,7 @@ MESH IJK=72,56,44, XB=0.00,3.60,-1.40,1.40,0.00,2.13 /
 
 
 &OBST XB=2.80,2.90,-1.40,1.40,0.00,2.13 / Wall with door or window
+/&HOLE XB=2.75,2.95,-0.10,0.15,0.00,1.83 / 2/6 Door
 
 &VENT MB='XMAX',SURF_ID='OPEN'/
 &VENT XB= 2.90,3.60,-1.40,-1.40,0.00,2.13, SURF_ID='OPEN'/
