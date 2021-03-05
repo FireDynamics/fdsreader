@@ -15,7 +15,7 @@ from fdsreader.pl3d import Plot3D
 from fdsreader.pl3d.Plot3dCollection import Plot3DCollection
 from fdsreader.slcf import Slice
 from fdsreader.slcf.SliceCollection import SliceCollection
-from fdsreader.utils import Mesh, Dimension, Surface, Quantity, Ventilation, Extent
+from fdsreader.utils import Mesh, Dimension, Surface, Quantity, Ventilation, Extent, log_error
 from fdsreader.utils.data import create_hash, get_smv_file, Device
 import fdsreader.utils.fortran_data as fdtype
 from fdsreader import settings
@@ -223,6 +223,7 @@ class Simulation:
 
         return mesh
 
+    @log_error("obst")
     def _load_obstructions(self, smv_file: TextIO, mesh: Mesh):
         temp_data = list()
         n = int(smv_file.readline().strip())
@@ -263,6 +264,7 @@ class Simulation:
             self.obstructions[obst_index]._extents[mesh] = extent
             mesh.obstructions.append(self.obstructions[obst_index])
 
+    @log_error("vents")
     def _load_vents(self, smv_file: TextIO, mesh: Mesh):
         line = smv_file.readline().split()
         n, n_dummies = int(line[0]), int(line[1])
@@ -329,6 +331,7 @@ class Simulation:
                                                          radius=radius)
             self.ventilations[vent_id]._add_subventilation(mesh, extent)
 
+    @log_error("surface")
     def _load_surface(self, smv_file: TextIO) -> Surface:
         """Load the information for a single surface from the smv file at current pointer position.
         """
@@ -351,6 +354,7 @@ class Simulation:
         return Surface(surface_id, tmpm, material_emissivity, surface_type, texture_width,
                        texture_height, texture_map, rgb, transparency)
 
+    @log_error("slcf")
     def _load_slice(self, smv_file: TextIO, line: str):
         """Loads the slice at current pointer position.
         """
@@ -392,6 +396,7 @@ class Simulation:
 
         logging.debug("Found SLICE with id: :i", slice_index)
 
+    @log_error("bndf")
     def _load_boundary_data(self, smv_file: TextIO, line: str):
         """Loads the boundary data at current pointer position.
         """
@@ -445,6 +450,7 @@ class Simulation:
                 extent, dimension = self._indices_to_extent(patch_info[:6], mesh)
                 orientation = patch_info[6]
                 obst_index = patch_info[7]
+                print(obst_index)
                 p = Patch(file_path, dimension, extent, orientation, cell_centered,
                           patch_offset + offset, n_t)
 
@@ -464,6 +470,7 @@ class Simulation:
             self.obstructions[obst_id]._add_patches(bid, cell_centered, quantity, label, unit, mesh,
                                                     p, times, n_t, lower_bounds, upper_bounds)
 
+    @log_error("pl3d")
     def _load_data_3d(self, smv_file: TextIO, line: str):
         """Loads the pl3d at current pointer position.
         """
@@ -485,6 +492,7 @@ class Simulation:
             self.data_3d[time] = Plot3D(self.root_path, time, quantities)
         self.data_3d[time]._add_subplot(filename, self.meshes[mesh_index])
 
+    @log_error("isof")
     def _load_isosurface(self, smv_file: TextIO, line: str):
         """Loads the isosurface at current pointer position.
         """
@@ -524,6 +532,7 @@ class Simulation:
                                                       unit, levels)
             self.isosurfaces[iso_id]._add_subsurface(self.meshes[mesh_index], iso_file_path)
 
+    @log_error("part")
     def _register_particle(self, smv_file: TextIO) -> Particle:
         particle_class = smv_file.readline().strip()
         color = tuple(float(c) for c in smv_file.readline().strip().split())
@@ -565,6 +574,7 @@ class Simulation:
                         particle.upper_bounds[quantity].append(float(line[1]))
         return times
 
+    @log_error("part")
     def _load_particle_data(self, smv_file: TextIO, line: str):
         file_path = os.path.join(self.root_path, smv_file.readline().strip())
 
@@ -581,6 +591,7 @@ class Simulation:
         for i in range(n_classes):
             smv_file.readline()
 
+    @log_error("devc")
     def _register_device(self, smv_file: TextIO) -> Tuple[str, Device]:
         line = smv_file.readline().strip().split('%')
         name = line[0].strip()
@@ -590,6 +601,7 @@ class Simulation:
         orientation = (float(line[3]), float(line[4]), float(line[5]))
         return name, Device(Quantity(name, quantity_label, ""), position, orientation)
 
+    @log_error("devc")
     def _load_DEVC_data(self, file_path: str):
         with open(file_path, 'r') as infile:
             units = infile.readline().split(',')
@@ -616,6 +628,7 @@ class Simulation:
                         for i in range(len(devc)):
                             devc[i] = data[k, i]
 
+    @log_error("csv")
     def _load_HRR_data(self, file_path: str) -> Dict[str, np.ndarray]:
         with open(file_path, 'r') as infile:
             infile.readline()
@@ -623,6 +636,7 @@ class Simulation:
             values = np.genfromtxt(infile, delimiter=',', dtype=np.float32, autostrip=True)
             return self._transform_csv_data(keys, values, [np.float32] * len(keys))
 
+    @log_error("csv")
     def _load_step_data(self, file_path: str) -> Dict[str, np.ndarray]:
         with open(file_path, 'r') as infile:
             infile.readline()
@@ -633,6 +647,7 @@ class Simulation:
             values = np.genfromtxt(infile, delimiter=',', dtype=dtypes, autostrip=True)
             return self._transform_csv_data(keys, values, dtypes)
 
+    @log_error("csv")
     def _load_CPU_data(self) -> Dict[str, np.ndarray]:
         file_path = os.path.join(self.root_path, self.chid + "_cpu.csv")
         if os.path.exists(file_path):
@@ -647,8 +662,6 @@ class Simulation:
                     return self._transform_csv_data(keys, values.reshape((1,)), dtypes)
 
     def _transform_csv_data(self, keys, values, dtypes):
-        return None
-        # Todo
         size = values.shape[0]
         data = {keys[i]: np.empty((size,), dtype=dtypes[i]) for i in range(len(keys))}
         for k, arr in enumerate(data.values()):

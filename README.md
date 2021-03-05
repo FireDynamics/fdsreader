@@ -64,9 +64,10 @@ Distributed under the LGPLv3 (GNU Lesser General Public License v3) license. See
     * (Entering alpha status after extensive private testing in pre-alpha stage)
     
 ### Pre-Alpha *(current stage)*
-* 0.7.3
+* 0.7.4
     * Added obst hole support (bndf)
-    * Bugfixes for csv
+* 0.7.3
+    * Added exception handling for optional modules
 * 0.7.2
     * Improved slice combination functionality
 * 0.7.1
