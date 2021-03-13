@@ -2,6 +2,8 @@ LAZY_LOAD = True
 
 ENABLE_CACHING = True
 
+DEBUG = True
+
 # As the binary representation of raw data is compiler dependent, this information must be provided
 # by the user
 FORTRAN_DATA_TYPE_INTEGER = "<i4"  # <i4 -> 32 bit integer (little-endian)

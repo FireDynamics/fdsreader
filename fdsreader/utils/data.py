@@ -23,8 +23,11 @@ class Quantity:
     def __hash__(self):
         return hash(self.label)
 
-    def __repr__(self):
+    def __str__(self):
         return f"Quantity(label={self.label}, unit={self.unit}, quantity={self.quantity})"
+
+    def __repr__(self):
+        return f"Quantity('{self.label}')"
 
 
 class Device:

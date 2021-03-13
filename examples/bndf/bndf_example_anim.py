@@ -6,9 +6,13 @@ import numpy as np
 
 def main():
     sim = Simulation("./fds_data")
-
     # Filter all obstructions by quantity
-    bndf = sim.obstructions.filter_by_quantity("Wall Temperature")[3]
+    obstructions = sim.obstructions.filter_by_boundary_data()
+
+    quantity = "Wall Temperature"
+
+    bndf = obstructions[1].get_boundary_data(quantity)
+
     # Load data of a specific face
     data = bndf.faces[1]
 

@@ -183,6 +183,8 @@ class Boundary:
 
             shape_dim1 = sum([patch_row[0].shape[0] for patch_row in patches])
             shape_dim2 = sum([patch.shape[1] for patch in patches[0]])
+            print(patches)
+
             self._faces[face] = np.empty(shape=(self.n_t, shape_dim1, shape_dim2))
             dim1_pos = 0
             dim2_pos = 0
@@ -313,7 +315,7 @@ class Obstruction:
         return self._boundary_data[item]
 
     def __eq__(self, other):
-        return self.id == other.id
+        return self.id == other.id and self.bound_indices == other.bound_indices
 
     def __repr__(self, *args, **kwargs):
         return f"Obstruction(id={self.id}, extent={self.extent}" + \

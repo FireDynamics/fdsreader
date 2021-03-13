@@ -155,7 +155,7 @@ class Simulation:
             # POST INIT (post read)
             self.out_file_path = os.path.join(self.root_path, self.chid + ".out")
             self.ventilations: List[Ventilation] = list(self.ventilations.values())
-            self.obstructions = ObstructionCollection(self.obstructions.values())
+            self.obstructions = ObstructionCollection(self._merged_obstructions)
             for obst in self.obstructions:
                 obst._post_init()
             # Combine the gathered temporary information into data collections
@@ -227,18 +227,25 @@ class Simulation:
     def _load_obstructions(self, smv_file: TextIO, mesh: Mesh):
         temp_data = list()
         n = int(smv_file.readline().strip())
+
+        if n != 0:
+            self.obstructions[mesh] = list()
+
         for _ in range(n):
             line = smv_file.readline().strip().split()
             ext = [float(line[i]) for i in range(6)]
-            obst_index = int(line[6]) - 1
+            obst_ordinal = int(line[6])
 
             side_surfaces = tuple(self.surfaces[int(line[i]) - 1] for i in range(7, 13))
             if len(line) > 13:
                 texture_origin = (float(line[13]), float(line[14]), float(line[15]))
-                temp_data.append((obst_index, Extent(*ext), side_surfaces, texture_origin))
+                temp_data.append((obst_ordinal, Extent(*ext), side_surfaces, texture_origin))
             else:
-                temp_data.append((obst_index, Extent(*ext), side_surfaces))
+                temp_data.append((obst_ordinal, Extent(*ext), side_surfaces))
 
+        # Obstructions with holes get split into 4 obstructions which all carry the same ordinal
+        # We therefore need to keep track of the actual ordinal ourself
+        # hole_obst_count = 0
         for tmp in temp_data:
             line = smv_file.readline().strip().split()
             bound_indices = (
@@ -252,17 +259,53 @@ class Simulation:
                 rgba = ()
 
             if len(tmp) == 4:
-                obst_index, extent, side_surfaces, texture_origin = tmp
+                obst_ordinal, extent, side_surfaces, texture_origin = tmp
             else:
-                obst_index, extent, side_surfaces = tmp
+                obst_ordinal, extent, side_surfaces = tmp
                 texture_origin = self.default_texture_origin
 
-            if obst_index not in self.obstructions:
-                self.obstructions[obst_index] = Obstruction(obst_index, side_surfaces,
-                                                            bound_indices, color_index, block_type,
-                                                            texture_origin, rgba=rgba)
-            self.obstructions[obst_index]._extents[mesh] = extent
-            mesh.obstructions.append(self.obstructions[obst_index])
+            obst = Obstruction(obst_ordinal, side_surfaces, bound_indices, color_index, block_type,
+                               texture_origin, rgba=rgba)
+
+            self.obstructions[mesh].append(obst)
+            obst._extents[mesh] = extent
+            mesh.obstructions.append(obst)
+
+            # obst = None
+            # # Check if the obst with that ordinal has been loaded already
+            # # Negative ordinals indicate a split obst (due to a hole)
+            # if (not any(obst.id == obst_ordinal for obst in self.obstructions)) or (
+            #         obst_ordinal < 0 and sum(
+            #     obst.id == obst_ordinal for obst in self.obstructions) < 4):
+            #     obst = Obstruction(obst_ordinal, side_surfaces, bound_indices, color_index,
+            #                        block_type, texture_origin, rgba=rgba)
+            #     tmp = [i for i, obst in enumerate(self.obstructions) if
+            #            abs(obst.id) < abs(obst_ordinal)]
+            #     idx = tmp[-1] + 1 if len(tmp) > 0 else 0
+            #     self.obstructions.insert(idx, obst)
+            # if obst is None:
+            #     if obst_ordinal < 0:
+            #         obst = [obst for obst in self.obstructions if obst.id == obst_ordinal][
+            #             hole_obst_count]
+            #     else:
+            #         obst = next(obst for obst in self.obstructions if obst.id == obst_ordinal)
+            # obst._extents[mesh] = extent
+            # mesh.obstructions.append(obst)
+            #
+            # if obst_ordinal < 0:
+            #     hole_obst_count += 1
+            #     # If we reached a count of 4 we reset the count for the next split obst
+            #     if hole_obst_count == 4:
+            #         hole_obst_count = 0
+
+    @property
+    def _merged_obstructions(self) -> List[Obstruction]:
+        ret = list()
+        for _, obstructions in self.obstructions.items():
+            for obst in obstructions:
+                if obst not in ret:
+                    ret.append(obst)
+        return ret
 
     @log_error("vents")
     def _load_vents(self, smv_file: TextIO, mesh: Mesh):
@@ -323,7 +366,7 @@ class Simulation:
         for v in range(n):
             extent, vent_id, surface, texture_origin, circular_vent_origin, radius = temp_data[v]
             bound_indices, color_index, draw_type, rgba = read_common_info2()
-            if vent_id not in self.obstructions:
+            if vent_id not in self.ventilations:
                 self.ventilations[vent_id] = Ventilation(vent_id, surface, bound_indices,
                                                          color_index, draw_type, rgba=rgba,
                                                          texture_origin=texture_origin,
@@ -450,25 +493,27 @@ class Simulation:
                 extent, dimension = self._indices_to_extent(patch_info[:6], mesh)
                 orientation = patch_info[6]
                 obst_index = patch_info[7]
-                print(obst_index)
+
                 p = Patch(file_path, dimension, extent, orientation, cell_centered,
                           patch_offset + offset, n_t)
 
-                # Skip obstacles with ID 0, which just gives the extent of the (whole) mesh faces
+                # Skip obstacles with index 0, which just gives the extent of the (whole) mesh faces
                 # These might be needed in case of "closed" mesh faces
                 if obst_index != 0:
-                    obst_id = mesh.obstructions[obst_index - 1].id
-                    if obst_id not in patches:
-                        patches[obst_id] = list()
-                    patches[obst_id].append(p)
+                    obst_index -= 1  # Account for fortran indexing
+                    if obst_index not in patches:
+                        patches[obst_index] = list()
+                    patches[obst_index].append(p)
                 patch_offset += fdtype.new(
                     (('f', str(p.dimension.shape(cell_centered=False))),)).itemsize
 
-        for obst_id, p in patches.items():
+        for obst_index, p in patches.items():
             for patch in p:
                 patch._post_init(patch_offset)
-            self.obstructions[obst_id]._add_patches(bid, cell_centered, quantity, label, unit, mesh,
-                                                    p, times, n_t, lower_bounds, upper_bounds)
+
+            self.obstructions[mesh][obst_index]._add_patches(bid, cell_centered, quantity, label,
+                                                             unit, mesh, p, times, n_t,
+                                                             lower_bounds, upper_bounds)
 
     @log_error("pl3d")
     def _load_data_3d(self, smv_file: TextIO, line: str):
@@ -692,8 +737,7 @@ class Simulation:
         self.data_3d.clear_cache()
         self.isosurfaces.clear_cache()
         self.particles.clear_cache()
-        for obst in self.obstructions:
-            obst.clear_cache()
+        self.obstructions.clear_cache()
 
         if clear_persistent_cache:
             os.remove(Simulation._get_pickle_filename(self.root_path, self.chid))

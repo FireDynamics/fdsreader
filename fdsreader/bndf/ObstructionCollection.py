@@ -18,7 +18,11 @@ class ObstructionCollection(FDSDataCollection):
         """
         if type(quantity) != str:
             quantity = quantity.quantity
-        return [x.get_boundary_data(quantity) for x in self]
+        return [x.get_boundary_data(quantity) for x in self if
+                x.get_boundary_data(quantity) is not None]
+
+    def filter_by_boundary_data(self) -> List[Obstruction]:
+        return [x for x in self if x.has_boundary_data]
 
     def get_nearest_obstruction(self, point: Tuple[float, float, float]) -> Obstruction:
         """Filters the obstruction with the shortest distance to the given point.
