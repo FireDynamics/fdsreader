@@ -7,6 +7,49 @@ import fdsreader.utils.fortran_data as fdtype
 from fdsreader import settings
 
 
+class Hole:
+    """Represents a hole in an obstruction. Used to output default values instead of actual data.
+
+    :ivar dimension: :class:`Dimension` object containing information about steps in each dimension.
+    :ivar extent: :class:`Extent` object containing 3-dimensional extent information.
+    :ivar orientation: The direction the patch is facing (x={-1;1}, y={-2;2}, z={-3;3}).
+    :ivar cell_centered: Indicates whether centered positioning for data is used.
+    """
+    default_value = 0
+
+    def __init__(self, dimension: Dimension, extent: Extent, orientation: int, cell_centered: bool):
+        self.dimension = dimension
+        self.extent = extent
+        self.orientation = orientation
+        self.cell_centered = cell_centered
+
+    @property
+    def shape(self) -> Tuple:
+        """Convenience function to calculate the shape of the array containing data for this hole.
+        """
+        return self.dimension.shape(self.cell_centered)
+
+    @property
+    def size(self) -> int:
+        """Convenience function to calculate the number of data points in the array for this hole.
+        """
+        return self.dimension.size(self.cell_centered)
+
+    @property
+    def data(self):
+        """Creates an array filled with the specified default value (self.default_value).
+        """
+        return np.full(self.shape, self.default_value)
+
+    def clear_cache(self):
+        """Exists only to be consistent with the :class:`Patch` class.
+        """
+        pass
+
+    def __repr__(self, *args, **kwargs):
+        return f"Hole(shape={self.shape}, orientation={self.orientation}, extent={self.extent})"
+
+
 class Patch:
     """Container for the actual data which is stored as rectangular plane with specific orientation
         and extent.
@@ -97,16 +140,16 @@ class Boundary:
         self.n_t = n_t
         self.extent = None
 
-        self._patches: Dict[Mesh, List[Patch]] = dict()
+        self._patches: Dict[Mesh, List[Union[Patch, Hole]]] = dict()
 
-    def _add_patches(self, mesh: Mesh, patches: List[Patch], lower_bounds: np.ndarray,
-                     upper_bounds: np.ndarray, ):
+    def _add_patches(self, mesh: Mesh, patches: List[Union[Patch, Hole]], lower_bounds: np.ndarray,
+                     upper_bounds: np.ndarray):
         self._patches[mesh] = patches
         self.lower_bounds[mesh] = lower_bounds
         self.upper_bounds[mesh] = upper_bounds
 
     @staticmethod
-    def sort_patches_cartesian(patches_in: List[Patch]):
+    def sort_patches_cartesian(patches_in: List[Union[Patch, Hole]]):
         """Returns all patches (of same orientation!) sorted in cartesian coordinates.
         """
         patches = patches_in.copy()
@@ -135,7 +178,7 @@ class Boundary:
             return patches_cart
         return patches
 
-    def get_patches_in_mesh(self, mesh: Mesh) -> List[Patch]:
+    def get_patches_in_mesh(self, mesh: Mesh) -> List[Union[Patch, Hole]]:
         """Gets all patches in a specific mesh.
         """
         if not hasattr(self._patches[mesh][0], "_data"):
@@ -183,7 +226,6 @@ class Boundary:
 
             shape_dim1 = sum([patch_row[0].shape[0] for patch_row in patches])
             shape_dim2 = sum([patch.shape[1] for patch in patches[0]])
-            print(patches)
 
             self._faces[face] = np.empty(shape=(self.n_t, shape_dim1, shape_dim2))
             dim1_pos = 0
@@ -257,13 +299,20 @@ class Obstruction:
         if len(rgba) != 0:
             self.rgba = rgba
 
-        self._extents: Dict[Mesh, Extent] = dict()
+        self._extents: Dict[Mesh, Union[Extent, List[Extent]]] = dict()
         self.extent: Extent = tuple()
 
         self._boundary_data: Dict[int, Boundary] = dict()
 
     def _post_init(self):
-        vals = self._extents.values()
+        vals = list()
+        for val in self._extents.values():
+            if type(val) == list:
+                for v in val:
+                    vals.append(v)
+            else:
+                vals.append(val)
+
         self.extent = Extent(
             min(vals, key=lambda e: e.x_start).x_start, max(vals, key=lambda e: e.x_end).x_end,
             min(vals, key=lambda e: e.y_start).y_start, max(vals, key=lambda e: e.y_end).y_end,
@@ -272,7 +321,7 @@ class Obstruction:
             boundary.extent = self.extent
 
     def _add_patches(self, bid: int, cell_centered: bool, quantity: str, label: str, unit: str,
-                     mesh: Mesh, patches: List[Patch], times: np.ndarray, n_t: int,
+                     mesh: Mesh, patches: List[Union[Patch, Hole]], times: np.ndarray, n_t: int,
                      lower_bounds: np.ndarray, upper_bounds: np.ndarray):
         if bid not in self._boundary_data:
             self._boundary_data[bid] = Boundary(cell_centered, Quantity(quantity, label, unit),
@@ -315,7 +364,7 @@ class Obstruction:
         return self._boundary_data[item]
 
     def __eq__(self, other):
-        return self.id == other.id and self.bound_indices == other.bound_indices
+        return self.id == other.id and self.extent == other.extent
 
     def __repr__(self, *args, **kwargs):
         return f"Obstruction(id={self.id}, extent={self.extent}" + \

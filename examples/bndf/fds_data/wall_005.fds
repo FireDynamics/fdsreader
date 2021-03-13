@@ -2,9 +2,9 @@
       /
 &TIME T_END=20.0, TIME_SHRINK_FACTOR=10.
 
-&MULT ID='mesh', DX=2, DY=1.6, I_UPPER=1, J_UPPER=2,/
+&MULT ID='mesh', DX=1, DY=0.8, I_UPPER=3, J_UPPER=5,/
 
-&MESH IJK= 20,16,72 XB=-1.5,0.5,-2,-0.4,-0.1000,3.5, MULT_ID='mesh' /
+&MESH IJK= 20,16,72 XB=-1.5,-0.5,-2,-1.2,-0.1000,3.5, MULT_ID='mesh' /
 
 &DUMP RENDER_FILE='Scene.ge1'
       STATUS_FILES=.TRUE.

@@ -1,4 +1,5 @@
 import os
+from operator import attrgetter
 from typing import List, TextIO, Dict, AnyStr, Sequence, Tuple, Union
 import logging
 
@@ -243,9 +244,10 @@ class Simulation:
             else:
                 temp_data.append((obst_ordinal, Extent(*ext), side_surfaces))
 
-        # Obstructions with holes get split into 4 obstructions which all carry the same ordinal
-        # We therefore need to keep track of the actual ordinal ourself
-        # hole_obst_count = 0
+        # We need to save the extents of obstructions that have been created due to a hole to later
+        # recreate a Hole with the correct extents
+        hole_extents: Dict[int, List[Extent]] = dict()
+
         for tmp in temp_data:
             line = smv_file.readline().strip().split()
             bound_indices = (
@@ -264,46 +266,52 @@ class Simulation:
                 obst_ordinal, extent, side_surfaces = tmp
                 texture_origin = self.default_texture_origin
 
-            obst = Obstruction(obst_ordinal, side_surfaces, bound_indices, color_index, block_type,
-                               texture_origin, rgba=rgba)
+            obst_tmp = Obstruction(obst_ordinal, side_surfaces, bound_indices, color_index,
+                                   block_type, texture_origin, rgba=rgba)
+            obst = next((o for o in self._merged_obstructions if o.id == obst_tmp.id), obst_tmp)
 
             self.obstructions[mesh].append(obst)
-            obst._extents[mesh] = extent
-            mesh.obstructions.append(obst)
+            # Holes will be handles differently
+            if obst_ordinal < 0:
+                if mesh not in obst._extents:
+                    obst._extents[mesh] = list()
+                obst._extents[mesh].append(extent)
+            else:
+                obst._extents[mesh] = extent
+                mesh.obstructions.append(obst)
 
-            # obst = None
-            # # Check if the obst with that ordinal has been loaded already
-            # # Negative ordinals indicate a split obst (due to a hole)
-            # if (not any(obst.id == obst_ordinal for obst in self.obstructions)) or (
-            #         obst_ordinal < 0 and sum(
-            #     obst.id == obst_ordinal for obst in self.obstructions) < 4):
-            #     obst = Obstruction(obst_ordinal, side_surfaces, bound_indices, color_index,
-            #                        block_type, texture_origin, rgba=rgba)
-            #     tmp = [i for i, obst in enumerate(self.obstructions) if
-            #            abs(obst.id) < abs(obst_ordinal)]
-            #     idx = tmp[-1] + 1 if len(tmp) > 0 else 0
-            #     self.obstructions.insert(idx, obst)
-            # if obst is None:
-            #     if obst_ordinal < 0:
-            #         obst = [obst for obst in self.obstructions if obst.id == obst_ordinal][
-            #             hole_obst_count]
-            #     else:
-            #         obst = next(obst for obst in self.obstructions if obst.id == obst_ordinal)
-            # obst._extents[mesh] = extent
-            # mesh.obstructions.append(obst)
-            #
-            # if obst_ordinal < 0:
-            #     hole_obst_count += 1
-            #     # If we reached a count of 4 we reset the count for the next split obst
-            #     if hole_obst_count == 4:
-            #         hole_obst_count = 0
+            if obst_ordinal < 0:
+                if obst_ordinal not in hole_extents:
+                    hole_extents[obst_ordinal] = list()
+                hole_extents[obst_ordinal].append(extent)
+
+        for ordinal, extents in hole_extents.items():
+            hole_extent = list()
+
+            minx = min(extents, key=attrgetter('x_start'))
+            hole_extent.append(minx.x_end)
+            maxx = max(extents, key=attrgetter('x_end'))
+            hole_extent.append(maxx.x_start)
+            miny = min(extents, key=attrgetter('y_start'))
+            hole_extent.append(miny.y_end)
+            maxy = max(extents, key=attrgetter('y_end'))
+            hole_extent.append(maxy.y_start)
+            minz = min(extents, key=attrgetter('z_start'))
+            hole_extent.append(minz.z_end)
+            maxz = max(extents, key=attrgetter('z_end'))
+            hole_extent.append(maxz.z_start)
+
+            hole_extent = Extent(*hole_extent)
+            obst = next(o for o in self._merged_obstructions if o.id == ordinal)
+            obst._extents[mesh].append(hole_extent)
+
 
     @property
     def _merged_obstructions(self) -> List[Obstruction]:
         ret = list()
         for _, obstructions in self.obstructions.items():
             for obst in obstructions:
-                if obst not in ret:
+                if not any(obst.id == o.id for o in ret):
                     ret.append(obst)
         return ret
 

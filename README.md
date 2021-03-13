@@ -57,13 +57,13 @@ Distributed under the LGPLv3 (GNU Lesser General Public License v3) license. See
 
 ### Beta *(Q1 2021)*
 * (unreleased) 0.9.0
-    * (Entering beta status after extensive testing with selected participants in alpha stage)
+    * (Entering beta status after implementing some additional features such as complex geometry support)
     
-### Alpha *(02/2021)*
-* (unreleased) 0.8.0
-    * (Entering alpha status after extensive private testing in pre-alpha stage)
+### Alpha *(current stage)*
+* 0.8.0
+    * Final bugfixes
     
-### Pre-Alpha *(current stage)*
+### Pre-Alpha
 * 0.7.4
     * Added obst hole support (bndf)
 * 0.7.3
