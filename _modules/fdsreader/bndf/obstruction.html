@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>fdsreader.bndf.obstruction &mdash; fdsreader [fdsreader, version 0.7.3] documentation</title>
+  <title>fdsreader.bndf.obstruction &mdash; fdsreader [fdsreader, version 0.8.0] documentation</title>
   
 
   
@@ -166,6 +166,49 @@
 <span class="kn">from</span> <span class="nn">fdsreader</span> <span class="kn">import</span> <span class="n">settings</span>
 
 
+<div class="viewcode-block" id="Hole"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Hole">[docs]</a><span class="k">class</span> <span class="nc">Hole</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Represents a hole in an obstruction. Used to output default values instead of actual data.</span>
+
+<span class="sd">    :ivar dimension: :class:`Dimension` object containing information about steps in each dimension.</span>
+<span class="sd">    :ivar extent: :class:`Extent` object containing 3-dimensional extent information.</span>
+<span class="sd">    :ivar orientation: The direction the patch is facing (x={-1;1}, y={-2;2}, z={-3;3}).</span>
+<span class="sd">    :ivar cell_centered: Indicates whether centered positioning for data is used.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">default_value</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="p">:</span> <span class="n">Dimension</span><span class="p">,</span> <span class="n">extent</span><span class="p">:</span> <span class="n">Extent</span><span class="p">,</span> <span class="n">orientation</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">cell_centered</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span> <span class="o">=</span> <span class="n">dimension</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extent</span> <span class="o">=</span> <span class="n">extent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span> <span class="o">=</span> <span class="n">orientation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cell_centered</span> <span class="o">=</span> <span class="n">cell_centered</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Convenience function to calculate the shape of the array containing data for this hole.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cell_centered</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Convenience function to calculate the number of data points in the array for this hole.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cell_centered</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Creates an array filled with the specified default value (self.default_value).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_value</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Hole.clear_cache"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Hole.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Exists only to be consistent with the :class:`Patch` class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Hole(shape=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">, orientation=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">orientation</span><span class="si">}</span><span class="s2">, extent=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="si">}</span><span class="s2">)&quot;</span></div>
+
+
 <div class="viewcode-block" id="Patch"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Patch">[docs]</a><span class="k">class</span> <span class="nc">Patch</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Container for the actual data which is stored as rectangular plane with specific orientation</span>
 <span class="sd">        and extent.</span>
@@ -256,16 +299,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">n_t</span> <span class="o">=</span> <span class="n">n_t</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">extent</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_patches</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Mesh</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Patch</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_patches</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Mesh</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Patch</span><span class="p">,</span> <span class="n">Hole</span><span class="p">]]]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">_add_patches</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">,</span> <span class="n">patches</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Patch</span><span class="p">],</span> <span class="n">lower_bounds</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-                     <span class="n">upper_bounds</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_add_patches</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">,</span> <span class="n">patches</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Patch</span><span class="p">,</span> <span class="n">Hole</span><span class="p">]],</span> <span class="n">lower_bounds</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                     <span class="n">upper_bounds</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_patches</span><span class="p">[</span><span class="n">mesh</span><span class="p">]</span> <span class="o">=</span> <span class="n">patches</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span><span class="p">[</span><span class="n">mesh</span><span class="p">]</span> <span class="o">=</span> <span class="n">lower_bounds</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">upper_bounds</span><span class="p">[</span><span class="n">mesh</span><span class="p">]</span> <span class="o">=</span> <span class="n">upper_bounds</span>
 
 <div class="viewcode-block" id="Boundary.sort_patches_cartesian"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Boundary.sort_patches_cartesian">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">sort_patches_cartesian</span><span class="p">(</span><span class="n">patches_in</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Patch</span><span class="p">]):</span>
+    <span class="k">def</span> <span class="nf">sort_patches_cartesian</span><span class="p">(</span><span class="n">patches_in</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Patch</span><span class="p">,</span> <span class="n">Hole</span><span class="p">]]):</span>
         <span class="sd">&quot;&quot;&quot;Returns all patches (of same orientation!) sorted in cartesian coordinates.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">patches</span> <span class="o">=</span> <span class="n">patches_in</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -294,7 +337,7 @@
             <span class="k">return</span> <span class="n">patches_cart</span>
         <span class="k">return</span> <span class="n">patches</span></div>
 
-<div class="viewcode-block" id="Boundary.get_patches_in_mesh"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Boundary.get_patches_in_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">get_patches_in_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Patch</span><span class="p">]:</span>
+<div class="viewcode-block" id="Boundary.get_patches_in_mesh"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Boundary.get_patches_in_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">get_patches_in_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Patch</span><span class="p">,</span> <span class="n">Hole</span><span class="p">]]:</span>
         <span class="sd">&quot;&quot;&quot;Gets all patches in a specific mesh.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_patches</span><span class="p">[</span><span class="n">mesh</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;_data&quot;</span><span class="p">):</span>
@@ -342,6 +385,7 @@
 
             <span class="n">shape_dim1</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">patch_row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">patch_row</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">])</span>
             <span class="n">shape_dim2</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">patch</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">patch</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+
             <span class="bp">self</span><span class="o">.</span><span class="n">_faces</span><span class="p">[</span><span class="n">face</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_t</span><span class="p">,</span> <span class="n">shape_dim1</span><span class="p">,</span> <span class="n">shape_dim2</span><span class="p">))</span>
             <span class="n">dim1_pos</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="n">dim2_pos</span> <span class="o">=</span> <span class="mi">0</span>
@@ -414,13 +458,20 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rgba</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rgba</span> <span class="o">=</span> <span class="n">rgba</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_extents</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Mesh</span><span class="p">,</span> <span class="n">Extent</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_extents</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Mesh</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Extent</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Extent</span><span class="p">]]]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="p">:</span> <span class="n">Extent</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Boundary</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_post_init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extents</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extents</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">val</span><span class="p">:</span>
+                    <span class="n">vals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">vals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">extent</span> <span class="o">=</span> <span class="n">Extent</span><span class="p">(</span>
             <span class="nb">min</span><span class="p">(</span><span class="n">vals</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">x_start</span><span class="p">)</span><span class="o">.</span><span class="n">x_start</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">vals</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">x_end</span><span class="p">)</span><span class="o">.</span><span class="n">x_end</span><span class="p">,</span>
             <span class="nb">min</span><span class="p">(</span><span class="n">vals</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">y_start</span><span class="p">)</span><span class="o">.</span><span class="n">y_start</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">vals</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">y_end</span><span class="p">)</span><span class="o">.</span><span class="n">y_end</span><span class="p">,</span>
@@ -429,7 +480,7 @@
             <span class="n">boundary</span><span class="o">.</span><span class="n">extent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extent</span>
 
     <span class="k">def</span> <span class="nf">_add_patches</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bid</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">cell_centered</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                     <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">,</span> <span class="n">patches</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Patch</span><span class="p">],</span> <span class="n">times</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">n_t</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                     <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">,</span> <span class="n">patches</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Patch</span><span class="p">,</span> <span class="n">Hole</span><span class="p">]],</span> <span class="n">times</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">n_t</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                      <span class="n">lower_bounds</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">bid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="p">[</span><span class="n">bid</span><span class="p">]</span> <span class="o">=</span> <span class="n">Boundary</span><span class="p">(</span><span class="n">cell_centered</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">(</span><span class="n">quantity</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">unit</span><span class="p">),</span>
@@ -472,7 +523,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="p">[</span><span class="n">item</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">id</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">id</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">extent</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">extent</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Obstruction(id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">, extent=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span> \

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>FDSReader documentation! &mdash; fdsreader [fdsreader, version 0.7.3] documentation</title>
+  <title>FDSReader documentation! &mdash; fdsreader [fdsreader, version 0.8.0] documentation</title>
   
 
   
@@ -858,10 +858,13 @@ used in the simulation. Other cases will require individual custom combination l
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Boundary</span></code>(cell_centered, quantity, times, …)</p></td>
 <td><p>Container for the actual data which is stored as rectangular plane with specific orientation</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Obstruction</span></code>(oid, side_surfaces, …)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Hole</span></code>(dimension, extent, orientation, …)</p></td>
+<td><p>Represents a hole in an obstruction.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Obstruction</span></code>(oid, side_surfaces, …)</p></td>
 <td><p>A box-shaped obstruction with specific surfaces (materials) on each side.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Patch</span></code>(file_path, dimension, extent, …)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Patch</span></code>(file_path, dimension, extent, …)</p></td>
 <td><p>Container for the actual data which is stored as rectangular plane with specific orientation</p></td>
 </tr>
 </tbody>
@@ -936,13 +939,13 @@ used in the simulation. Other cases will require individual custom combination l
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname"><span class="pre">get_patches_in_mesh</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.fds_classes.mesh.Mesh</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.bndf.obstruction.Patch</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Boundary.get_patches_in_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">get_patches_in_mesh</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.fds_classes.mesh.Mesh</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.bndf.obstruction.Patch</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.bndf.obstruction.Hole</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Boundary.get_patches_in_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Gets all patches in a specific mesh.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt>
-<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">sort_patches_cartesian</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">patches_in</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.bndf.obstruction.Patch</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Boundary.sort_patches_cartesian"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">sort_patches_cartesian</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">patches_in</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.bndf.obstruction.Patch</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.bndf.obstruction.Hole</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Boundary.sort_patches_cartesian"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Returns all patches (of same orientation!) sorted in cartesian coordinates.</p>
 </dd></dl>
 
@@ -956,6 +959,84 @@ used in the simulation. Other cases will require individual custom combination l
 <dt>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">vmin</span></code></dt>
 <dd><p>Minimum value of all patches in any time step.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.bndf.obstruction.</span></code><code class="sig-name descname"><span class="pre">Hole</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimension</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.dimension.Dimension</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extent</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.extent.Extent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_centered</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Hole"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Represents a hole in an obstruction. Used to output default values instead of actual data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dimension</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">Dimension</span></code> object containing information about steps in each dimension.</p></li>
+<li><p><strong>extent</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">Extent</span></code> object containing 3-dimensional extent information.</p></li>
+<li><p><strong>orientation</strong> – The direction the patch is facing (x={-1;1}, y={-2;2}, z={-3;3}).</p></li>
+<li><p><strong>cell_centered</strong> – Indicates whether centered positioning for data is used.</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Methods:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_cache</span></code>()</p></td>
+<td><p>Exists only to be consistent with the <code class="xref py py-class docutils literal notranslate"><span class="pre">Patch</span></code> class.</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Attributes:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></p></td>
+<td><p>Creates an array filled with the specified default value (self.default_value).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_value</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code></p></td>
+<td><p>Convenience function to calculate the shape of the array containing data for this hole.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">size</span></code></p></td>
+<td><p>Convenience function to calculate the number of data points in the array for this hole.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt>
+<code class="sig-name descname"><span class="pre">clear_cache</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Hole.clear_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Exists only to be consistent with the <code class="xref py py-class docutils literal notranslate"><span class="pre">Patch</span></code> class.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">data</span></code></dt>
+<dd><p>Creates an array filled with the specified default value (self.default_value).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt>
+<code class="sig-name descname"><span class="pre">default_value</span></code><em class="property"> <span class="pre">=</span> <span class="pre">0</span></em></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">shape</span></code></dt>
+<dd><p>Convenience function to calculate the shape of the array containing data for this hole.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">size</span></code></dt>
+<dd><p>Convenience function to calculate the number of data points in the array for this hole.</p>
 </dd></dl>
 
 </dd></dl>
