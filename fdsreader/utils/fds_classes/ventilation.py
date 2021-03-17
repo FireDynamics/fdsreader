@@ -71,4 +71,4 @@ class Ventilation:
         self._subventilations[mesh] = SubVentilation(mesh, extent)
 
     def __repr__(self, *args, **kwargs):
-        return f"Ventilation(id={self.id})"
+        return f"Ventilation()"

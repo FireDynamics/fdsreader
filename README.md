@@ -60,8 +60,10 @@ Distributed under the LGPLv3 (GNU Lesser General Public License v3) license. See
     * (Entering beta status after implementing some additional features such as complex geometry support)
     
 ### Alpha *(current stage)*
+* 0.8.1
+    * Bugfixes for vents
 * 0.8.0
-    * Final bugfixes
+    * Major bugfixes
     
 ### Pre-Alpha
 * 0.7.4

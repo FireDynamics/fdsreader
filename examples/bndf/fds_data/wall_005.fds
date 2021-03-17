@@ -1,6 +1,6 @@
 &HEAD CHID='wall_test'
       /
-&TIME T_END=20.0, TIME_SHRINK_FACTOR=10.
+&TIME T_END=20.0
 
 &MULT ID='mesh', DX=1, DY=0.8, I_UPPER=3, J_UPPER=5,/
 
@@ -25,16 +25,16 @@
 &SURF ID='Boden', MATL_ID='Stahlbeton',THICKNESS=0.2, BACKING="EXPOSED"/
 
 /Boden
-/&OBST ID='Boden' XB=-1,2,-1.2,2.4,-0.1,0, SURF_ID='Boden'/
+&OBST ID='Boden' XB=-1,2,-1.2,2.4,-0.1,0, SURF_ID='Boden'/
 
 /Decke
-/&OBST ID='Decke' XB=-1,2,-1.2,2.4,3,3.2, SURF_ID='Boden'/
+&OBST ID='Decke' XB=-1,2,-1.2,2.4,3,3.2, SURF_ID='Boden'/
 
 /Wand rechts
 &OBST ID='Wand_r' XB=-0.85,-0.8,-1,2.4,0,3, SURF_ID='wall'/
 
 /Wand vorne
-/&OBST ID='Wand_v' XB=-1,2,-1.2,-1,0,3, SURF_ID='wall'/
+&OBST ID='Wand_v' XB=-1,2,-1.2,-1,0,3, SURF_ID='wall'/
 
 &OBST ID='Golf_brandfläche' XB= -0.3,1.1,0.4,1.7,0.4,0.45 /
 

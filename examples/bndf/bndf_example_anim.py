@@ -9,7 +9,7 @@ def main():
 
     # Get obstruction data by quantity
     quantity = "Wall Temperature"
-    bndf = sim.obstructions.filter_by_quantity(quantity)[0]
+    bndf = sim.obstructions.filter_by_quantity(quantity)[3]
 
     # Load data of a specific face
     data = bndf.faces[1]

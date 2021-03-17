@@ -144,8 +144,12 @@ class Simulation:
                         self._load_isosurface(smv_file, keyword)
                     elif "PL3D" in keyword:
                         self._load_data_3d(smv_file, keyword)
-                    elif "BND" in keyword:
-                        self._load_boundary_data(smv_file, keyword)
+                    elif "BNDF" in keyword:
+                        self._load_boundary_data(smv_file, keyword, cell_centered=False)
+                    elif "BNDC" in keyword:
+                        self._load_boundary_data(smv_file, keyword, cell_centered=True)
+                    elif "BNDE" in keyword:
+                        self._load_boundary_data_geom(smv_file, keyword)
                     elif "PRT5" in keyword:
                         self._load_particle_data(smv_file, keyword)
 
@@ -345,7 +349,7 @@ class Simulation:
             temp_data.append((Extent(*ext), vent_index, surface, texture_origin))
 
         for _ in range(n_dummies):
-            _, extents, vent_index, surface = read_common_info()
+            _, ext, vent_index, surface = read_common_info()
             temp_data.append((Extent(*ext), vent_index, surface))
 
         for v in range(n):
@@ -366,21 +370,21 @@ class Simulation:
         n = int(smv_file.readline().strip())
         temp_data.clear()
         for _ in range(n):
-            line, extent, vid, surface = read_common_info()
+            line, extent, vent_index, surface = read_common_info()
             circular_vent_origin = (float(line[12]), float(line[13]), float(line[14]))
             radius = float(line[15])
-            temp_data.append((extent, vid, surface, texture_origin, circular_vent_origin, radius))
+            temp_data.append((extent, vent_index, surface, texture_origin, circular_vent_origin, radius))
 
         for v in range(n):
-            extent, vent_id, surface, texture_origin, circular_vent_origin, radius = temp_data[v]
+            extent, vent_index, surface, texture_origin, circular_vent_origin, radius = temp_data[v]
             bound_indices, color_index, draw_type, rgba = read_common_info2()
-            if vent_id not in self.ventilations:
-                self.ventilations[vent_id] = Ventilation(vent_id, surface, bound_indices,
+            if vent_index not in self.ventilations:
+                self.ventilations[vent_index] = Ventilation(surface, bound_indices,
                                                          color_index, draw_type, rgba=rgba,
                                                          texture_origin=texture_origin,
                                                          circular_vent_origin=circular_vent_origin,
                                                          radius=radius)
-            self.ventilations[vent_id]._add_subventilation(mesh, extent)
+            self.ventilations[vent_index]._add_subventilation(mesh, extent)
 
     @log_error("surface")
     def _load_surface(self, smv_file: TextIO) -> Surface:
@@ -448,14 +452,10 @@ class Simulation:
         logging.debug("Found SLICE with id: :i", slice_index)
 
     @log_error("bndf")
-    def _load_boundary_data(self, smv_file: TextIO, line: str):
+    def _load_boundary_data(self, smv_file: TextIO, line: str, cell_centered: bool):
         """Loads the boundary data at current pointer position.
         """
         line = line.split()
-        if line[0] == 'BNDC':
-            cell_centered = True
-        else:
-            cell_centered = False
         mesh_index = int(line[1]) - 1
         mesh = self.meshes[mesh_index]
 
@@ -522,6 +522,10 @@ class Simulation:
             self.obstructions[mesh][obst_index]._add_patches(bid, cell_centered, quantity, label,
                                                              unit, mesh, p, times, n_t,
                                                              lower_bounds, upper_bounds)
+
+    @log_error("bndf")
+    def _load_boundary_data_geom(self, smv_file: TextIO, line: str):
+        pass
 
     @log_error("pl3d")
     def _load_data_3d(self, smv_file: TextIO, line: str):
