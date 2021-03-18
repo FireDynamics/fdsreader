@@ -60,6 +60,8 @@ Distributed under the LGPLv3 (GNU Lesser General Public License v3) license. See
     * (Entering beta status after implementing some additional features such as complex geometry support)
     
 ### Alpha *(current stage)*
+* 0.8.3
+    * Added collections to documentation
 * 0.8.2
     * Fixed slcf examples
 * 0.8.1

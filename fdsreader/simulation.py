@@ -8,6 +8,7 @@ import pickle
 
 from fdsreader.bndf import Obstruction, Patch
 from fdsreader.bndf.ObstructionCollection import ObstructionCollection
+from fdsreader.bndf.geometry import Geometry
 from fdsreader.isof import Isosurface
 from fdsreader.isof.IsosurfaceCollection import IsosurfaceCollection
 from fdsreader.part import Particle
@@ -85,6 +86,7 @@ class Simulation:
 
             self.root_path = os.path.dirname(self.smv_file_path)
 
+            self.geoms: List[Geometry] = list()
             self.meshes: List[Mesh] = list()
             self.surfaces: List[Surface] = list()
             self.obstructions = dict()
@@ -125,7 +127,9 @@ class Simulation:
                         self.default_texture_origin = tuple(float(offsets[i]) for i in range(3))
                     elif keyword == "CLASS_OF_PARTICLES":
                         self.particles.append(self._register_particle(smv_file))
-                    elif "GRID" in keyword:
+                    elif keyword.startswith("GEOM"):
+                        self._load_geoms(smv_file, keyword)
+                    elif keyword.startswith("GRID"):
                         self.meshes.append(self._load_mesh(smv_file, keyword))
                     elif keyword == "SURFACE":
                         self.surfaces.append(self._load_surface(smv_file))
@@ -138,19 +142,19 @@ class Simulation:
                                 self.devices[name] = [self.devices[name], device]
                         else:
                             self.devices[name] = device
-                    elif "SLC" in keyword:
+                    elif keyword.startswith("SLC"):
                         self._load_slice(smv_file, keyword)
-                    elif "ISOG" in keyword:
+                    elif keyword.startswith("ISOG"):
                         self._load_isosurface(smv_file, keyword)
-                    elif "PL3D" in keyword:
+                    elif keyword.startswith("PL3D"):
                         self._load_data_3d(smv_file, keyword)
-                    elif "BNDF" in keyword:
+                    elif keyword.startswith("BNDF"):
                         self._load_boundary_data(smv_file, keyword, cell_centered=False)
-                    elif "BNDC" in keyword:
+                    elif keyword.startswith("BNDC"):
                         self._load_boundary_data(smv_file, keyword, cell_centered=True)
-                    elif "BNDE" in keyword:
+                    elif keyword.startswith("BNDE"):
                         self._load_boundary_data_geom(smv_file, keyword)
-                    elif "PRT5" in keyword:
+                    elif keyword.startswith("PRT5"):
                         self._load_particle_data(smv_file, keyword)
 
                 self.cpu = self._load_CPU_data()
@@ -309,6 +313,31 @@ class Simulation:
             obst = next(o for o in self._merged_obstructions if o.id == ordinal)
             obst._extents[mesh].append(hole_extent)
 
+    def _load_geoms(self, smv_file: TextIO, line: str):
+        ngeoms = int(line.split()[1])
+
+        filename = smv_file.readline()
+        file_path = os.path.join(self.root_path, filename)
+
+        for g in range(ngeoms):
+            line = smv_file.readline().split("!")
+            texture_line = line[0].split()
+            rgb_line = line[1].split()
+
+            texture_mapping = texture_line[0]
+            texture_origin = (
+                float(texture_line[1]), float(texture_line[2]), float(texture_line[3]))
+            is_terrain = bool(texture_line[4])
+            rgb = (int(rgb_line[0]), int(rgb_line[1]), int(rgb_line[2]))
+
+            if '%' in line[0]:
+                surface_id = line[0].split("%")[-1]
+                surface = next((s for s in self.surfaces if s.id() == surface_id), None)
+                geom = Geometry(file_path, texture_mapping, texture_origin, is_terrain, rgb,
+                                surface=surface)
+            else:
+                geom = Geometry(file_path, texture_mapping, texture_origin, is_terrain, rgb)
+            self.geoms.append(geom)
 
     @property
     def _merged_obstructions(self) -> List[Obstruction]:
@@ -373,17 +402,18 @@ class Simulation:
             line, extent, vent_index, surface = read_common_info()
             circular_vent_origin = (float(line[12]), float(line[13]), float(line[14]))
             radius = float(line[15])
-            temp_data.append((extent, vent_index, surface, texture_origin, circular_vent_origin, radius))
+            temp_data.append(
+                (extent, vent_index, surface, texture_origin, circular_vent_origin, radius))
 
         for v in range(n):
             extent, vent_index, surface, texture_origin, circular_vent_origin, radius = temp_data[v]
             bound_indices, color_index, draw_type, rgba = read_common_info2()
             if vent_index not in self.ventilations:
                 self.ventilations[vent_index] = Ventilation(surface, bound_indices,
-                                                         color_index, draw_type, rgba=rgba,
-                                                         texture_origin=texture_origin,
-                                                         circular_vent_origin=circular_vent_origin,
-                                                         radius=radius)
+                                                            color_index, draw_type, rgba=rgba,
+                                                            texture_origin=texture_origin,
+                                                            circular_vent_origin=circular_vent_origin,
+                                                            radius=radius)
             self.ventilations[vent_index]._add_subventilation(mesh, extent)
 
     @log_error("surface")
@@ -525,7 +555,78 @@ class Simulation:
 
     @log_error("bndf")
     def _load_boundary_data_geom(self, smv_file: TextIO, line: str):
-        pass
+        line = line.split()
+        mesh_index = int(line[1]) - 1
+        # Meshes are not loaded yet
+        # mesh = self.meshes[mesh_index]
+
+        filename1 = smv_file.readline().strip()
+        filename2 = smv_file.readline().strip()
+        quantity = smv_file.readline().strip()
+        label = smv_file.readline().strip()
+        unit = smv_file.readline().strip()
+
+        bid = int(filename1.split('_')[-1][:-3])
+
+        file_path1 = os.path.join(self.root_path, filename1)
+        file_path2 = os.path.join(self.root_path, filename2)
+
+        times = list()
+        lower_bounds = list()
+        upper_bounds = list()
+        with open(file_path1 + ".bnd", 'r') as bnd_file:
+            for line in bnd_file:
+                splits = line.split()
+                times.append(float(splits[0]))
+                lower_bounds.append(float(splits[1]))
+                upper_bounds.append(float(splits[2]))
+        times = np.array(times)
+        lower_bounds = np.array(lower_bounds, dtype=np.float32)
+        upper_bounds = np.array(upper_bounds, dtype=np.float32)
+        n_t = times.shape[0]
+
+        # _ = (bid, quantity, label, unit, mesh, times, n_t, lower_bounds, upper_bounds)
+
+        # Load .gbf
+        with open(file_path2, 'rb') as infile:
+            offset = fdtype.INT.itemsize * 2 + fdtype.new(
+                (('i', 3),)).itemsize + fdtype.FLOAT.itemsize
+            infile.seek(offset)
+
+            dtype_meta = fdtype.new((('i', 3),))
+            n_vertices, n_faces, _ = np.fromfile(infile, dtype_meta, 1)[0][1]
+
+            dtype_vertices = fdtype.new((('f', 3 * n_vertices),))
+            vertices = np.fromfile(infile, dtype_vertices, 1)[0][1].reshape((n_vertices, 3)).astype(
+                float)
+
+            dtype_faces = fdtype.new((('i', 3 * n_faces),))
+            faces = fdtype.read(infile, dtype_faces, 1)[0][0].reshape((n_faces, 3)).astype(int) - 1
+
+        # Load .be
+        with open(file_path1, 'rb') as infile:
+            offset = fdtype.INT.itemsize * 2
+            infile.seek(offset)
+
+            for t in range(n_t):
+                # Skip time value
+                infile.seek(fdtype.FLOAT.itemsize, 1)
+
+                dtype_meta = fdtype.new((('i', 4),))
+                n_faces = fdtype.read(infile, dtype_meta, 1)[0][0][3]
+                if n_faces > 0:
+                    dtype_faces = fdtype.new((('f', n_faces),))
+                    data = np.fromfile(infile, dtype_faces, 1)[0][1]
+
+        if quantity != "RADIATIVE HEAT FLUX":
+            return
+        # Plot test
+        from pyvista import PolyData, Plotter
+
+        triangles = np.hstack(np.append(np.full((faces.shape[0], 1), 3), faces, axis=1))
+        plotter = Plotter()
+        plotter.add_mesh(PolyData(vertices, triangles), scalars=data)
+        plotter.show()
 
     @log_error("pl3d")
     def _load_data_3d(self, smv_file: TextIO, line: str):
