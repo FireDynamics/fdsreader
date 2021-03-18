@@ -22,7 +22,7 @@ def main():
     # Get the value of supporting point in the dimension corresponding to the orientation
     support_vector_val = subslice.data[0, 0, 0]
     # Mask the data
-    mask = mesh.get_obstruction_mask_slice(slc.orientation, support_vector_val, False)  # slc.cell_centered)
+    mask = mesh.get_obstruction_mask_slice(slc.orientation, support_vector_val, slc.cell_centered)
     sslc_data = np.where(mask, subslice.data[t], fill)
 
     # Plot the slice

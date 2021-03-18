@@ -130,13 +130,12 @@ class Boundary:
     :ivar n_t: Total number of time steps for which output data has been written.
     """
 
-    def __init__(self, cell_centered: bool, quantity: Quantity, times: np.ndarray, n_t: int,
-                 lower_bounds: np.ndarray, upper_bounds: np.ndarray, initial_mesh: Mesh):
+    def __init__(self, cell_centered: bool, quantity: Quantity, times: np.ndarray, n_t: int):
         self.cell_centered = cell_centered
         self.quantity = quantity
         self.times = times
-        self.lower_bounds = {initial_mesh: lower_bounds}
-        self.upper_bounds = {initial_mesh: upper_bounds}
+        self.lower_bounds: Dict[Mesh, np.ndarray] = dict()
+        self.upper_bounds: Dict[Mesh, np.ndarray] = dict()
         self.n_t = n_t
         self.extent = None
 
@@ -196,7 +195,7 @@ class Boundary:
 
     @property
     def vmin(self) -> float:
-        """Minimum value of all patches in any time step.
+        """Minimum value of all patches at any time.
         """
         curr_min = min(np.min(b) for b in self.lower_bounds.values())
         if curr_min == 0.0:
@@ -205,7 +204,7 @@ class Boundary:
 
     @property
     def vmax(self) -> float:
-        """Maximum value of all patches in any time step.
+        """Maximum value of all patches at any time.
         """
         curr_max = max(np.max(b) for b in self.upper_bounds.values())
         if curr_max == np.float32(-1e33):
@@ -325,7 +324,7 @@ class Obstruction:
                      lower_bounds: np.ndarray, upper_bounds: np.ndarray):
         if bid not in self._boundary_data:
             self._boundary_data[bid] = Boundary(cell_centered, Quantity(quantity, label, unit),
-                                                times, n_t, lower_bounds, upper_bounds, mesh)
+                                                times, n_t)
         self._boundary_data[bid]._add_patches(mesh, patches, lower_bounds, upper_bounds)
 
         if not settings.LAZY_LOAD:

@@ -59,6 +59,7 @@ class Mesh:
 
         mask_indices = [slice(None)] * 3
         mask_indices[orientation - 1] = slice(slc_index, slc_index + 1, 1)
+        mask_indices = tuple(mask_indices)
 
         return np.squeeze(self.get_obstruction_mask(cell_centered=cell_centered)[mask_indices])
 
