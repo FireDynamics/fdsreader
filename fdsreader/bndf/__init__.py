@@ -1,3 +1,3 @@
 from .obstruction import Obstruction, Boundary, Patch
 
-from .geometry import Geometry
+from .geometry import Geometry, GeomBoundary

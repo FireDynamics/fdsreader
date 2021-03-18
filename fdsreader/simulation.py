@@ -8,7 +8,7 @@ import pickle
 
 from fdsreader.bndf import Obstruction, Patch
 from fdsreader.bndf.ObstructionCollection import ObstructionCollection
-from fdsreader.bndf.geometry import Geometry
+from fdsreader.bndf.geometry import Geometry, GeomBoundary
 from fdsreader.isof import Isosurface
 from fdsreader.isof.IsosurfaceCollection import IsosurfaceCollection
 from fdsreader.part import Particle
@@ -87,6 +87,7 @@ class Simulation:
             self.root_path = os.path.dirname(self.smv_file_path)
 
             self.geoms: List[Geometry] = list()
+            self.geom_data: List[GeomBoundary] = list()
             self.meshes: List[Mesh] = list()
             self.surfaces: List[Surface] = list()
             self.obstructions = dict()
@@ -566,7 +567,7 @@ class Simulation:
         label = smv_file.readline().strip()
         unit = smv_file.readline().strip()
 
-        bid = int(filename1.split('_')[-1][:-3])
+        bid = int(filename1.split('_')[-1][:-3]) - 1
 
         file_path1 = os.path.join(self.root_path, filename1)
         file_path2 = os.path.join(self.root_path, filename2)
@@ -585,8 +586,6 @@ class Simulation:
         upper_bounds = np.array(upper_bounds, dtype=np.float32)
         n_t = times.shape[0]
 
-        # _ = (bid, quantity, label, unit, mesh, times, n_t, lower_bounds, upper_bounds)
-
         # Load .gbf
         with open(file_path2, 'rb') as infile:
             offset = fdtype.INT.itemsize * 2 + fdtype.new(
@@ -604,6 +603,7 @@ class Simulation:
             faces = fdtype.read(infile, dtype_faces, 1)[0][0].reshape((n_faces, 3)).astype(int) - 1
 
         # Load .be
+        data = np.empty((n_t,), dtype=object)
         with open(file_path1, 'rb') as infile:
             offset = fdtype.INT.itemsize * 2
             infile.seek(offset)
@@ -616,17 +616,11 @@ class Simulation:
                 n_faces = fdtype.read(infile, dtype_meta, 1)[0][0][3]
                 if n_faces > 0:
                     dtype_faces = fdtype.new((('f', n_faces),))
-                    data = np.fromfile(infile, dtype_faces, 1)[0][1]
+                    data[t] = np.fromfile(infile, dtype_faces, 1)[0][1]
 
-        if quantity != "RADIATIVE HEAT FLUX":
-            return
-        # Plot test
-        from pyvista import PolyData, Plotter
-
-        triangles = np.hstack(np.append(np.full((faces.shape[0], 1), 3), faces, axis=1))
-        plotter = Plotter()
-        plotter.add_mesh(PolyData(vertices, triangles), scalars=data)
-        plotter.show()
+        if bid >= len(self.geom_data):
+            self.geom_data.append(GeomBoundary(Quantity(quantity, label, unit), times, n_t))
+        self.geom_data[bid]._add_data(mesh_index, vertices, faces, data, lower_bounds, upper_bounds)
 
     @log_error("pl3d")
     def _load_data_3d(self, smv_file: TextIO, line: str):
