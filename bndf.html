@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Boundary files &mdash; fdsreader [fdsreader, version 0.8.1] documentation</title>
+  <title>Boundary files &mdash; fdsreader [fdsreader, version 0.8.2] documentation</title>
   
 
   
@@ -167,7 +167,7 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Boundary</span></code>(cell_centered, quantity, times, …)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Boundary</span></code>(cell_centered, quantity, times, n_t)</p></td>
 <td><p>Container for the actual data which is stored as rectangular plane with specific orientation</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Hole</span></code>(dimension, extent, orientation, …)</p></td>
@@ -183,7 +183,7 @@
 </table>
 <dl class="py class">
 <dt>
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.bndf.obstruction.</span></code><code class="sig-name descname"><span class="pre">Boundary</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell_centered</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.data.Quantity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">times</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_t</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_bounds</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_bounds</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_mesh</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.fds_classes.mesh.Mesh</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Boundary"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.bndf.obstruction.</span></code><code class="sig-name descname"><span class="pre">Boundary</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell_centered</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.data.Quantity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">times</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_t</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Boundary"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><dl class="simple">
 <dt>Container for the actual data which is stored as rectangular plane with specific orientation</dt><dd><p>and extent.</p>
 </dd>
@@ -230,10 +230,10 @@
 <td><p>Global/combines faces for all 6 orientations.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmax</span></code></p></td>
-<td><p>Maximum value of all patches in any time step.</p></td>
+<td><p>Maximum value of all patches at any time.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmin</span></code></p></td>
-<td><p>Minimum value of all patches in any time step.</p></td>
+<td><p>Minimum value of all patches at any time.</p></td>
 </tr>
 </tbody>
 </table>
@@ -264,13 +264,13 @@
 <dl class="py method">
 <dt>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">vmax</span></code></dt>
-<dd><p>Maximum value of all patches in any time step.</p>
+<dd><p>Maximum value of all patches at any time.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">vmin</span></code></dt>
-<dd><p>Minimum value of all patches in any time step.</p>
+<dd><p>Minimum value of all patches at any time.</p>
 </dd></dl>
 
 </dd></dl>
