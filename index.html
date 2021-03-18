@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>FDSReader documentation! &mdash; fdsreader [fdsreader, version 0.8.2] documentation</title>
+  <title>FDSReader documentation! &mdash; fdsreader [fdsreader, version 0.8.3] documentation</title>
   
 
   
@@ -223,6 +223,43 @@ the same directory.</p>
 </div>
 <div class="section" id="isosurface-files">
 <h2>Isosurface files<a class="headerlink" href="#isosurface-files" title="Permalink to this headline">¶</a></h2>
+<p><strong>Classes:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">IsosurfaceCollection</span></code>(*isosurfaces)</p></td>
+<td><p>Collection of <code class="xref py py-class docutils literal notranslate"><span class="pre">Isosurface</span></code> objects.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.isof.IsosurfaceCollection.</span></code><code class="sig-name descname"><span class="pre">IsosurfaceCollection</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">isosurfaces</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.isof.isosurface.Isosurface</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/isof/IsosurfaceCollection.html#IsosurfaceCollection"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Collection of <code class="xref py py-class docutils literal notranslate"><span class="pre">Isosurface</span></code> objects. Offers extensive functionality for filtering and
+using isosurfaces as well as its subclasses such as <code class="xref py py-class docutils literal notranslate"><span class="pre">SubSurface</span></code>.</p>
+<p><strong>Methods:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_by_quantity</span></code>(quantity)</p></td>
+<td><p>Filters all isosurfaces by a specific quantity.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt>
+<code class="sig-name descname"><span class="pre">filter_by_quantity</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.isof.isosurface.Isosurface</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="_modules/fdsreader/isof/IsosurfaceCollection.html#IsosurfaceCollection.filter_by_quantity"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Filters all isosurfaces by a specific quantity.</p>
+</dd></dl>
+
+</dd></dl>
+
 <p><strong>Classes:</strong></p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -639,6 +676,61 @@ calculated for this Plot3D with the corresponding label and unit.</p></li>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SliceCollection</span></code>(*slices)</p></td>
+<td><p>Collection of <code class="xref py py-class docutils literal notranslate"><span class="pre">Slice</span></code> objects.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.slcf.SliceCollection.</span></code><code class="sig-name descname"><span class="pre">SliceCollection</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">slices</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.slcf.slice.Slice</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/SliceCollection.html#SliceCollection"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Collection of <code class="xref py py-class docutils literal notranslate"><span class="pre">Slice</span></code> objects. Offers extensive functionality for filtering and
+using slices as well as its subclasses such as <code class="xref py py-class docutils literal notranslate"><span class="pre">SubSlice</span></code>.</p>
+<p><strong>Methods:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_by_quantity</span></code>(quantity)</p></td>
+<td><p>Filters all slices by a specific quantity.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_by_id</span></code>(slice_id)</p></td>
+<td><p>Get the slice with corresponding id if it exists.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_nearest</span></code>(point)</p></td>
+<td><p>Filters the slice with the shortest distance to the given point.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt>
+<code class="sig-name descname"><span class="pre">filter_by_quantity</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.slcf.slice.Slice</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="_modules/fdsreader/slcf/SliceCollection.html#SliceCollection.filter_by_quantity"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Filters all slices by a specific quantity.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname"><span class="pre">get_by_id</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slice_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/SliceCollection.html#SliceCollection.get_by_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Get the slice with corresponding id if it exists.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname"><span class="pre">get_nearest</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">fdsreader.slcf.slice.Slice</span><a class="reference internal" href="_modules/fdsreader/slcf/SliceCollection.html#SliceCollection.get_nearest"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Filters the slice with the shortest distance to the given point.</p>
+</dd></dl>
+
+</dd></dl>
+
+<p><strong>Classes:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Slice</span></code>(root_path, slice_id, cell_centered, …)</p></td>
 <td><p>Slice file data container including metadata. Consists of multiple subslices, one for each</p></td>
 </tr>
@@ -848,6 +940,69 @@ used in the simulation. Other cases will require individual custom combination l
 </div>
 <div class="section" id="boundary-files">
 <h2>Boundary files<a class="headerlink" href="#boundary-files" title="Permalink to this headline">¶</a></h2>
+<p><strong>Classes:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ObstructionCollection</span></code>(*obstructions)</p></td>
+<td><p>Collection of <code class="xref py py-class docutils literal notranslate"><span class="pre">Obstruction</span></code> objects.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.bndf.ObstructionCollection.</span></code><code class="sig-name descname"><span class="pre">ObstructionCollection</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">obstructions</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.bndf.obstruction.Obstruction</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/ObstructionCollection.html#ObstructionCollection"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Collection of <code class="xref py py-class docutils literal notranslate"><span class="pre">Obstruction</span></code> objects. Offers extensive functionality for filtering and
+using obstructions as well as dependent such as <code class="xref py py-class docutils literal notranslate"><span class="pre">Boundary</span></code>.</p>
+<p><strong>Methods:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_by_boundary_data</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_by_quantity</span></code>(quantity)</p></td>
+<td><p>Filters all obstructions for its boundary data by a specific quantity.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_border_obstructions</span></code>()</p></td>
+<td><p>Filters all obstructions with at least one face on the border of a mesh.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_nearest_obstruction</span></code>(point)</p></td>
+<td><p>Filters the obstruction with the shortest distance to the given point.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt>
+<code class="sig-name descname"><span class="pre">filter_by_boundary_data</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.bndf.obstruction.Obstruction</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="_modules/fdsreader/bndf/ObstructionCollection.html#ObstructionCollection.filter_by_boundary_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname"><span class="pre">filter_by_quantity</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.bndf.obstruction.Boundary</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="_modules/fdsreader/bndf/ObstructionCollection.html#ObstructionCollection.filter_by_quantity"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Filters all obstructions for its boundary data by a specific quantity.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname"><span class="pre">get_border_obstructions</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.bndf.obstruction.Obstruction</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="_modules/fdsreader/bndf/ObstructionCollection.html#ObstructionCollection.get_border_obstructions"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Filters all obstructions with at least one face on the border of a mesh.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname"><span class="pre">get_nearest_obstruction</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">fdsreader.bndf.obstruction.Obstruction</span><a class="reference internal" href="_modules/fdsreader/bndf/ObstructionCollection.html#ObstructionCollection.get_nearest_obstruction"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Filters the obstruction with the shortest distance to the given point.</p>
+</dd></dl>
+
+</dd></dl>
+
 <p><strong>Classes:</strong></p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -1224,6 +1379,25 @@ pattern should begin.</p>
 </div>
 <div class="section" id="particles">
 <h2>Particles<a class="headerlink" href="#particles" title="Permalink to this headline">¶</a></h2>
+<p><strong>Classes:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ParticleCollection</span></code>(times, *particles)</p></td>
+<td><p>Collection of <code class="xref py py-class docutils literal notranslate"><span class="pre">Plot3D</span></code> objects.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.part.ParticleCollection.</span></code><code class="sig-name descname"><span class="pre">ParticleCollection</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">particles</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.part.particle.Particle</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/part/ParticleCollection.html#ParticleCollection"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Collection of <code class="xref py py-class docutils literal notranslate"><span class="pre">Plot3D</span></code> objects. Offers extensive functionality for filtering and
+using plot3Ds as well as its subclasses such as <code class="xref py py-class docutils literal notranslate"><span class="pre">SubPlot3D</span></code>.</p>
+</dd></dl>
+
 <p><strong>Classes:</strong></p>
 <table class="longtable docutils align-default">
 <colgroup>
