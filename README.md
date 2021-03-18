@@ -55,11 +55,11 @@ Distributed under the LGPLv3 (GNU Lesser General Public License v3) license. See
 * (unreleased) 1.0.0
     * (First official version will be released after sufficient public testing in beta stage)
 
-### Beta *(Q1 2021)*
-* (unreleased) 0.9.0
-    * (Entering beta status after implementing some additional features such as complex geometry support)
+### Beta *(current stage)*
+* 0.9.0
+    * Added rudimentary support for complex geometry
     
-### Alpha *(current stage)*
+### Alpha
 * 0.8.3
     * Added collections to documentation
 * 0.8.2
