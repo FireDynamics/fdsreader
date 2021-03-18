@@ -1,5 +1,4 @@
-import itertools
-from typing import Tuple, Dict, List, Iterable
+from typing import Tuple, Dict, Iterable
 
 import numpy as np
 
@@ -9,7 +8,11 @@ from fdsreader.utils import Surface, Quantity
 class GeomBoundary:
     """Boundary data of a specific quantity for all geoms in the simulation.
 
-
+    :ivar quantity: Quantity object containing information about the quantity calculated for geoms.
+    :ivar times: Numpy array containing all times for which data has been recorded.
+    :ivar n_t: Total number of time steps for which output data has been written.
+    :ivar lower_bounds: Dictionary with lower bounds for each timestep per mesh.
+    :ivar upper_bounds: Dictionary with upper bounds for each timestep per mesh.
     """
 
     def __init__(self, quantity: Quantity, times: np.ndarray, n_t: int):
@@ -35,6 +38,8 @@ class GeomBoundary:
 
     @property
     def vertices(self) -> Iterable:
+        """Returns a global array of the vertices from all meshes.
+        """
         size = sum(v.shape[0] for v in self._vertices.values())
         ret = np.empty((size, 3), dtype=float)
         counter = 0
@@ -48,6 +53,8 @@ class GeomBoundary:
 
     @property
     def faces(self) -> np.ndarray:
+        """Returns a global array of the faces from all meshes.
+        """
         size = sum(f.shape[0] for f in self._faces.values())
         ret = np.empty((size, 3), dtype=int)
         counter = 0
@@ -61,6 +68,8 @@ class GeomBoundary:
 
     @property
     def data(self) -> np.ndarray:
+        """Returns a global array of the loaded data for the quantity with data from all meshes.
+        """
         ret = np.empty((self.n_t,), dtype=object)
         for t in range(self.n_t):
             size = sum(d[t].shape[0] for d in self._data.values())
@@ -92,13 +101,10 @@ class GeomBoundary:
             return max(max(np.max(p.data) for p in ps) for ps in self._faces.values())
         return curr_max
 
-    def clear_cache(self):
-        """Remove all data from the internal cache that has been loaded so far to free memory.
-        """
-        pass
-
 
 class Geometry:
+    """Obstruction defined as a complex geometry.
+    """
     def __init__(self, file_path: str, texture_mapping: str,
                  texture_origin: Tuple[float, float, float],
                  is_terrain: bool, rgb: Tuple[int, int, int], surface: Surface = None):
@@ -108,12 +114,3 @@ class Geometry:
         self.is_terrain = is_terrain
         self.rgb = rgb
         self.surface = surface
-
-        # Maps boundary id to the GeomBoundary object
-        self._boundary_data: Dict[int, GeomBoundary] = dict()
-
-    def clear_cache(self):
-        """Remove all data from the internal cache that has been loaded so far to free memory.
-        """
-        for bndf in self._boundary_data.values():
-            bndf.clear_cache()

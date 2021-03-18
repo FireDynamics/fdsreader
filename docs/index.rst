@@ -10,6 +10,7 @@ FDSReader documentation!
    pl3d
    slcf
    bndf
+   geom
    part
    utils
 
@@ -18,5 +19,6 @@ FDSReader documentation!
 .. include::  pl3d.rst
 .. include::  slcf.rst
 .. include::  bndf.rst
+.. include::  geom.rst
 .. include::  part.rst
 .. include::  utils.rst
