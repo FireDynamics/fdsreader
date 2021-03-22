@@ -104,12 +104,19 @@ class GeomBoundary:
 
 class Geometry:
     """Obstruction defined as a complex geometry.
+
+    :ivar file_path: Path to the .ge file that defines the geom.
+    :ivar texture_map: Path to the texture map of the geometry.
+    :ivar texture_origin: Origin position of the texture provided by the surface.
+    :ivar is_terrain: Indicates whether the geometry is a regular complex geom or terrain geometry.
+    :ivar rgb: Color of the geometry in form of a 3-element tuple.
+    :ivar surface: Surface object used for the geometry.
     """
     def __init__(self, file_path: str, texture_mapping: str,
                  texture_origin: Tuple[float, float, float],
                  is_terrain: bool, rgb: Tuple[int, int, int], surface: Surface = None):
         self.file_path = file_path
-        self.texture_mapping = texture_mapping
+        self.texture_map = texture_mapping
         self.texture_origin = texture_origin
         self.is_terrain = is_terrain
         self.rgb = rgb
