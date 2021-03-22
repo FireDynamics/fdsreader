@@ -29,6 +29,9 @@ More advanced examples can be found in the respective data type directories insi
 The package provides a few configuration options that can be set using the `settings` module.  
 ```python
 fds.settings.KEY = VALUE
+
+# Example
+fds.settings.DEBUG = True
 ```  
 
 |      KEY       |  VALUE  | Default | Description |
