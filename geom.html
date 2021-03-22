@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Complex Geometry &mdash; fdsreader [fdsreader, version 0.9.1] documentation</title>
+  <title>Complex Geometry &mdash; fdsreader [fdsreader, version 0.9.2] documentation</title>
   
 
   
@@ -251,6 +251,18 @@
 <dt>
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.bndf.geometry.</span></code><code class="sig-name descname"><span class="pre">Geometry</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texture_mapping</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texture_origin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_terrain</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rgb</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">surface</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.utils.fds_classes.surface.Surface</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/geometry.html#Geometry"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Obstruction defined as a complex geometry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_path</strong> – Path to the .ge file that defines the geom.</p></li>
+<li><p><strong>texture_map</strong> – Path to the texture map of the geometry.</p></li>
+<li><p><strong>texture_origin</strong> – Origin position of the texture provided by the surface.</p></li>
+<li><p><strong>is_terrain</strong> – Indicates whether the geometry is a regular complex geom or terrain geometry.</p></li>
+<li><p><strong>rgb</strong> – Color of the geometry in form of a 3-element tuple.</p></li>
+<li><p><strong>surface</strong> – Surface object used for the geometry.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </div>

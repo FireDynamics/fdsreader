@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>fdsreader.bndf.geometry &mdash; fdsreader [fdsreader, version 0.9.1] documentation</title>
+  <title>fdsreader.bndf.geometry &mdash; fdsreader [fdsreader, version 0.9.2] documentation</title>
   
 
   
@@ -264,12 +264,19 @@
 
 <div class="viewcode-block" id="Geometry"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.geometry.Geometry">[docs]</a><span class="k">class</span> <span class="nc">Geometry</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Obstruction defined as a complex geometry.</span>
+
+<span class="sd">    :ivar file_path: Path to the .ge file that defines the geom.</span>
+<span class="sd">    :ivar texture_map: Path to the texture map of the geometry.</span>
+<span class="sd">    :ivar texture_origin: Origin position of the texture provided by the surface.</span>
+<span class="sd">    :ivar is_terrain: Indicates whether the geometry is a regular complex geom or terrain geometry.</span>
+<span class="sd">    :ivar rgb: Color of the geometry in form of a 3-element tuple.</span>
+<span class="sd">    :ivar surface: Surface object used for the geometry.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">texture_mapping</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                  <span class="n">texture_origin</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
                  <span class="n">is_terrain</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">rgb</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">surface</span><span class="p">:</span> <span class="n">Surface</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">file_path</span> <span class="o">=</span> <span class="n">file_path</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">texture_mapping</span> <span class="o">=</span> <span class="n">texture_mapping</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">texture_map</span> <span class="o">=</span> <span class="n">texture_mapping</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">texture_origin</span> <span class="o">=</span> <span class="n">texture_origin</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">is_terrain</span> <span class="o">=</span> <span class="n">is_terrain</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rgb</span> <span class="o">=</span> <span class="n">rgb</span>
