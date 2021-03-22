@@ -2,7 +2,7 @@ LAZY_LOAD = True
 
 ENABLE_CACHING = True
 
-DEBUG = True
+DEBUG = False
 
 # As the binary representation of raw data is compiler dependent, this information must be provided
 # by the user
