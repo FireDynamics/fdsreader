@@ -25,6 +25,22 @@ print(sim.meshes, sim.surfaces, sim.slices, sim.data_3d, sim.isosurfaces, sim.pa
 
 More advanced examples can be found in the respective data type directories inside of the examples directory.  
 
+### Configuration
+The package provides a few configuration options that can be set using the `settings` module.  
+```python
+fds.settings.KEY = VALUE
+
+# Example
+fds.settings.DEBUG = True
+```  
+
+|      KEY       |  VALUE  | Default | Description |
+|----------------|---------|---------|-------------|
+|    LAZY_LOAD   | boolean |   True  | Load all data when initially loading the simulation (False) or only when specific data is needed (True). |
+| ENABLE_CACHING | boolean |   True  | Cache the loaded simulation to reduce startup times when loading the same simulation again. |
+|     DEBUG      | boolean |  False  | Crash on non-critical errors with an exception (True) or hide non-critical errors (False). |
+
+
 ### Data structure
 ![Data structure](https://raw.githubusercontent.com/FireDynamics/fdsreader/master/docs/img/data-structure.svg)
 
