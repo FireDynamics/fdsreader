@@ -18,7 +18,7 @@ def _get_dtype_output_format(d, n):
         return str(n)
     if type(n) == int or type(n) == np.int32:
         return f"({n},)"
-    return n
+    return str(n)
 
 
 def new_raw(data_structure: Sequence[Tuple[str, Union[int, str]]]) -> str:

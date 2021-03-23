@@ -1,5 +1,5 @@
 from . import _version
-__version__ = str(_version.Version)
+__version__ = str(_version.Version.public)
 
 import logging
 
