@@ -72,6 +72,8 @@ Distributed under the LGPLv3 (GNU Lesser General Public License v3) license. See
     * (First official version will be released after sufficient public testing in beta stage)
 
 ### Beta *(current stage)*
+* 0.9.5
+    * Fixed issue with invalid pickle files (cache)
 * 0.9.4
     * Bugfixes for complex geometry
 * 0.9.3

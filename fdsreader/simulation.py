@@ -57,13 +57,14 @@ class Simulation:
             pickle_file_path = Simulation._get_pickle_filename(root_path, chid)
 
             if os.path.isfile(pickle_file_path):
-                with open(pickle_file_path) as f:
-                    sim = pickle.load(f)
-                if not isinstance(sim, cls) or sim.reader_version != __version__:
-                    os.remove(pickle_file_path)
-                else:
-                    if sim._hash == create_hash(smv_file_path):
+                try:
+                    with open(pickle_file_path) as f:
+                        sim = pickle.load(f)
+                    # Check if pickle file is valid
+                    if isinstance(sim, cls) and sim.reader_version == __version__ and sim._hash == create_hash(smv_file_path):
                         return sim
+                except:
+                    os.remove(pickle_file_path)
 
         return super(Simulation, cls).__new__(cls)
 
