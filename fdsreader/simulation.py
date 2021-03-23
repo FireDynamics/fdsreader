@@ -6,17 +6,12 @@ import logging
 import numpy as np
 import pickle
 
-from fdsreader.bndf import Obstruction, Patch
-from fdsreader.bndf.ObstructionCollection import ObstructionCollection
-from fdsreader.bndf.geometry import Geometry, GeomBoundary
-from fdsreader.isof import Isosurface
-from fdsreader.isof.IsosurfaceCollection import IsosurfaceCollection
-from fdsreader.part import Particle
-from fdsreader.part.ParticleCollection import ParticleCollection
-from fdsreader.pl3d import Plot3D
-from fdsreader.pl3d.Plot3dCollection import Plot3DCollection
-from fdsreader.slcf import Slice
-from fdsreader.slcf.SliceCollection import SliceCollection
+from fdsreader.bndf import Obstruction, Patch, ObstructionCollection
+from fdsreader.geom import Geometry, GeomBoundary, GeometryCollection
+from fdsreader.isof import Isosurface, IsosurfaceCollection
+from fdsreader.part import Particle, ParticleCollection
+from fdsreader.pl3d import Plot3D, Plot3DCollection
+from fdsreader.slcf import Slice, SliceCollection
 from fdsreader.utils import Mesh, Dimension, Surface, Quantity, Ventilation, Extent, log_error
 from fdsreader.utils.data import create_hash, get_smv_file, Device
 import fdsreader.utils.fortran_data as fdtype
@@ -87,7 +82,6 @@ class Simulation:
             self.root_path = os.path.dirname(self.smv_file_path)
 
             self.geoms: List[Geometry] = list()
-            self.geom_data: List[GeomBoundary] = list()
             self.meshes: List[Mesh] = list()
             self.surfaces: List[Surface] = list()
             self.obstructions = dict()
@@ -99,6 +93,7 @@ class Simulation:
             self.data_3d = dict()
             self.isosurfaces = dict()
             self.particles = list()
+            self.geom_data = list()
             self.devices: Dict[str, Union[Device, List[Device]]] = dict()
             device_tmp = str()
 
@@ -169,6 +164,7 @@ class Simulation:
             for obst in self.obstructions:
                 obst._post_init()
             # Combine the gathered temporary information into data collections
+            self.geom_data = GeometryCollection(self.geom_data)
             self.slices = SliceCollection(
                 Slice(self.root_path, slice_data[0]["id"], slice_data[0]["cell_centered"],
                       slice_data[0]["times"], slice_data[1:]) for slice_data in
@@ -554,28 +550,28 @@ class Simulation:
                                                              unit, mesh, p, times, n_t,
                                                              lower_bounds, upper_bounds)
 
-    @log_error("bndf")
+    @log_error("geom")
     def _load_boundary_data_geom(self, smv_file: TextIO, line: str):
         line = line.split()
         mesh_index = int(line[1]) - 1
         # Meshes are not loaded yet
         # mesh = self.meshes[mesh_index]
 
-        filename1 = smv_file.readline().strip()
-        filename2 = smv_file.readline().strip()
+        filename_be = smv_file.readline().strip()
+        filename_gbf = smv_file.readline().strip()
         quantity = smv_file.readline().strip()
         label = smv_file.readline().strip()
         unit = smv_file.readline().strip()
 
-        bid = int(filename1.split('_')[-1][:-3]) - 1
+        bid = int(filename_be.split('_')[-1][:-3]) - 1
 
-        file_path1 = os.path.join(self.root_path, filename1)
-        file_path2 = os.path.join(self.root_path, filename2)
+        file_path_be = os.path.join(self.root_path, filename_be)
+        file_path_gbf = os.path.join(self.root_path, filename_gbf)
 
         times = list()
         lower_bounds = list()
         upper_bounds = list()
-        with open(file_path1 + ".bnd", 'r') as bnd_file:
+        with open(file_path_be + ".bnd", 'r') as bnd_file:
             for line in bnd_file:
                 splits = line.split()
                 times.append(float(splits[0]))
@@ -586,41 +582,10 @@ class Simulation:
         upper_bounds = np.array(upper_bounds, dtype=np.float32)
         n_t = times.shape[0]
 
-        # Load .gbf
-        with open(file_path2, 'rb') as infile:
-            offset = fdtype.INT.itemsize * 2 + fdtype.new(
-                (('i', 3),)).itemsize + fdtype.FLOAT.itemsize
-            infile.seek(offset)
-
-            dtype_meta = fdtype.new((('i', 3),))
-            n_vertices, n_faces, _ = np.fromfile(infile, dtype_meta, 1)[0][1]
-
-            dtype_vertices = fdtype.new((('f', 3 * n_vertices),))
-            vertices = np.fromfile(infile, dtype_vertices, 1)[0][1].reshape((n_vertices, 3)).astype(
-                float)
-
-            dtype_faces = fdtype.new((('i', 3 * n_faces),))
-            faces = fdtype.read(infile, dtype_faces, 1)[0][0].reshape((n_faces, 3)).astype(int) - 1
-
-        # Load .be
-        data = np.empty((n_t,), dtype=object)
-        with open(file_path1, 'rb') as infile:
-            offset = fdtype.INT.itemsize * 2
-            infile.seek(offset)
-
-            for t in range(n_t):
-                # Skip time value
-                infile.seek(fdtype.FLOAT.itemsize, 1)
-
-                dtype_meta = fdtype.new((('i', 4),))
-                n_faces = fdtype.read(infile, dtype_meta, 1)[0][0][3]
-                if n_faces > 0:
-                    dtype_faces = fdtype.new((('f', n_faces),))
-                    data[t] = np.fromfile(infile, dtype_faces, 1)[0][1]
-
         if bid >= len(self.geom_data):
             self.geom_data.append(GeomBoundary(Quantity(quantity, label, unit), times, n_t))
-        self.geom_data[bid]._add_data(mesh_index, vertices, faces, data, lower_bounds, upper_bounds)
+        self.geom_data[bid]._add_data(mesh_index, file_path_be, file_path_gbf, lower_bounds,
+                                      upper_bounds)
 
     @log_error("pl3d")
     def _load_data_3d(self, smv_file: TextIO, line: str):

@@ -3,6 +3,7 @@ from typing import Tuple, Dict, Iterable
 import numpy as np
 
 from fdsreader.utils import Surface, Quantity
+import fdsreader.utils.fortran_data as fdtype
 
 
 class GeomBoundary:
@@ -23,23 +24,69 @@ class GeomBoundary:
         self.lower_bounds: Dict[int, np.ndarray] = dict()
         self.upper_bounds: Dict[int, np.ndarray] = dict()
 
+        self.file_paths_be: Dict[int, str] = dict()
+        self.file_paths_gbf: Dict[int, str] = dict()
+
+    def _add_data(self, mesh: int, file_path_be: str, file_path_gbf: str, lower_bounds: np.ndarray,
+                  upper_bounds: np.ndarray):
+        self.file_paths_be[mesh] = file_path_be
+        self.file_paths_gbf[mesh] = file_path_gbf
+
+        self.lower_bounds[mesh] = lower_bounds
+        self.upper_bounds[mesh] = upper_bounds
+
+    def _load_data(self):
         self._vertices: Dict[int, np.ndarray] = dict()
         self._faces: Dict[int, np.ndarray] = dict()
         self._data: Dict[int, np.ndarray] = dict()
 
-    def _add_data(self, mesh: int, vertices: np.ndarray, faces: np.ndarray, data: np.ndarray,
-                  lower_bounds: np.ndarray, upper_bounds: np.ndarray):
-        self._vertices[mesh] = vertices
-        self._faces[mesh] = faces
-        self._data[mesh] = data
+        for mesh in self.file_paths_be.keys():
+            file_path_be = self.file_paths_be[mesh]
+            file_path_gbf = self.file_paths_gbf[mesh]
+            # Load .gbf
+            with open(file_path_gbf, 'rb') as infile:
+                offset = fdtype.INT.itemsize * 2 + fdtype.new(
+                    (('i', 3),)).itemsize + fdtype.FLOAT.itemsize
+                infile.seek(offset)
 
-        self.lower_bounds[mesh] = lower_bounds
-        self.upper_bounds[mesh] = upper_bounds
+                dtype_meta = fdtype.new((('i', 3),))
+                n_vertices, n_faces, _ = np.fromfile(infile, dtype_meta, 1)[0][1]
+
+                dtype_vertices = fdtype.new((('f', 3 * n_vertices),))
+                vertices = np.fromfile(infile, dtype_vertices, 1)[0][1].reshape(
+                    (n_vertices, 3)).astype(float)
+
+                dtype_faces = fdtype.new((('i', 3 * n_faces),))
+                faces = fdtype.read(infile, dtype_faces, 1)[0][0].reshape((n_faces, 3)).astype(
+                    int) - 1
+
+            # Load .be
+            data = np.empty((self.n_t,), dtype=object)
+            with open(file_path_be, 'rb') as infile:
+                offset = fdtype.INT.itemsize * 2
+                infile.seek(offset)
+
+                for t in range(self.n_t):
+                    # Skip time value
+                    infile.seek(fdtype.FLOAT.itemsize, 1)
+
+                    dtype_meta = fdtype.new((('i', 4),))
+                    n_faces = fdtype.read(infile, dtype_meta, 1)[0][0][3]
+                    if n_faces > 0:
+                        dtype_faces = fdtype.new((('f', n_faces),))
+                        data[t] = np.fromfile(infile, dtype_faces, 1)[0][1]
+
+            self._vertices[mesh] = vertices
+            self._faces[mesh] = faces
+            self._data[mesh] = data
 
     @property
     def vertices(self) -> Iterable:
         """Returns a global array of the vertices from all meshes.
         """
+        if not hasattr(self, "_vertices"):
+            self._load_data()
+
         size = sum(v.shape[0] for v in self._vertices.values())
         ret = np.empty((size, 3), dtype=float)
         counter = 0
@@ -55,13 +102,16 @@ class GeomBoundary:
     def faces(self) -> np.ndarray:
         """Returns a global array of the faces from all meshes.
         """
+        if not hasattr(self, "_faces"):
+            self._load_data()
+
         size = sum(f.shape[0] for f in self._faces.values())
         ret = np.empty((size, 3), dtype=int)
         counter = 0
 
         for f in self._faces.values():
             size = f.shape[0]
-            ret[counter:counter+size, :] = f + counter
+            ret[counter:counter + size, :] = f + counter
             counter += size
 
         return ret
@@ -70,6 +120,9 @@ class GeomBoundary:
     def data(self) -> np.ndarray:
         """Returns a global array of the loaded data for the quantity with data from all meshes.
         """
+        if not hasattr(self, "_data"):
+            self._load_data()
+
         ret = np.empty((self.n_t,), dtype=object)
         for t in range(self.n_t):
             size = sum(d[t].shape[0] for d in self._data.values())
@@ -112,6 +165,7 @@ class Geometry:
     :ivar rgb: Color of the geometry in form of a 3-element tuple.
     :ivar surface: Surface object used for the geometry.
     """
+
     def __init__(self, file_path: str, texture_mapping: str,
                  texture_origin: Tuple[float, float, float],
                  is_terrain: bool, rgb: Tuple[int, int, int], surface: Surface = None):
