@@ -13,7 +13,7 @@ class GeometryCollection(FDSDataCollection):
     def __init__(self, *geom_boundaries: Iterable[GeomBoundary]):
         super().__init__(*geom_boundaries)
 
-        if settings.LAZY_LOAD:
+        if not settings.LAZY_LOAD:
             for geom in self:
                 geom._load_data()
 
