@@ -1,7 +1,6 @@
 import os
 from operator import attrgetter
 from typing import List, TextIO, Dict, AnyStr, Sequence, Tuple, Union
-import logging
 
 import numpy as np
 import pickle
@@ -193,12 +192,10 @@ class Simulation:
         """Load information for a single mesh from the smv file at current pointer position.
         """
         mesh_id = line.split()[1]
-        logging.debug("Found MESH with id: %s", mesh_id)
 
         grid_numbers = smv_file.readline().strip().split()
         grid_dimensions = {'x': int(grid_numbers[0]) + 1, 'y': int(grid_numbers[1]) + 1,
                            'z': int(grid_numbers[2]) + 1}
-        logging.debug("Number of cells: %i x %i x %i", *grid_dimensions.values())
 
         smv_file.readline()  # Blank line
         assert smv_file.readline().strip() == "PDIM"
@@ -480,8 +477,6 @@ class Simulation:
             {"dimension": dimension, "extent": extent, "mesh": mesh, "filename": filename,
              "quantity": quantity, "label": label, "unit": unit})
 
-        logging.debug("Found SLICE with id: :i", slice_index)
-
     @log_error("bndf")
     def _load_boundary_data(self, smv_file: TextIO, line: str, cell_centered: bool):
         """Loads the boundary data at current pointer position.
@@ -501,19 +496,23 @@ class Simulation:
 
         patches = dict()
 
-        times = list()
-        lower_bounds = list()
-        upper_bounds = list()
-        with open(file_path + ".bnd", 'r') as bnd_file:
-            for line in bnd_file:
-                splits = line.split()
-                times.append(float(splits[0]))
-                lower_bounds.append(float(splits[1]))
-                upper_bounds.append(float(splits[2]))
-        times = np.array(times)
-        lower_bounds = np.array(lower_bounds, dtype=np.float32)
-        upper_bounds = np.array(upper_bounds, dtype=np.float32)
-        n_t = times.shape[0]
+        if os.path.exists(file_path + ".bnd"):
+            times = list()
+            lower_bounds = list()
+            upper_bounds = list()
+            with open(file_path + ".bnd", 'r') as bnd_file:
+                for line in bnd_file:
+                    splits = line.split()
+                    times.append(float(splits[0]))
+                    lower_bounds.append(float(splits[1]))
+                    upper_bounds.append(float(splits[2]))
+            times = np.array(times)
+            lower_bounds = np.array(lower_bounds, dtype=np.float32)
+            upper_bounds = np.array(upper_bounds, dtype=np.float32)
+            n_t = times.shape[0]
+        else:
+            times = None
+            n_t = -1
 
         with open(file_path, 'rb') as infile:
             # Offset of the binary file to the end of the file header.
@@ -534,7 +533,7 @@ class Simulation:
                 obst_index = patch_info[7]
 
                 p = Patch(file_path, dimension, extent, orientation, cell_centered,
-                          patch_offset + offset, n_t)
+                          patch_offset, offset, n_t)
 
                 # Skip obstacles with index 0, which just gives the extent of the (whole) mesh faces
                 # These might be needed in case of "closed" mesh faces

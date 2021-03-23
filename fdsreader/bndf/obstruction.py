@@ -1,3 +1,4 @@
+import os
 from typing import List, Dict, Tuple, Union
 from typing_extensions import Literal
 import numpy as np
@@ -62,13 +63,14 @@ class Patch:
     """
 
     def __init__(self, file_path: str, dimension: Dimension, extent: Extent, orientation: int,
-                 cell_centered: bool, _initial_offset: int, n_t: int):
+                 cell_centered: bool, patch_offset:int, initial_offset: int, n_t: int):
         self.file_path = file_path
         self.dimension = dimension
         self.extent = extent
         self.orientation = orientation
         self.cell_centered = cell_centered
-        self._initial_offset = _initial_offset
+        self._patch_offset = patch_offset
+        self._initial_offset = initial_offset
         self._time_offset = -1
         self.n_t = n_t
 
@@ -94,11 +96,15 @@ class Patch:
         """Method to load the quantity data for a single patch.
         """
         if not hasattr(self, "_data"):
-            self._data = np.empty((self.n_t,) + self.shape)
             dtype_data = fdtype.new((('f', self.dimension.size(cell_centered=False)),))
+
+            if self.n_t == -1:
+                self.n_t = (os.stat(self.file_path).st_size - self._initial_offset) // self._time_offset
+
+            self._data = np.empty((self.n_t,) + self.shape)
             with open(self.file_path, 'rb') as infile:
                 for t in range(self.n_t):
-                    infile.seek(self._initial_offset + t * self._time_offset)
+                    infile.seek(self._initial_offset + self._patch_offset + t * self._time_offset)
                     data = np.fromfile(infile, dtype_data, 1)[0][1].reshape(
                         self.dimension.shape(cell_centered=False), order='F')
                     if self.cell_centered:
