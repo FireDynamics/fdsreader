@@ -65,9 +65,18 @@ class SubSlice:
         n = self.dimension.size(cell_centered=False)
         dtype_data = fdtype.combine(fdtype.FLOAT, fdtype.new((('f', n),)))
 
+        load_times = False
+        if self.parent_slice.n_t == -1:
+            load_times = True
+            self.parent_slice.n_t = (os.stat(
+                file_path).st_size - self._offset) // dtype_data.itemsize
+            self.parent_slice.times = np.empty(self.parent_slice.n_t)
+
         with open(file_path, 'rb') as infile:
             infile.seek(self._offset)
             for t, data in enumerate(fdtype.read(infile, dtype_data, self.parent_slice.n_t)):
+                if load_times:
+                    self.parent_slice.times[t] = data[0][0]
                 data = data[1].reshape(self.dimension.shape(cell_centered=False), order='F')
                 if self.parent_slice.cell_centered:
                     data_out[t, :] = data[:-1, :-1]  # Ignore ghost points
@@ -131,7 +140,11 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         self.cell_centered = cell_centered
 
         self.times = times
-        self.n_t = len(times)
+
+        if times is not None:
+            self.n_t = times.size
+        else:
+            self.n_t = -1
 
         self.id = slice_id
 

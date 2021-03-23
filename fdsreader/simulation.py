@@ -464,11 +464,14 @@ class Simulation:
 
         file_path = os.path.join(self.root_path, filename)
 
-        times = list()
-        with open(file_path + ".bnd", 'r') as bnd_file:
-            for line in bnd_file:
-                times.append(float(line.split()[0]))
-        times = np.array(times)
+        if os.path.exists(file_path + ".bnd"):
+            times = list()
+            with open(file_path + ".bnd", 'r') as bnd_file:
+                for line in bnd_file:
+                    times.append(float(line.split()[0]))
+            times = np.array(times)
+        else:
+            times = None
 
         if slice_index not in self.slices:
             self.slices[slice_index] = [

@@ -72,6 +72,8 @@ Distributed under the LGPLv3 (GNU Lesser General Public License v3) license. See
     * (First official version will be released after sufficient public testing in beta stage)
 
 ### Beta *(current stage)*
+* 0.9.7
+    * Added slcf support for older versions of fds
 * 0.9.6
     * Bugfixes for complex geometry
 * 0.9.5
