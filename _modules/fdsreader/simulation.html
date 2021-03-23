@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>fdsreader.simulation &mdash; fdsreader [fdsreader, version 0.9.4] documentation</title>
+  <title>fdsreader.simulation &mdash; fdsreader [fdsreader, version 0.9.5] documentation</title>
   
 
   
@@ -217,13 +217,14 @@
             <span class="n">pickle_file_path</span> <span class="o">=</span> <span class="n">Simulation</span><span class="o">.</span><span class="n">_get_pickle_filename</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="n">chid</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">pickle_file_path</span><span class="p">):</span>
-                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">pickle_file_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-                    <span class="n">sim</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span> <span class="ow">or</span> <span class="n">sim</span><span class="o">.</span><span class="n">reader_version</span> <span class="o">!=</span> <span class="n">__version__</span><span class="p">:</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">pickle_file_path</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">sim</span><span class="o">.</span><span class="n">_hash</span> <span class="o">==</span> <span class="n">create_hash</span><span class="p">(</span><span class="n">smv_file_path</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">pickle_file_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                        <span class="n">sim</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                    <span class="c1"># Check if pickle file is valid</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sim</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span> <span class="ow">and</span> <span class="n">sim</span><span class="o">.</span><span class="n">reader_version</span> <span class="o">==</span> <span class="n">__version__</span> <span class="ow">and</span> <span class="n">sim</span><span class="o">.</span><span class="n">_hash</span> <span class="o">==</span> <span class="n">create_hash</span><span class="p">(</span><span class="n">smv_file_path</span><span class="p">):</span>
                         <span class="k">return</span> <span class="n">sim</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">pickle_file_path</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">Simulation</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
 
