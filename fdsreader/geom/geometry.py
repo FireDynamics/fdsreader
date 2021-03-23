@@ -108,11 +108,13 @@ class GeomBoundary:
         size = sum(f.shape[0] for f in self._faces.values())
         ret = np.empty((size, 3), dtype=int)
         counter = 0
+        verts_counter = 0
 
-        for f in self._faces.values():
+        for m, f in self._faces.items():
             size = f.shape[0]
-            ret[counter:counter + size, :] = f + counter
+            ret[counter:counter + size, :] = f + verts_counter
             counter += size
+            verts_counter += self._vertices[m].shape[0]
 
         return ret
 
