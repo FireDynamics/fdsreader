@@ -513,6 +513,8 @@ class Simulation:
         else:
             times = None
             n_t = -1
+            lower_bounds = np.array([0.0], dtype=np.float32)
+            upper_bounds = np.array([np.float32(-1e33)], dtype=np.float32)
 
         with open(file_path, 'rb') as infile:
             # Offset of the binary file to the end of the file header.
@@ -525,7 +527,7 @@ class Simulation:
             patch_infos = fdtype.read(infile, dtype_patches, n_patches)
             offset += fdtype.INT.itemsize + dtype_patches.itemsize * n_patches
             patch_offset = fdtype.FLOAT.itemsize
-            # cell_centered = False
+
             for patch_info in patch_infos:
                 patch_info = patch_info[0]
                 extent, dimension = self._indices_to_extent(patch_info[:6], mesh)
