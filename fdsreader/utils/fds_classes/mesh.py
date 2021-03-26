@@ -17,8 +17,8 @@ class Mesh:
     """
     id = None  # Needed for hash to work
 
-    def __init__(self, coordinates: Dict[str, np.ndarray], extents: Dict[str, Tuple[float, float]],
-                 mesh_id: str):
+    def __init__(self, coordinates: Dict[Literal['x', 'y', 'z'], np.ndarray],
+                 extents: Dict[Literal['x', 'y', 'z'], Tuple[float, float]], mesh_id: str):
         """
         :param coordinates: Coordinate values of the three axes.
         :param extents: Extent of the mesh in each dimension.

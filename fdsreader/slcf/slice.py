@@ -233,7 +233,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         else:
             return idx
 
-    def get_nearest_index(self, dimension: Literal['x', 'y', 'z'], value: float):
+    def get_nearest_index2(self, dimension: Literal['x', 'y', 'z'], value: float) -> int:
         index_counter = 0
         nearest_index = -1
         nearest_value = np.finfo(np.float32).max
@@ -252,6 +252,24 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             index_counter += coords.size
 
         return nearest_index
+
+    def get_nearest_index(self, dimension: Literal['x', 'y', 'z'], value: float) -> int:
+        coords = self.coordinates[dimension]
+        idx = np.searchsorted(coords, value, side="left")
+        if idx > 0 and (idx == coords.size or np.math.fabs(value - coords[idx - 1]) < np.math.fabs(
+                value - coords[idx])):
+            return idx - 1
+        else:
+            return idx
+
+    @property
+    def coordinates(self) -> Dict[Literal['x', 'y', 'z'], np.ndarray]:
+        coords = {'x': set(), 'y': set(), 'z': set()}
+        for dim in ('x', 'y', 'z'):
+            for mesh in self._subslices.keys():
+                coords[dim].update(mesh.coordinates[dim])
+            coords[dim] = np.array(sorted(list(coords[dim])))
+        return coords
 
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory.

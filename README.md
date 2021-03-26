@@ -72,6 +72,8 @@ Distributed under the LGPLv3 (GNU Lesser General Public License v3) license. See
     * (First official version will be released after sufficient public testing in beta stage)
 
 ### Beta *(current stage)*
+* 0.9.11
+    * Added option to retrieve coordinates from slices
 * 0.9.10
     * Improved slice filtering functionality
 * 0.9.9
