@@ -233,6 +233,26 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         else:
             return idx
 
+    def get_nearest_index(self, dimension: Literal['x', 'y', 'z'], value: float):
+        index_counter = 0
+        nearest_index = -1
+        nearest_value = np.finfo(np.float32).max
+        for mesh in self._subslices.keys():
+            coords = mesh.coordinates[dimension]
+            idx = np.searchsorted(coords, value, side="left")
+            if (idx == coords.size or np.math.fabs(value - coords[idx - 1]) < np.math.fabs(
+                    value - coords[idx])):
+                if np.math.fabs(coords[idx - 1] - value) < np.math.fabs(nearest_value - value):
+                    nearest_index = idx - 1 + index_counter
+                    nearest_value = coords[idx - 1]
+            else:
+                if np.math.fabs(coords[idx] - value) < np.math.fabs(nearest_value - value):
+                    nearest_index = idx + index_counter
+                    nearest_value = coords[idx]
+            index_counter += coords.size
+
+        return nearest_index
+
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory.
         """
@@ -309,7 +329,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         raise UserWarning(
             "Slices can not be converted to numpy arrays, but they support all typical numpy"
             " operations such as np.multiply. If a 'global' array containg all subslices is"
-            " required, please request this functionality by submitting an issue on Github.")
+            " required, use the 'to_global' method and use the returned numpy-array explicitly.")
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """Method that will be called by numpy when using a ufunction with a Slice as input.

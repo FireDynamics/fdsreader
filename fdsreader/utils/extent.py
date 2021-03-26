@@ -33,11 +33,6 @@ class Extent:
                                                                                        self.z_start,
                                                                                        self.z_end)
 
-    def __getitem__(self, dimension: Literal[0, 1, 2, 'x', 'y', 'z']):
-        if type(dimension) == int:
-            dimension = ('x', 'y', 'z')[dimension]
-        return self.__dict__[dimension]
-
     @property
     def x_start(self):
         """Gives the absolute extent in x-direction.
