@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>fdsreader.slcf.slice &mdash; fdsreader [fdsreader, version 0.9.9] documentation</title>
+  <title>fdsreader.slcf.slice &mdash; fdsreader [fdsreader, version 0.9.10] documentation</title>
   
 
   
@@ -393,6 +393,26 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">idx</span></div>
 
+<div class="viewcode-block" id="Slice.get_nearest_index"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.slice.Slice.get_nearest_index">[docs]</a>    <span class="k">def</span> <span class="nf">get_nearest_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">],</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="n">index_counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">nearest_index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">nearest_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">max</span>
+        <span class="k">for</span> <span class="n">mesh</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subslices</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">coords</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="n">dimension</span><span class="p">]</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">idx</span> <span class="o">==</span> <span class="n">coords</span><span class="o">.</span><span class="n">size</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">value</span> <span class="o">-</span> <span class="n">coords</span><span class="p">[</span><span class="n">idx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span>
+                    <span class="n">value</span> <span class="o">-</span> <span class="n">coords</span><span class="p">[</span><span class="n">idx</span><span class="p">])):</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="n">idx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">value</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">nearest_value</span> <span class="o">-</span> <span class="n">value</span><span class="p">):</span>
+                    <span class="n">nearest_index</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">index_counter</span>
+                    <span class="n">nearest_value</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="n">idx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">-</span> <span class="n">value</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">nearest_value</span> <span class="o">-</span> <span class="n">value</span><span class="p">):</span>
+                    <span class="n">nearest_index</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">+</span> <span class="n">index_counter</span>
+                    <span class="n">nearest_value</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="n">index_counter</span> <span class="o">+=</span> <span class="n">coords</span><span class="o">.</span><span class="n">size</span>
+
+        <span class="k">return</span> <span class="n">nearest_index</span></div>
+
 <div class="viewcode-block" id="Slice.clear_cache"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.slice.Slice.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -469,7 +489,7 @@
         <span class="k">raise</span> <span class="ne">UserWarning</span><span class="p">(</span>
             <span class="s2">&quot;Slices can not be converted to numpy arrays, but they support all typical numpy&quot;</span>
             <span class="s2">&quot; operations such as np.multiply. If a &#39;global&#39; array containg all subslices is&quot;</span>
-            <span class="s2">&quot; required, please request this functionality by submitting an issue on Github.&quot;</span><span class="p">)</span>
+            <span class="s2">&quot; required, use the &#39;to_global&#39; method and use the returned numpy-array explicitly.&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__array_ufunc__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ufunc</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="o">*</span><span class="n">inputs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Method that will be called by numpy when using a ufunction with a Slice as input.</span>

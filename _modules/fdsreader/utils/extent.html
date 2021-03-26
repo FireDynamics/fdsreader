@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>fdsreader.utils.extent &mdash; fdsreader [fdsreader, version 0.9.9] documentation</title>
+  <title>fdsreader.utils.extent &mdash; fdsreader [fdsreader, version 0.9.10] documentation</title>
   
 
   
@@ -192,11 +192,6 @@
                                                                                        <span class="bp">self</span><span class="o">.</span><span class="n">y_end</span><span class="p">,</span>
                                                                                        <span class="bp">self</span><span class="o">.</span><span class="n">z_start</span><span class="p">,</span>
                                                                                        <span class="bp">self</span><span class="o">.</span><span class="n">z_end</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">]):</span>
-        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">dimension</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
-            <span class="n">dimension</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">)[</span><span class="n">dimension</span><span class="p">]</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">dimension</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">x_start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
