@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>FDSReader documentation! &mdash; fdsreader [fdsreader, version 0.9.11] documentation</title>
+  <title>FDSReader documentation! &mdash; fdsreader [fdsreader, version 0.9.12] documentation</title>
   
 
   
@@ -797,13 +797,10 @@ slice with the corresponding label and unit.</p></li>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean</span></code>()</p></td>
 <td><p>Calculates the mean over the whole slice.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">slice_at</span></code>(dimension, value)</p></td>
-<td><p>Creates a 2D-slice from a 3D-slice.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_subslices_cartesian</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_subslices_cartesian</span></code>()</p></td>
 <td><p>Returns all subslices sorted in cartesian coordinates (2D-slices only).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_global</span></code>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_global</span></code>()</p></td>
 <td><p>Creates a global 2D-numpy ndarray from all subslices (2D-slices only).</p></td>
 </tr>
 </tbody>
@@ -821,7 +818,10 @@ slice with the corresponding label and unit.</p></li>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">extent_dirs</span></code></p></td>
 <td><p>The directions in which there is an extent.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">type</span></code></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">meshes</span></code></p></td>
+<td><p>Returns a list of all meshes this slice cuts through.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">type</span></code></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -867,8 +867,8 @@ slice with the corresponding label and unit.</p></li>
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname"><span class="pre">slice_at</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimension</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">x</span><span class="p"><span class="pre">,</span> </span><span class="pre">y</span><span class="p"><span class="pre">,</span> </span><span class="pre">z</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice.slice_at"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Creates a 2D-slice from a 3D-slice. Only works on 3D-slices.</p>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">meshes</span></code></dt>
+<dd><p>Returns a list of all meshes this slice cuts through.</p>
 </dd></dl>
 
 <dl class="py method">
