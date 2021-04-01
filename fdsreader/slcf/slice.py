@@ -1,5 +1,5 @@
 import os
-from copy import deepcopy
+from copy import deepcopy, copy
 
 import numpy as np
 import logging
@@ -233,26 +233,6 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         else:
             return idx
 
-    def get_nearest_index2(self, dimension: Literal['x', 'y', 'z'], value: float) -> int:
-        index_counter = 0
-        nearest_index = -1
-        nearest_value = np.finfo(np.float32).max
-        for mesh in self._subslices.keys():
-            coords = mesh.coordinates[dimension]
-            idx = np.searchsorted(coords, value, side="left")
-            if (idx == coords.size or np.math.fabs(value - coords[idx - 1]) < np.math.fabs(
-                    value - coords[idx])):
-                if np.math.fabs(coords[idx - 1] - value) < np.math.fabs(nearest_value - value):
-                    nearest_index = idx - 1 + index_counter
-                    nearest_value = coords[idx - 1]
-            else:
-                if np.math.fabs(coords[idx] - value) < np.math.fabs(nearest_value - value):
-                    nearest_index = idx + index_counter
-                    nearest_value = coords[idx]
-            index_counter += coords.size
-
-        return nearest_index
-
     def get_nearest_index(self, dimension: Literal['x', 'y', 'z'], value: float) -> int:
         coords = self.coordinates[dimension]
         idx = np.searchsorted(coords, value, side="left")
@@ -278,8 +258,10 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             subslice.clear_cache()
 
     def sort_subslices_cartesian(self):
-        """Returns all subslices sorted in cartesian coordinates.
+        """Returns all subslices sorted in cartesian coordinates (2D-slices only).
         """
+        assert self.type == '2D', "The sort_subslices_cartesian method only works on 2D-slices!"
+
         slices = list(self._subslices.values())
         slices_cart = [[slices[0]]]
         orientation = abs(slices[0].orientation)
@@ -305,10 +287,12 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         return slices_cart
 
     def to_global(self) -> np.ndarray:
-        """Creates a global numpy ndarray from all subslices.
+        """Creates a global 2D-numpy ndarray from all subslices (2D-slices only).
             Note: This method will only return valid output if evenly sized and spaced meshes were
             used in the simulation. Other cases will require individual custom combination logic.
         """
+        assert self.type == '2D', "The to_global method only works on 2D-slices!"
+
         slices = self.sort_subslices_cartesian()
 
         shape_dim1 = sum([slice_row[0].shape[0] for slice_row in slices])
@@ -333,6 +317,29 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             dim1_pos += d1
             dim2_pos = 0
         return slc_array
+
+    def slice_at(self, dimension: Literal['x', 'y', 'z'], value: float):
+        """Creates a 2D-slice from a 3D-slice. Only works on 3D-slices.
+        """
+        assert self.type == '3D', "The slice_at method only works on 3D-slices!"
+
+        new_slc = copy(self)
+        new_slc.id = self.id + f"_2D_{dimension}_{value}"
+
+        new_slc.orientation = {'x': 1, 'y': 2, 'z': 3}[dimension]
+        new_extents = self.extent.as_list(reduced=False)
+        new_extents[(new_slc.orientation-1)*2] = value
+        new_extents[(new_slc.orientation-1)*2+1] = value
+        new_slc.extent = Extent(new_extents, skip_dimension=dimension)
+
+        for sslc in self._subslices.items():
+            pass # Todo
+
+    @property
+    def type(self) -> Literal['2D', '3D']:
+        if self.orientation == 0:
+            return '3D'
+        return '2D'
 
     def mean(self):
         """Calculates the mean over the whole slice.
@@ -387,7 +394,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         return _HANDLED_FUNCTIONS[func](*args, **kwargs)
 
     def __repr__(self):
-        if self.orientation == 0:  # 3D-Slice
+        if self.type == '3D':  # 3D-Slice
             return f"Slice([3D] cell_centered={self.cell_centered}, extent={self.extent}, times=[{self.times[0]:.2f},{self.times[1]:.2f},...,{self.times[-1]:.2f}])"
         else:  # 2D-Slice
             return f"Slice([2D] cell_centered={self.cell_centered}, extent={self.extent}, extent_dirs={self.extent_dirs}, orientation={self.orientation}, times=[{self.times[0]:.2f},{self.times[1]:.2f},...,{self.times[-1]:.2f}])"
