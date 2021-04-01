@@ -3,7 +3,7 @@ from copy import deepcopy, copy
 
 import numpy as np
 import logging
-from typing import Dict, Collection, Tuple, Union
+from typing import Dict, Collection, Tuple, Union, List
 from typing_extensions import Literal
 
 from fdsreader.utils import Dimension, Quantity, Mesh, Extent
@@ -176,6 +176,19 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             if "W-VELOCITY" in vector_filenames:
                 self._subslices[mesh].vector_filenames["w"] = vector_filenames["W-VELOCITY"]
 
+        # Iterate over all subslices and remove duplicated ones which will be created when the slice
+        # cuts exactly through two mesh borders. Only required for non-cell-centered slices.
+        if not self.cell_centered:
+            extents_tmp = list()
+            remove_tmp = list()
+            for mesh, sslc in self._subslices.items():
+                if sslc.extent not in extents_tmp:
+                    extents_tmp.append(sslc.extent)
+                else:
+                    remove_tmp.append(mesh)
+            for mesh in remove_tmp:
+                del self._subslices[mesh]
+
         vals = self._subslices.values()
         self.extent = Extent(min(vals, key=lambda e: e.extent.x_start).extent.x_start,
                              max(vals, key=lambda e: e.extent.x_end).extent.x_end,
@@ -241,6 +254,12 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             return idx - 1
         else:
             return idx
+
+    @property
+    def meshes(self) -> List[Mesh]:
+        """Returns a list of all meshes this slice cuts through.
+        """
+        return list(self._subslices.keys())
 
     @property
     def coordinates(self) -> Dict[Literal['x', 'y', 'z'], np.ndarray]:
@@ -317,23 +336,6 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             dim1_pos += d1
             dim2_pos = 0
         return slc_array
-
-    def slice_at(self, dimension: Literal['x', 'y', 'z'], value: float):
-        """Creates a 2D-slice from a 3D-slice. Only works on 3D-slices.
-        """
-        assert self.type == '3D', "The slice_at method only works on 3D-slices!"
-
-        new_slc = copy(self)
-        new_slc.id = self.id + f"_2D_{dimension}_{value}"
-
-        new_slc.orientation = {'x': 1, 'y': 2, 'z': 3}[dimension]
-        new_extents = self.extent.as_list(reduced=False)
-        new_extents[(new_slc.orientation-1)*2] = value
-        new_extents[(new_slc.orientation-1)*2+1] = value
-        new_slc.extent = Extent(new_extents, skip_dimension=dimension)
-
-        for sslc in self._subslices.items():
-            pass # Todo
 
     @property
     def type(self) -> Literal['2D', '3D']:
