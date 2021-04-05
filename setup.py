@@ -27,6 +27,7 @@ setuptools.setup(
     install_requires=[
         'incremental',
         'numpy',
-        'typing_extensions'
+        'typing_extensions',
+        'idna>=2.5,<3'
     ],
 )
