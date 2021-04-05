@@ -7,9 +7,6 @@ base_dir = os.path.dirname(os.path.realpath(__file__))
 with open(os.path.join(base_dir, "README.md"), 'r') as f:
     long_description = f.read()
 
-with open(os.path.join(base_dir, "requirements.txt"), 'r') as f:
-    install_requires = f.read().splitlines()
-
 setuptools.setup(
     name="fdsreader",
     use_incremental=True,
@@ -27,5 +24,9 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
-    install_requires=install_requires,
+    install_requires=[
+        'incremental',
+        'numpy',
+        'typing_extensions'
+    ],
 )
