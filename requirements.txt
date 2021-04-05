@@ -11,7 +11,7 @@ colorama==0.4.4
 constantly==15.1.0
 docutils==0.17
 hyperlink==21.0.0
-idna==3.1
+idna==2.10
 imageio==2.9.0
 imageio-ffmpeg==0.4.3
 imagesize==1.2.0

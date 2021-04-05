@@ -72,6 +72,8 @@ Distributed under the LGPLv3 (GNU Lesser General Public License v3) license. See
     * (First official version will be released after sufficient public testing in beta stage)
 
 ### Beta *(current stage)*
+* 0.9.14
+    * Resolved possible requirement version conflicts
 * 0.9.13
     * Refactored requirements
 * 0.9.12
