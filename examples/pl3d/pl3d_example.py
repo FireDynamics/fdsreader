@@ -26,7 +26,7 @@ def main():
     quantity_idx = 0
     quantity = pl_t1.quantities[quantity_idx]
 
-    # Get 3D data for a specific quantity
+    # Get 3D data for a specific quantity in one of the meshes
     color_data = pl_t1[mesh].data[:, :, :, quantity_idx]
     # It is also possible to just plot a slice
     # color_data = pl_t1[mesh].data[:, 29:30, :, quantity_idx]

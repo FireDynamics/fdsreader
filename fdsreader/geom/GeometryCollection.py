@@ -17,13 +17,13 @@ class GeometryCollection(FDSDataCollection):
             for geom in self:
                 geom._load_data()
 
-    def filter_by_quantity(self, quantity: Union[str, Quantity]) -> List[GeomBoundary]:
+    def filter_by_quantity(self, quantity: Union[str, Quantity]):
         """Filters all GeomBoundaries by a specific quantity.
         """
         if type(quantity) != str:
             quantity = quantity.quantity
-        return [x for x in self if x.quantity.quantity.lower() == quantity.lower() or
-                x.quantity.label.lower() == quantity.lower()]
+        return GeometryCollection(x for x in self if
+                                  x.quantity.quantity.lower() == quantity.lower() or x.quantity.label.lower() == quantity.lower())
 
     def __repr__(self):
         return "GeometryCollection(" + super(GeometryCollection, self).__repr__() + ")"

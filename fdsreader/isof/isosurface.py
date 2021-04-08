@@ -166,6 +166,9 @@ class SubSurface:
         if hasattr(self, "_colors"):
             del self._colors
 
+    def __repr__(self):
+        return f'SubSurface(mesh="{str(self.mesh)}")'
+
 
 class Isosurface:
     """Isosurface file data container including metadata. Consists of a list of vertices forming a
@@ -361,3 +364,6 @@ class Isosurface:
         """
         for subsurface in self._subsurfaces.values():
             subsurface.clear_cache()
+
+    def __repr__(self):
+        return f'Isosurface(id="{self.id}", quantity={str(self.quantity)}, levels={str(self.levels)})'

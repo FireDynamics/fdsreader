@@ -21,8 +21,8 @@ class ObstructionCollection(FDSDataCollection):
         return [x.get_boundary_data(quantity) for x in self if
                 x.get_boundary_data(quantity) is not None]
 
-    def filter_by_boundary_data(self) -> List[Obstruction]:
-        return [x for x in self if x.has_boundary_data]
+    def filter_by_boundary_data(self):
+        return ObstructionCollection(x for x in self if x.has_boundary_data)
 
     def get_nearest_obstruction(self, point: Tuple[float, float, float]) -> Obstruction:
         """Filters the obstruction with the shortest distance to the given point.
@@ -41,7 +41,7 @@ class ObstructionCollection(FDSDataCollection):
 
         return obst_min
 
-    def get_border_obstructions(self) -> List[Obstruction]:
+    def get_border_obstructions(self):
         """Filters all obstructions with at least one face on the border of a mesh.
         """
         raise NotImplementedError("If you need this feature, please open an issue on GitHub "

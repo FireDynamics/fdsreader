@@ -142,7 +142,7 @@ class Simulation:
                             self.devices[name] = device
                     elif keyword.startswith("SLC"):
                         self._load_slice(smv_file, keyword)
-                    elif keyword.startswith("ISOG"):
+                    elif "ISOG" in keyword:
                         self._load_isosurface(smv_file, keyword)
                     elif keyword.startswith("PL3D"):
                         self._load_data_3d(smv_file, keyword)
@@ -452,7 +452,6 @@ class Simulation:
         mesh_index = int(line.split('&')[0].strip().split()[1]) - 1
         mesh = self.meshes[mesh_index]
 
-        # print("slcf:")
         # Read in index ranges for x, y and z
         bound_indices = [int(i.strip()) for i in line.split('&')[1].split('!')[0].strip().split()]
         extent, dimension = self._indices_to_extent(bound_indices, mesh)
@@ -534,7 +533,6 @@ class Simulation:
             for patch_info in patch_infos:
                 patch_info = patch_info[0]
 
-                # print("bndf:")
                 extent, dimension = self._indices_to_extent(patch_info[:6], mesh)
                 orientation = patch_info[6]
                 obst_index = patch_info[7]
@@ -802,7 +800,6 @@ class Simulation:
         x_min, x_max, y_min, y_max, z_min, z_max = (
             int(indices[0]), int(indices[1]), int(indices[2]), int(indices[3]), int(indices[4]),
             int(indices[5]))
-        # if x_min != x_max: print(x_min, x_max)
         co_x_min, co_x_max, co_y_min, co_y_max, co_z_min, co_z_max = (
             co['x'][x_min], co['x'][x_max], co['y'][y_min],
             co['y'][y_max], co['z'][z_min], co['z'][z_max])
