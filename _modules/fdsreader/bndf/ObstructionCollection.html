@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>fdsreader.bndf.ObstructionCollection &mdash; fdsreader [fdsreader, version 0.9.14] documentation</title>
+  <title>fdsreader.bndf.ObstructionCollection &mdash; fdsreader [fdsreader, version 0.9.15] documentation</title>
   
 
   
@@ -181,8 +181,8 @@
         <span class="k">return</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">get_boundary_data</span><span class="p">(</span><span class="n">quantity</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span>
                 <span class="n">x</span><span class="o">.</span><span class="n">get_boundary_data</span><span class="p">(</span><span class="n">quantity</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="ObstructionCollection.filter_by_boundary_data"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.ObstructionCollection.ObstructionCollection.filter_by_boundary_data">[docs]</a>    <span class="k">def</span> <span class="nf">filter_by_boundary_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Obstruction</span><span class="p">]:</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">has_boundary_data</span><span class="p">]</span></div>
+<div class="viewcode-block" id="ObstructionCollection.filter_by_boundary_data"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.ObstructionCollection.ObstructionCollection.filter_by_boundary_data">[docs]</a>    <span class="k">def</span> <span class="nf">filter_by_boundary_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ObstructionCollection</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">has_boundary_data</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ObstructionCollection.get_nearest_obstruction"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.ObstructionCollection.ObstructionCollection.get_nearest_obstruction">[docs]</a>    <span class="k">def</span> <span class="nf">get_nearest_obstruction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Obstruction</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Filters the obstruction with the shortest distance to the given point.</span>
@@ -201,7 +201,7 @@
 
         <span class="k">return</span> <span class="n">obst_min</span></div>
 
-<div class="viewcode-block" id="ObstructionCollection.get_border_obstructions"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.ObstructionCollection.ObstructionCollection.get_border_obstructions">[docs]</a>    <span class="k">def</span> <span class="nf">get_border_obstructions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Obstruction</span><span class="p">]:</span>
+<div class="viewcode-block" id="ObstructionCollection.get_border_obstructions"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.ObstructionCollection.ObstructionCollection.get_border_obstructions">[docs]</a>    <span class="k">def</span> <span class="nf">get_border_obstructions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Filters all obstructions with at least one face on the border of a mesh.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;If you need this feature, please open an issue on GitHub &quot;</span>

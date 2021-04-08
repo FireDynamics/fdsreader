@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>fdsreader.isof.isosurface &mdash; fdsreader [fdsreader, version 0.9.14] documentation</title>
+  <title>fdsreader.isof.isosurface &mdash; fdsreader [fdsreader, version 0.9.15] documentation</title>
   
 
   
@@ -324,7 +324,10 @@
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_surfaces&quot;</span><span class="p">):</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_surfaces</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_colors&quot;</span><span class="p">):</span>
-            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_colors</span></div></div>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_colors</span></div>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;SubSurface(mesh=&quot;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="p">)</span><span class="si">}</span><span class="s1">&quot;)&#39;</span></div>
 
 
 <div class="viewcode-block" id="Isosurface"><a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.Isosurface">[docs]</a><span class="k">class</span> <span class="nc">Isosurface</span><span class="p">:</span>
@@ -520,7 +523,10 @@
         <span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">subsurface</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subsurfaces</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="n">subsurface</span><span class="o">.</span><span class="n">clear_cache</span><span class="p">()</span></div></div>
+            <span class="n">subsurface</span><span class="o">.</span><span class="n">clear_cache</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Isosurface(id=&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">&quot;, quantity=</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">quantity</span><span class="p">)</span><span class="si">}</span><span class="s1">, levels=</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">levels</span><span class="p">)</span><span class="si">}</span><span class="s1">)&#39;</span></div>
 </pre></div>
 
            </div>

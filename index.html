@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>FDSReader documentation! &mdash; fdsreader [fdsreader, version 0.9.14] documentation</title>
+  <title>FDSReader documentation! &mdash; fdsreader [fdsreader, version 0.9.15] documentation</title>
   
 
   
@@ -259,7 +259,7 @@ using isosurfaces as well as its subclasses such as <code class="xref py py-clas
 </table>
 <dl class="py method">
 <dt>
-<code class="sig-name descname"><span class="pre">filter_by_quantity</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.isof.isosurface.Isosurface</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="_modules/fdsreader/isof/IsosurfaceCollection.html#IsosurfaceCollection.filter_by_quantity"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">filter_by_quantity</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/isof/IsosurfaceCollection.html#IsosurfaceCollection.filter_by_quantity"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Filters all isosurfaces by a specific quantity.</p>
 </dd></dl>
 
@@ -706,14 +706,14 @@ using slices as well as its subclasses such as <code class="xref py py-class doc
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_by_id</span></code>(slice_id)</p></td>
 <td><p>Get the slice with corresponding id if it exists.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_nearest</span></code>(point)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_nearest</span></code>([x, y, z])</p></td>
 <td><p>Filters the slice with the shortest distance to the given point.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py method">
 <dt>
-<code class="sig-name descname"><span class="pre">filter_by_quantity</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.slcf.slice.Slice</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="_modules/fdsreader/slcf/SliceCollection.html#SliceCollection.filter_by_quantity"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">filter_by_quantity</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/SliceCollection.html#SliceCollection.filter_by_quantity"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Filters all slices by a specific quantity.</p>
 </dd></dl>
 
@@ -725,7 +725,7 @@ using slices as well as its subclasses such as <code class="xref py py-class doc
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname"><span class="pre">get_nearest</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">fdsreader.slcf.slice.Slice</span><a class="reference internal" href="_modules/fdsreader/slcf/SliceCollection.html#SliceCollection.get_nearest"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">get_nearest</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">fdsreader.slcf.slice.Slice</span><a class="reference internal" href="_modules/fdsreader/slcf/SliceCollection.html#SliceCollection.get_nearest"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Filters the slice with the shortest distance to the given point.</p>
 </dd></dl>
 
@@ -1020,7 +1020,7 @@ using obstructions as well as dependent such as <code class="xref py py-class do
 </table>
 <dl class="py method">
 <dt>
-<code class="sig-name descname"><span class="pre">filter_by_boundary_data</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.bndf.obstruction.Obstruction</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="_modules/fdsreader/bndf/ObstructionCollection.html#ObstructionCollection.filter_by_boundary_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">filter_by_boundary_data</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/ObstructionCollection.html#ObstructionCollection.filter_by_boundary_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1031,7 +1031,7 @@ using obstructions as well as dependent such as <code class="xref py py-class do
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname"><span class="pre">get_border_obstructions</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.bndf.obstruction.Obstruction</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="_modules/fdsreader/bndf/ObstructionCollection.html#ObstructionCollection.get_border_obstructions"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">get_border_obstructions</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/ObstructionCollection.html#ObstructionCollection.get_border_obstructions"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Filters all obstructions with at least one face on the border of a mesh.</p>
 </dd></dl>
 
@@ -1554,7 +1554,7 @@ using geometry data.</p>
 </table>
 <dl class="py method">
 <dt>
-<code class="sig-name descname"><span class="pre">filter_by_quantity</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.geom.geometry.GeomBoundary</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="_modules/fdsreader/geom/GeometryCollection.html#GeometryCollection.filter_by_quantity"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">filter_by_quantity</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/geom/GeometryCollection.html#GeometryCollection.filter_by_quantity"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Filters all GeomBoundaries by a specific quantity.</p>
 </dd></dl>
 

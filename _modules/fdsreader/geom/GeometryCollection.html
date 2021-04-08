@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>fdsreader.geom.GeometryCollection &mdash; fdsreader [fdsreader, version 0.9.14] documentation</title>
+  <title>fdsreader.geom.GeometryCollection &mdash; fdsreader [fdsreader, version 0.9.15] documentation</title>
   
 
   
@@ -177,13 +177,13 @@
             <span class="k">for</span> <span class="n">geom</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
                 <span class="n">geom</span><span class="o">.</span><span class="n">_load_data</span><span class="p">()</span>
 
-<div class="viewcode-block" id="GeometryCollection.filter_by_quantity"><a class="viewcode-back" href="../../../index.html#fdsreader.geom.GeometryCollection.GeometryCollection.filter_by_quantity">[docs]</a>    <span class="k">def</span> <span class="nf">filter_by_quantity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">GeomBoundary</span><span class="p">]:</span>
+<div class="viewcode-block" id="GeometryCollection.filter_by_quantity"><a class="viewcode-back" href="../../../index.html#fdsreader.geom.GeometryCollection.GeometryCollection.filter_by_quantity">[docs]</a>    <span class="k">def</span> <span class="nf">filter_by_quantity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">]):</span>
         <span class="sd">&quot;&quot;&quot;Filters all GeomBoundaries by a specific quantity.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">quantity</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">:</span>
             <span class="n">quantity</span> <span class="o">=</span> <span class="n">quantity</span><span class="o">.</span><span class="n">quantity</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">quantity</span><span class="o">.</span><span class="n">quantity</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">quantity</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span>
-                <span class="n">x</span><span class="o">.</span><span class="n">quantity</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">quantity</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span></div>
+        <span class="k">return</span> <span class="n">GeometryCollection</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span>
+                                  <span class="n">x</span><span class="o">.</span><span class="n">quantity</span><span class="o">.</span><span class="n">quantity</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">quantity</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="n">x</span><span class="o">.</span><span class="n">quantity</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">quantity</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span></div>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;GeometryCollection(&quot;</span> <span class="o">+</span> <span class="nb">super</span><span class="p">(</span><span class="n">GeometryCollection</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span></div>
