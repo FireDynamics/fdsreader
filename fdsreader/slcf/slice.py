@@ -397,8 +397,8 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
 
     def __repr__(self):
         if self.type == '3D':  # 3D-Slice
-            return f"Slice([3D] cell_centered={self.cell_centered}, extent={self.extent}, times=[{self.times[0]:.2f},{self.times[1]:.2f},...,{self.times[-1]:.2f}])"
+            return f"Slice([3D] cell_centered={self.cell_centered}, extent={self.extent})"
         else:  # 2D-Slice
-            return f"Slice([2D] cell_centered={self.cell_centered}, extent={self.extent}, extent_dirs={self.extent_dirs}, orientation={self.orientation}, times=[{self.times[0]:.2f},{self.times[1]:.2f},...,{self.times[-1]:.2f}])"
+            return f"Slice([2D] cell_centered={self.cell_centered}, extent={self.extent}, extent_dirs={self.extent_dirs}, orientation={self.orientation}, times=[{self.times[0]:.2f})"
 
 # __array_function__ implementations

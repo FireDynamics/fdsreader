@@ -3,6 +3,8 @@
     * (First official version will be released after sufficient public testing in beta stage)
 
 ### Beta *(current stage)*
+* 0.9.18
+    * Improved slice filtering
 * 0.9.17
     * Made collection output easier to read
 * 0.9.16
