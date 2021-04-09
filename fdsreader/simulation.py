@@ -70,15 +70,16 @@ class Simulation:
         return super(Simulation, cls).__new__(cls)
 
     def __repr__(self):
-        return f"Simulation(chid={self.chid},\n" + \
+        r = f"Simulation(chid={self.chid},\n" + \
                f"           meshes={len(self.meshes)},\n" + \
-               f"           obstructions={len(self.obstructions)},\n" if len(self.obstructions) > 0 else "" + \
-               f"           geometries={len(self.geoms)},\n" if len(self.geoms) > 0 else "" + \
-               f"           slices={len(self.slices)},\n" if len(self.slices) > 0 else "" + \
-               f"           plot3d={len(self.data_3d)},\n" if len(self.data_3d) > 0 else "" + \
-               f"           isosurfaces={len(self.isosurfaces)},\n" if len(self.isosurfaces) > 0 else "" + \
-               f"           particles={len(self.particles)},\n" if len(self.particles) > 0 else "" + \
-               f"           devices={len(self.devices)})" if len(self.devices) > 0 else ""
+               (f"           obstructions={len(self.obstructions)},\n" if len(self.obstructions) > 0 else "") + \
+               (f"           geometries={len(self.geoms)},\n" if len(self.geoms) > 0 else "") + \
+               (f"           slices={len(self.slices)},\n" if len(self.slices) > 0 else "") + \
+               (f"           plot3d={len(self.data_3d)},\n" if len(self.data_3d) > 0 else "") + \
+               (f"           isosurfaces={len(self.isosurfaces)},\n" if len(self.isosurfaces) > 0 else "") + \
+               (f"           particles={len(self.particles)},\n" if len(self.particles) > 0 else "") + \
+               (f"           devices={len(self.devices)},\n" if len(self.devices) > 0 else "")
+        return r[:-2] + ')'
 
     def __init__(self, path: str):
         """

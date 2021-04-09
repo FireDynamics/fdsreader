@@ -108,7 +108,7 @@ class FDSDataCollection:
         return value in self._elements
 
     def __repr__(self):
-        return "[" + str(self._elements) + "]"
+        return "[" + "\n".join(str(e) for e in self._elements) + "]"
 
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory.
