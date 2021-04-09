@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>FDSReader documentation! &mdash; fdsreader [fdsreader, version 0.9.18] documentation</title>
+  <title>FDSReader documentation! &mdash; fdsreader [fdsreader, version 0.9.19] documentation</title>
   
 
   
@@ -796,13 +796,16 @@ slice with the corresponding label and unit.</p></li>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_nearest_timestep</span></code>(time)</p></td>
 <td><p>Calculates the nearest timestep for which data has been output for this slice.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean</span></code>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_subslice</span></code>(key)</p></td>
+<td><p>Returns the <code class="xref py py-class docutils literal notranslate"><span class="pre">SubSlice</span></code> that cuts through the given mesh.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean</span></code>()</p></td>
 <td><p>Calculates the mean over the whole slice.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_subslices_cartesian</span></code>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_subslices_cartesian</span></code>()</p></td>
 <td><p>Returns all subslices sorted in cartesian coordinates (2D-slices only).</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_global</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_global</span></code>()</p></td>
 <td><p>Creates a global 2D-numpy ndarray from all subslices (2D-slices only).</p></td>
 </tr>
 </tbody>
@@ -823,7 +826,10 @@ slice with the corresponding label and unit.</p></li>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">meshes</span></code></p></td>
 <td><p>Returns a list of all meshes this slice cuts through.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">type</span></code></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">subslices</span></code></p></td>
+<td><p>Get a list with all SubSlices.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">type</span></code></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -858,6 +864,13 @@ slice with the corresponding label and unit.</p></li>
 
 <dl class="py method">
 <dt>
+<code class="sig-name descname"><span class="pre">get_subslice</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.fds_classes.mesh.Mesh</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">fdsreader.slcf.slice.SubSlice</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice.get_subslice"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Returns the <code class="xref py py-class docutils literal notranslate"><span class="pre">SubSlice</span></code> that cuts through the given mesh. When an int is provided
+the nth SubSlice will be returned.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
 <code class="sig-name descname"><span class="pre">mean</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice.mean"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Calculates the mean over the whole slice.</p>
 <dl class="field-list simple">
@@ -877,6 +890,12 @@ slice with the corresponding label and unit.</p></li>
 <dt>
 <code class="sig-name descname"><span class="pre">sort_subslices_cartesian</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice.sort_subslices_cartesian"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Returns all subslices sorted in cartesian coordinates (2D-slices only).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">subslices</span></code></dt>
+<dd><p>Get a list with all SubSlices.</p>
 </dd></dl>
 
 <dl class="py method">
