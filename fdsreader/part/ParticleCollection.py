@@ -24,7 +24,6 @@ class ParticleCollection(FDSDataCollection):
 
     def _post_init(self):
         if not settings.LAZY_LOAD:
-            print("Test")
             self._load_data()
 
     def _load_data(self):

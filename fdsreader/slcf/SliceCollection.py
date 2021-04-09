@@ -19,7 +19,6 @@ class SliceCollection(FDSDataCollection):
         """
         if type(quantity) != str:
             quantity = quantity.quantity
-        print(SliceCollection(x for x in self))
         return SliceCollection(x for x in self if x.quantity.quantity.lower() == quantity.lower()
                                or x.quantity.label.lower() == quantity.lower())
 
