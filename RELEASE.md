@@ -3,6 +3,8 @@
     * (First official version will be released after sufficient public testing in beta stage)
 
 ### Beta *(current stage)*
+* 0.9.19
+    * Added more utility functions for slices
 * 0.9.18
     * Improved slice filtering
 * 0.9.17

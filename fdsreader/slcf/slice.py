@@ -211,8 +211,15 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             for _, subslice in self._subslices.items():
                 _ = subslice.data
 
-    def __getitem__(self, key: Union[int, Mesh]):
-        """Returns the :class:`SubSlice` that cuts through the given mesh.
+    def get_subslice(self, key: Union[int, Mesh]) -> SubSlice:
+        """Returns the :class:`SubSlice` that cuts through the given mesh. When an int is provided
+            the nth SubSlice will be returned.
+        """
+        return self[key]
+
+    def __getitem__(self, key: Union[int, Mesh]) -> SubSlice:
+        """Returns the :class:`SubSlice` that cuts through the given mesh. When an int is provided
+            the nth SubSlice will be returned.
         """
         if type(key) == int:
             return tuple(self._subslices.values())[key]
@@ -220,6 +227,12 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
 
     def __len__(self):
         return len(self._subslices)
+
+    @property
+    def subslices(self) -> List[SubSlice]:
+        """Get a list with all SubSlices.
+        """
+        return list(self._subslices.values())
 
     @property
     def extent_dirs(self) -> Tuple[
