@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>fdsreader.utils.data &mdash; fdsreader [fdsreader, version 0.9.16] documentation</title>
+  <title>fdsreader.utils.data &mdash; fdsreader [fdsreader, version 0.9.17] documentation</title>
   
 
   
@@ -268,7 +268,7 @@
         <span class="k">return</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_elements</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;[&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_elements</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;]&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;[&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_elements</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;]&quot;</span>
 
 <div class="viewcode-block" id="FDSDataCollection.clear_cache"><a class="viewcode-back" href="../../../utils.html#fdsreader.utils.data.FDSDataCollection.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
