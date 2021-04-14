@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>FDSReader documentation! &mdash; fdsreader [fdsreader, version 0.9.19] documentation</title>
+  <title>FDSReader documentation! &mdash; fdsreader [fdsreader, version 0.9.20] documentation</title>
   
 
   
@@ -791,7 +791,7 @@ slice with the corresponding label and unit.</p></li>
 <td><p>Remove all data from the internal cache that has been loaded so far to free memory.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_nearest_index</span></code>(dimension, value)</p></td>
-<td><p></p></td>
+<td><p>Get the nearest mesh coordinate index in a specific dimension.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_nearest_timestep</span></code>(time)</p></td>
 <td><p>Calculates the nearest timestep for which data has been output for this slice.</p></td>
@@ -818,7 +818,7 @@ slice with the corresponding label and unit.</p></li>
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">coordinates</span></code></p></td>
-<td><p></p></td>
+<td><p>Returns a dictionary containing a numpy ndarray with coordinates for each dimension.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">extent_dirs</span></code></p></td>
 <td><p>The directions in which there is an extent.</p></td>
@@ -843,7 +843,9 @@ slice with the corresponding label and unit.</p></li>
 <dl class="py method">
 <dt>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">coordinates</span></code></dt>
-<dd></dd></dl>
+<dd><p>Returns a dictionary containing a numpy ndarray with coordinates for each dimension.
+For cell-centered slices, the coordinates are adjusted to represent cell-centered coordinates.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt>
@@ -854,7 +856,8 @@ slice with the corresponding label and unit.</p></li>
 <dl class="py method">
 <dt>
 <code class="sig-name descname"><span class="pre">get_nearest_index</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimension</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">x</span><span class="p"><span class="pre">,</span> </span><span class="pre">y</span><span class="p"><span class="pre">,</span> </span><span class="pre">z</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">int</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice.get_nearest_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd></dd></dl>
+<dd><p>Get the nearest mesh coordinate index in a specific dimension.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt>
