@@ -260,6 +260,8 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             return idx
 
     def get_nearest_index(self, dimension: Literal['x', 'y', 'z'], value: float) -> int:
+        """Get the nearest mesh coordinate index in a specific dimension.
+        """
         coords = self.coordinates[dimension]
         idx = np.searchsorted(coords, value, side="left")
         if idx > 0 and (idx == coords.size or np.math.fabs(value - coords[idx - 1]) < np.math.fabs(
@@ -276,11 +278,21 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
 
     @property
     def coordinates(self) -> Dict[Literal['x', 'y', 'z'], np.ndarray]:
+        """Returns a dictionary containing a numpy ndarray with coordinates for each dimension.
+            For cell-centered slices, the coordinates are adjusted to represent cell-centered coordinates.
+        """
         coords = {'x': set(), 'y': set(), 'z': set()}
         for dim in ('x', 'y', 'z'):
             for mesh in self._subslices.keys():
-                coords[dim].update(mesh.coordinates[dim])
+                co = mesh.coordinates[dim]
+                # In case the slice is cell-centered, we will shift the coordinates by half a cell
+                # and remove the last coordinate
+                if self.cell_centered:
+                    co = co[:-1]
+                    co += (co[1] - co[0]) / 2
+                coords[dim].update(co)
             coords[dim] = np.array(sorted(list(coords[dim])))
+
         return coords
 
     def clear_cache(self):

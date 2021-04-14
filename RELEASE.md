@@ -3,6 +3,8 @@
     * (First official version will be released after sufficient public testing in beta stage)
 
 ### Beta *(current stage)*
+* 0.9.20
+    * Slice coordinates now correctly represent cell-centered slices
 * 0.9.19
     * Added more utility functions for slices
 * 0.9.18
