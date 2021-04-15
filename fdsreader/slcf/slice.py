@@ -368,6 +368,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             return '3D'
         return '2D'
 
+    @implements(np.mean)
     def mean(self):
         """Calculates the mean over the whole slice.
 

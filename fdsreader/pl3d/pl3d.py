@@ -88,6 +88,7 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
         """
         return self._subplots[mesh]
 
+    @implements(np.mean)
     def mean(self) -> np.ndarray:
         """Calculates the mean over each quantity individually of the whole Plot3D.
 
