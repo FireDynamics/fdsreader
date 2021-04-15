@@ -82,7 +82,7 @@
               
             
             
-              <p><span class="caption-text">FDSReader</span></p>
+              <p class="caption"><span class="caption-text">FDSReader</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../simulation.html">Simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../isof.html">Isosurface files</a></li>
@@ -528,7 +528,8 @@
             <span class="k">return</span> <span class="s1">&#39;3D&#39;</span>
         <span class="k">return</span> <span class="s1">&#39;2D&#39;</span>
 
-<div class="viewcode-block" id="Slice.mean"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.slice.Slice.mean">[docs]</a>    <span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Slice.mean"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.slice.Slice.mean">[docs]</a>    <span class="nd">@implements</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Calculates the mean over the whole slice.</span>
 
 <span class="sd">        :returns: The calculated mean value.</span>
