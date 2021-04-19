@@ -3,6 +3,8 @@
     * (First official version will be released after sufficient public testing in beta stage)
 
 ### Beta *(current stage)*
+* 0.9.22
+    * Bugfixes for bndf
 * 0.9.21
     * Slice and Pl3D now support np.mean
 * 0.9.20

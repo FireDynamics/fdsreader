@@ -22,12 +22,14 @@ class ObstructionCollection(FDSDataCollection):
                 x.get_boundary_data(quantity) is not None]
 
     def filter_by_boundary_data(self):
+        """Filters all obstructions for which output data exists.
+        """
         return ObstructionCollection(x for x in self if x.has_boundary_data)
 
     def get_nearest_obstruction(self, point: Tuple[float, float, float]) -> Obstruction:
         """Filters the obstruction with the shortest distance to the given point.
         """
-        d_min = np.finfo(float).min
+        d_min = np.finfo(float).max
         obst_min = None
 
         for obst in self:

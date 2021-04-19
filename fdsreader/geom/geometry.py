@@ -156,6 +156,9 @@ class GeomBoundary:
             return max(max(np.max(p.data) for p in ps) for ps in self._faces.values())
         return curr_max
 
+    def __repr__(self, *args, **kwargs):
+        return f"GeomBoundary(quantity={self.quantity})"
+
 
 class Geometry:
     """Obstruction defined as a complex geometry.
@@ -177,3 +180,6 @@ class Geometry:
         self.is_terrain = is_terrain
         self.rgb = rgb
         self.surface = surface
+
+    def __repr__(self, *args, **kwargs):
+        return f"Geometry(file_path={self.file_path})"
