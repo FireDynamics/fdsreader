@@ -4,8 +4,7 @@ import numpy as np
 
 
 def main():
-    # sim = Simulation("./fds_data")
-    sim = Simulation("./fds_steckler")
+    sim = Simulation("./fds_data")
 
     # Choose a quantity to plot
     quantity = sim.obstructions[1].quantities[0]

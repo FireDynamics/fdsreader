@@ -1,54 +1,10 @@
 import os
 from typing import List, Dict, Tuple, Union
-from typing_extensions import Literal
 import numpy as np
 
-from fdsreader.utils import Surface, Mesh, Extent, Quantity, Dimension
+from fdsreader.utils import Surface, Extent, Quantity, Dimension
 import fdsreader.utils.fortran_data as fdtype
 from fdsreader import settings
-
-
-class Hole:
-    """Represents a hole in an obstruction. Used to output default values instead of actual data.
-
-    :ivar dimension: :class:`Dimension` object containing information about steps in each dimension.
-    :ivar extent: :class:`Extent` object containing 3-dimensional extent information.
-    :ivar orientation: The direction the patch is facing (x={-1;1}, y={-2;2}, z={-3;3}).
-    :ivar cell_centered: Indicates whether centered positioning for data is used.
-    """
-    default_value = 0
-
-    def __init__(self, dimension: Dimension, extent: Extent, orientation: int, cell_centered: bool):
-        self.dimension = dimension
-        self.extent = extent
-        self.orientation = orientation
-        self.cell_centered = cell_centered
-
-    @property
-    def shape(self) -> Tuple:
-        """Convenience function to calculate the shape of the array containing data for this hole.
-        """
-        return self.dimension.shape(self.cell_centered)
-
-    @property
-    def size(self) -> int:
-        """Convenience function to calculate the number of data points in the array for this hole.
-        """
-        return self.dimension.size(self.cell_centered)
-
-    @property
-    def data(self):
-        """Creates an array filled with the specified default value (self.default_value).
-        """
-        return np.full(self.shape, self.default_value)
-
-    def clear_cache(self):
-        """Exists only to be consistent with the :class:`Patch` class.
-        """
-        pass
-
-    def __repr__(self, *args, **kwargs):
-        return f"Hole(shape={self.shape}, orientation={self.orientation}, extent={self.extent})"
 
 
 class Patch:
@@ -63,7 +19,7 @@ class Patch:
     """
 
     def __init__(self, file_path: str, dimension: Dimension, extent: Extent, orientation: int,
-                 cell_centered: bool, patch_offset:int, initial_offset: int, n_t: int):
+                 cell_centered: bool, patch_offset: int, initial_offset: int, n_t: int):
         self.file_path = file_path
         self.dimension = dimension
         self.extent = extent
@@ -124,8 +80,7 @@ class Patch:
 
 
 class Boundary:
-    """Container for the actual data which is stored as rectangular plane with specific orientation
-        and extent.
+    """
 
     :ivar quantity: Quantity object containing information about the quantity calculated for this
         :class:`Obstruction` with the corresponding label and unit.
@@ -136,141 +91,107 @@ class Boundary:
     :ivar n_t: Total number of time steps for which output data has been written.
     """
 
-    def __init__(self, cell_centered: bool, quantity: Quantity, times: np.ndarray, n_t: int):
-        self.cell_centered = cell_centered
+    def __init__(self, quantity: Quantity, cell_centered: bool, times: np.ndarray, n_t: int, patches: List[Patch],
+                 lower_bounds: np.ndarray, upper_bounds: np.ndarray):
         self.quantity = quantity
+        self.cell_centered = cell_centered
+        self.patches = patches
         self.times = times
-        self.lower_bounds: Dict[Mesh, np.ndarray] = dict()
-        self.upper_bounds: Dict[Mesh, np.ndarray] = dict()
         self.n_t = n_t
-        self.extent = None
-
-        self._patches: Dict[Mesh, List[Union[Patch, Hole]]] = dict()
-
-    def _add_patches(self, mesh: Mesh, patches: List[Union[Patch, Hole]], lower_bounds: np.ndarray,
-                     upper_bounds: np.ndarray):
-        self._patches[mesh] = patches
-        self.lower_bounds[mesh] = lower_bounds
-        self.upper_bounds[mesh] = upper_bounds
-
-    @staticmethod
-    def sort_patches_cartesian(patches_in: List[Union[Patch, Hole]]):
-        """Returns all patches (of same orientation!) sorted in cartesian coordinates.
-        """
-        patches = patches_in.copy()
-        if len(patches) != 0:
-            patches_cart = [[patches[0]]]
-            orientation = abs(patches[0].orientation)
-            if orientation == 1:  # x
-                patches.sort(key=lambda p: (p.extent.y_start, p.extent.z_start))
-            elif orientation == 2:  # y
-                patches.sort(key=lambda p: (p.extent.x_start, p.extent.z_start))
-            elif orientation == 3:  # z
-                patches.sort(key=lambda p: (p.extent.x_start, p.extent.y_start))
-
-            if orientation == 1:
-                for patch in patches[1:]:
-                    if patch.extent.y_start == patches_cart[-1][-1].extent.y_start:
-                        patches_cart[-1].append(patch)
-                    else:
-                        patches_cart.append([patch])
-            else:
-                for patch in patches[1:]:
-                    if patch.extent.x_start == patches_cart[-1][-1].extent.x_start:
-                        patches_cart[-1].append(patch)
-                    else:
-                        patches_cart.append([patch])
-            return patches_cart
-        return patches
-
-    def get_patches_in_mesh(self, mesh: Mesh) -> List[Union[Patch, Hole]]:
-        """Gets all patches in a specific mesh.
-        """
-        if not hasattr(self._patches[mesh][0], "_data"):
-            for patch in self._patches[mesh]:
-                _ = patch.data
-        return self._patches[mesh]
+        self.lower_bounds = lower_bounds
+        self.upper_bounds = upper_bounds
 
     @property
-    def faces(self) -> Dict[Literal[-3, -2, -1, 1, 2, 3], np.ndarray]:
-        """Global/combines faces for all 6 orientations.
+    def data(self) -> Dict[int, np.ndarray]:
+        """The :class:`Patch` data in each direction (-3=-z, -2=-y, -1=-x, 1=x, 2=y, 3=y).
         """
-        if not hasattr(self, "_faces"):
-            self._prepare_faces()
-        return self._faces
-
-    @property
-    def vmin(self) -> float:
-        """Minimum value of all patches at any time.
-        """
-        curr_min = min(np.min(b) for b in self.lower_bounds.values())
-        if curr_min == 0.0:
-            return min(min(np.min(p.data) for p in ps) for ps in self._patches.values())
-        return curr_min
-
-    @property
-    def vmax(self) -> float:
-        """Maximum value of all patches at any time.
-        """
-        curr_max = max(np.max(b) for b in self.upper_bounds.values())
-        if curr_max == np.float32(-1e33):
-            return max(max(np.max(p.data) for p in ps) for ps in self._patches.values())
-        return curr_max
-
-    def _prepare_faces(self):
-        patches_for_face = {-3: list(), -2: list(), -1: list(), 1: list(), 2: list(), 3: list()}
-        for patches in self._patches.values():
-            for patch in patches:
-                patches_for_face[patch.orientation].append(patch)
-
-        self._faces: Dict[Literal[-3, -2, -1, 1, 2, 3], np.ndarray] = dict()
-        for face in (-3, -2, -1, 1, 2, 3):
-            patches = self.sort_patches_cartesian(patches_for_face[face])
-            if len(patches) == 0:
-                continue
-
-            shape_dim1 = sum([patch_row[0].shape[0] for patch_row in patches])
-            shape_dim2 = sum([patch.shape[1] for patch in patches[0]])
-
-            self._faces[face] = np.empty(shape=(self.n_t, shape_dim1, shape_dim2))
-            dim1_pos = 0
-            dim2_pos = 0
-            for patch_row in patches:
-                d1 = patch_row[0].shape[0]
-                for patch in patch_row:
-                    d2 = patch.shape[1]
-                    self._faces[face][:, dim1_pos:dim1_pos + d1,
-                    dim2_pos:dim2_pos + d2] = patch.data
-                    dim2_pos += d2
-                dim1_pos += d1
-                dim2_pos = 0
+        return {p.orientation: p.data for p in self.patches}
 
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory.
         """
-        for patches in self._patches.values():
-            for patch in patches:
-                patch.clear_cache()
+        for p in self.patches:
+            p.clear_cache()
 
-    def __getitem__(self, item):
-        """Either gets all patches in a mesh [type(item)==Mesh] or all faces with a specific
-            orientation [type(item)==int].
+
+class SubObstruction:
+    """An :class:`Obstruction` consists of 1 or more SubObstructions which can be hidden at specific points in time.
+
+    :ivar extent: :class:`Extent` object containing 3-dimensional extent information.
+    :ivar bound_indices: Indices used to define obstruction bounds in terms of mesh locations.
+    :ivar side_surfaces: Tuple of six surfaces for each side of the cuboid.
+    :ivar hide_times: List with points in time from when on the SubObstruction will be hidden.
+    :ivar show_times: List with points in time from when on the SubObstruction will be shown.
+    """
+
+    def __init__(self, side_surfaces: Tuple[Surface, ...], bound_indices: Tuple[int, int, int, int, int, int],
+                 extent: Extent):
+        self.extent = extent
+        self.side_surfaces = side_surfaces
+        self.bound_indices = {'x': (bound_indices[0], bound_indices[1]),
+                              'y': (bound_indices[2], bound_indices[3]),
+                              'z': (bound_indices[4], bound_indices[5])}
+
+        self.extent = extent
+
+        self._boundary_data: Dict[int, Boundary] = dict()
+
+        self.hide_times = list()
+        self.show_times = list()
+
+    def _add_patches(self, bid: int, cell_centered: bool, quantity: str, label: str, unit: str, patches: List[Patch],
+                     times: np.ndarray, n_t: int, lower_bounds: np.ndarray, upper_bounds: np.ndarray):
+        if bid not in self._boundary_data:
+            self._boundary_data[bid] = Boundary(Quantity(quantity, label, unit), cell_centered, times, n_t, patches,
+                                                lower_bounds, upper_bounds)
+
+        if not settings.LAZY_LOAD:
+            _ = self._boundary_data[bid].data
+
+    def get_data(self, quantity: Union[str, Quantity]):
+        if type(quantity) != str:
+            quantity = quantity.quantity
+        return next(
+            b for b in self._boundary_data.values() if b.quantity.quantity == quantity or b.quantity.label == quantity)
+
+    def _hide(self, time: float):
+        self.hide_times.append(time)
+        self.hide_times.sort()
+
+    def _show(self, time: float):
+        self.show_times.append(time)
+        self.show_times.sort()
+
+    @property
+    def visible_times(self) -> np.ndarray:
+        """Returns an ndarray containing all time steps when there is data available for the SubObstruction. Will return an
+            empty list when no data is output at all.
         """
-        if type(item) == Mesh:
-            return self.get_patches_in_mesh(item)
-        else:
-            return self.faces[item]
+        times = next(iter(self._boundary_data.values())).times
+        ret = list()
 
-    def __repr__(self, *args, **kwargs):
-        return f"Boundary(quantity={self.quantity}, cell_centered={self.cell_centered})"
+        hidden = False
+        for time in times:
+            if time in self.show_times:
+                hidden = False
+            if time in self.hide_times:
+                hidden = True
+            if not hidden:
+                ret.append(time)
+
+        return np.array(ret)
+
+    def clear_cache(self):
+        """Remove all data from the internal cache that has been loaded so far to free memory.
+        """
+        for bndf in self._boundary_data.values():
+            bndf.clear_cache()
 
 
 class Obstruction:
     """A box-shaped obstruction with specific surfaces (materials) on each side.
 
     :ivar id: ID of the obstruction.
-    :ivar side_surfaces: Tuple of six surfaces for each side of the cuboid.
-    :ivar bound_indices: Indices used to define obstruction bounds in terms of mesh locations.
     :ivar color_index: Type of coloring used to color obstruction.
      \n-1 - default color
      \n-2 - invisible
@@ -285,92 +206,79 @@ class Obstruction:
         pattern should begin.
     :ivar rgba: Optional color of the obstruction in form of a 4-element tuple
         (ranging from 0.0 to 1.0).
-    :ivar extent: :class:`Extent` object containing 3-dimensional extent information.
     """
 
-    def __init__(self, oid: int,
-                 side_surfaces: Tuple[Surface, Surface, Surface, Surface, Surface, Surface],
-                 bound_indices: Tuple[int, int, int, int, int, int], color_index: int,
-                 block_type: int, texture_origin: Tuple[float, float, float],
+    def __init__(self, oid: int, color_index: int, block_type: int, texture_origin: Tuple[float, float, float],
                  rgba: Union[Tuple[()], Tuple[float, float, float, float]] = ()):
         self.id = oid
-        self.side_surfaces = side_surfaces
-        self.bound_indices = {'x': (bound_indices[0], bound_indices[1]),
-                              'y': (bound_indices[2], bound_indices[3]),
-                              'z': (bound_indices[4], bound_indices[5])}
         self.color_index = color_index
         self.block_type = block_type
         self.texture_origin = texture_origin
         if len(rgba) != 0:
             self.rgba = rgba
 
-        self._extents: Dict[Mesh, Union[Extent, List[Extent]]] = dict()
-        self.extent: Extent = tuple()
+        self._subobstructions: List[SubObstruction] = list()
 
-        self._boundary_data: Dict[int, Boundary] = dict()
+    @property
+    def bounding_box(self) -> Extent:
+        """:class:`Extent` object representing the bounding box around the Obstruction.
+        """
+        extents = [sub.extent for sub in self._subobstructions]
 
-    def _post_init(self):
-        vals = list()
-        for val in self._extents.values():
-            if type(val) == list:
-                for v in val:
-                    vals.append(v)
-            else:
-                vals.append(val)
-
-        self.extent = Extent(
-            min(vals, key=lambda e: e.x_start).x_start, max(vals, key=lambda e: e.x_end).x_end,
-            min(vals, key=lambda e: e.y_start).y_start, max(vals, key=lambda e: e.y_end).y_end,
-            min(vals, key=lambda e: e.z_start).z_start, max(vals, key=lambda e: e.z_end).z_end)
-        for boundary in self._boundary_data.values():
-            boundary.extent = self.extent
-
-    def _add_patches(self, bid: int, cell_centered: bool, quantity: str, label: str, unit: str,
-                     mesh: Mesh, patches: List[Union[Patch, Hole]], times: np.ndarray, n_t: int,
-                     lower_bounds: np.ndarray, upper_bounds: np.ndarray):
-        if bid not in self._boundary_data:
-            self._boundary_data[bid] = Boundary(cell_centered, Quantity(quantity, label, unit),
-                                                times, n_t)
-        self._boundary_data[bid]._add_patches(mesh, patches, lower_bounds, upper_bounds)
-
-        if not settings.LAZY_LOAD:
-            self._boundary_data[bid].get_patches_in_mesh(mesh)
+        return Extent(min(extents, key=lambda e: e.x_start).x_start, max(extents, key=lambda e: e.x_end).x_end,
+                      min(extents, key=lambda e: e.y_start).y_start, max(extents, key=lambda e: e.y_end).y_end,
+                      min(extents, key=lambda e: e.z_start).z_start, max(extents, key=lambda e: e.z_end).z_end)
 
     @property
     def quantities(self) -> List[Quantity]:
         """Get a list of all quantities for which boundary data exists.
         """
-        return [b.quantity for b in self._boundary_data.values()]
+        return [b.quantity for b in self._subobstructions[0]._boundary_data.values()]
 
-    def get_boundary_data(self, quantity: Union[Quantity, str]):
-        """Gets the boundary data for a specific quantity.
+    def get_boundary_data(self, quantity: Union[Quantity, str]) -> List[Boundary]:
+        """Gets the boundary data for a specific quantity of all SubObstructions.
         """
         if type(quantity) != str:
             quantity = quantity.quantity
-        return next((x for x in self._boundary_data.values() if
-                     x.quantity.quantity.lower() == quantity.lower() or
-                     x.quantity.label.lower() == quantity.lower()), None)
+
+        return [subobst.get_data(quantity) for subobst in self._subobstructions]
 
     @property
     def has_boundary_data(self):
         """Whether boundary data has been output in the simulation.
         """
-        return len(self._boundary_data) != 0
+        return len(self._subobstructions[0]._boundary_data) != 0
 
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory.
         """
-        for bndf in self._boundary_data.values():
-            bndf.clear_cache()
+        for s in self._subobstructions:
+            s.clear_cache()
 
-    def __getitem__(self, item):
-        if type(item) == Quantity or type(item) == str:
-            return self.get_boundary_data(item)
-        return self._boundary_data[item]
+    def vmin(self, quantity: Union[str, Quantity]) -> float:
+        """Minimum value of all patches at any time for a specific quantity.
+        """
+        curr_min = min(np.min(s.get_data(quantity).data) for s in self._subobstructions)
+        if curr_min == 0.0:
+            return min(min(np.min(p.data) for p in s.get_data(quantity).patches) for s in self._subobstructions)
+        return curr_min
+
+    def vmax(self, quantity: Union[str, Quantity]) -> float:
+        """Maximum value of all patches at any time for a specific quantity.
+        """
+        curr_max = max(np.max(s.get_data(quantity).data) for s in self._subobstructions)
+        if curr_max == np.float32(-1e33):
+            return max(max(np.max(p.data) for p in s.get_data(quantity).patches) for s in self._subobstructions)
+        return curr_max
+
+    def __getitem__(self, index):
+        """Gets the nth :class:`SubObstruction`.
+        """
+        return self._subobstructions[index]
 
     def __eq__(self, other):
-        return self.id == other.id and self.extent == other.extent
+        return self.id == other.id
 
     def __repr__(self, *args, **kwargs):
-        return f"Obstruction(id={self.id}, extent={self.extent}" + \
-               (f", Quantities={self.quantities}" if self.has_boundary_data else "") + ")"
+        return f"Obstruction(id={self.id}, subobstructions={len(self._subobstructions)}" + \
+               (f", Quantities={[q.label for q in self.quantities]}" if self.has_boundary_data else "") + ")"

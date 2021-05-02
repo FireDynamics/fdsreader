@@ -18,7 +18,7 @@ class Quantity:
         self.quantity = quantity
 
     def __eq__(self, other):
-        return self.quantity == other.quantity
+        return self.quantity == other.quantity and self.label == other.label and self.unit == other.unit
 
     def __hash__(self):
         return hash(self.label)
@@ -54,7 +54,7 @@ class Device:
 def create_hash(path: str):
     """Returns the md5 hash as string for the given file.
     """
-    return str(hashlib.md5(open(path, 'rb').read()))
+    return str(hashlib.md5(open(path, 'rb').read()).hexdigest())
 
 
 def scan_directory_smv(directory: str):

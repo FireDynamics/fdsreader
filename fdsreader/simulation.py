@@ -1,11 +1,11 @@
+import logging
 import os
-from operator import attrgetter
 from typing import List, TextIO, Dict, AnyStr, Sequence, Tuple, Union
 
 import numpy as np
 import pickle
 
-from fdsreader.bndf import Obstruction, Patch, ObstructionCollection
+from fdsreader.bndf import Obstruction, Patch, ObstructionCollection, SubObstruction
 from fdsreader.geom import Geometry, GeomBoundary, GeometryCollection
 from fdsreader.isof import Isosurface, IsosurfaceCollection
 from fdsreader.part import Particle, ParticleCollection
@@ -21,6 +21,7 @@ from fdsreader._version import __version__
 class Simulation:
     """Master class managing all data for a given simulation.
 
+    :ivar reader_version: The version of the fdsreader used to load the Simulation.
     :ivar smv_file_path: Path to the .smv file of the simulation.
     :ivar root_path: Path to the root directory of the simulation.
     :ivar fds_version: Version of FDS the simulation was performed with.
@@ -44,10 +45,12 @@ class Simulation:
     :ivar steps: Dictionary mapping .csv header keys to numpy arrays containing steps data.
     """
 
+    loading = False
+
     def __new__(cls, path: str):
         if settings.ENABLE_CACHING:
             smv_file_path = get_smv_file(path)
-            root_path = os.path.dirname(path)
+            root_path = os.path.dirname(smv_file_path)
 
             with open(smv_file_path, 'r') as infile:
                 for line in infile:
@@ -57,28 +60,40 @@ class Simulation:
 
             pickle_file_path = Simulation._get_pickle_filename(root_path, chid)
 
-            if os.path.isfile(pickle_file_path):
+            if not Simulation.loading and os.path.isfile(pickle_file_path):
+                Simulation.loading = True
                 try:
-                    with open(pickle_file_path) as f:
+                    with open(pickle_file_path, 'rb') as f:
                         sim = pickle.load(f)
-                    # Check if pickle file is valid
-                    if isinstance(sim, cls) and sim.reader_version == __version__ and sim._hash == create_hash(smv_file_path):
-                        return sim
-                except:
+                    # Check if pickle file stores a Simulation
+                    assert isinstance(sim, cls)
+                    # Check if the fdsreader version still matches
+                    assert sim.reader_version == __version__
+                    # Check if the smv_file did not change
+                    assert sim._hash == create_hash(smv_file_path)
+
+                    # Return cached sim if it turned out to be valid
+                    return sim
+                except Exception as e:
+                    if settings.DEBUG:
+                        logging.exception(e)
                     os.remove(pickle_file_path)
 
         return super(Simulation, cls).__new__(cls)
 
+    def __getnewargs__(self):
+        return self.smv_file_path,
+
     def __repr__(self):
         r = f"Simulation(chid={self.chid},\n" + \
-               f"           meshes={len(self.meshes)},\n" + \
-               (f"           obstructions={len(self.obstructions)},\n" if len(self.obstructions) > 0 else "") + \
-               (f"           geometries={len(self.geoms)},\n" if len(self.geoms) > 0 else "") + \
-               (f"           slices={len(self.slices)},\n" if len(self.slices) > 0 else "") + \
-               (f"           plot3d={len(self.data_3d)},\n" if len(self.data_3d) > 0 else "") + \
-               (f"           isosurfaces={len(self.isosurfaces)},\n" if len(self.isosurfaces) > 0 else "") + \
-               (f"           particles={len(self.particles)},\n" if len(self.particles) > 0 else "") + \
-               (f"           devices={len(self.devices)},\n" if len(self.devices) > 0 else "")
+            f"           meshes={len(self.meshes)},\n" + \
+            (f"           obstructions={len(self.obstructions)},\n" if len(self.obstructions) > 0 else "") + \
+            (f"           geometries={len(self.geoms)},\n" if len(self.geoms) > 0 else "") + \
+            (f"           slices={len(self.slices)},\n" if len(self.slices) > 0 else "") + \
+            (f"           plot3d={len(self.data_3d)},\n" if len(self.data_3d) > 0 else "") + \
+            (f"           isosurfaces={len(self.isosurfaces)},\n" if len(self.isosurfaces) > 0 else "") + \
+            (f"           particles={len(self.particles)},\n" if len(self.particles) > 0 else "") + \
+            (f"           devices={len(self.devices)},\n" if len(self.devices) > 0 else "")
         return r[:-2] + ')'
 
     def __init__(self, path: str):
@@ -87,6 +102,7 @@ class Simulation:
             to the .smv file for the simulation in case that multiple simulation output was written to
             the same directory.
         """
+        del Simulation.loading
         # Check if the file has already been instantiated via a cached pickle file
         if not hasattr(self, "_hash"):
             self.reader_version = __version__
@@ -98,8 +114,11 @@ class Simulation:
             self.geoms: List[Geometry] = list()
             self.meshes: List[Mesh] = list()
             self.surfaces: List[Surface] = list()
-            self.obstructions = dict()
+            self.obstructions = list()
             self.ventilations = dict()
+
+            # Will only be used during the loading process to map boundary data to the correct obstruction
+            self._subobstructions: Dict[Mesh, List[SubObstruction]] = dict()
 
             # First collect all meta-information for any FDS data to later combine the gathered
             # information into data collections
@@ -166,6 +185,10 @@ class Simulation:
                         self._load_boundary_data_geom(smv_file, keyword)
                     elif keyword.startswith("PRT5"):
                         self._load_particle_data(smv_file, keyword)
+                    elif keyword.startswith("SHOW_OBST"):
+                        self._toggle_obst(smv_file, keyword)
+                    elif keyword.startswith("HIDE_OBST"):
+                        self._toggle_obst(smv_file, keyword)
 
                 self.cpu = self._load_CPU_data()
                 if device_tmp != "":
@@ -174,9 +197,8 @@ class Simulation:
             # POST INIT (post read)
             self.out_file_path = os.path.join(self.root_path, self.chid + ".out")
             self.ventilations: List[Ventilation] = list(self.ventilations.values())
-            self.obstructions = ObstructionCollection(self._merged_obstructions)
-            for obst in self.obstructions:
-                obst._post_init()
+            self.obstructions = ObstructionCollection(self.obstructions)
+
             # Combine the gathered temporary information into data collections
             self.geom_data = GeometryCollection(self.geom_data)
             self.slices = SliceCollection(
@@ -246,81 +268,58 @@ class Simulation:
         temp_data = list()
         n = int(smv_file.readline().strip())
 
-        if n != 0:
-            self.obstructions[mesh] = list()
+        if n > 0:
+            self._subobstructions[mesh] = list()
 
         for _ in range(n):
             line = smv_file.readline().strip().split()
             ext = [float(line[i]) for i in range(6)]
-            obst_ordinal = int(line[6])
+            # The ordinal is negative if the obstruction was created due to a hole. We will ignore that for now
+            obst_ordinal = abs(int(line[6]))
 
             side_surfaces = tuple(self.surfaces[int(line[i]) - 1] for i in range(7, 13))
             if len(line) > 13:
                 texture_origin = (float(line[13]), float(line[14]), float(line[15]))
-                temp_data.append((obst_ordinal, Extent(*ext), side_surfaces, texture_origin))
             else:
-                temp_data.append((obst_ordinal, Extent(*ext), side_surfaces))
-
-        # We need to save the extents of obstructions that have been created due to a hole to later
-        # recreate a Hole with the correct extents
-        hole_extents: Dict[int, List[Extent]] = dict()
+                texture_origin = self.default_texture_origin
+            temp_data.append((obst_ordinal, Extent(*ext), side_surfaces, texture_origin))
 
         for tmp in temp_data:
+            obst_ordinal, extent, side_surfaces, texture_origin = tmp
+
             line = smv_file.readline().strip().split()
             bound_indices = (
                 int(float(line[0])) - 1, int(float(line[1])) - 1, int(float(line[2])) - 1,
                 int(float(line[3])) - 1, int(float(line[4])) - 1, int(float(line[5])) - 1)
             color_index = int(line[6])
             block_type = int(line[7])
-            if color_index == -3:
-                rgba = tuple(float(line[i]) for i in range(8, 12))
-            else:
-                rgba = ()
+            rgba = tuple(float(line[i]) for i in range(8, 12)) if color_index == -3 else ()
 
-            if len(tmp) == 4:
-                obst_ordinal, extent, side_surfaces, texture_origin = tmp
-            else:
-                obst_ordinal, extent, side_surfaces = tmp
-                texture_origin = self.default_texture_origin
+            obst = next((o for o in self.obstructions if obst_ordinal == o.id), None)
+            if obst is None:
+                obst = Obstruction(obst_ordinal, color_index, block_type, texture_origin, rgba)
+                self.obstructions.append(obst)
 
-            obst_tmp = Obstruction(obst_ordinal, side_surfaces, bound_indices, color_index,
-                                   block_type, texture_origin, rgba=rgba)
-            obst = next((o for o in self._merged_obstructions if o.id == obst_tmp.id), obst_tmp)
-
-            self.obstructions[mesh].append(obst)
-            # Holes will be handles differently
-            if obst_ordinal < 0:
-                if mesh not in obst._extents:
-                    obst._extents[mesh] = list()
-                obst._extents[mesh].append(extent)
-            else:
-                obst._extents[mesh] = extent
+            if not any(obst_ordinal == o.id for o in mesh.obstructions):
                 mesh.obstructions.append(obst)
 
-            if obst_ordinal < 0:
-                if obst_ordinal not in hole_extents:
-                    hole_extents[obst_ordinal] = list()
-                hole_extents[obst_ordinal].append(extent)
+            subobst = SubObstruction(side_surfaces, bound_indices, extent)
 
-        for ordinal, extents in hole_extents.items():
-            hole_extent = list()
+            self._subobstructions[mesh].append(subobst)
+            obst._subobstructions.append(subobst)
 
-            minx = min(extents, key=attrgetter('x_start'))
-            hole_extent.append(minx.x_end)
-            maxx = max(extents, key=attrgetter('x_end'))
-            hole_extent.append(maxx.x_start)
-            miny = min(extents, key=attrgetter('y_start'))
-            hole_extent.append(miny.y_end)
-            maxy = max(extents, key=attrgetter('y_end'))
-            hole_extent.append(maxy.y_start)
-            minz = min(extents, key=attrgetter('z_start'))
-            hole_extent.append(minz.z_end)
-            maxz = max(extents, key=attrgetter('z_end'))
-            hole_extent.append(maxz.z_start)
+    def _toggle_obst(self, smv_file: TextIO, line: str):
+        line = line.split()
+        mesh = self.meshes[int(line[-1]) - 1]
 
-            hole_extent = Extent(*hole_extent)
-            obst = next(o for o in self._merged_obstructions if o.id == ordinal)
-            obst._extents[mesh].append(hole_extent)
+        obst_index, time = smv_file.readline().split()
+        time = float(time)
+        subobst = self._subobstructions[mesh][int(obst_index) - 1]
+
+        if "HIDE_OBST" in line[0]:
+            subobst._hide(time)
+        else:
+            subobst._show(time)
 
     def _load_geoms(self, smv_file: TextIO, line: str):
         ngeoms = int(line.split()[1])
@@ -347,15 +346,6 @@ class Simulation:
             else:
                 geom = Geometry(file_path, texture_mapping, texture_origin, is_terrain, rgb)
             self.geoms.append(geom)
-
-    @property
-    def _merged_obstructions(self) -> List[Obstruction]:
-        ret = list()
-        for _, obstructions in self.obstructions.items():
-            for obst in obstructions:
-                if not any(obst.id == o.id for o in ret):
-                    ret.append(obst)
-        return ret
 
     @log_error("vents")
     def _load_vents(self, smv_file: TextIO, mesh: Mesh):
@@ -566,9 +556,8 @@ class Simulation:
             for patch in p:
                 patch._post_init(patch_offset)
 
-            self.obstructions[mesh][obst_index]._add_patches(bid, cell_centered, quantity, label,
-                                                             unit, mesh, p, times, n_t,
-                                                             lower_bounds, upper_bounds)
+            self._subobstructions[mesh][obst_index]._add_patches(bid, cell_centered, quantity, label, unit, p, times,
+                                                                 n_t, lower_bounds, upper_bounds)
 
     @log_error("geom")
     def _load_boundary_data_geom(self, smv_file: TextIO, line: str):

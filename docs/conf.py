@@ -35,7 +35,8 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
     'sphinx_rtd_theme',
-    'autodocsumm'
+    'autodocsumm',
+    'nbsphinx'
 ]
 
 autoclass_content = 'both'

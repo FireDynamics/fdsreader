@@ -17,6 +17,10 @@ class GeometryCollection(FDSDataCollection):
             for geom in self:
                 geom._load_data()
 
+    @property
+    def quantities(self) -> List[Quantity]:
+        return list({geom.quantity for geom in self})
+
     def filter_by_quantity(self, quantity: Union[str, Quantity]):
         """Filters all GeomBoundaries by a specific quantity.
         """

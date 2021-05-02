@@ -1,8 +1,10 @@
 ## Release History
-* (unreleased) 1.0.0
-    * (First official version will be released after sufficient public testing in beta stage)
+* 1.0.0
+    * Reworked bndf data structure
+    * Fixed multiple bugs
+    * Added quantities property to all collections
 
-### Beta *(current stage)*
+### Beta
 * 0.9.22
     * Bugfixes for bndf
 * 0.9.21

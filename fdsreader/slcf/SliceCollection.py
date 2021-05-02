@@ -14,6 +14,10 @@ class SliceCollection(FDSDataCollection):
     def __init__(self, *slices: Iterable[Slice]):
         super().__init__(*slices)
 
+    @property
+    def quantities(self) -> List[Quantity]:
+        return list({slc.quantity for slc in self})
+
     def filter_by_quantity(self, quantity: Union[str, Quantity]):
         """Filters all slices by a specific quantity.
         """

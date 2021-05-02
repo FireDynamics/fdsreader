@@ -13,6 +13,14 @@ class Plot3DCollection(FDSDataCollection):
         super().__init__(*plot3ds)
         self.times = list(times)
 
+    @property
+    def quantities(self) -> List[Quantity]:
+        qs = set()
+        for pl3d in self:
+            for q in pl3d.quantities:
+                qs.add(q)
+        return list(qs)
+
     def filter_by_quantity(self, quantity: Union[str, Quantity]):
         """Filters all plot3d data by a specific quantity.
         """

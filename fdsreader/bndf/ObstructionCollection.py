@@ -1,7 +1,7 @@
-from typing import Iterable, Union, List, Tuple
+from typing import Iterable, Tuple, List
 import numpy as np
 
-from fdsreader.bndf import Boundary, Obstruction
+from fdsreader.bndf import Obstruction
 from fdsreader.utils.data import FDSDataCollection, Quantity
 
 
@@ -13,13 +13,13 @@ class ObstructionCollection(FDSDataCollection):
     def __init__(self, *obstructions: Iterable[Obstruction]):
         super().__init__(*obstructions)
 
-    def filter_by_quantity(self, quantity: Union[str, Quantity]) -> List[Boundary]:
-        """Filters all obstructions for its boundary data by a specific quantity.
-        """
-        if type(quantity) != str:
-            quantity = quantity.quantity
-        return [x.get_boundary_data(quantity) for x in self if
-                x.get_boundary_data(quantity) is not None]
+    @property
+    def quantities(self) -> List[Quantity]:
+        qs = set()
+        for obst in self:
+            for q in obst.quantities:
+                qs.add(q)
+        return list(qs)
 
     def filter_by_boundary_data(self):
         """Filters all obstructions for which output data exists.

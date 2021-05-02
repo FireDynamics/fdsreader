@@ -376,6 +376,17 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         """
         return np.mean([np.mean(subsclice.data) for subsclice in self._subslices.values()])
 
+    @implements(np.std)
+    def std(self):
+        """Calculates the standard deviation over the whole slice.
+
+        :returns: The calculated standard deviation.
+        """
+        mean = self.mean
+        sum = np.sum([np.sum(np.power(subsclice.data-mean, 2)) for subsclice in self._subslices.values()])
+        N = np.sum([subsclice.data.size for subsclice in self._subslices.values()])
+        return np.sqrt(sum / N)
+
     def __array__(self):
         """Method that will be called by numpy when trying to convert the object to a numpy ndarray.
         """

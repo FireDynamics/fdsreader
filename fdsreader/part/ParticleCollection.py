@@ -1,9 +1,9 @@
-from typing import Iterable, Dict
+from typing import Iterable, Dict, List
 import numpy as np
 
 from fdsreader.part import Particle
 from fdsreader.utils import Mesh
-from fdsreader.utils.data import FDSDataCollection
+from fdsreader.utils.data import FDSDataCollection, Quantity
 import fdsreader.utils.fortran_data as fdtype
 from fdsreader import settings
 
@@ -21,6 +21,14 @@ class ParticleCollection(FDSDataCollection):
         if settings.LAZY_LOAD:
             for particle in self:
                 particle._init_callback = self._load_data
+
+    @property
+    def quantities(self) -> List[Quantity]:
+        qs = set()
+        for part in self:
+            for q in part.quantities:
+                qs.add(q)
+        return list(qs)
 
     def _post_init(self):
         if not settings.LAZY_LOAD:

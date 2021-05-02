@@ -38,7 +38,7 @@ class SubPlot3D:
     def data(self) -> np.ndarray:
         """Method to lazy load the 3D data for each quantity of a single mesh.
 
-        :returns: 4D numpy array wiht (x,y,z,q) as dimensions, while q represents the 5 quantities.
+        :returns: 4D numpy array with (x,y,z,q) as dimensions, while q represents the 5 quantities.
         """
         if not hasattr(self, "_data"):
             with open(self.file_path, 'rb') as infile:
@@ -90,7 +90,7 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
 
     @implements(np.mean)
     def mean(self) -> np.ndarray:
-        """Calculates the mean over each quantity individually of the whole Plot3D.
+        """Calculates the mean for each quantity individually of the whole Plot3D.
 
         :returns: The calculated mean values.
         """
@@ -98,6 +98,21 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
         for subplot in self._subplots.values():
             mean_sums += np.mean(subplot.data, axis=(0, 1, 2))
         return mean_sums / len(self._subplots)
+
+    @implements(np.std)
+    def std(self) -> np.ndarray:
+        """Calculates the standard deviation for each quantity individually of the whole Plot3D.
+
+        :returns: The calculated standard deviations.
+        """
+        stds = np.zeros((5,))
+        n_q = len(self.quantities)
+        for q in range(nq):
+            mean = self.mean
+            sum = np.sum([np.sum(np.power(subplot.data[:, :, :, q] - mean, 2)) for subplot in self._subplots.values()])
+            N = np.sum([subplot.data.size / n_q for subplot in self._subplots.values()])
+            return np.sqrt(sum / N)
+        return stds
 
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory.

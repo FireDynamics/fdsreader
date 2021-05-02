@@ -12,6 +12,10 @@ class IsosurfaceCollection(FDSDataCollection):
     def __init__(self, *isosurfaces: Iterable[Isosurface]):
         super().__init__(*isosurfaces)
 
+    @property
+    def quantities(self) -> List[Quantity]:
+        return list({iso.quantity for iso in self})
+
     def filter_by_quantity(self, quantity: Union[str, Quantity]):
         """Filters all isosurfaces by a specific quantity.
         """
