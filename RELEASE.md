@@ -1,4 +1,6 @@
 ## Release History
+* 1.0.3
+    * Bufixes for part
 * 1.0.2
     * Bugfixes for Python 3.6/3.7
 * 1.0.1
