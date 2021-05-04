@@ -494,7 +494,7 @@ class Simulation:
         label = smv_file.readline().strip()
         unit = smv_file.readline().strip()
 
-        bid = int(filename.split('_')[-1][:-3])
+        bid = int(filename.split('_')[-1][:-3]) - 1
 
         file_path = os.path.join(self.root_path, filename)
 
@@ -537,6 +537,7 @@ class Simulation:
 
                 extent, dimension = self._indices_to_extent(patch_info[:6], mesh)
                 orientation = patch_info[6]
+                print(orientation)
                 obst_index = patch_info[7]
 
                 p = Patch(file_path, dimension, extent, orientation, cell_centered,

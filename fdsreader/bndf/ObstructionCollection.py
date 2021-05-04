@@ -33,21 +33,16 @@ class ObstructionCollection(FDSDataCollection):
         obst_min = None
 
         for obst in self:
-            dx = max(obst.extent.x_start - point[0], 0, point[0] - obst.extent.x_end)
-            dy = max(obst.extent.y_start - point[1], 0, point[1] - obst.extent.y_end)
-            dz = max(obst.extent.z_start - point[2], 0, point[2] - obst.extent.z_end)
-            d = np.sqrt(dx * dx + dy * dy + dz * dz)
-            if d < d_min:
-                d_min = d
-                obst_min = obst
+            for subobst in obst:
+                dx = max(subobst.extent.x_start - point[0], 0, point[0] - subobst.extent.x_end)
+                dy = max(subobst.extent.y_start - point[1], 0, point[1] - subobst.extent.y_end)
+                dz = max(subobst.extent.z_start - point[2], 0, point[2] - subobst.extent.z_end)
+                d = np.sqrt(dx * dx + dy * dy + dz * dz)
+                if d < d_min:
+                    d_min = d
+                    obst_min = obst
 
         return obst_min
-
-    def get_border_obstructions(self):
-        """Filters all obstructions with at least one face on the border of a mesh.
-        """
-        raise NotImplementedError("If you need this feature, please open an issue on GitHub "
-                                  "describing your exact needs and your specific use case.")
 
     def __repr__(self):
         return "ObstructionCollection(" + super(ObstructionCollection, self).__repr__() + ")"

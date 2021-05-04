@@ -1,5 +1,5 @@
 import os
-from typing import List, Dict, Tuple, Union
+from typing import List, Dict, Tuple, Union, Literal
 import numpy as np
 
 from fdsreader.utils import Surface, Extent, Quantity, Dimension
@@ -18,8 +18,8 @@ class Patch:
     :ivar n_t: Total number of time steps for which output data has been written.
     """
 
-    def __init__(self, file_path: str, dimension: Dimension, extent: Extent, orientation: int,
-                 cell_centered: bool, patch_offset: int, initial_offset: int, n_t: int):
+    def __init__(self, file_path: str, dimension: Dimension, extent: Extent, orientation: int, cell_centered: bool,
+                 patch_offset: int, initial_offset: int, n_t: int):
         self.file_path = file_path
         self.dimension = dimension
         self.extent = extent
@@ -80,7 +80,7 @@ class Patch:
 
 
 class Boundary:
-    """
+    """Container for boundary data specific to one quantity.
 
     :ivar quantity: Quantity object containing information about the quantity calculated for this
         :class:`Obstruction` with the corresponding label and unit.
@@ -102,10 +102,28 @@ class Boundary:
         self.upper_bounds = upper_bounds
 
     @property
-    def data(self) -> Dict[int, np.ndarray]:
-        """The :class:`Patch` data in each direction (-3=-z, -2=-y, -1=-x, 1=x, 2=y, 3=y).
+    def data(self) -> Dict[int, Patch]:
+        """The :class:`Patch` in each direction (-3=-z, -2=-y, -1=-x, 1=x, 2=y, 3=y).
         """
-        return {p.orientation: p.data for p in self.patches}
+        return {p.orientation: p for p in self.patches}
+
+    @property
+    def vmin(self) -> float:
+        """Minimum value of all patches at any time.
+        """
+        curr_min = np.min(self.lower_bounds)
+        if curr_min == 0.0:
+            return min(np.min(p.data) for p in self.patches)
+        return curr_min
+
+    @property
+    def vmax(self) -> float:
+        """Maximum value of all patches at any time.
+        """
+        curr_max = np.max(self.upper_bounds)
+        if curr_max == np.float32(-1e33):
+            return max(np.max(p.data) for p in self.patches)
+        return curr_max
 
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory.
@@ -151,8 +169,13 @@ class SubObstruction:
     def get_data(self, quantity: Union[str, Quantity]):
         if type(quantity) != str:
             quantity = quantity.quantity
-        return next(
-            b for b in self._boundary_data.values() if b.quantity.quantity == quantity or b.quantity.label == quantity)
+        return next(b for b in self._boundary_data.values() if
+                    b.quantity.quantity.lower() == quantity.lower() or b.quantity.label.lower() == quantity.lower())
+
+    def __getitem__(self, item):
+        if type(item) == int:
+            return self._boundary_data[item]
+        return self.get_data(item)
 
     def _hide(self, time: float):
         self.hide_times.append(time)
@@ -180,6 +203,16 @@ class SubObstruction:
                 ret.append(time)
 
         return np.array(ret)
+
+    def vmin(self, quantity: Union[str, Quantity]) -> float:
+        """Minimum value of all patches at any time for a specific quantity.
+        """
+        return self.get_data(quantity).vmin
+
+    def vmax(self, quantity: Union[str, Quantity]) -> float:
+        """Maximum value of all patches at any time for a specific quantity.
+        """
+        return self.get_data(quantity).vmax
 
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory.
@@ -235,13 +268,28 @@ class Obstruction:
         """
         return [b.quantity for b in self._subobstructions[0]._boundary_data.values()]
 
-    def get_boundary_data(self, quantity: Union[Quantity, str]) -> List[Boundary]:
+    def filter_by_orientation(self, orientation: Literal[-3, -2, -1, 0, 1, 2, 3] = 0) -> List[SubObstruction]:
+        """Filter all SubObstructions by a specific orientation. All returned SubObstructions will contain boundary data
+            in the specified orientation.
+        """
+        return [subobst for subobst in self._subobstructions if
+                orientation in next(iter(subobst._boundary_data.values())).data.keys()]
+
+    def get_boundary_data(self, quantity: Union[Quantity, str],
+                          orientation: Literal[-3, -2, -1, 0, 1, 2, 3] = 0) -> List[Boundary]:
         """Gets the boundary data for a specific quantity of all SubObstructions.
+
+        :param quantity: The quantity to filter by.
+        :param orientation: Optionally filter by a specific orientation as well (-3=-z, -2=-y, -1=-x, 1=x, 2=y, 3=y).
+            A value of 0 indicates to no filter.
         """
         if type(quantity) != str:
             quantity = quantity.quantity
 
-        return [subobst.get_data(quantity) for subobst in self._subobstructions]
+        ret = [subobst.get_data(quantity) for subobst in self._subobstructions]
+        if orientation == 0:
+            return ret
+        return [bndf for bndf in ret if orientation in bndf.data.keys()]
 
     @property
     def has_boundary_data(self):
@@ -258,18 +306,12 @@ class Obstruction:
     def vmin(self, quantity: Union[str, Quantity]) -> float:
         """Minimum value of all patches at any time for a specific quantity.
         """
-        curr_min = min(np.min(s.get_data(quantity).data) for s in self._subobstructions)
-        if curr_min == 0.0:
-            return min(min(np.min(p.data) for p in s.get_data(quantity).patches) for s in self._subobstructions)
-        return curr_min
+        return min(s.vmin(quantity) for s in self._subobstructions)
 
     def vmax(self, quantity: Union[str, Quantity]) -> float:
         """Maximum value of all patches at any time for a specific quantity.
         """
-        curr_max = max(np.max(s.get_data(quantity).data) for s in self._subobstructions)
-        if curr_max == np.float32(-1e33):
-            return max(max(np.max(p.data) for p in s.get_data(quantity).patches) for s in self._subobstructions)
-        return curr_max
+        return max(s.vmax(quantity) for s in self._subobstructions)
 
     def __getitem__(self, index):
         """Gets the nth :class:`SubObstruction`.

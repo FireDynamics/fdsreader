@@ -12,3 +12,9 @@ ______________
    :members:
    :undoc-members:
    :noindex:
+
+.. automodule:: fdsreader.bndf.utils
+   :autosummary:
+   :members:
+   :undoc-members:
+   :noindex:
