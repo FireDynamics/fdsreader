@@ -1,4 +1,6 @@
 ## Release History
+* 1.0.1
+    * Vmin/Vmax and numpy min/max support for slcf
 * 1.0.0
     * Reworked bndf data structure
     * Fixed multiple bugs

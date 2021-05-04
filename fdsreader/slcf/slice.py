@@ -108,6 +108,14 @@ class SubSlice:
                 self._load_data(file_path, self._vector_data[direction])
         return self._vector_data
 
+    @property
+    def vmin(self):
+        return np.min(self.data)
+
+    @property
+    def vmax(self):
+        return np.max(self.data)
+
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory.
         """
@@ -295,6 +303,14 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
 
         return coords
 
+    @property
+    def vmin(self):
+        return np.min(self)
+
+    @property
+    def vmax(self):
+        return np.max(self)
+
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory.
         """
@@ -367,6 +383,14 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         if self.orientation == 0:
             return '3D'
         return '2D'
+
+    @implements(np.min)
+    def _min(self):
+        return min(subsclice.vmin for subsclice in self._subslices.values())
+
+    @implements(np.max)
+    def _max(self):
+        return max(subsclice.vmax for subsclice in self._subslices.values())
 
     @implements(np.mean)
     def mean(self):
