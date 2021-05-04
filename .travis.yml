@@ -3,7 +3,9 @@ jobs:
     - stage: deploy
       language: python
       python: 3.8
-      install: pip install -r requirements.txt
+      install:
+        - |
+          while read requirement; do pip install $requirement || conda install --yes $requirement ; done < requirements.txt
       script:
         - cd $TRAVIS_BUILD_DIR
         - sphinx-build -b html docs docs/build
