@@ -1,4 +1,6 @@
 ## Release History
+* 1.0.2
+    * Bugfixes for Python 3.6/3.7
 * 1.0.1
     * Vmin/Vmax and numpy min/max support for slcf
 * 1.0.0
