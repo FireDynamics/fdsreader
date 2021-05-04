@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>fdsreader.slcf.slice &mdash; fdsreader [fdsreader, version 0.9.22] documentation</title>
+  <title>fdsreader.slcf.slice &mdash; fdsreader [fdsreader, version 1.0.1] documentation</title>
   
 
   
@@ -32,6 +32,7 @@
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
@@ -268,6 +269,14 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_load_data</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vector_data</span><span class="p">[</span><span class="n">direction</span><span class="p">])</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vector_data</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">vmin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">vmax</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
 <div class="viewcode-block" id="SubSlice.clear_cache"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.slice.SubSlice.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -455,6 +464,14 @@
 
         <span class="k">return</span> <span class="n">coords</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">vmin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">vmax</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
 <div class="viewcode-block" id="Slice.clear_cache"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.slice.Slice.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -528,6 +545,14 @@
             <span class="k">return</span> <span class="s1">&#39;3D&#39;</span>
         <span class="k">return</span> <span class="s1">&#39;2D&#39;</span>
 
+    <span class="nd">@implements</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_min</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">subsclice</span><span class="o">.</span><span class="n">vmin</span> <span class="k">for</span> <span class="n">subsclice</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subslices</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+    <span class="nd">@implements</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_max</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">subsclice</span><span class="o">.</span><span class="n">vmax</span> <span class="k">for</span> <span class="n">subsclice</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subslices</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
 <div class="viewcode-block" id="Slice.mean"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.slice.Slice.mean">[docs]</a>    <span class="nd">@implements</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Calculates the mean over the whole slice.</span>
@@ -535,6 +560,17 @@
 <span class="sd">        :returns: The calculated mean value.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">subsclice</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="k">for</span> <span class="n">subsclice</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subslices</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span></div>
+
+<div class="viewcode-block" id="Slice.std"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.slice.Slice.std">[docs]</a>    <span class="nd">@implements</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">std</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculates the standard deviation over the whole slice.</span>
+
+<span class="sd">        :returns: The calculated standard deviation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span>
+        <span class="nb">sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">subsclice</span><span class="o">.</span><span class="n">data</span><span class="o">-</span><span class="n">mean</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="k">for</span> <span class="n">subsclice</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subslices</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="n">subsclice</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">size</span> <span class="k">for</span> <span class="n">subsclice</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subslices</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">sum</span> <span class="o">/</span> <span class="n">N</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">__array__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Method that will be called by numpy when trying to convert the object to a numpy ndarray.</span>

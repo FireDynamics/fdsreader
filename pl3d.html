@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Plot3D files &mdash; fdsreader [fdsreader, version 0.9.22] documentation</title>
+  <title>Plot3D files &mdash; fdsreader [fdsreader, version 1.0.1] documentation</title>
   
 
   
@@ -32,6 +32,7 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -159,10 +160,51 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="plot3d-files">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="plot3d-files">
 <h1>Plot3D files<a class="headerlink" href="#plot3d-files" title="Permalink to this headline">¶</a></h1>
 <p>Collection of <code class="xref py py-class docutils literal notranslate"><span class="pre">Plot3D</span></code> objects. Offers extensive functionality for filtering and
 using plot3Ds as well as its subclasses such as <code class="xref py py-class docutils literal notranslate"><span class="pre">SubPlot3D</span></code>.</p>
+<p><strong>Miscellaneous:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">quantities</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py attribute">
+<dt>
+<code class="sig-prename descclassname"><span class="pre">fdsreader.pl3d.Plot3DCollection.</span></code><code class="sig-name descname"><span class="pre">quantities</span></code></dt>
+<dd></dd></dl>
+
 <p><strong>Classes:</strong></p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -218,7 +260,10 @@ calculated for this Plot3D with the corresponding label and unit.</p></li>
 <td><p>Remove all data from the internal cache that has been loaded so far to free memory.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean</span></code>()</p></td>
-<td><p>Calculates the mean over each quantity individually of the whole Plot3D.</p></td>
+<td><p>Calculates the mean for each quantity individually of the whole Plot3D.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">std</span></code>()</p></td>
+<td><p>Calculates the standard deviation for each quantity individually of the whole Plot3D.</p></td>
 </tr>
 </tbody>
 </table>
@@ -231,10 +276,21 @@ calculated for this Plot3D with the corresponding label and unit.</p></li>
 <dl class="py method">
 <dt>
 <code class="sig-name descname"><span class="pre">mean</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.ndarray</span><a class="reference internal" href="_modules/fdsreader/pl3d/pl3d.html#Plot3D.mean"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Calculates the mean over each quantity individually of the whole Plot3D.</p>
+<dd><p>Calculates the mean for each quantity individually of the whole Plot3D.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>The calculated mean values.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname"><span class="pre">std</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.ndarray</span><a class="reference internal" href="_modules/fdsreader/pl3d/pl3d.html#Plot3D.std"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Calculates the standard deviation for each quantity individually of the whole Plot3D.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The calculated standard deviations.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -286,7 +342,7 @@ calculated for this Plot3D with the corresponding label and unit.</p></li>
 <dd><p>Method to lazy load the 3D data for each quantity of a single mesh.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>4D numpy array wiht (x,y,z,q) as dimensions, while q represents the 5 quantities.</p>
+<dd class="field-odd"><p>4D numpy array with (x,y,z,q) as dimensions, while q represents the 5 quantities.</p>
 </dd>
 </dl>
 </dd></dl>

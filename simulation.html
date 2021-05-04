@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Simulation &mdash; fdsreader [fdsreader, version 0.9.22] documentation</title>
+  <title>Simulation &mdash; fdsreader [fdsreader, version 1.0.1] documentation</title>
   
 
   
@@ -32,6 +32,7 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -159,7 +160,31 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="simulation">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="simulation">
 <h1>Simulation<a class="headerlink" href="#simulation" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt>
@@ -168,6 +193,7 @@
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
 <dd class="field-odd"><ul class="simple">
+<li><p><strong>reader_version</strong> – The version of the fdsreader used to load the Simulation.</p></li>
 <li><p><strong>smv_file_path</strong> – Path to the .smv file of the simulation.</p></li>
 <li><p><strong>root_path</strong> – Path to the root directory of the simulation.</p></li>
 <li><p><strong>fds_version</strong> – Version of FDS the simulation was performed with.</p></li>
@@ -207,6 +233,36 @@ the same directory.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py attribute">
+<dt>
+<code class="sig-name descname"><span class="pre">devices</span></code><em class="property"><span class="pre">:</span> <span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.utils.data.Device</span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.utils.data.Device</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt>
+<code class="sig-name descname"><span class="pre">geoms</span></code><em class="property"><span class="pre">:</span> <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.geom.geometry.Geometry</span><span class="p"><span class="pre">]</span></span></em></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt>
+<code class="sig-name descname"><span class="pre">loading</span></code><em class="property"> <span class="pre">=</span> <span class="pre">False</span></em></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt>
+<code class="sig-name descname"><span class="pre">meshes</span></code><em class="property"><span class="pre">:</span> <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.utils.fds_classes.mesh.Mesh</span><span class="p"><span class="pre">]</span></span></em></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt>
+<code class="sig-name descname"><span class="pre">surfaces</span></code><em class="property"><span class="pre">:</span> <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.utils.fds_classes.surface.Surface</span><span class="p"><span class="pre">]</span></span></em></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt>
+<code class="sig-name descname"><span class="pre">ventilations</span></code><em class="property"><span class="pre">:</span> <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.utils.fds_classes.ventilation.Ventilation</span><span class="p"><span class="pre">]</span></span></em></dt>
+<dd></dd></dl>
 
 </dd></dl>
 

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>FDSReader documentation! &mdash; fdsreader [fdsreader, version 0.9.22] documentation</title>
+  <title>FDSReader documentation! &mdash; fdsreader [fdsreader, version 1.0.1] documentation</title>
   
 
   
@@ -32,6 +32,7 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -158,7 +159,31 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="fdsreader-documentation">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="fdsreader-documentation">
 <h1>FDSReader documentation!<a class="headerlink" href="#fdsreader-documentation" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">FDSReader</span></p>
@@ -182,6 +207,7 @@
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
 <dd class="field-odd"><ul class="simple">
+<li><p><strong>reader_version</strong> – The version of the fdsreader used to load the Simulation.</p></li>
 <li><p><strong>smv_file_path</strong> – Path to the .smv file of the simulation.</p></li>
 <li><p><strong>root_path</strong> – Path to the root directory of the simulation.</p></li>
 <li><p><strong>fds_version</strong> – Version of FDS the simulation was performed with.</p></li>
@@ -222,6 +248,11 @@ the same directory.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt>
+<code class="sig-name descname"><span class="pre">loading</span></code><em class="property"> <span class="pre">=</span> <span class="pre">False</span></em></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 </div>
@@ -256,11 +287,28 @@ using isosurfaces as well as its subclasses such as <code class="xref py py-clas
 </tr>
 </tbody>
 </table>
+<p><strong>Attributes:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">quantities</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
 <dl class="py method">
 <dt>
 <code class="sig-name descname"><span class="pre">filter_by_quantity</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/isof/IsosurfaceCollection.html#IsosurfaceCollection.filter_by_quantity"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Filters all isosurfaces by a specific quantity.</p>
 </dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">quantities</span></code></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -536,6 +584,23 @@ The list has the size n_triangles, while the indices correspond to indices of th
 <h2>Plot3D files<a class="headerlink" href="#plot3d-files" title="Permalink to this headline">¶</a></h2>
 <p>Collection of <code class="xref py py-class docutils literal notranslate"><span class="pre">Plot3D</span></code> objects. Offers extensive functionality for filtering and
 using plot3Ds as well as its subclasses such as <code class="xref py py-class docutils literal notranslate"><span class="pre">SubPlot3D</span></code>.</p>
+<p><strong>Miscellaneous:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">quantities</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py attribute">
+<dt>
+<code class="sig-prename descclassname"><span class="pre">fdsreader.pl3d.Plot3DCollection.</span></code><code class="sig-name descname"><span class="pre">quantities</span></code></dt>
+<dd></dd></dl>
+
 <p><strong>Classes:</strong></p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -591,7 +656,10 @@ calculated for this Plot3D with the corresponding label and unit.</p></li>
 <td><p>Remove all data from the internal cache that has been loaded so far to free memory.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean</span></code>()</p></td>
-<td><p>Calculates the mean over each quantity individually of the whole Plot3D.</p></td>
+<td><p>Calculates the mean for each quantity individually of the whole Plot3D.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">std</span></code>()</p></td>
+<td><p>Calculates the standard deviation for each quantity individually of the whole Plot3D.</p></td>
 </tr>
 </tbody>
 </table>
@@ -604,10 +672,21 @@ calculated for this Plot3D with the corresponding label and unit.</p></li>
 <dl class="py method">
 <dt>
 <code class="sig-name descname"><span class="pre">mean</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.ndarray</span><a class="reference internal" href="_modules/fdsreader/pl3d/pl3d.html#Plot3D.mean"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Calculates the mean over each quantity individually of the whole Plot3D.</p>
+<dd><p>Calculates the mean for each quantity individually of the whole Plot3D.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>The calculated mean values.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname"><span class="pre">std</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.ndarray</span><a class="reference internal" href="_modules/fdsreader/pl3d/pl3d.html#Plot3D.std"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Calculates the standard deviation for each quantity individually of the whole Plot3D.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The calculated standard deviations.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -659,7 +738,7 @@ calculated for this Plot3D with the corresponding label and unit.</p></li>
 <dd><p>Method to lazy load the 3D data for each quantity of a single mesh.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>4D numpy array wiht (x,y,z,q) as dimensions, while q represents the 5 quantities.</p>
+<dd class="field-odd"><p>4D numpy array with (x,y,z,q) as dimensions, while q represents the 5 quantities.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -710,6 +789,18 @@ using slices as well as its subclasses such as <code class="xref py py-class doc
 </tr>
 </tbody>
 </table>
+<p><strong>Attributes:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">quantities</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
 <dl class="py method">
 <dt>
 <code class="sig-name descname"><span class="pre">filter_by_quantity</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/SliceCollection.html#SliceCollection.filter_by_quantity"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
@@ -728,6 +819,11 @@ using slices as well as its subclasses such as <code class="xref py py-class doc
 <dd><p>Filters the slice with the shortest distance to the given point.
 If there are multiple slices with the same distance, a random one will be selected.</p>
 </dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">quantities</span></code></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -804,7 +900,10 @@ slice with the corresponding label and unit.</p></li>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_subslices_cartesian</span></code>()</p></td>
 <td><p>Returns all subslices sorted in cartesian coordinates (2D-slices only).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_global</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">std</span></code>()</p></td>
+<td><p>Calculates the standard deviation over the whole slice.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_global</span></code>()</p></td>
 <td><p>Creates a global 2D-numpy ndarray from all subslices (2D-slices only).</p></td>
 </tr>
 </tbody>
@@ -829,6 +928,12 @@ slice with the corresponding label and unit.</p></li>
 <td><p>Get a list with all SubSlices.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">type</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmax</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmin</span></code></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -896,6 +1001,17 @@ the nth SubSlice will be returned.</p>
 
 <dl class="py method">
 <dt>
+<code class="sig-name descname"><span class="pre">std</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice.std"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Calculates the standard deviation over the whole slice.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The calculated standard deviation.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">subslices</span></code></dt>
 <dd><p>Get a list with all SubSlices.</p>
 </dd></dl>
@@ -911,6 +1027,16 @@ used in the simulation. Other cases will require individual custom combination l
 <dl class="py method">
 <dt>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">type</span></code></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">vmax</span></code></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">vmin</span></code></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -959,6 +1085,12 @@ used in the simulation. Other cases will require individual custom combination l
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vector_data</span></code></p></td>
 <td><p>Method to lazy load the slice’s vector data if it exists.</p></td>
 </tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmax</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmin</span></code></p></td>
+<td><p></p></td>
+</tr>
 </tbody>
 </table>
 <dl class="py method">
@@ -990,6 +1122,16 @@ used in the simulation. Other cases will require individual custom combination l
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">vector_data</span></code></dt>
 <dd><p>Method to lazy load the slice’s vector data if it exists.</p>
 </dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">vmax</span></code></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">vmin</span></code></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -1029,14 +1171,20 @@ using obstructions as well as dependent such as <code class="xref py py-class do
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_by_boundary_data</span></code>()</p></td>
 <td><p>Filters all obstructions for which output data exists.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_by_quantity</span></code>(quantity)</p></td>
-<td><p>Filters all obstructions for its boundary data by a specific quantity.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_border_obstructions</span></code>()</p></td>
-<td><p>Filters all obstructions with at least one face on the border of a mesh.</p></td>
-</tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_nearest_obstruction</span></code>(point)</p></td>
 <td><p>Filters the obstruction with the shortest distance to the given point.</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Attributes:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">quantities</span></code></p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>
@@ -1048,21 +1196,14 @@ using obstructions as well as dependent such as <code class="xref py py-class do
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname"><span class="pre">filter_by_quantity</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.bndf.obstruction.Boundary</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="_modules/fdsreader/bndf/ObstructionCollection.html#ObstructionCollection.filter_by_quantity"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Filters all obstructions for its boundary data by a specific quantity.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt>
-<code class="sig-name descname"><span class="pre">get_border_obstructions</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/ObstructionCollection.html#ObstructionCollection.get_border_obstructions"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Filters all obstructions with at least one face on the border of a mesh.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt>
 <code class="sig-name descname"><span class="pre">get_nearest_obstruction</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">fdsreader.bndf.obstruction.Obstruction</span><a class="reference internal" href="_modules/fdsreader/bndf/ObstructionCollection.html#ObstructionCollection.get_nearest_obstruction"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Filters the obstruction with the shortest distance to the given point.</p>
 </dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">quantities</span></code></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -1073,27 +1214,24 @@ using obstructions as well as dependent such as <code class="xref py py-class do
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Boundary</span></code>(cell_centered, quantity, times, n_t)</p></td>
-<td><p>Container for the actual data which is stored as rectangular plane with specific orientation</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Boundary</span></code>(quantity, cell_centered, times, …)</p></td>
+<td><p>Container for boundary data specific to one quantity.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Hole</span></code>(dimension, extent, orientation, …)</p></td>
-<td><p>Represents a hole in an obstruction.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Obstruction</span></code>(oid, side_surfaces, …)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Obstruction</span></code>(oid, color_index, block_type, …)</p></td>
 <td><p>A box-shaped obstruction with specific surfaces (materials) on each side.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Patch</span></code>(file_path, dimension, extent, …)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Patch</span></code>(file_path, dimension, extent, …)</p></td>
 <td><p>Container for the actual data which is stored as rectangular plane with specific orientation</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SubObstruction</span></code>(side_surfaces, …], …)</p></td>
+<td><p>An <code class="xref py py-class docutils literal notranslate"><span class="pre">Obstruction</span></code> consists of 1 or more SubObstructions which can be hidden at specific points in time.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py class">
 <dt>
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.bndf.obstruction.</span></code><code class="sig-name descname"><span class="pre">Boundary</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell_centered</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.data.Quantity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">times</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_t</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Boundary"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><dl class="simple">
-<dt>Container for the actual data which is stored as rectangular plane with specific orientation</dt><dd><p>and extent.</p>
-</dd>
-</dl>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.bndf.obstruction.</span></code><code class="sig-name descname"><span class="pre">Boundary</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.data.Quantity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_centered</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">times</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_t</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patches</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.bndf.obstruction.Patch</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_bounds</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_bounds</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Boundary"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Container for boundary data specific to one quantity.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
 <dd class="field-odd"><ul class="simple">
@@ -1117,12 +1255,6 @@ using obstructions as well as dependent such as <code class="xref py py-class do
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_cache</span></code>()</p></td>
 <td><p>Remove all data from the internal cache that has been loaded so far to free memory.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_patches_in_mesh</span></code>(mesh)</p></td>
-<td><p>Gets all patches in a specific mesh.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_patches_cartesian</span></code>(patches_in)</p></td>
-<td><p>Returns all patches (of same orientation!) sorted in cartesian coordinates.</p></td>
-</tr>
 </tbody>
 </table>
 <p><strong>Attributes:</strong></p>
@@ -1132,8 +1264,8 @@ using obstructions as well as dependent such as <code class="xref py py-class do
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">faces</span></code></p></td>
-<td><p>Global/combines faces for all 6 orientations.</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></p></td>
+<td><p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">Patch</span></code> in each direction (-3=-z, -2=-y, -1=-x, 1=x, 2=y, 3=y).</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmax</span></code></p></td>
 <td><p>Maximum value of all patches at any time.</p></td>
@@ -1151,20 +1283,8 @@ using obstructions as well as dependent such as <code class="xref py py-class do
 
 <dl class="py method">
 <dt>
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">faces</span></code></dt>
-<dd><p>Global/combines faces for all 6 orientations.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt>
-<code class="sig-name descname"><span class="pre">get_patches_in_mesh</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.fds_classes.mesh.Mesh</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.bndf.obstruction.Patch</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.bndf.obstruction.Hole</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Boundary.get_patches_in_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Gets all patches in a specific mesh.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt>
-<em class="property"><span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">sort_patches_cartesian</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">patches_in</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.bndf.obstruction.Patch</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.bndf.obstruction.Hole</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Boundary.sort_patches_cartesian"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Returns all patches (of same orientation!) sorted in cartesian coordinates.</p>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">data</span></code></dt>
+<dd><p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">Patch</span></code> in each direction (-3=-z, -2=-y, -1=-x, 1=x, 2=y, 3=y).</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1183,96 +1303,12 @@ using obstructions as well as dependent such as <code class="xref py py-class do
 
 <dl class="py class">
 <dt>
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.bndf.obstruction.</span></code><code class="sig-name descname"><span class="pre">Hole</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimension</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.dimension.Dimension</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extent</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.extent.Extent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_centered</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Hole"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Represents a hole in an obstruction. Used to output default values instead of actual data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Variables</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>dimension</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">Dimension</span></code> object containing information about steps in each dimension.</p></li>
-<li><p><strong>extent</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">Extent</span></code> object containing 3-dimensional extent information.</p></li>
-<li><p><strong>orientation</strong> – The direction the patch is facing (x={-1;1}, y={-2;2}, z={-3;3}).</p></li>
-<li><p><strong>cell_centered</strong> – Indicates whether centered positioning for data is used.</p></li>
-</ul>
-</dd>
-</dl>
-<p><strong>Methods:</strong></p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_cache</span></code>()</p></td>
-<td><p>Exists only to be consistent with the <code class="xref py py-class docutils literal notranslate"><span class="pre">Patch</span></code> class.</p></td>
-</tr>
-</tbody>
-</table>
-<p><strong>Attributes:</strong></p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></p></td>
-<td><p>Creates an array filled with the specified default value (self.default_value).</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_value</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code></p></td>
-<td><p>Convenience function to calculate the shape of the array containing data for this hole.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">size</span></code></p></td>
-<td><p>Convenience function to calculate the number of data points in the array for this hole.</p></td>
-</tr>
-</tbody>
-</table>
-<dl class="py method">
-<dt>
-<code class="sig-name descname"><span class="pre">clear_cache</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Hole.clear_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Exists only to be consistent with the <code class="xref py py-class docutils literal notranslate"><span class="pre">Patch</span></code> class.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt>
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">data</span></code></dt>
-<dd><p>Creates an array filled with the specified default value (self.default_value).</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt>
-<code class="sig-name descname"><span class="pre">default_value</span></code><em class="property"> <span class="pre">=</span> <span class="pre">0</span></em></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt>
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">shape</span></code></dt>
-<dd><p>Convenience function to calculate the shape of the array containing data for this hole.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt>
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">size</span></code></dt>
-<dd><p>Convenience function to calculate the number of data points in the array for this hole.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt>
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.bndf.obstruction.</span></code><code class="sig-name descname"><span class="pre">Obstruction</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">oid</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">side_surfaces</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.utils.fds_classes.surface.Surface</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.fds_classes.surface.Surface</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.fds_classes.surface.Surface</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.fds_classes.surface.Surface</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.fds_classes.surface.Surface</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.fds_classes.surface.Surface</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bound_indices</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_index</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texture_origin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rgba</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">(</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Obstruction"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.bndf.obstruction.</span></code><code class="sig-name descname"><span class="pre">Obstruction</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">oid</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_index</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texture_origin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rgba</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">(</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Obstruction"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>A box-shaped obstruction with specific surfaces (materials) on each side.</p>
 <blockquote>
 <div><dl class="field-list simple">
 <dt class="field-odd">ivar id</dt>
 <dd class="field-odd"><p>ID of the obstruction.</p>
-</dd>
-<dt class="field-even">ivar side_surfaces</dt>
-<dd class="field-even"><p>Tuple of six surfaces for each side of the cuboid.</p>
-</dd>
-<dt class="field-odd">ivar bound_indices</dt>
-<dd class="field-odd"><p>Indices used to define obstruction bounds in terms of mesh locations.</p>
 </dd>
 <dt class="field-even">ivar color_index</dt>
 <dd class="field-even"><p>Type of coloring used to color obstruction.</p>
@@ -1303,12 +1339,27 @@ pattern should begin.</p>
 <dd class="field-even"><p>Optional color of the obstruction in form of a 4-element tuple
 (ranging from 0.0 to 1.0).</p>
 </dd>
-<dt class="field-odd">ivar extent</dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Extent</span></code> object containing 3-dimensional extent information.</p>
-</dd>
 </dl>
 </dd>
 </dl>
+<p><strong>Attributes:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">bounding_box</span></code></p></td>
+<td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Extent</span></code> object representing the bounding box around the Obstruction.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">has_boundary_data</span></code></p></td>
+<td><p>Whether boundary data has been output in the simulation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">quantities</span></code></p></td>
+<td><p>Get a list of all quantities for which boundary data exists.</p></td>
+</tr>
+</tbody>
+</table>
 <p><strong>Methods:</strong></p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -1319,26 +1370,26 @@ pattern should begin.</p>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_cache</span></code>()</p></td>
 <td><p>Remove all data from the internal cache that has been loaded so far to free memory.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_boundary_data</span></code>(quantity)</p></td>
-<td><p>Gets the boundary data for a specific quantity.</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_by_orientation</span></code>([orientation])</p></td>
+<td><p>Filter all SubObstructions by a specific orientation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_boundary_data</span></code>(quantity[, orientation])</p></td>
+<td><p>Gets the boundary data for a specific quantity of all SubObstructions.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmax</span></code>(quantity)</p></td>
+<td><p>Maximum value of all patches at any time for a specific quantity.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmin</span></code>(quantity)</p></td>
+<td><p>Minimum value of all patches at any time for a specific quantity.</p></td>
 </tr>
 </tbody>
 </table>
-<p><strong>Attributes:</strong></p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">has_boundary_data</span></code></p></td>
-<td><p>Whether boundary data has been output in the simulation.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">quantities</span></code></p></td>
-<td><p>Get a list of all quantities for which boundary data exists.</p></td>
-</tr>
-</tbody>
-</table>
+<dl class="py method">
+<dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">bounding_box</span></code></dt>
+<dd><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Extent</span></code> object representing the bounding box around the Obstruction.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt>
 <code class="sig-name descname"><span class="pre">clear_cache</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Obstruction.clear_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
@@ -1347,8 +1398,24 @@ pattern should begin.</p>
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname"><span class="pre">get_boundary_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">,</span> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Obstruction.get_boundary_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Gets the boundary data for a specific quantity.</p>
+<code class="sig-name descname"><span class="pre">filter_by_orientation</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Literal[-</span> <span class="pre">3,</span> <span class="pre">-</span> <span class="pre">2,</span> <span class="pre">-</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">2,</span> <span class="pre">3]</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.bndf.obstruction.SubObstruction</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Obstruction.filter_by_orientation"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Filter all SubObstructions by a specific orientation. All returned SubObstructions will contain boundary data
+in the specified orientation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname"><span class="pre">get_boundary_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">,</span> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Literal[-</span> <span class="pre">3,</span> <span class="pre">-</span> <span class="pre">2,</span> <span class="pre">-</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">2,</span> <span class="pre">3]</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.bndf.obstruction.Boundary</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Obstruction.get_boundary_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Gets the boundary data for a specific quantity of all SubObstructions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>quantity</strong> – The quantity to filter by.</p></li>
+<li><p><strong>orientation</strong> – Optionally filter by a specific orientation as well (-3=-z, -2=-y, -1=-x, 1=x, 2=y, 3=y).
+A value of 0 indicates to no filter.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -1361,6 +1428,18 @@ pattern should begin.</p>
 <dt>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">quantities</span></code></dt>
 <dd><p>Get a list of all quantities for which boundary data exists.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname"><span class="pre">vmax</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Obstruction.vmax"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Maximum value of all patches at any time for a specific quantity.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname"><span class="pre">vmin</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Obstruction.vmin"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Minimum value of all patches at any time for a specific quantity.</p>
 </dd></dl>
 
 </dd></dl>
@@ -1437,6 +1516,104 @@ pattern should begin.</p>
 <dd><p>Convenience function to calculate the number of data points in the array for this patch.</p>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py class">
+<dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.bndf.obstruction.</span></code><code class="sig-name descname"><span class="pre">SubObstruction</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">side_surfaces</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.utils.fds_classes.surface.Surface</span><span class="p"><span class="pre">,</span> </span><span class="p"><span class="pre">…</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bound_indices</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extent</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.extent.Extent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#SubObstruction"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>An <code class="xref py py-class docutils literal notranslate"><span class="pre">Obstruction</span></code> consists of 1 or more SubObstructions which can be hidden at specific points in time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>extent</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">Extent</span></code> object containing 3-dimensional extent information.</p></li>
+<li><p><strong>bound_indices</strong> – Indices used to define obstruction bounds in terms of mesh locations.</p></li>
+<li><p><strong>side_surfaces</strong> – Tuple of six surfaces for each side of the cuboid.</p></li>
+<li><p><strong>hide_times</strong> – List with points in time from when on the SubObstruction will be hidden.</p></li>
+<li><p><strong>show_times</strong> – List with points in time from when on the SubObstruction will be shown.</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Methods:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_cache</span></code>()</p></td>
+<td><p>Remove all data from the internal cache that has been loaded so far to free memory.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_data</span></code>(quantity)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmax</span></code>(quantity)</p></td>
+<td><p>Maximum value of all patches at any time for a specific quantity.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmin</span></code>(quantity)</p></td>
+<td><p>Minimum value of all patches at any time for a specific quantity.</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Attributes:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">visible_times</span></code></p></td>
+<td><p>Returns an ndarray containing all time steps when there is data available for the SubObstruction.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt>
+<code class="sig-name descname"><span class="pre">clear_cache</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#SubObstruction.clear_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Remove all data from the internal cache that has been loaded so far to free memory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname"><span class="pre">get_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#SubObstruction.get_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">visible_times</span></code></dt>
+<dd><p>Returns an ndarray containing all time steps when there is data available for the SubObstruction. Will return an
+empty list when no data is output at all.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname"><span class="pre">vmax</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#SubObstruction.vmax"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Maximum value of all patches at any time for a specific quantity.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname"><span class="pre">vmin</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#SubObstruction.vmin"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Minimum value of all patches at any time for a specific quantity.</p>
+</dd></dl>
+
+</dd></dl>
+
+<p><strong>Functions:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_patches_cartesian</span></code>(patches_in)</p></td>
+<td><p>Returns all patches (of same orientation!) sorted in cartesian coordinates.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py function">
+<dt>
+<code class="sig-prename descclassname"><span class="pre">fdsreader.bndf.utils.</span></code><code class="sig-name descname"><span class="pre">sort_patches_cartesian</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">patches_in</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.bndf.obstruction.Patch</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/utils.html#sort_patches_cartesian"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Returns all patches (of same orientation!) sorted in cartesian coordinates.</p>
 </dd></dl>
 
 </div>
@@ -1575,11 +1752,28 @@ using geometry data.</p>
 </tr>
 </tbody>
 </table>
+<p><strong>Attributes:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">quantities</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
 <dl class="py method">
 <dt>
 <code class="sig-name descname"><span class="pre">filter_by_quantity</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/geom/GeometryCollection.html#GeometryCollection.filter_by_quantity"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Filters all GeomBoundaries by a specific quantity.</p>
 </dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">quantities</span></code></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -1603,6 +1797,23 @@ using geometry data.</p>
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.part.ParticleCollection.</span></code><code class="sig-name descname"><span class="pre">ParticleCollection</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">particles</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.part.particle.Particle</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/part/ParticleCollection.html#ParticleCollection"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Collection of <code class="xref py py-class docutils literal notranslate"><span class="pre">Plot3D</span></code> objects. Offers extensive functionality for filtering and
 using plot3Ds as well as its subclasses such as <code class="xref py py-class docutils literal notranslate"><span class="pre">SubPlot3D</span></code>.</p>
+<p><strong>Attributes:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">quantities</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">quantities</span></code></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <p><strong>Classes:</strong></p>
@@ -1856,12 +2067,26 @@ dimensions can be left out from the tuple.</p></li>
 <dl class="py method">
 <dt>
 <code class="sig-name descname"><span class="pre">get_obstruction_mask</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell_centered</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.ndarray</span><a class="reference internal" href="_modules/fdsreader/utils/fds_classes/mesh.html#Mesh.get_obstruction_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd></dd></dl>
+<dd><p>Marks all cells which are blocked by an obstruction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A 4-dimensional array with time as first and x,y,z as last dimensions. The array depends on time as
+as obstructions may be hidden as specific points in time.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt>
 <code class="sig-name descname"><span class="pre">get_obstruction_mask_slice</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">1</span><span class="p"><span class="pre">,</span> </span><span class="pre">2</span><span class="p"><span class="pre">,</span> </span><span class="pre">3</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_centered</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/fds_classes/mesh.html#Mesh.get_obstruction_mask_slice"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd></dd></dl>
+<dd><p>Marks all cells of a single slice which are blocked by an obstruction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A 4-dimensional array with time as first and x,y,z as last dimensions. The array depends on time as
+as obstructions may be hidden as specific points in time.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py attribute">
 <dt>

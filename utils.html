@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Utilities &mdash; fdsreader [fdsreader, version 0.9.22] documentation</title>
+  <title>Utilities &mdash; fdsreader [fdsreader, version 1.0.1] documentation</title>
   
 
   
@@ -32,6 +32,7 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -158,7 +159,31 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="utilities">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="utilities">
 <h1>Utilities<a class="headerlink" href="#utilities" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt>
@@ -313,12 +338,26 @@ dimensions can be left out from the tuple.</p></li>
 <dl class="py method">
 <dt>
 <code class="sig-name descname"><span class="pre">get_obstruction_mask</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell_centered</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.ndarray</span><a class="reference internal" href="_modules/fdsreader/utils/fds_classes/mesh.html#Mesh.get_obstruction_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd></dd></dl>
+<dd><p>Marks all cells which are blocked by an obstruction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A 4-dimensional array with time as first and x,y,z as last dimensions. The array depends on time as
+as obstructions may be hidden as specific points in time.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt>
 <code class="sig-name descname"><span class="pre">get_obstruction_mask_slice</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">1</span><span class="p"><span class="pre">,</span> </span><span class="pre">2</span><span class="p"><span class="pre">,</span> </span><span class="pre">3</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_centered</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/fds_classes/mesh.html#Mesh.get_obstruction_mask_slice"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd></dd></dl>
+<dd><p>Marks all cells of a single slice which are blocked by an obstruction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A 4-dimensional array with time as first and x,y,z as last dimensions. The array depends on time as
+as obstructions may be hidden as specific points in time.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py attribute">
 <dt>

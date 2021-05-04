@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>fdsreader.pl3d.pl3d &mdash; fdsreader [fdsreader, version 0.9.22] documentation</title>
+  <title>fdsreader.pl3d.pl3d &mdash; fdsreader [fdsreader, version 1.0.1] documentation</title>
   
 
   
@@ -32,6 +32,7 @@
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
@@ -198,7 +199,7 @@
     <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Method to lazy load the 3D data for each quantity of a single mesh.</span>
 
-<span class="sd">        :returns: 4D numpy array wiht (x,y,z,q) as dimensions, while q represents the 5 quantities.</span>
+<span class="sd">        :returns: 4D numpy array with (x,y,z,q) as dimensions, while q represents the 5 quantities.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_data&quot;</span><span class="p">):</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
@@ -250,7 +251,7 @@
 
 <div class="viewcode-block" id="Plot3D.mean"><a class="viewcode-back" href="../../../pl3d.html#fdsreader.pl3d.pl3d.Plot3D.mean">[docs]</a>    <span class="nd">@implements</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Calculates the mean over each quantity individually of the whole Plot3D.</span>
+        <span class="sd">&quot;&quot;&quot;Calculates the mean for each quantity individually of the whole Plot3D.</span>
 
 <span class="sd">        :returns: The calculated mean values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -258,6 +259,21 @@
         <span class="k">for</span> <span class="n">subplot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="n">mean_sums</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">subplot</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">mean_sums</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Plot3D.std"><a class="viewcode-back" href="../../../pl3d.html#fdsreader.pl3d.pl3d.Plot3D.std">[docs]</a>    <span class="nd">@implements</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">std</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Calculates the standard deviation for each quantity individually of the whole Plot3D.</span>
+
+<span class="sd">        :returns: The calculated standard deviations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">stds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">5</span><span class="p">,))</span>
+        <span class="n">n_q</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">quantities</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nq</span><span class="p">):</span>
+            <span class="n">mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span>
+            <span class="nb">sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">subplot</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">q</span><span class="p">]</span> <span class="o">-</span> <span class="n">mean</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="k">for</span> <span class="n">subplot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
+            <span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="n">subplot</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">size</span> <span class="o">/</span> <span class="n">n_q</span> <span class="k">for</span> <span class="n">subplot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">sum</span> <span class="o">/</span> <span class="n">N</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">stds</span></div>
 
 <div class="viewcode-block" id="Plot3D.clear_cache"><a class="viewcode-back" href="../../../pl3d.html#fdsreader.pl3d.pl3d.Plot3D.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
