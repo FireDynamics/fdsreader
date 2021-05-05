@@ -1,4 +1,6 @@
 ## Release History
+* 1.0.4
+    * Bugfixes for obst masks
 * 1.0.3
     * Bufixes for part
 * 1.0.2

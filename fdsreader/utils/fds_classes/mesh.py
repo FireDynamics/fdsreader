@@ -43,7 +43,7 @@ class Mesh:
         :returns: A 4-dimensional array with time as first and x,y,z as last dimensions. The array depends on time as
             as obstructions may be hidden as specific points in time.
         """
-        n_t = next(iter(self.obstructions[0]._boundary_data.values())).times
+        n_t = next(iter(self.obstructions[0]._subobstructions[0]._boundary_data.values())).times
         shape = self.dimension.shape(cell_centered=cell_centered)
         mask = np.ones((n_t, shape[0], shape[1], shape[2]), dtype=bool)
         c = 1 if cell_centered else 0

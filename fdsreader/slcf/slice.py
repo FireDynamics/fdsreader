@@ -1,5 +1,5 @@
 import os
-from copy import deepcopy, copy
+from copy import deepcopy
 
 import numpy as np
 import logging
@@ -55,10 +55,16 @@ class SubSlice:
         return shape
 
     @property
-    def orientation(self):
+    def orientation(self) -> Literal[1, 2, 3]:
         """Orientation [1,2,3] of the slice in case it is 2D, 0 otherwise.
         """
         return self.parent_slice.orientation
+
+    @property
+    def cell_centered(self) -> bool:
+        """Indicates whether centered positioning for data is used.
+        """
+        return self.parent_slice.cell_centered
 
     def _load_data(self, file_path: str, data_out: np.ndarray):
         # Both cases (cell_centered True/False) output the same number of data points
