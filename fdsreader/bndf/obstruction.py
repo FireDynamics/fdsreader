@@ -1,5 +1,5 @@
 import os
-from typing import List, Dict, Tuple, Union
+from typing import List, Dict, Tuple, Union, Sequence
 from typing_extensions import Literal
 import numpy as np
 
@@ -186,12 +186,12 @@ class SubObstruction:
         self.show_times.append(time)
         self.show_times.sort()
 
-    @property
-    def visible_times(self) -> np.ndarray:
+    def visible_times(self, times: Sequence[float]) -> np.ndarray:
         """Returns an ndarray containing all time steps when there is data available for the SubObstruction. Will return an
             empty list when no data is output at all.
+
+        :param times: All timesteps of the simulation.
         """
-        times = next(iter(self._boundary_data.values())).times
         ret = list()
 
         hidden = False

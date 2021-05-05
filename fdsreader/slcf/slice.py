@@ -35,10 +35,10 @@ class SubSlice:
     _offset = 3 * fdtype.new((('c', 30),)).itemsize + fdtype.new((('i', 6),)).itemsize
 
     def __init__(self, parent_slc, filename: str, dimension: Dimension, extent: Extent, mesh: Mesh):
+        self._parent_slice = parent_slc
         self.mesh = mesh
         self.dimension = dimension
         self.extent = extent
-        self.parent_slice = parent_slc
 
         self.filename = filename
 
@@ -49,8 +49,8 @@ class SubSlice:
     def shape(self) -> Tuple[int, int]:
         """2D-shape of the slice.
         """
-        shape = self.dimension.shape(cell_centered=self.parent_slice.cell_centered)
-        if self.parent_slice.orientation != 0:
+        shape = self.dimension.shape(cell_centered=self.cell_centered)
+        if self.orientation != 0:
             return shape[0], shape[1]
         return shape
 
@@ -58,13 +58,21 @@ class SubSlice:
     def orientation(self) -> Literal[1, 2, 3]:
         """Orientation [1,2,3] of the slice in case it is 2D, 0 otherwise.
         """
-        return self.parent_slice.orientation
+        return self._parent_slice.orientation
 
     @property
     def cell_centered(self) -> bool:
         """Indicates whether centered positioning for data is used.
         """
-        return self.parent_slice.cell_centered
+        return self._parent_slice.cell_centered
+
+    @property
+    def times(self):
+        return self._parent_slice.times
+
+    @property
+    def n_t(self):
+        return self._parent_slice.n_t
 
     def _load_data(self, file_path: str, data_out: np.ndarray):
         # Both cases (cell_centered True/False) output the same number of data points
@@ -72,19 +80,18 @@ class SubSlice:
         dtype_data = fdtype.combine(fdtype.FLOAT, fdtype.new((('f', n),)))
 
         load_times = False
-        if self.parent_slice.n_t == -1:
+        if self.n_t == -1:
             load_times = True
-            self.parent_slice.n_t = (os.stat(
-                file_path).st_size - self._offset) // dtype_data.itemsize
-            self.parent_slice.times = np.empty(self.parent_slice.n_t)
+            self._parent_slice.n_t = (os.stat(file_path).st_size - self._offset) // dtype_data.itemsize
+            self._parent_slice.times = np.empty(self.n_t)
 
         with open(file_path, 'rb') as infile:
             infile.seek(self._offset)
-            for t, data in enumerate(fdtype.read(infile, dtype_data, self.parent_slice.n_t)):
+            for t, data in enumerate(fdtype.read(infile, dtype_data, self.n_t)):
                 if load_times:
-                    self.parent_slice.times[t] = data[0][0]
+                    self.times[t] = data[0][0]
                 data = data[1].reshape(self.dimension.shape(cell_centered=False), order='F')
-                if self.parent_slice.cell_centered:
+                if self.cell_centered:
                     data_out[t, :] = data[:-1, :-1]  # Ignore ghost points
                 else:
                     data_out[t, :] = data
@@ -94,8 +101,8 @@ class SubSlice:
         """Method to lazy load the slice's data.
         """
         if not hasattr(self, "_data"):
-            file_path = os.path.join(self.parent_slice.root_path, self.filename)
-            self._data = np.empty((self.parent_slice.n_t,) + self.shape, dtype=np.float32)
+            file_path = os.path.join(self._parent_slice.root_path, self.filename)
+            self._data = np.empty((self.n_t,) + self.shape, dtype=np.float32)
             self._load_data(file_path, self._data)
         return self._data
 
@@ -107,9 +114,9 @@ class SubSlice:
             raise AttributeError("There is no vector data available for this slice.")
         if len(self._vector_data) == 0:
             for direction in self.vector_filenames.keys():
-                file_path = os.path.join(self.parent_slice.root_path,
+                file_path = os.path.join(self._parent_slice.root_path,
                                          self.vector_filenames[direction])
-                self._vector_data[direction] = np.empty((self.parent_slice.n_t,) + self.shape,
+                self._vector_data[direction] = np.empty((self.n_t,) + self.shape,
                                                         dtype=np.float32)
                 self._load_data(file_path, self._vector_data[direction])
         return self._vector_data
@@ -466,6 +473,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         if self.type == '3D':  # 3D-Slice
             return f"Slice([3D] cell_centered={self.cell_centered}, extent={self.extent})"
         else:  # 2D-Slice
-            return f"Slice([2D] cell_centered={self.cell_centered}, extent={self.extent}, extent_dirs={self.extent_dirs}, orientation={self.orientation})"
+            return f"Slice([2D] cell_centered={self.cell_centered}, extent={self.extent}, " \
+                   f"extent_dirs={self.extent_dirs}, orientation={self.orientation})"
 
 # __array_function__ implementations

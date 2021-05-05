@@ -537,7 +537,6 @@ class Simulation:
 
                 extent, dimension = self._indices_to_extent(patch_info[:6], mesh)
                 orientation = patch_info[6]
-                print(orientation)
                 obst_index = patch_info[7]
 
                 p = Patch(file_path, dimension, extent, orientation, cell_centered,

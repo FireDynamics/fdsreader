@@ -20,6 +20,7 @@ import fdsreader as fds
 sim = fds.Simulation("./sample_data")
 
 # Examples of data that can be easily accessed
+# Todo
 print(sim.meshes, sim.surfaces, sim.slices, sim.data_3d, sim.isosurfaces, sim.particles, sim.obstructions, sim.obstructions[0].get_boundary_data("temperature"))
 ```
 

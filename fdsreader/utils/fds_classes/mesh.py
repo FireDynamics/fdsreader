@@ -1,4 +1,4 @@
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Sequence
 from typing_extensions import Literal
 import numpy as np
 
@@ -13,7 +13,7 @@ class Mesh:
     :ivar extent: :class:`Extent` object containing 3-dimensional extent information.
     :ivar n: Number of elements for each of the 3 dimensions.
     :ivar n_size: Total number of blocks in this mesh.
-    :ivar id: Mesh id/label assigned to this mesh.
+    :var id: Mesh id/label assigned to this mesh.
     """
     id = None  # Needed for hash to work
 
@@ -37,15 +37,15 @@ class Mesh:
 
         self.obstructions = list()
 
-    def get_obstruction_mask(self, cell_centered=False) -> np.ndarray:
+    def get_obstruction_mask(self, times: Sequence[float], cell_centered=False) -> np.ndarray:
         """Marks all cells which are blocked by an obstruction.
 
+        :param times: All timesteps of the simulation.
         :returns: A 4-dimensional array with time as first and x,y,z as last dimensions. The array depends on time as
             as obstructions may be hidden as specific points in time.
         """
-        n_t = next(iter(self.obstructions[0]._subobstructions[0]._boundary_data.values())).times
         shape = self.dimension.shape(cell_centered=cell_centered)
-        mask = np.ones((n_t, shape[0], shape[1], shape[2]), dtype=bool)
+        mask = np.ones((len(times), shape[0], shape[1], shape[2]), dtype=bool)
         c = 1 if cell_centered else 0
 
         for obst in self.obstructions:
@@ -53,26 +53,27 @@ class Mesh:
                 x1, x2 = subobst.bound_indices['x']
                 y1, y2 = subobst.bound_indices['y']
                 z1, z2 = subobst.bound_indices['z']
-                for t in subobst.visible_times:
+                for t, _ in enumerate(subobst.visible_times(times)):
                     mask[t, x1:max(x2 + c, x1 + 1), y1:max(y2 + c, y1 + 1), z1:max(z2 + c, z1 + 1)] = False
-
         return mask
 
-    def get_obstruction_mask_slice(self, orientation: Literal[1, 2, 3], value: float, cell_centered=False):
+    def get_obstruction_mask_slice(self, subslice):
         """Marks all cells of a single slice which are blocked by an obstruction.
 
         :returns: A 4-dimensional array with time as first and x,y,z as last dimensions. The array depends on time as
             as obstructions may be hidden as specific points in time.
         """
-        assert orientation in (1, 2, 3), "The slices orientation has to be one of [1,2,3]!"
+        orientation = subslice.orientation
+        value = subslice.extent[orientation - 1][0]
+        cell_centered = subslice.cell_centered
 
         slc_index = self.coordinate_to_index((value,), dimension=(orientation - 1,), cell_centered=cell_centered)[0]
 
-        mask_indices = [slice(None)] * 3
-        mask_indices[orientation - 1] = slice(slc_index, slc_index + 1, 1)
+        mask_indices = [slice(None)] * 4
+        mask_indices[orientation] = slice(slc_index, slc_index + 1, 1)
         mask_indices = tuple(mask_indices)
 
-        return np.squeeze(self.get_obstruction_mask(cell_centered=cell_centered)[mask_indices])
+        return np.squeeze(self.get_obstruction_mask(subslice.times, cell_centered=cell_centered)[mask_indices])
 
     def coordinate_to_index(self, coordinate: Tuple[float, ...],
                             dimension: Tuple[Literal[0, 1, 2, 'x', 'y', 'z'], ...] = ('x', 'y', 'z'),

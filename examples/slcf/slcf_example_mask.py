@@ -5,7 +5,7 @@ import fdsreader as fds
 
 
 def main():
-    fds.settings.DEBUG = False
+    fds.settings.DEBUG = True
 
     sim = fds.Simulation("./fds_data")
 
@@ -21,11 +21,9 @@ def main():
     t = -1
     # Fill value for mask
     fill = 0
-    # Get the value of supporting point in the dimension corresponding to the orientation
-    support_vector_val = subslice.data[0, 0, 0]
     # Mask the data
-    mask = mesh.get_obstruction_mask_slice(slc.orientation, support_vector_val, slc.cell_centered)
-    sslc_data = np.where(mask, subslice.data[t], fill)
+    mask = mesh.get_obstruction_mask_slice(subslice)
+    sslc_data = np.where(mask[t], subslice.data[t], fill)
 
     # Plot the slice
     plt.imshow(sslc_data.T, origin="lower")

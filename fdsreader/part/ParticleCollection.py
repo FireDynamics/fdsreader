@@ -13,14 +13,18 @@ class ParticleCollection(FDSDataCollection):
         using plot3Ds as well as its subclasses such as :class:`SubPlot3D`.
     """
 
-    def __init__(self, times: Iterable[float], *particles: Iterable[Particle]):
-        super().__init__(*particles)
+    def __init__(self, times: Iterable[float], particles: Iterable[Particle]):
+        super().__init__(particles)
         self.times = list(times)
         self._file_paths: Dict[Mesh, str] = dict()
+        for particle in particles:
+            particle.times = times
 
-        if settings.LAZY_LOAD:
-            for particle in self:
+        for particle in self:
+            if settings.LAZY_LOAD:
                 particle._init_callback = self._load_data
+            else:
+                self._load_data()
 
     @property
     def quantities(self) -> List[Quantity]:
@@ -41,17 +45,15 @@ class ParticleCollection(FDSDataCollection):
         pointer_location = {particle: [0] * len(self.times) for particle in particles}
 
         for particle in particles:
-            if particle._positions is None:
-                particle._positions = list()
-                particle._tags = list()
+            if len(particle._positions) == 0 and len(particle._tags) == 0:
                 for t in range(len(self.times)):
                     size = 0
                     for mesh in self._file_paths.keys():
                         size += particle.n_particles[mesh][t]
                     for quantity in particle.quantities:
-                        particle._data[quantity.quantity].append(np.empty((size,)))
-                    particle._positions.append(np.empty((size, 3)))
-                    particle._tags.append(np.empty((size,)))
+                        particle._data[quantity.quantity].append(np.empty((size,), dtype=np.float32))
+                    particle._positions.append(np.empty((size, 3), dtype=np.float32))
+                    particle._tags.append(np.empty((size,), dtype=int))
 
         for mesh, file_path in self._file_paths.items():
             with open(file_path, 'rb') as infile:

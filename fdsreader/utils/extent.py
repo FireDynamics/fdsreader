@@ -33,6 +33,9 @@ class Extent:
                                                                                        self.z_start,
                                                                                        self.z_end)
 
+    def __getitem__(self, item):
+        return self._extents[item]
+
     @property
     def x_start(self):
         """Gives the absolute extent in x-direction.

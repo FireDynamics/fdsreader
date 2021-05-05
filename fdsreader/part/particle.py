@@ -1,4 +1,4 @@
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Sequence
 
 import numpy as np
 
@@ -22,9 +22,10 @@ class Particle:
         self.color = color
         self.n_particles: Dict[Mesh, List[int]] = dict()
 
-        self._positions = None
-        self._tags = None
-        self._data = {q.quantity: [] for q in self.quantities}
+        self._positions: List[np.ndarray] = list()
+        self._tags: List[np.ndarray] = list()
+        self._data: Dict[str, List[np.ndarray]] = {q.quantity: [] for q in self.quantities}
+        self.times: Sequence[float] = list()
 
         self.lower_bounds = {q.quantity: [] for q in self.quantities}
         self.upper_bounds = {q.quantity: [] for q in self.quantities}
@@ -35,12 +36,46 @@ class Particle:
     def id(self):
         return self.class_name
 
+    def filter_by_tag(self, tag: int):
+        """Filter all particles by a single one with the specified tag.
+        """
+        data = self.data
+        tags = self.tags
+        positions = self.positions
+        part = Particle(self.class_name, self.quantities, self.color)
+        part._tags = tag
+
+        part._data = {quantity: list() for quantity in data.keys()}
+        part._positions = list()
+        part.times = list()
+
+        for t, tags in enumerate(tags):
+            if tag in tags:
+                idx = np.where(tags == tag)[0]
+
+                for quantity in data.keys():
+                    part._data[quantity].append(data[quantity][t][idx][0])
+                part._positions.append(positions[t][idx][0])
+                part.times.append(self.times[t])
+
+        part.lower_bounds = dict()
+        part.upper_bounds = dict()
+        for q in self.quantities:
+            if len(part._positions) != 0:
+                part.lower_bounds[q.quantity] = np.min(part._data[q.quantity])
+                part.upper_bounds[q.quantity] = np.max(part._data[q.quantity])
+            else:
+                part.lower_bounds[q.quantity] = 0
+                part.upper_bounds[q.quantity] = 0
+
+        return part
+
     @property
     def data(self) -> Dict[str, List[np.ndarray]]:
         """Dictionary with quantities as keys and a list with a numpy array for each timestep which
             contains data for each particle in that timestep.
         """
-        if self._positions is None:
+        if len(self._positions) == 0 and len(self._tags) == 0:
             self._init_callback()
         return self._data
 
@@ -49,7 +84,7 @@ class Particle:
         """List with a numpy array for each timestep which contains a tag for each particle in that
             timestep.
         """
-        if self._positions is None:
+        if len(self._positions) == 0 and len(self._tags) == 0:
             self._init_callback()
         return self._tags
 
@@ -58,7 +93,7 @@ class Particle:
         """List with a numpy array for each timestep which contains the position of each particle in
             that timestep.
         """
-        if self._positions is None:
+        if len(self._positions) == 0 and len(self._tags) == 0:
             self._init_callback()
         return self._positions
 
