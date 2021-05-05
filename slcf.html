@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Slice files &mdash; fdsreader [fdsreader, version 1.0.4] documentation</title>
+  <title>Slice files &mdash; fdsreader [fdsreader, version 1.0.5] documentation</title>
   
 
   
@@ -499,11 +499,17 @@ used in the simulation. Other cases will require individual custom combination l
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></p></td>
 <td><p>Method to lazy load the slice’s data.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">orientation</span></code></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_t</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">orientation</span></code></p></td>
 <td><p>Orientation [1,2,3] of the slice in case it is 2D, 0 otherwise.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code></p></td>
 <td><p>2D-shape of the slice.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">times</span></code></p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vector_data</span></code></p></td>
 <td><p>Method to lazy load the slice’s vector data if it exists.</p></td>
@@ -548,6 +554,11 @@ used in the simulation. Other cases will require individual custom combination l
 
 <dl class="py method">
 <dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">n_t</span></code></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">orientation</span></code></dt>
 <dd><p>Orientation [1,2,3] of the slice in case it is 2D, 0 otherwise.</p>
 </dd></dl>
@@ -557,6 +568,11 @@ used in the simulation. Other cases will require individual custom combination l
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">shape</span></code></dt>
 <dd><p>2D-shape of the slice.</p>
 </dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">times</span></code></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt>

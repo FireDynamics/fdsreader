@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Boundary files &mdash; fdsreader [fdsreader, version 1.0.4] documentation</title>
+  <title>Boundary files &mdash; fdsreader [fdsreader, version 1.0.5] documentation</title>
   
 
   
@@ -588,23 +588,14 @@ A value of 0 indicates to no filter.</p></li>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_data</span></code>(quantity)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmax</span></code>(quantity)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">visible_times</span></code>(times)</p></td>
+<td><p>Returns an ndarray containing all time steps when there is data available for the SubObstruction. Will return an</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmax</span></code>(quantity)</p></td>
 <td><p>Maximum value of all patches at any time for a specific quantity.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmin</span></code>(quantity)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmin</span></code>(quantity)</p></td>
 <td><p>Minimum value of all patches at any time for a specific quantity.</p></td>
-</tr>
-</tbody>
-</table>
-<p><strong>Attributes:</strong></p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">visible_times</span></code></p></td>
-<td><p>Returns an ndarray containing all time steps when there is data available for the SubObstruction.</p></td>
 </tr>
 </tbody>
 </table>
@@ -621,9 +612,16 @@ A value of 0 indicates to no filter.</p></li>
 
 <dl class="py method">
 <dt>
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">visible_times</span></code></dt>
-<dd><p>Returns an ndarray containing all time steps when there is data available for the SubObstruction. Will return an
-empty list when no data is output at all.</p>
+<code class="sig-name descname"><span class="pre">visible_times</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.ndarray</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#SubObstruction.visible_times"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><dl class="simple">
+<dt>Returns an ndarray containing all time steps when there is data available for the SubObstruction. Will return an</dt><dd><p>empty list when no data is output at all.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>times</strong> – All timesteps of the simulation.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">

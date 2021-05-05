@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>FDSReader documentation! &mdash; fdsreader [fdsreader, version 1.0.4] documentation</title>
+  <title>FDSReader documentation! &mdash; fdsreader [fdsreader, version 1.0.5] documentation</title>
   
 
   
@@ -1067,11 +1067,17 @@ used in the simulation. Other cases will require individual custom combination l
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></p></td>
 <td><p>Method to lazy load the slice’s data.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">orientation</span></code></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_t</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">orientation</span></code></p></td>
 <td><p>Orientation [1,2,3] of the slice in case it is 2D, 0 otherwise.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code></p></td>
 <td><p>2D-shape of the slice.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">times</span></code></p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vector_data</span></code></p></td>
 <td><p>Method to lazy load the slice’s vector data if it exists.</p></td>
@@ -1116,6 +1122,11 @@ used in the simulation. Other cases will require individual custom combination l
 
 <dl class="py method">
 <dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">n_t</span></code></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">orientation</span></code></dt>
 <dd><p>Orientation [1,2,3] of the slice in case it is 2D, 0 otherwise.</p>
 </dd></dl>
@@ -1125,6 +1136,11 @@ used in the simulation. Other cases will require individual custom combination l
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">shape</span></code></dt>
 <dd><p>2D-shape of the slice.</p>
 </dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">times</span></code></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt>
@@ -1555,23 +1571,14 @@ A value of 0 indicates to no filter.</p></li>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_data</span></code>(quantity)</p></td>
 <td><p></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmax</span></code>(quantity)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">visible_times</span></code>(times)</p></td>
+<td><p>Returns an ndarray containing all time steps when there is data available for the SubObstruction. Will return an</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmax</span></code>(quantity)</p></td>
 <td><p>Maximum value of all patches at any time for a specific quantity.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmin</span></code>(quantity)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmin</span></code>(quantity)</p></td>
 <td><p>Minimum value of all patches at any time for a specific quantity.</p></td>
-</tr>
-</tbody>
-</table>
-<p><strong>Attributes:</strong></p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">visible_times</span></code></p></td>
-<td><p>Returns an ndarray containing all time steps when there is data available for the SubObstruction.</p></td>
 </tr>
 </tbody>
 </table>
@@ -1588,9 +1595,16 @@ A value of 0 indicates to no filter.</p></li>
 
 <dl class="py method">
 <dt>
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">visible_times</span></code></dt>
-<dd><p>Returns an ndarray containing all time steps when there is data available for the SubObstruction. Will return an
-empty list when no data is output at all.</p>
+<code class="sig-name descname"><span class="pre">visible_times</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.ndarray</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#SubObstruction.visible_times"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><dl class="simple">
+<dt>Returns an ndarray containing all time steps when there is data available for the SubObstruction. Will return an</dt><dd><p>empty list when no data is output at all.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>times</strong> – All timesteps of the simulation.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -1796,14 +1810,14 @@ using geometry data.</p>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ParticleCollection</span></code>(times, *particles)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ParticleCollection</span></code>(times, particles)</p></td>
 <td><p>Collection of <code class="xref py py-class docutils literal notranslate"><span class="pre">Plot3D</span></code> objects.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py class">
 <dt>
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.part.ParticleCollection.</span></code><code class="sig-name descname"><span class="pre">ParticleCollection</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">particles</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.part.particle.Particle</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/part/ParticleCollection.html#ParticleCollection"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.part.ParticleCollection.</span></code><code class="sig-name descname"><span class="pre">ParticleCollection</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">particles</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.part.particle.Particle</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/part/ParticleCollection.html#ParticleCollection"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Collection of <code class="xref py py-class docutils literal notranslate"><span class="pre">Plot3D</span></code> objects. Offers extensive functionality for filtering and
 using plot3Ds as well as its subclasses such as <code class="xref py py-class docutils literal notranslate"><span class="pre">SubPlot3D</span></code>.</p>
 <p><strong>Attributes:</strong></p>
@@ -1863,6 +1877,9 @@ using plot3Ds as well as its subclasses such as <code class="xref py py-class do
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_cache</span></code>()</p></td>
 <td><p>Remove all data from the internal cache that has been loaded so far to free memory.</p></td>
 </tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_by_tag</span></code>(tag)</p></td>
+<td><p>Filter all particles by a single one with the specified tag.</p></td>
+</tr>
 </tbody>
 </table>
 <p><strong>Attributes:</strong></p>
@@ -1897,6 +1914,12 @@ using plot3Ds as well as its subclasses such as <code class="xref py py-class do
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">data</span></code></dt>
 <dd><p>Dictionary with quantities as keys and a list with a numpy array for each timestep which
 contains data for each particle in that timestep.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname"><span class="pre">filter_by_tag</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/part/particle.html#Particle.filter_by_tag"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Filter all particles by a single one with the specified tag.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -2075,11 +2098,14 @@ dimensions can be left out from the tuple.</p></li>
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname"><span class="pre">get_obstruction_mask</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell_centered</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.ndarray</span><a class="reference internal" href="_modules/fdsreader/utils/fds_classes/mesh.html#Mesh.get_obstruction_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">get_obstruction_mask</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_centered</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.ndarray</span><a class="reference internal" href="_modules/fdsreader/utils/fds_classes/mesh.html#Mesh.get_obstruction_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Marks all cells which are blocked by an obstruction.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>A 4-dimensional array with time as first and x,y,z as last dimensions. The array depends on time as
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>times</strong> – All timesteps of the simulation.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 4-dimensional array with time as first and x,y,z as last dimensions. The array depends on time as
 as obstructions may be hidden as specific points in time.</p>
 </dd>
 </dl>
@@ -2087,7 +2113,7 @@ as obstructions may be hidden as specific points in time.</p>
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname"><span class="pre">get_obstruction_mask_slice</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">1</span><span class="p"><span class="pre">,</span> </span><span class="pre">2</span><span class="p"><span class="pre">,</span> </span><span class="pre">3</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_centered</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/fds_classes/mesh.html#Mesh.get_obstruction_mask_slice"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">get_obstruction_mask_slice</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subslice</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/utils/fds_classes/mesh.html#Mesh.get_obstruction_mask_slice"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Marks all cells of a single slice which are blocked by an obstruction.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
