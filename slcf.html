@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Slice files &mdash; fdsreader [fdsreader, version 1.0.3] documentation</title>
+  <title>Slice files &mdash; fdsreader [fdsreader, version 1.0.4] documentation</title>
   
 
   
@@ -486,6 +486,36 @@ used in the simulation. Other cases will require individual custom combination l
 </ul>
 </dd>
 </dl>
+<p><strong>Attributes:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">cell_centered</span></code></p></td>
+<td><p>Indicates whether centered positioning for data is used.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></p></td>
+<td><p>Method to lazy load the slice’s data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">orientation</span></code></p></td>
+<td><p>Orientation [1,2,3] of the slice in case it is 2D, 0 otherwise.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code></p></td>
+<td><p>2D-shape of the slice.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vector_data</span></code></p></td>
+<td><p>Method to lazy load the slice’s vector data if it exists.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmax</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmin</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
 <p><strong>Methods:</strong></p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -498,33 +528,12 @@ used in the simulation. Other cases will require individual custom combination l
 </tr>
 </tbody>
 </table>
-<p><strong>Attributes:</strong></p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></p></td>
-<td><p>Method to lazy load the slice’s data.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">orientation</span></code></p></td>
-<td><p>Orientation [1,2,3] of the slice in case it is 2D, 0 otherwise.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">shape</span></code></p></td>
-<td><p>2D-shape of the slice.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vector_data</span></code></p></td>
-<td><p>Method to lazy load the slice’s vector data if it exists.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmax</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmin</span></code></p></td>
-<td><p></p></td>
-</tr>
-</tbody>
-</table>
+<dl class="py method">
+<dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">cell_centered</span></code></dt>
+<dd><p>Indicates whether centered positioning for data is used.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt>
 <code class="sig-name descname"><span class="pre">clear_cache</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#SubSlice.clear_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
