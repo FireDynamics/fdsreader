@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>fdsreader.simulation &mdash; fdsreader [fdsreader, version 1.0.5] documentation</title>
+  <title>fdsreader.simulation &mdash; fdsreader [fdsreader, version 1.0.6] documentation</title>
   
 
   
@@ -233,6 +233,7 @@
                     <span class="c1"># Check if the smv_file did not change</span>
                     <span class="k">assert</span> <span class="n">sim</span><span class="o">.</span><span class="n">_hash</span> <span class="o">==</span> <span class="n">create_hash</span><span class="p">(</span><span class="n">smv_file_path</span><span class="p">)</span>
 
+                    <span class="k">del</span> <span class="n">Simulation</span><span class="o">.</span><span class="n">loading</span>
                     <span class="c1"># Return cached sim if it turned out to be valid</span>
                     <span class="k">return</span> <span class="n">sim</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
@@ -263,9 +264,9 @@
 <span class="sd">            to the .smv file for the simulation in case that multiple simulation output was written to</span>
 <span class="sd">            the same directory.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">del</span> <span class="n">Simulation</span><span class="o">.</span><span class="n">loading</span>
         <span class="c1"># Check if the file has already been instantiated via a cached pickle file</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_hash&quot;</span><span class="p">):</span>
+            <span class="k">del</span> <span class="n">Simulation</span><span class="o">.</span><span class="n">loading</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">reader_version</span> <span class="o">=</span> <span class="n">__version__</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">smv_file_path</span> <span class="o">=</span> <span class="n">get_smv_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
