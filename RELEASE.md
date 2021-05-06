@@ -1,4 +1,6 @@
 ## Release History
+* 1.0.6
+    * Caching bugfixes
 * 1.0.5
     * Bugfixes for obst slice masks
     * Added tag convencience function for particles

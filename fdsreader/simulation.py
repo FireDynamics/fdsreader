@@ -72,6 +72,7 @@ class Simulation:
                     # Check if the smv_file did not change
                     assert sim._hash == create_hash(smv_file_path)
 
+                    del Simulation.loading
                     # Return cached sim if it turned out to be valid
                     return sim
                 except Exception as e:
@@ -102,9 +103,9 @@ class Simulation:
             to the .smv file for the simulation in case that multiple simulation output was written to
             the same directory.
         """
-        del Simulation.loading
         # Check if the file has already been instantiated via a cached pickle file
         if not hasattr(self, "_hash"):
+            del Simulation.loading
             self.reader_version = __version__
 
             self.smv_file_path = get_smv_file(path)

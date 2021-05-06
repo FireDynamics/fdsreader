@@ -5,8 +5,6 @@ import fdsreader as fds
 
 
 def main():
-    fds.settings.DEBUG = True
-
     sim = fds.Simulation("./fds_data")
 
     # Get the first mesh defined in fds file
