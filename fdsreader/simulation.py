@@ -797,13 +797,16 @@ class Simulation:
     def _indices_to_extent(self, indices: Sequence[Union[int, str]], mesh: Mesh) -> Tuple[
         Extent, Dimension]:
         co = mesh.coordinates
-        x_min, x_max, y_min, y_max, z_min, z_max = (
-            int(indices[0]), int(indices[1]), int(indices[2]), int(indices[3]), int(indices[4]),
-            int(indices[5]))
+
+        indices = tuple(int(index) for index in indices)
+
+        x_min, x_max = np.clip((indices[0] - 1, indices[1] - 1), 0, len(co['x']))
+        y_min, y_max = np.clip((indices[2] - 1, indices[3] - 1), 0, len(co['y']))
+        z_min, z_max = np.clip((indices[4] - 1, indices[5] - 1), 0, len(co['z']))
         co_x_min, co_x_max, co_y_min, co_y_max, co_z_min, co_z_max = (
             co['x'][x_min], co['x'][x_max], co['y'][y_min],
             co['y'][y_max], co['z'][z_min], co['z'][z_max])
-        dimension = Dimension(x_max - x_min + 1, y_max - y_min + 1, z_max - z_min + 1)
+        dimension = Dimension(indices[1] - indices[0] + 1, indices[3] - indices[2] + 1, indices[5] - indices[4] + 1)
 
         extent = Extent(co_x_min, co_x_max, co_y_min, co_y_max, co_z_min, co_z_max)
         return extent, dimension

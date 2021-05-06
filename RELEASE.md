@@ -1,4 +1,6 @@
 ## Release History
+* 1.0.8
+    * Bugfixes for obst slice masks
 * 1.0.7
     * Caching bugfixes
 * 1.0.6

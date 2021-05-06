@@ -24,7 +24,7 @@ class Quantity:
         return hash(self.label)
 
     def __str__(self):
-        return f"Quantity(label={self.label}, unit={self.unit}, quantity={self.quantity})"
+        return f"Quantity('{self.quantity}')"
 
     def __repr__(self):
         return f"Quantity('{self.label}')"

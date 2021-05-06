@@ -67,7 +67,7 @@ class Mesh:
         value = subslice.extent[orientation - 1][0]
         cell_centered = subslice.cell_centered
 
-        slc_index = self.coordinate_to_index((value,), dimension=(orientation - 1,), cell_centered=cell_centered)[0]
+        slc_index = self.coordinate_to_index((value,), dimension=(orientation,), cell_centered=cell_centered)[0]
 
         mask_indices = [slice(None)] * 4
         mask_indices[orientation] = slice(slc_index, slc_index + 1, 1)
@@ -76,16 +76,16 @@ class Mesh:
         return np.squeeze(self.get_obstruction_mask(subslice.times, cell_centered=cell_centered)[mask_indices])
 
     def coordinate_to_index(self, coordinate: Tuple[float, ...],
-                            dimension: Tuple[Literal[0, 1, 2, 'x', 'y', 'z'], ...] = ('x', 'y', 'z'),
+                            dimension: Tuple[Literal[1, 2, 3, 'x', 'y', 'z'], ...] = ('x', 'y', 'z'),
                             cell_centered=False) -> Tuple[int, ...]:
         """Finds the nearest point in the mesh's grid and returns its indices.
 
         :param coordinate: Tuple of 3 floats. If the dimension parameter is supplied, up to 2
             dimensions can be left out from the tuple.
-        :param dimension: The dimensions in which to return the indices.
+        :param dimension: The dimensions in which to return the indices (1=x, 2=y, 3=z).
         """
         # Convert possible integer input to chars
-        dimension = tuple(('x', 'y', 'z')[dim] if type(dim) == int else dim for dim in dimension)
+        dimension = tuple(('x', 'y', 'z')[dim-1] if type(dim) == int else dim for dim in dimension)
 
         ret = list()
         for i, dim in enumerate(dimension):
