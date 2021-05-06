@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>FDSReader documentation! &mdash; fdsreader [fdsreader, version 1.0.9] documentation</title>
+  <title>FDSReader documentation! &mdash; fdsreader [fdsreader, version 1.0.10] documentation</title>
   
 
   
@@ -1275,6 +1275,12 @@ using obstructions as well as dependent such as <code class="xref py py-class do
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_cache</span></code>()</p></td>
 <td><p>Remove all data from the internal cache that has been loaded so far to free memory.</p></td>
 </tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmax</span></code>([orientation])</p></td>
+<td><p>Maximum value of all patches at any time.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmin</span></code>([orientation])</p></td>
+<td><p>Minimum value of all patches at any time.</p></td>
+</tr>
 </tbody>
 </table>
 <p><strong>Attributes:</strong></p>
@@ -1286,12 +1292,6 @@ using obstructions as well as dependent such as <code class="xref py py-class do
 <tbody>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">data</span></code></p></td>
 <td><p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">Patch</span></code> in each direction (-3=-z, -2=-y, -1=-x, 1=x, 2=y, 3=y).</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmax</span></code></p></td>
-<td><p>Maximum value of all patches at any time.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmin</span></code></p></td>
-<td><p>Minimum value of all patches at any time.</p></td>
 </tr>
 </tbody>
 </table>
@@ -1309,14 +1309,24 @@ using obstructions as well as dependent such as <code class="xref py py-class do
 
 <dl class="py method">
 <dt>
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">vmax</span></code></dt>
+<code class="sig-name descname"><span class="pre">vmax</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Literal[-</span> <span class="pre">3,</span> <span class="pre">-</span> <span class="pre">2,</span> <span class="pre">-</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">2,</span> <span class="pre">3]</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Boundary.vmax"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Maximum value of all patches at any time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>orientation</strong> – Optionally filter by patches with a specific orientation.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt>
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">vmin</span></code></dt>
+<code class="sig-name descname"><span class="pre">vmin</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Literal[-</span> <span class="pre">3,</span> <span class="pre">-</span> <span class="pre">2,</span> <span class="pre">-</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">2,</span> <span class="pre">3]</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Boundary.vmin"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Minimum value of all patches at any time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>orientation</strong> – Optionally filter by patches with a specific orientation.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -1396,10 +1406,10 @@ pattern should begin.</p>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_boundary_data</span></code>(quantity[, orientation])</p></td>
 <td><p>Gets the boundary data for a specific quantity of all SubObstructions.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmax</span></code>(quantity)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmax</span></code>(quantity[, orientation])</p></td>
 <td><p>Maximum value of all patches at any time for a specific quantity.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmin</span></code>(quantity)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmin</span></code>(quantity[, orientation])</p></td>
 <td><p>Minimum value of all patches at any time for a specific quantity.</p></td>
 </tr>
 </tbody>
@@ -1431,7 +1441,7 @@ in the specified orientation.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>quantity</strong> – The quantity to filter by.</p></li>
-<li><p><strong>orientation</strong> – Optionally filter by a specific orientation as well (-3=-z, -2=-y, -1=-x, 1=x, 2=y, 3=y).
+<li><p><strong>orientation</strong> – Optionally filter by a specific orientation as well (-3=-z, -2=-y, -1=-x, 1=x, 2=y, 3=z).
 A value of 0 indicates to no filter.</p></li>
 </ul>
 </dd>
@@ -1452,14 +1462,24 @@ A value of 0 indicates to no filter.</p></li>
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname"><span class="pre">vmax</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Obstruction.vmax"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">vmax</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Literal[-</span> <span class="pre">3,</span> <span class="pre">-</span> <span class="pre">2,</span> <span class="pre">-</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">2,</span> <span class="pre">3]</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Obstruction.vmax"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Maximum value of all patches at any time for a specific quantity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>orientation</strong> – Optionally filter by patches with a specific orientation.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname"><span class="pre">vmin</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Obstruction.vmin"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">vmin</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Literal[-</span> <span class="pre">3,</span> <span class="pre">-</span> <span class="pre">2,</span> <span class="pre">-</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">2,</span> <span class="pre">3]</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#Obstruction.vmin"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Minimum value of all patches at any time for a specific quantity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>orientation</strong> – Optionally filter by patches with a specific orientation.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -1569,10 +1589,10 @@ A value of 0 indicates to no filter.</p></li>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">visible_times</span></code>(times)</p></td>
 <td><p>Returns an ndarray containing all time steps when there is data available for the SubObstruction. Will return an</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmax</span></code>(quantity)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmax</span></code>(quantity[, orientation])</p></td>
 <td><p>Maximum value of all patches at any time for a specific quantity.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmin</span></code>(quantity)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmin</span></code>(quantity[, orientation])</p></td>
 <td><p>Minimum value of all patches at any time for a specific quantity.</p></td>
 </tr>
 </tbody>
@@ -1604,14 +1624,24 @@ A value of 0 indicates to no filter.</p></li>
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname"><span class="pre">vmax</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#SubObstruction.vmax"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">vmax</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Literal[-</span> <span class="pre">3,</span> <span class="pre">-</span> <span class="pre">2,</span> <span class="pre">-</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">2,</span> <span class="pre">3]</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#SubObstruction.vmax"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Maximum value of all patches at any time for a specific quantity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>orientation</strong> – Optionally filter by patches with a specific orientation.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname"><span class="pre">vmin</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#SubObstruction.vmin"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">vmin</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Literal[-</span> <span class="pre">3,</span> <span class="pre">-</span> <span class="pre">2,</span> <span class="pre">-</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">2,</span> <span class="pre">3]</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#SubObstruction.vmin"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Minimum value of all patches at any time for a specific quantity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>orientation</strong> – Optionally filter by patches with a specific orientation.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
