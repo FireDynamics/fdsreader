@@ -1,4 +1,6 @@
 ## Release History
+* 1.0.7
+    * Caching bugfixes
 * 1.0.6
     * Caching bugfixes
 * 1.0.5

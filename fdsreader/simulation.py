@@ -45,7 +45,7 @@ class Simulation:
     :ivar steps: Dictionary mapping .csv header keys to numpy arrays containing steps data.
     """
 
-    loading = False
+    _loading = False
 
     def __new__(cls, path: str):
         if settings.ENABLE_CACHING:
@@ -60,8 +60,8 @@ class Simulation:
 
             pickle_file_path = Simulation._get_pickle_filename(root_path, chid)
 
-            if not Simulation.loading and os.path.isfile(pickle_file_path):
-                Simulation.loading = True
+            if not Simulation._loading and os.path.isfile(pickle_file_path):
+                Simulation._loading = True
                 try:
                     with open(pickle_file_path, 'rb') as f:
                         sim = pickle.load(f)
@@ -72,7 +72,6 @@ class Simulation:
                     # Check if the smv_file did not change
                     assert sim._hash == create_hash(smv_file_path)
 
-                    del Simulation.loading
                     # Return cached sim if it turned out to be valid
                     return sim
                 except Exception as e:
@@ -105,7 +104,6 @@ class Simulation:
         """
         # Check if the file has already been instantiated via a cached pickle file
         if not hasattr(self, "_hash"):
-            del Simulation.loading
             self.reader_version = __version__
 
             self.smv_file_path = get_smv_file(path)
