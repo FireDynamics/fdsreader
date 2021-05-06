@@ -1,4 +1,6 @@
 ## Release History
+* 1.0.10
+    * Improvements for bndf
 * 1.0.9
     * Improvements for complex geometry
 * 1.0.8

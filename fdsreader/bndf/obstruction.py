@@ -108,29 +108,40 @@ class Boundary:
         """
         return {p.orientation: p for p in self.patches}
 
-    @property
-    def vmin(self) -> float:
+    def vmin(self, orientation: Literal[-3, -2, -1, 0, 1, 2, 3] = 0) -> float:
         """Minimum value of all patches at any time.
-        """
-        curr_min = np.min(self.lower_bounds)
-        if curr_min == 0.0:
-            return min(np.min(p.data) for p in self.patches)
-        return curr_min
 
-    @property
-    def vmax(self) -> float:
-        """Maximum value of all patches at any time.
+        :param orientation: Optionally filter by patches with a specific orientation.
         """
-        curr_max = np.max(self.upper_bounds)
-        if curr_max == np.float32(-1e33):
-            return max(np.max(p.data) for p in self.patches)
-        return curr_max
+        if orientation == 0:
+            curr_min = np.min(self.lower_bounds)
+            if curr_min == 0.0:
+                return min(np.min(p.data) for p in self.patches)
+            return curr_min
+        else:
+            return np.min(self.data[orientation].data)
+
+    def vmax(self, orientation: Literal[-3, -2, -1, 0, 1, 2, 3] = 0) -> float:
+        """Maximum value of all patches at any time.
+
+        :param orientation: Optionally filter by patches with a specific orientation.
+        """
+        if orientation == 0:
+            curr_max = np.max(self.upper_bounds)
+            if curr_max == np.float32(-1e33):
+                return max(np.max(p.data) for p in self.patches)
+            return curr_max
+        else:
+            return np.max(self.data[orientation].data)
 
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory.
         """
         for p in self.patches:
             p.clear_cache()
+
+    def __repr__(self):
+        return f"Boundary(Quantity={self.quantity}, Patches={len(self.patches)})"
 
 
 class SubObstruction:
@@ -150,8 +161,6 @@ class SubObstruction:
         self.bound_indices = {'x': (bound_indices[0], bound_indices[1]),
                               'y': (bound_indices[2], bound_indices[3]),
                               'z': (bound_indices[4], bound_indices[5])}
-
-        self.extent = extent
 
         self._boundary_data: Dict[int, Boundary] = dict()
 
@@ -205,21 +214,28 @@ class SubObstruction:
 
         return np.array(ret)
 
-    def vmin(self, quantity: Union[str, Quantity]) -> float:
+    def vmin(self, quantity: Union[str, Quantity], orientation: Literal[-3, -2, -1, 0, 1, 2, 3] = 0) -> float:
         """Minimum value of all patches at any time for a specific quantity.
-        """
-        return self.get_data(quantity).vmin
 
-    def vmax(self, quantity: Union[str, Quantity]) -> float:
-        """Maximum value of all patches at any time for a specific quantity.
+        :param orientation: Optionally filter by patches with a specific orientation.
         """
-        return self.get_data(quantity).vmax
+        return self.get_data(quantity).vmin(orientation)
+
+    def vmax(self, quantity: Union[str, Quantity], orientation: Literal[-3, -2, -1, 0, 1, 2, 3] = 0) -> float:
+        """Maximum value of all patches at any time for a specific quantity.
+
+        :param orientation: Optionally filter by patches with a specific orientation.
+        """
+        return self.get_data(quantity).vmax(orientation)
 
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory.
         """
         for bndf in self._boundary_data.values():
             bndf.clear_cache()
+
+    def __repr__(self):
+        return f"SubObstruction(Extent={self.extent})"
 
 
 class Obstruction:
@@ -281,7 +297,7 @@ class Obstruction:
         """Gets the boundary data for a specific quantity of all SubObstructions.
 
         :param quantity: The quantity to filter by.
-        :param orientation: Optionally filter by a specific orientation as well (-3=-z, -2=-y, -1=-x, 1=x, 2=y, 3=y).
+        :param orientation: Optionally filter by a specific orientation as well (-3=-z, -2=-y, -1=-x, 1=x, 2=y, 3=z).
             A value of 0 indicates to no filter.
         """
         if type(quantity) != str:
@@ -304,15 +320,19 @@ class Obstruction:
         for s in self._subobstructions:
             s.clear_cache()
 
-    def vmin(self, quantity: Union[str, Quantity]) -> float:
+    def vmin(self, quantity: Union[str, Quantity], orientation: Literal[-3, -2, -1, 0, 1, 2, 3] = 0) -> float:
         """Minimum value of all patches at any time for a specific quantity.
-        """
-        return min(s.vmin(quantity) for s in self._subobstructions)
 
-    def vmax(self, quantity: Union[str, Quantity]) -> float:
-        """Maximum value of all patches at any time for a specific quantity.
+        :param orientation: Optionally filter by patches with a specific orientation.
         """
-        return max(s.vmax(quantity) for s in self._subobstructions)
+        return min(s.vmin(quantity, orientation) for s in self._subobstructions)
+
+    def vmax(self, quantity: Union[str, Quantity], orientation: Literal[-3, -2, -1, 0, 1, 2, 3] = 0) -> float:
+        """Maximum value of all patches at any time for a specific quantity.
+
+        :param orientation: Optionally filter by patches with a specific orientation.
+        """
+        return max(s.vmax(quantity, orientation) for s in self._subobstructions)
 
     def __getitem__(self, index):
         """Gets the nth :class:`SubObstruction`.
@@ -323,5 +343,5 @@ class Obstruction:
         return self.id == other.id
 
     def __repr__(self, *args, **kwargs):
-        return f"Obstruction(id={self.id}, subobstructions={len(self._subobstructions)}" + \
-               (f", Quantities={[q.label for q in self.quantities]}" if self.has_boundary_data else "") + ")"
+        return f"Obstruction(id={self.id}, Bounding-Box={self.bounding_box}, SubObstructions={len(self._subobstructions)}" + (
+            f", Quantities={[q.label for q in self.quantities]}" if self.has_boundary_data else "") + ")"
