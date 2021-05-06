@@ -125,12 +125,10 @@ class GeomBoundary:
         if not hasattr(self, "_data"):
             self._load_data()
 
-        ret = np.empty((self.n_t,), dtype=object)
+        size = sum(d[0].shape[0] for d in self._data.values())
+        ret = np.empty((self.n_t, size), dtype=np.float32)
         for t in range(self.n_t):
-            size = sum(d[t].shape[0] for d in self._data.values())
             counter = 0
-            ret[t] = np.empty((size,), dtype=float)
-
             for d in self._data.values():
                 size = d[t].shape[0]
                 ret[t][counter:counter + size] = d[t]
