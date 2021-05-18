@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>FDSReader documentation! &mdash; fdsreader [fdsreader, version 1.0.10] documentation</title>
+  <title>FDSReader documentation! &mdash; fdsreader [fdsreader, version 1.0.11] documentation</title>
   
 
   
@@ -1191,7 +1191,10 @@ using obstructions as well as dependent such as <code class="xref py py-class do
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_by_boundary_data</span></code>()</p></td>
 <td><p>Filters all obstructions for which output data exists.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_nearest_obstruction</span></code>(point)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_by_id</span></code>(obst_id)</p></td>
+<td><p>Get the obstruction with corresponding id if it exists.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_nearest_obstruction</span></code>(point)</p></td>
 <td><p>Filters the obstruction with the shortest distance to the given point.</p></td>
 </tr>
 </tbody>
@@ -1212,6 +1215,12 @@ using obstructions as well as dependent such as <code class="xref py py-class do
 <dt>
 <code class="sig-name descname"><span class="pre">filter_by_boundary_data</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/ObstructionCollection.html#ObstructionCollection.filter_by_boundary_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Filters all obstructions for which output data exists.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname"><span class="pre">get_by_id</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obst_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/ObstructionCollection.html#ObstructionCollection.get_by_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Get the obstruction with corresponding id if it exists.</p>
 </dd></dl>
 
 <dl class="py method">

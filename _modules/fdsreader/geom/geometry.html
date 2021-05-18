@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>fdsreader.geom.geometry &mdash; fdsreader [fdsreader, version 1.0.10] documentation</title>
+  <title>fdsreader.geom.geometry &mdash; fdsreader [fdsreader, version 1.0.11] documentation</title>
   
 
   
@@ -159,7 +159,8 @@
            <div itemprop="articleBody">
             
   <h1>Source code for fdsreader.geom.geometry</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span>
+<span></span><span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
@@ -222,24 +223,94 @@
                     <span class="nb">int</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
 
             <span class="c1"># Load .be</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_t</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+            <span class="n">dtype_faces</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">n_faces</span><span class="p">),))</span>
+            <span class="n">dtype_meta</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),))</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_t</span><span class="p">,</span> <span class="n">n_faces</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path_be</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
                 <span class="n">offset</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">INT</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">*</span> <span class="mi">2</span>
                 <span class="n">infile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span>
-
                 <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_t</span><span class="p">):</span>
                     <span class="c1"># Skip time value</span>
                     <span class="n">infile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">fdtype</span><span class="o">.</span><span class="n">FLOAT</span><span class="o">.</span><span class="n">itemsize</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-
-                    <span class="n">dtype_meta</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),))</span>
-                    <span class="n">n_faces</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_meta</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span>
+                    <span class="k">assert</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_meta</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="n">n_faces</span><span class="p">,</span> <span class="s2">&quot;Something went wrong, please&quot;</span> \
+                                                                                   <span class="s2">&quot; submit an issue on Github&quot;</span> \
+                                                                                   <span class="s2">&quot; attaching your fds case!&quot;</span>
                     <span class="k">if</span> <span class="n">n_faces</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                        <span class="n">dtype_faces</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">n_faces</span><span class="p">),))</span>
-                        <span class="n">data</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_faces</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="n">data</span><span class="p">[</span><span class="n">t</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_faces</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span><span class="p">[</span><span class="n">mesh</span><span class="p">]</span> <span class="o">=</span> <span class="n">vertices</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_faces</span><span class="p">[</span><span class="n">mesh</span><span class="p">]</span> <span class="o">=</span> <span class="n">faces</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">mesh</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+
+    <span class="c1"># def _load_data2(self):</span>
+    <span class="c1">#     self._vertices: Dict[int, np.ndarray] = dict()</span>
+    <span class="c1">#     self._faces: Dict[int, np.ndarray] = dict()</span>
+    <span class="c1">#     self._data: Dict[int, np.ndarray] = dict()</span>
+    <span class="c1">#</span>
+    <span class="c1">#     for mesh in self.file_paths_be.keys():</span>
+    <span class="c1">#         file_path_be = self.file_paths_be[mesh]</span>
+    <span class="c1">#         file_path_gbf = self.file_paths_gbf[mesh]</span>
+    <span class="c1">#         # Load .gbf</span>
+    <span class="c1">#         with open(file_path_gbf, &#39;rb&#39;) as infile:</span>
+    <span class="c1">#             offset = fdtype.INT.itemsize * 2 + fdtype.new(</span>
+    <span class="c1">#                 ((&#39;i&#39;, 3),)).itemsize + fdtype.FLOAT.itemsize</span>
+    <span class="c1">#             infile.seek(offset)</span>
+    <span class="c1">#</span>
+    <span class="c1">#             dtype_meta = fdtype.new(((&#39;i&#39;, 3),))</span>
+    <span class="c1">#             n_vertices, n_faces, _ = np.fromfile(infile, dtype_meta, 1)[0][1]</span>
+    <span class="c1">#</span>
+    <span class="c1">#             dtype_vertices = fdtype.new(((&#39;f&#39;, 3 * n_vertices),))</span>
+    <span class="c1">#             vertices = np.fromfile(infile, dtype_vertices, 1)[0][1].reshape(</span>
+    <span class="c1">#                 (n_vertices, 3)).astype(float)</span>
+    <span class="c1">#</span>
+    <span class="c1">#             dtype_faces = fdtype.new(((&#39;i&#39;, 3 * n_faces),))</span>
+    <span class="c1">#             faces = fdtype.read(infile, dtype_faces, 1)[0][0].reshape((n_faces, 3)).astype(</span>
+    <span class="c1">#                 int) - 1</span>
+    <span class="c1">#</span>
+    <span class="c1">#         # Load .be</span>
+    <span class="c1">#         class BEReader(threading.Thread):</span>
+    <span class="c1">#             def __init__(self, path, thread_offset, n_t, data, t_start, n_faces):</span>
+    <span class="c1">#                 threading.Thread.__init__(self)</span>
+    <span class="c1">#                 self.path = path</span>
+    <span class="c1">#                 self.n_faces = n_faces</span>
+    <span class="c1">#                 self.offset = thread_offset</span>
+    <span class="c1">#                 self.n_t = n_t</span>
+    <span class="c1">#                 self.data = data</span>
+    <span class="c1">#                 self.t_start = t_start</span>
+    <span class="c1">#</span>
+    <span class="c1">#             def run(self):</span>
+    <span class="c1">#                 dtype_faces = fdtype.new(((&#39;f&#39;, self.n_faces),))</span>
+    <span class="c1">#                 dtype_meta = fdtype.new(((&#39;i&#39;, 4),))</span>
+    <span class="c1">#                 with open(self.path, &#39;rb&#39;) as infile:</span>
+    <span class="c1">#                     for t in range(self.n_t):</span>
+    <span class="c1">#                         # Skip time and n_faces values</span>
+    <span class="c1">#                         infile.seek(fdtype.FLOAT.itemsize + dtype_meta.itemsize, 1)</span>
+    <span class="c1">#</span>
+    <span class="c1">#                         if self.n_faces &gt; 0:</span>
+    <span class="c1">#                             self.data[self.t_start + t, :] = np.fromfile(infile, dtype_faces, 1)[0][1]</span>
+    <span class="c1">#</span>
+    <span class="c1">#         dtype_faces = fdtype.new(((&#39;f&#39;, n_faces),))</span>
+    <span class="c1">#         dtype_meta = fdtype.new(((&#39;i&#39;, 4),))</span>
+    <span class="c1">#         data = np.empty((self.n_t, n_faces), dtype=np.float32)</span>
+    <span class="c1">#</span>
+    <span class="c1">#         offset = fdtype.INT.itemsize * 2</span>
+    <span class="c1">#         stride = dtype_faces.itemsize + dtype_meta.itemsize + fdtype.FLOAT.itemsize</span>
+    <span class="c1">#</span>
+    <span class="c1">#         times = list(range(0, self.n_t, self.n_t // 8))</span>
+    <span class="c1">#         times.append(self.n_t)</span>
+    <span class="c1">#         threads = list()</span>
+    <span class="c1">#         for i in range(len(times)-1):</span>
+    <span class="c1">#             threads.append(BEReader(file_path_be, offset+stride*times[i], times[i+1] - times[i], data, times[i], n_faces))</span>
+    <span class="c1">#</span>
+    <span class="c1">#         for thread in threads:</span>
+    <span class="c1">#             thread.start()</span>
+    <span class="c1">#</span>
+    <span class="c1">#         for thread in threads:</span>
+    <span class="c1">#             thread.join()</span>
+    <span class="c1">#</span>
+    <span class="c1">#         self._vertices[mesh] = vertices</span>
+    <span class="c1">#         self._faces[mesh] = faces</span>
+    <span class="c1">#         self._data[mesh] = data</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">:</span>
@@ -286,20 +357,35 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_data&quot;</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_load_data</span><span class="p">()</span>
 
-        <span class="c1"># Todo: Check if this really has to be of type object</span>
-
-        <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_t</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_t</span><span class="p">,</span> <span class="n">size</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_t</span><span class="p">):</span>
-            <span class="n">size</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="n">t</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
             <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="n">ret</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">size</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-
             <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
                 <span class="n">size</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="n">t</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="n">ret</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">counter</span><span class="p">:</span><span class="n">counter</span> <span class="o">+</span> <span class="n">size</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="n">t</span><span class="p">]</span>
+                <span class="n">ret</span><span class="p">[</span><span class="n">t</span><span class="p">,</span> <span class="n">counter</span><span class="p">:</span><span class="n">counter</span> <span class="o">+</span> <span class="n">size</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="n">t</span><span class="p">]</span>
                 <span class="n">counter</span> <span class="o">+=</span> <span class="n">size</span>
 
         <span class="k">return</span> <span class="n">ret</span>
+
+    <span class="c1"># @property</span>
+    <span class="c1"># def data2(self) -&gt; np.ndarray:</span>
+    <span class="c1">#     &quot;&quot;&quot;Returns a global array of the loaded data for the quantity with data from all meshes.</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     # if not hasattr(self, &quot;_data&quot;):</span>
+    <span class="c1">#     #     self._load_data2()</span>
+    <span class="c1">#     self._load_data2()</span>
+    <span class="c1">#</span>
+    <span class="c1">#     size = sum(d[0].shape[0] for d in self._data.values())</span>
+    <span class="c1">#     ret = np.empty((self.n_t, size), dtype=np.float32)</span>
+    <span class="c1">#     for t in range(self.n_t):</span>
+    <span class="c1">#         counter = 0</span>
+    <span class="c1">#         for d in self._data.values():</span>
+    <span class="c1">#             size = d[t].shape[0]</span>
+    <span class="c1">#             ret[t, counter:counter + size] = d[t]</span>
+    <span class="c1">#             counter += size</span>
+    <span class="c1">#</span>
+    <span class="c1">#     return ret</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">vmin</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>

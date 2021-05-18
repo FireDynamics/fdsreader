@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>fdsreader.bndf.ObstructionCollection &mdash; fdsreader [fdsreader, version 1.0.10] documentation</title>
+  <title>fdsreader.bndf.ObstructionCollection &mdash; fdsreader [fdsreader, version 1.0.11] documentation</title>
   
 
   
@@ -186,6 +186,11 @@
         <span class="sd">&quot;&quot;&quot;Filters all obstructions for which output data exists.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">ObstructionCollection</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">has_boundary_data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ObstructionCollection.get_by_id"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.ObstructionCollection.ObstructionCollection.get_by_id">[docs]</a>    <span class="k">def</span> <span class="nf">get_by_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obst_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the obstruction with corresponding id if it exists.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">next</span><span class="p">((</span><span class="n">obst</span> <span class="k">for</span> <span class="n">obst</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span> <span class="n">obst</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">obst_id</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ObstructionCollection.get_nearest_obstruction"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.ObstructionCollection.ObstructionCollection.get_nearest_obstruction">[docs]</a>    <span class="k">def</span> <span class="nf">get_nearest_obstruction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Obstruction</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Filters the obstruction with the shortest distance to the given point.</span>
