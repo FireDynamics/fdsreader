@@ -1,3 +1,4 @@
+import threading
 from typing import Tuple, Dict, Iterable
 
 import numpy as np
@@ -61,24 +62,94 @@ class GeomBoundary:
                     int) - 1
 
             # Load .be
-            data = np.empty((self.n_t,), dtype=object)
+            dtype_faces = fdtype.new((('f', n_faces),))
+            dtype_meta = fdtype.new((('i', 4),))
+            data = np.empty((self.n_t, n_faces), dtype=np.float32)
             with open(file_path_be, 'rb') as infile:
                 offset = fdtype.INT.itemsize * 2
                 infile.seek(offset)
-
                 for t in range(self.n_t):
                     # Skip time value
                     infile.seek(fdtype.FLOAT.itemsize, 1)
-
-                    dtype_meta = fdtype.new((('i', 4),))
-                    n_faces = fdtype.read(infile, dtype_meta, 1)[0][0][3]
+                    assert fdtype.read(infile, dtype_meta, 1)[0][0][3] == n_faces, "Something went wrong, please" \
+                                                                                   " submit an issue on Github" \
+                                                                                   " attaching your fds case!"
                     if n_faces > 0:
-                        dtype_faces = fdtype.new((('f', n_faces),))
-                        data[t] = np.fromfile(infile, dtype_faces, 1)[0][1]
+                        data[t, :] = np.fromfile(infile, dtype_faces, 1)[0][1]
 
             self._vertices[mesh] = vertices
             self._faces[mesh] = faces
             self._data[mesh] = data
+
+    # def _load_data2(self):
+    #     self._vertices: Dict[int, np.ndarray] = dict()
+    #     self._faces: Dict[int, np.ndarray] = dict()
+    #     self._data: Dict[int, np.ndarray] = dict()
+    #
+    #     for mesh in self.file_paths_be.keys():
+    #         file_path_be = self.file_paths_be[mesh]
+    #         file_path_gbf = self.file_paths_gbf[mesh]
+    #         # Load .gbf
+    #         with open(file_path_gbf, 'rb') as infile:
+    #             offset = fdtype.INT.itemsize * 2 + fdtype.new(
+    #                 (('i', 3),)).itemsize + fdtype.FLOAT.itemsize
+    #             infile.seek(offset)
+    #
+    #             dtype_meta = fdtype.new((('i', 3),))
+    #             n_vertices, n_faces, _ = np.fromfile(infile, dtype_meta, 1)[0][1]
+    #
+    #             dtype_vertices = fdtype.new((('f', 3 * n_vertices),))
+    #             vertices = np.fromfile(infile, dtype_vertices, 1)[0][1].reshape(
+    #                 (n_vertices, 3)).astype(float)
+    #
+    #             dtype_faces = fdtype.new((('i', 3 * n_faces),))
+    #             faces = fdtype.read(infile, dtype_faces, 1)[0][0].reshape((n_faces, 3)).astype(
+    #                 int) - 1
+    #
+    #         # Load .be
+    #         class BEReader(threading.Thread):
+    #             def __init__(self, path, thread_offset, n_t, data, t_start, n_faces):
+    #                 threading.Thread.__init__(self)
+    #                 self.path = path
+    #                 self.n_faces = n_faces
+    #                 self.offset = thread_offset
+    #                 self.n_t = n_t
+    #                 self.data = data
+    #                 self.t_start = t_start
+    #
+    #             def run(self):
+    #                 dtype_faces = fdtype.new((('f', self.n_faces),))
+    #                 dtype_meta = fdtype.new((('i', 4),))
+    #                 with open(self.path, 'rb') as infile:
+    #                     for t in range(self.n_t):
+    #                         # Skip time and n_faces values
+    #                         infile.seek(fdtype.FLOAT.itemsize + dtype_meta.itemsize, 1)
+    #
+    #                         if self.n_faces > 0:
+    #                             self.data[self.t_start + t, :] = np.fromfile(infile, dtype_faces, 1)[0][1]
+    #
+    #         dtype_faces = fdtype.new((('f', n_faces),))
+    #         dtype_meta = fdtype.new((('i', 4),))
+    #         data = np.empty((self.n_t, n_faces), dtype=np.float32)
+    #
+    #         offset = fdtype.INT.itemsize * 2
+    #         stride = dtype_faces.itemsize + dtype_meta.itemsize + fdtype.FLOAT.itemsize
+    #
+    #         times = list(range(0, self.n_t, self.n_t // 8))
+    #         times.append(self.n_t)
+    #         threads = list()
+    #         for i in range(len(times)-1):
+    #             threads.append(BEReader(file_path_be, offset+stride*times[i], times[i+1] - times[i], data, times[i], n_faces))
+    #
+    #         for thread in threads:
+    #             thread.start()
+    #
+    #         for thread in threads:
+    #             thread.join()
+    #
+    #         self._vertices[mesh] = vertices
+    #         self._faces[mesh] = faces
+    #         self._data[mesh] = data
 
     @property
     def vertices(self) -> Iterable:
@@ -125,20 +196,35 @@ class GeomBoundary:
         if not hasattr(self, "_data"):
             self._load_data()
 
-        # Todo: Check if this really has to be of type object
-
-        ret = np.empty((self.n_t,), dtype=object)
+        size = sum(d[0].shape[0] for d in self._data.values())
+        ret = np.empty((self.n_t, size), dtype=np.float32)
         for t in range(self.n_t):
-            size = sum(d[t].shape[0] for d in self._data.values())
             counter = 0
-            ret[t] = np.empty((size,), dtype=float)
-
             for d in self._data.values():
                 size = d[t].shape[0]
-                ret[t][counter:counter + size] = d[t]
+                ret[t, counter:counter + size] = d[t]
                 counter += size
 
         return ret
+
+    # @property
+    # def data2(self) -> np.ndarray:
+    #     """Returns a global array of the loaded data for the quantity with data from all meshes.
+    #     """
+    #     # if not hasattr(self, "_data"):
+    #     #     self._load_data2()
+    #     self._load_data2()
+    #
+    #     size = sum(d[0].shape[0] for d in self._data.values())
+    #     ret = np.empty((self.n_t, size), dtype=np.float32)
+    #     for t in range(self.n_t):
+    #         counter = 0
+    #         for d in self._data.values():
+    #             size = d[t].shape[0]
+    #             ret[t, counter:counter + size] = d[t]
+    #             counter += size
+    #
+    #     return ret
 
     @property
     def vmin(self) -> float:

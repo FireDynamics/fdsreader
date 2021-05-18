@@ -11,7 +11,7 @@ from fdsreader.isof import Isosurface, IsosurfaceCollection
 from fdsreader.part import Particle, ParticleCollection
 from fdsreader.pl3d import Plot3D, Plot3DCollection
 from fdsreader.slcf import Slice, SliceCollection
-from fdsreader.utils import Mesh, Dimension, Surface, Quantity, Ventilation, Extent, log_error
+from fdsreader.utils import Mesh, MeshCollection, Dimension, Surface, Quantity, Ventilation, Extent, log_error
 from fdsreader.utils.data import create_hash, get_smv_file, Device
 import fdsreader.utils.fortran_data as fdtype
 from fdsreader import settings
@@ -111,7 +111,6 @@ class Simulation:
             self.root_path = os.path.dirname(self.smv_file_path)
 
             self.geoms: List[Geometry] = list()
-            self.meshes: List[Mesh] = list()
             self.surfaces: List[Surface] = list()
             self.obstructions = list()
             self.ventilations = dict()
@@ -126,6 +125,7 @@ class Simulation:
             self.isosurfaces = dict()
             self.particles = list()
             self.geom_data = list()
+            self.meshes = list()
             self.devices: Dict[str, Union[Device, List[Device]]] = dict()
             device_tmp = str()
 
@@ -207,7 +207,8 @@ class Simulation:
             self.data_3d = Plot3DCollection(self.data_3d.keys(), self.data_3d.values())
             self.isosurfaces = IsosurfaceCollection(self.isosurfaces.values())
             if self.particles is None:
-                self.particles = ParticleCollection(())
+                self.particles = ParticleCollection((), ())
+            self.meshes = MeshCollection(self.meshes)
 
             if settings.ENABLE_CACHING:
                 # Hash will be saved to simulation pickle file and compared to new hash when loading
@@ -800,9 +801,7 @@ class Simulation:
 
         indices = tuple(int(index) for index in indices)
 
-        x_min, x_max = np.clip((indices[0] - 1, indices[1] - 1), 0, len(co['x']))
-        y_min, y_max = np.clip((indices[2] - 1, indices[3] - 1), 0, len(co['y']))
-        z_min, z_max = np.clip((indices[4] - 1, indices[5] - 1), 0, len(co['z']))
+        x_min, x_max, y_min, y_max, z_min, z_max = indices
         co_x_min, co_x_max, co_y_min, co_y_max, co_z_min, co_z_max = (
             co['x'][x_min], co['x'][x_max], co['y'][y_min],
             co['y'][y_max], co['z'][z_min], co['z'][z_max])

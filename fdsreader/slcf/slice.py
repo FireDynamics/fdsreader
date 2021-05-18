@@ -92,7 +92,7 @@ class SubSlice:
                     self.times[t] = data[0][0]
                 data = data[1].reshape(self.dimension.shape(cell_centered=False), order='F')
                 if self.cell_centered:
-                    data_out[t, :] = data[:-1, :-1]  # Ignore ghost points
+                    data_out[t, :] = data[1:, 1:]  # Ignore ghost points
                 else:
                     data_out[t, :] = data
 
@@ -106,6 +106,7 @@ class SubSlice:
             self._load_data(file_path, self._data)
         return self._data
 
+    # Todo: Check CC
     @property
     def vector_data(self) -> Dict[str, np.ndarray]:
         """Method to lazy load the slice's vector data if it exists.
@@ -310,7 +311,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                 # and remove the last coordinate
                 if self.cell_centered:
                     co = co[:-1]
-                    co += (co[1] - co[0]) / 2
+                    co -= (co[1] - co[0]) / 2
                 coords[dim].update(co)
             coords[dim] = np.array(sorted(list(coords[dim])))
 

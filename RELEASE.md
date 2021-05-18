@@ -1,4 +1,7 @@
 ## Release History
+* 1.0.11
+    * Bugfixes for cell-centered slices
+    * Added get_by_id filter for obstructions and meshes
 * 1.0.10
     * Improvements for bndf
 * 1.0.9

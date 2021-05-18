@@ -26,6 +26,11 @@ class ObstructionCollection(FDSDataCollection):
         """
         return ObstructionCollection(x for x in self if x.has_boundary_data)
 
+    def get_by_id(self, obst_id: str):
+        """Get the obstruction with corresponding id if it exists.
+        """
+        return next((obst for obst in self if obst.id == obst_id), None)
+
     def get_nearest_obstruction(self, point: Tuple[float, float, float]) -> Obstruction:
         """Filters the obstruction with the shortest distance to the given point.
         """
