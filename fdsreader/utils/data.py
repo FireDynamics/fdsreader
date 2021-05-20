@@ -23,9 +23,6 @@ class Quantity:
     def __hash__(self):
         return hash(self.label)
 
-    def __str__(self):
-        return f"Quantity('{self.quantity}')"
-
     def __repr__(self):
         return f"Quantity('{self.label}')"
 
@@ -41,11 +38,15 @@ class Device:
         self.orientation = orientation
         self.data: np.ndarray = None
 
+    @property
+    def xyz(self):
+        return self.position
+
     def __eq__(self, other):
         return self.id == other.id
 
     def __repr__(self):
-        return f"Device(id='{self.id}', xyz={self.position}, quantity={self.quantity}, mean={np.mean(self.data)})"
+        return f"Device(id='{self.id}', xyz={self.position}, quantity={self.quantity})"
 
 
 def create_hash(path: str):

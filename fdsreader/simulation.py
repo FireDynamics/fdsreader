@@ -153,7 +153,7 @@ class Simulation:
                             self.steps = self._load_step_data(file_path)
                         elif csv_type == "devc":
                             device_tmp = file_path
-                            self.devices["Time"] = Device("Time", Quantity("Time", "Time", ""), (.0, .0, .0),
+                            self.devices["Time"] = Device("Time", Quantity("TIME", "TIME", "s"), (.0, .0, .0),
                                                           (.0, .0, .0))
                     elif keyword == "HRRPUVCUT":
                         self.hrrpuv_cutoff = float(smv_file.readline().strip())
@@ -786,7 +786,7 @@ class Simulation:
         line = smv_file.readline().strip().split('#')[0].split()
         position = (float(line[0]), float(line[1]), float(line[2]))
         orientation = (float(line[3]), float(line[4]), float(line[5]))
-        return device_id, Device(device_id, Quantity(quantity, "", ""), position, orientation)
+        return device_id, Device(device_id, Quantity(quantity, quantity, ""), position, orientation)
 
     @log_error("devc")
     def _load_DEVC_data(self, file_path: str):
