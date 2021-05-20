@@ -660,7 +660,6 @@ class Simulation:
 
         times = list()
         upper_bounds = list()
-        max_length = 0
         with open(os.path.join(self.root_path, filename + ".sz"), 'r') as sizefile:
             # skip version line
             sizefile.readline()
@@ -668,8 +667,6 @@ class Simulation:
                 line = line.split()
                 times.append(float(line[0]))
                 upper_bounds.append(float(line[-1]))
-                if int(line[1]) > max_length:
-                    max_length = int(line[1])
         times = np.array(times)
         upper_bounds = np.array(upper_bounds)
 
@@ -677,7 +674,7 @@ class Simulation:
 
         if quantity not in self.smoke_3d:
             self.smoke_3d[quantity] = Smoke3D(self.root_path, times, quantity)
-        self.smoke_3d[quantity]._add_subsmoke(filename, self.meshes[mesh_index], upper_bounds, max_length)
+        self.smoke_3d[quantity]._add_subsmoke(filename, self.meshes[mesh_index], upper_bounds)
 
     @log_error("isof")
     def _load_isosurface(self, smv_file: TextIO, line: str):
@@ -756,7 +753,7 @@ class Simulation:
                         int(bnd_file.readline().strip().split()[1].strip()))
                     for q in range(n_q[i]):
                         line = bnd_file.readline().strip().split()
-                        quantity = particle.quantities[q].quantity
+                        quantity = particle.quantities[q].name
                         particle.lower_bounds[quantity].append(float(line[0]))
                         particle.upper_bounds[quantity].append(float(line[1]))
         return times

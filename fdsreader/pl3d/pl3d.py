@@ -59,14 +59,13 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
     """Plot3d file data container including metadata. Consists of multiple subplots, one for each
         mesh.
 
-    :ivar root_path: Path to the directory containing all slice files.
     :ivar time: The point in time when this data has been recorded.
     :ivar quantities: List with quantity objects containing information about recorded quantities
      calculated for this Plot3D with the corresponding label and unit.
     """
 
     def __init__(self, root_path: str, time: float, quantities: Sequence[Quantity]):
-        self.root_path = root_path
+        self._root_path = root_path
         self.time = time
         self.quantities = quantities
 
@@ -74,7 +73,7 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
         self._subplots: Dict[Mesh, SubPlot3D] = dict()
 
     def _add_subplot(self, filename: str, mesh: Mesh) -> SubPlot3D:
-        subplot = SubPlot3D(os.path.join(self.root_path, filename), mesh)
+        subplot = SubPlot3D(os.path.join(self._root_path, filename), mesh)
         self._subplots[mesh] = subplot
 
         # If lazy loading has been disabled by the user, load the data instantaneously instead

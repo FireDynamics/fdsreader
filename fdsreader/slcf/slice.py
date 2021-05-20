@@ -101,7 +101,7 @@ class SubSlice:
         """Method to lazy load the slice's data.
         """
         if not hasattr(self, "_data"):
-            file_path = os.path.join(self._parent_slice.root_path, self.filename)
+            file_path = os.path.join(self._parent_slice._root_path, self.filename)
             self._data = np.empty((self.n_t,) + self.shape, dtype=np.float32)
             self._load_data(file_path, self._data)
         return self._data
@@ -114,7 +114,7 @@ class SubSlice:
             raise AttributeError("There is no vector data available for this slice.")
         if len(self._vector_data) == 0:
             for direction in self.vector_filenames.keys():
-                file_path = os.path.join(self._parent_slice.root_path,
+                file_path = os.path.join(self._parent_slice._root_path,
                                          self.vector_filenames[direction])
                 self._vector_data[direction] = np.empty((self.n_t,) + self.shape,
                                                         dtype=np.float32)
@@ -145,7 +145,6 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
     """Slice file data container including metadata. Consists of multiple subslices, one for each
         mesh the slice cuts through.
 
-    :ivar root_path: Path to the directory containing all slice files.
     :ivar cell_centered: Indicates whether centered positioning for data is used.
     :ivar quantity: Quantity object containing information about the quantity calculated for this
         slice with the corresponding label and unit.
@@ -157,7 +156,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
 
     def __init__(self, root_path: str, slice_id: str, cell_centered: bool, times: np.ndarray,
                  multimesh_data: Collection[Dict]):
-        self.root_path = root_path
+        self._root_path = root_path
         self.cell_centered = cell_centered
 
         self.times = times
@@ -420,7 +419,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         :returns: The calculated standard deviation.
         """
         mean = self.mean
-        sum = np.sum([np.sum(np.power(subsclice.data-mean, 2)) for subsclice in self._subslices.values()])
+        sum = np.sum([np.sum(np.power(subsclice.data - mean, 2)) for subsclice in self._subslices.values()])
         N = np.sum([subsclice.data.size for subsclice in self._subslices.values()])
         return np.sqrt(sum / N)
 

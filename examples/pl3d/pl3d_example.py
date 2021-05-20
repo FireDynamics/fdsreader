@@ -35,7 +35,7 @@ def main():
     plotter = pv.Plotter()
     plotter.add_mesh(pv.PolyData(points), scalars=color_data.flatten(),
                      opacity=0.3, render_points_as_spheres=False, point_size=25)
-    plotter.add_scalar_bar(title=quantity.quantity)
+    plotter.add_scalar_bar(title=quantity.name)
     plotter.show()
 
 

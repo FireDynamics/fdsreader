@@ -19,15 +19,15 @@ class GeometryCollection(FDSDataCollection):
 
     @property
     def quantities(self) -> List[Quantity]:
-        return list({geom.quantity for geom in self})
+        return list({geom.name for geom in self})
 
     def filter_by_quantity(self, quantity: Union[str, Quantity]):
         """Filters all GeomBoundaries by a specific quantity.
         """
         if type(quantity) != str:
-            quantity = quantity.quantity
+            quantity = quantity.name
         return GeometryCollection(x for x in self if
-                                  x.quantity.quantity.lower() == quantity.lower() or x.quantity.label.lower() == quantity.lower())
+                                  x.name.name.lower() == quantity.lower() or x.name.label.lower() == quantity.lower())
 
     def __repr__(self):
         return "GeometryCollection(" + super(GeometryCollection, self).__repr__() + ")"

@@ -14,15 +14,15 @@ class Smoke3DCollection(FDSDataCollection):
 
     @property
     def quantities(self) -> List[Quantity]:
-        return [smoke3d.quantity for smoke3d in self]
+        return [smoke3d.name for smoke3d in self]
 
     def get_by_quantity(self, quantity: Union[Quantity, str]):
         """Gets the :class:`Smoke3D`s with a specific quantity.
         """
         if type(quantity) != str:
-            quantity = quantity.quantity
+            quantity = quantity.name
         return next(x for x in self if
-                    x.quantity.quantity.lower() == quantity.lower() or x.quantity.label.lower() == quantity.lower())
+                    x.name.name.lower() == quantity.lower() or x.name.label.lower() == quantity.lower())
 
     def __repr__(self):
         return "Smoke3DCollection(" + super(Smoke3DCollection, self).__repr__() + ")"

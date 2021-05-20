@@ -51,7 +51,7 @@ class ParticleCollection(FDSDataCollection):
                     for mesh in self._file_paths.keys():
                         size += particle.n_particles[mesh][t]
                     for quantity in particle.quantities:
-                        particle._data[quantity.quantity].append(np.empty((size,), dtype=np.float32))
+                        particle._data[quantity.name].append(np.empty((size,), dtype=np.float32))
                     particle._positions.append(np.empty((size, 3), dtype=np.float32))
                     particle._tags.append(np.empty((size,), dtype=int))
 
@@ -94,7 +94,7 @@ class ParticleCollection(FDSDataCollection):
                                 (n_particles, len(particle.quantities)), order='F')
 
                             for q, quantity in enumerate(particle.quantities):
-                                particle._data[quantity.quantity][t][
+                                particle._data[quantity.name][t][
                                 offset:offset + n_particles] = data_raw[:, q].astype(float)
 
                         pointer_location[particle][t] += particle.n_particles[mesh][t]

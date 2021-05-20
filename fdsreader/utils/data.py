@@ -1,5 +1,5 @@
 """
-Collection of internal utilities (convenience functions) for data handling.
+Collection of internal utilities (convenience functions and classes) for data handling.
 """
 import glob
 import hashlib
@@ -11,14 +11,18 @@ import numpy as np
 
 class Quantity:
     """Object containing information about a quantity with the corresponding label and unit.
+
+    :ivar label: The short label representing the quantity.
+    :ivar quantity: The name of the quantity.
+    :ivar unit: The corresponding unit of the quantity.
     """
     def __init__(self, quantity: str, label: str, unit: str):
         self.label = label
         self.unit = unit
-        self.quantity = quantity
+        self.name = quantity
 
     def __eq__(self, other):
-        return self.quantity == other.quantity and self.label == other.label and self.unit == other.unit
+        return self.name == other.name and self.label == other.label and self.unit == other.unit
 
     def __hash__(self):
         return hash(self.label)
@@ -29,6 +33,12 @@ class Quantity:
 
 class Device:
     """Represents a single Device.
+
+    :ivar id: The id the device was given.
+    :ivar quantity: The quantity the device measured.
+    :ivar position: Position of the device in the simulation space.
+    :ivar orientation: The direction the device was facing.
+    :ivar data: All data the device measured.
     """
     def __init__(self, device_id: str, quantity: Quantity, position: Tuple[float, float, float],
                  orientation: Tuple[float, float, float]):
@@ -39,7 +49,21 @@ class Device:
         self.data: np.ndarray = None
 
     @property
+    def quantity_name(self):
+        """Alias for :class:`Device`.quantity.name.
+        """
+        return self.quantity.name
+
+    @property
+    def unit(self):
+        """Alias for :class:`Device`.quantity.unit.
+        """
+        return self.quantity.unit
+
+    @property
     def xyz(self):
+        """Alias for :class:`Device`.position.
+        """
         return self.position
 
     def __eq__(self, other):

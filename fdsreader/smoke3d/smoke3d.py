@@ -26,21 +26,23 @@ class SubSmoke3D:
     """Part of a smoke3d output for a single mesh.
 
     :ivar mesh: The mesh containing the data.
+    :ivar upper_bounds: Numpy ndarray containing the maxmimum data value for each timestep.
+    :ivar times: Numpy ndarray containing all time steps for which data has been written out.
     """
 
-    def __init__(self, file_path: str, mesh: Mesh, upper_bounds: np.ndarray, times: np.ndarray, max_length: int):
-        self.file_path = file_path  # Path to the binary data file
+    def __init__(self, file_path: str, mesh: Mesh, upper_bounds: np.ndarray, times: np.ndarray):
         self.mesh = mesh
         self.upper_bounds = upper_bounds
         self.times = times
-        self._max_length = max_length
+
+        self._file_path = file_path  # Path to the binary data file
 
     @property
     def data(self) -> np.ndarray:
         """Method to lazy load the Smoke3D data of a single mesh.
         """
         if not hasattr(self, "_data"):
-            with open(self.file_path, 'rb') as infile:
+            with open(self._file_path, 'rb') as infile:
                 dtype_header = fdtype.new((('i', 8),))
                 dtype_nchars = fdtype.new((('i', 2),))
 
@@ -88,42 +90,40 @@ class SubSmoke3D:
 
 
 class Smoke3D(np.lib.mixins.NDArrayOperatorsMixin):
-    """Smoke3D file data container including metadata. Consists of multiple subplots, one for each
+    """Smoke3D file data container including metadata. Consists of multiple subsmokes, one for each
         mesh.
 
-    :ivar root_path: Path to the directory containing all slice files.
-    :ivar time: The point in time when this data has been recorded.
-    :ivar quantities: List with quantity objects containing information about recorded quantities
-     calculated for this Smoke3D with the corresponding label and unit.
+    :ivar times: Numpy ndarray containing all time steps for which data has been written out.
+    :ivar quantity: :class:`Quantity` object containing information about the recorded quantity and its unit.
     """
 
     def __init__(self, root_path: str, times: np.ndarray, quantity: Quantity):
-        self.root_path = root_path
+        self._root_path = root_path
         self.times = times
         self.quantity = quantity
 
-        # List of all subplots this Smoke3D consists of (one per mesh).
+        # List of all subsmokes this Smoke3D consists of (one per mesh).
         self._subsmokes: Dict[Mesh, SubSmoke3D] = dict()
 
-    def _add_subsmoke(self, filename: str, mesh: Mesh, upper_bounds: np.ndarray, max_length: int) -> SubSmoke3D:
-        subplot = SubSmoke3D(os.path.join(self.root_path, filename), mesh, upper_bounds, self.times, max_length)
-        self._subsmokes[mesh] = subplot
+    def _add_subsmoke(self, filename: str, mesh: Mesh, upper_bounds: np.ndarray) -> SubSmoke3D:
+        subsmoke = SubSmoke3D(os.path.join(self._root_path, filename), mesh, upper_bounds, self.times)
+        self._subsmokes[mesh] = subsmoke
 
         # If lazy loading has been disabled by the user, load the data instantaneously instead
         if not settings.LAZY_LOAD:
-            _ = subplot.data
+            _ = subsmoke.data
 
-        return subplot
+        return subsmoke
 
     def __getitem__(self, mesh: Mesh):
-        """Returns the :class:`SubPlot` that contains data for the given mesh.
+        """Returns the :class:`SubSmoke` that contains data for the given mesh.
         """
-        return self._subsmokes[mesh]
+        return self.get_subsmoke(mesh)
 
     def get_subsmoke(self, mesh: Mesh):
-        """Returns the :class:`SubPlot` that contains data for the given mesh.
+        """Returns the :class:`SubSmoke` that contains data for the given mesh.
         """
-        return self[mesh]
+        return self._subsmokes[mesh]
 
     @property
     def vmax(self):
@@ -136,42 +136,31 @@ class Smoke3D(np.lib.mixins.NDArrayOperatorsMixin):
 
     @implements(np.mean)
     def mean(self) -> np.ndarray:
-        """Calculates the mean for each quantity individually of the whole Smoke3D.
-
-        :returns: The calculated mean values.
+        """Calculates the mean value of all Smoke3D data for this quantity.
         """
-        mean_sums = np.zeros((5,))
-        for subplot in self._subsmokes.values():
-            mean_sums += np.mean(subplot.data, axis=(0, 1, 2))
-        return mean_sums / len(self._subsmokes)
+        return np.sum([np.mean(subsmoke.data) for subsmoke in self._subsmokes.values()]) / len(self._subsmokes)
 
     @implements(np.std)
     def std(self) -> np.ndarray:
-        """Calculates the standard deviation for each quantity individually of the whole Smoke3D.
-
-        :returns: The calculated standard deviations.
+        """Calculates the standard deviation of all Smoke3D data for this quantity.
         """
-        stds = np.zeros((5,))
-        n_q = len(self.quantities)
-        for q in range(n_q):
-            mean = self.mean
-            sum = np.sum([np.sum(np.power(subplot.data[:, :, :, q] - mean, 2)) for subplot in self._subsmokes.values()])
-            N = np.sum([subplot.data.size / n_q for subplot in self._subsmokes.values()])
-            return np.sqrt(sum / N)
-        return stds
+        mean = self.mean
+        sum = np.sum([np.sum(np.power(subsmoke.data - mean, 2)) for subsmoke in self._subsmokes.values()])
+        N = np.sum([subsmoke.data.size for subsmoke in self._subsmokes.values()])
+        return np.sqrt(sum / N)
 
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory.
         """
-        for subplot in self._subsmokes.values():
-            subplot.clear_cache()
+        for subsmoke in self._subsmokes.values():
+            subsmoke.clear_cache()
 
     def __array__(self):
         """Method that will be called by numpy when trying to convert the object to a numpy ndarray.
         """
         raise UserWarning(
             "Smoke3Ds can not be converted to numpy arrays, but they support all typical numpy"
-            " operations such as np.multiply. If a 'global' array containg all subplots is"
+            " operations such as np.multiply. If a 'global' array containg all subsmokes is"
             " required, please request this functionality by submitting an issue on Github.")
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
@@ -190,8 +179,8 @@ class Smoke3D(np.lib.mixins.NDArrayOperatorsMixin):
                 del input_list[i]
 
         new_smoke3d = deepcopy(self)
-        for subplot in self._subsmokes.values():
-            subplot._data = ufunc(subplot.data, input_list[0], **kwargs)
+        for subsmoke in self._subsmokes.values():
+            subsmoke._data = ufunc(subsmoke.data, input_list[0], **kwargs)
         return new_smoke3d
 
     def __array_function__(self, func, types, args, kwargs):

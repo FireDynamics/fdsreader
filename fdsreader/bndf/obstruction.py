@@ -178,9 +178,9 @@ class SubObstruction:
 
     def get_data(self, quantity: Union[str, Quantity]):
         if type(quantity) != str:
-            quantity = quantity.quantity
+            quantity = quantity.name
         return next(b for b in self._boundary_data.values() if
-                    b.quantity.quantity.lower() == quantity.lower() or b.quantity.label.lower() == quantity.lower())
+                    b.quantity.name.lower() == quantity.lower() or b.quantity.label.lower() == quantity.lower())
 
     def __getitem__(self, item):
         if type(item) == int:
@@ -301,7 +301,7 @@ class Obstruction:
             A value of 0 indicates to no filter.
         """
         if type(quantity) != str:
-            quantity = quantity.quantity
+            quantity = quantity.name
 
         ret = [subobst.get_data(quantity) for subobst in self._subobstructions]
         if orientation == 0:

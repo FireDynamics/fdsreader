@@ -16,15 +16,15 @@ class SliceCollection(FDSDataCollection):
 
     @property
     def quantities(self) -> List[Quantity]:
-        return list({slc.quantity for slc in self})
+        return list({slc.name for slc in self})
 
     def filter_by_quantity(self, quantity: Union[str, Quantity]):
         """Filters all slices by a specific quantity.
         """
         if type(quantity) != str:
-            quantity = quantity.quantity
-        return SliceCollection(x for x in self if x.quantity.quantity.lower() == quantity.lower()
-                               or x.quantity.label.lower() == quantity.lower())
+            quantity = quantity.name
+        return SliceCollection(x for x in self if x.name.name.lower() == quantity.lower()
+                               or x.name.label.lower() == quantity.lower())
 
     def get_by_id(self, slice_id: str):
         """Get the slice with corresponding id if it exists.

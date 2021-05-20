@@ -1,24 +1,30 @@
 FDSReader documentation!
-====================================================
+========================
 
 .. toctree::
    :maxdepth: 1
    :caption: FDSReader
 
    simulation
-   isof
-   pl3d
    slcf
    bndf
    geom
+   isof
+   pl3d
+   smoke3d
    part
+   devc
+   quantity
    utils
 
 .. include::  simulation.rst
-.. include::  isof.rst
-.. include::  pl3d.rst
 .. include::  slcf.rst
 .. include::  bndf.rst
 .. include::  geom.rst
+.. include::  isof.rst
+.. include::  pl3d.rst
+.. include::  smoke3d.rst
 .. include::  part.rst
+.. include::  devc.rst
+.. include::  quantity.rst
 .. include::  utils.rst

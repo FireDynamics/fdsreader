@@ -25,9 +25,9 @@ class Plot3DCollection(FDSDataCollection):
         """Filters all plot3d data by a specific quantity.
         """
         if type(quantity) != str:
-            quantity = quantity.quantity
+            quantity = quantity.name
         return Plot3DCollection(x for x in self if any(
-            q.quantity.lower() == quantity.lower() or q.label.lower() == quantity.lower() for q in
+            q.name.lower() == quantity.lower() or q.label.lower() == quantity.lower() for q in
             x.quantities))
 
     def __repr__(self):

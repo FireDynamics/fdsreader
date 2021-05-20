@@ -24,11 +24,11 @@ class Particle:
 
         self._positions: List[np.ndarray] = list()
         self._tags: List[np.ndarray] = list()
-        self._data: Dict[str, List[np.ndarray]] = {q.quantity: [] for q in self.quantities}
+        self._data: Dict[str, List[np.ndarray]] = {q.name: [] for q in self.quantities}
         self.times: Sequence[float] = list()
 
-        self.lower_bounds = {q.quantity: [] for q in self.quantities}
-        self.upper_bounds = {q.quantity: [] for q in self.quantities}
+        self.lower_bounds = {q.name: [] for q in self.quantities}
+        self.upper_bounds = {q.name: [] for q in self.quantities}
 
         self._init_callback = None
 
@@ -62,11 +62,11 @@ class Particle:
         part.upper_bounds = dict()
         for q in self.quantities:
             if len(part._positions) != 0:
-                part.lower_bounds[q.quantity] = np.min(part._data[q.quantity])
-                part.upper_bounds[q.quantity] = np.max(part._data[q.quantity])
+                part.lower_bounds[q.name] = np.min(part._data[q.name])
+                part.upper_bounds[q.name] = np.max(part._data[q.name])
             else:
-                part.lower_bounds[q.quantity] = 0
-                part.upper_bounds[q.quantity] = 0
+                part.lower_bounds[q.name] = 0
+                part.upper_bounds[q.name] = 0
 
         return part
 
