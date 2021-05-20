@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>fdsreader.pl3d.pl3d &mdash; fdsreader [fdsreader, version 1.1.0.rc2] documentation</title>
+  <title>fdsreader.pl3d.pl3d &mdash; fdsreader [fdsreader, version 1.1.0] documentation</title>
   
 
   
@@ -86,12 +86,15 @@
               <p class="caption"><span class="caption-text">FDSReader</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../simulation.html">Simulation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../isof.html">Isosurface files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../pl3d.html">Plot3D files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../slcf.html">Slice files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../bndf.html">Boundary files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../geom.html">Complex Geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../isof.html">Isosurface files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pl3d.html">Plot3D files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../smoke3d.html">Smoke3D files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../part.html">Particles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devc.html">Devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quantity.html">Quantity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../utils.html">Utilities</a></li>
 </ul>
 
@@ -220,14 +223,13 @@
     <span class="sd">&quot;&quot;&quot;Plot3d file data container including metadata. Consists of multiple subplots, one for each</span>
 <span class="sd">        mesh.</span>
 
-<span class="sd">    :ivar root_path: Path to the directory containing all slice files.</span>
 <span class="sd">    :ivar time: The point in time when this data has been recorded.</span>
 <span class="sd">    :ivar quantities: List with quantity objects containing information about recorded quantities</span>
 <span class="sd">     calculated for this Plot3D with the corresponding label and unit.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">quantities</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Quantity</span><span class="p">]):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">root_path</span> <span class="o">=</span> <span class="n">root_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_root_path</span> <span class="o">=</span> <span class="n">root_path</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">time</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">quantities</span> <span class="o">=</span> <span class="n">quantities</span>
 
@@ -235,7 +237,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Mesh</span><span class="p">,</span> <span class="n">SubPlot3D</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_add_subplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SubPlot3D</span><span class="p">:</span>
-        <span class="n">subplot</span> <span class="o">=</span> <span class="n">SubPlot3D</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="n">filename</span><span class="p">),</span> <span class="n">mesh</span><span class="p">)</span>
+        <span class="n">subplot</span> <span class="o">=</span> <span class="n">SubPlot3D</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_root_path</span><span class="p">,</span> <span class="n">filename</span><span class="p">),</span> <span class="n">mesh</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="p">[</span><span class="n">mesh</span><span class="p">]</span> <span class="o">=</span> <span class="n">subplot</span>
 
         <span class="c1"># If lazy loading has been disabled by the user, load the data instantaneously instead</span>

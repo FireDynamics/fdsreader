@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>fdsreader.part.ParticleCollection &mdash; fdsreader [fdsreader, version 1.1.0.rc2] documentation</title>
+  <title>fdsreader.part.ParticleCollection &mdash; fdsreader [fdsreader, version 1.1.0] documentation</title>
   
 
   
@@ -86,12 +86,15 @@
               <p class="caption"><span class="caption-text">FDSReader</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../simulation.html">Simulation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../isof.html">Isosurface files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../pl3d.html">Plot3D files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../slcf.html">Slice files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../bndf.html">Boundary files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../geom.html">Complex Geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../isof.html">Isosurface files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pl3d.html">Plot3D files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../smoke3d.html">Smoke3D files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../part.html">Particles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devc.html">Devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quantity.html">Quantity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../utils.html">Utilities</a></li>
 </ul>
 
@@ -212,7 +215,7 @@
                     <span class="k">for</span> <span class="n">mesh</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_paths</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                         <span class="n">size</span> <span class="o">+=</span> <span class="n">particle</span><span class="o">.</span><span class="n">n_particles</span><span class="p">[</span><span class="n">mesh</span><span class="p">][</span><span class="n">t</span><span class="p">]</span>
                     <span class="k">for</span> <span class="n">quantity</span> <span class="ow">in</span> <span class="n">particle</span><span class="o">.</span><span class="n">quantities</span><span class="p">:</span>
-                        <span class="n">particle</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">quantity</span><span class="o">.</span><span class="n">quantity</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">size</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span>
+                        <span class="n">particle</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">quantity</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">size</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span>
                     <span class="n">particle</span><span class="o">.</span><span class="n">_positions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">size</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span>
                     <span class="n">particle</span><span class="o">.</span><span class="n">_tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">size</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">))</span>
 
@@ -255,7 +258,7 @@
                                 <span class="p">(</span><span class="n">n_particles</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">particle</span><span class="o">.</span><span class="n">quantities</span><span class="p">)),</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
 
                             <span class="k">for</span> <span class="n">q</span><span class="p">,</span> <span class="n">quantity</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">particle</span><span class="o">.</span><span class="n">quantities</span><span class="p">):</span>
-                                <span class="n">particle</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">quantity</span><span class="o">.</span><span class="n">quantity</span><span class="p">][</span><span class="n">t</span><span class="p">][</span>
+                                <span class="n">particle</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">quantity</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="n">t</span><span class="p">][</span>
                                 <span class="n">offset</span><span class="p">:</span><span class="n">offset</span> <span class="o">+</span> <span class="n">n_particles</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_raw</span><span class="p">[:,</span> <span class="n">q</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
 
                         <span class="n">pointer_location</span><span class="p">[</span><span class="n">particle</span><span class="p">][</span><span class="n">t</span><span class="p">]</span> <span class="o">+=</span> <span class="n">particle</span><span class="o">.</span><span class="n">n_particles</span><span class="p">[</span><span class="n">mesh</span><span class="p">][</span><span class="n">t</span><span class="p">]</span>

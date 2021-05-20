@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>fdsreader.simulation &mdash; fdsreader [fdsreader, version 1.1.0.rc2] documentation</title>
+  <title>fdsreader.simulation &mdash; fdsreader [fdsreader, version 1.1.0] documentation</title>
   
 
   
@@ -86,12 +86,15 @@
               <p class="caption"><span class="caption-text">FDSReader</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../simulation.html">Simulation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../isof.html">Isosurface files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../pl3d.html">Plot3D files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slcf.html">Slice files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../bndf.html">Boundary files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../geom.html">Complex Geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../isof.html">Isosurface files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pl3d.html">Plot3D files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../smoke3d.html">Smoke3D files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../part.html">Particles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devc.html">Devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quantity.html">Quantity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../utils.html">Utilities</a></li>
 </ul>
 
@@ -821,7 +824,6 @@
 
         <span class="n">times</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="n">upper_bounds</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-        <span class="n">max_length</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="n">filename</span> <span class="o">+</span> <span class="s2">&quot;.sz&quot;</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">sizefile</span><span class="p">:</span>
             <span class="c1"># skip version line</span>
             <span class="n">sizefile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
@@ -829,8 +831,6 @@
                 <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
                 <span class="n">times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
                 <span class="n">upper_bounds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
-                <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;</span> <span class="n">max_length</span><span class="p">:</span>
-                    <span class="n">max_length</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
         <span class="n">times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
         <span class="n">upper_bounds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">upper_bounds</span><span class="p">)</span>
 
@@ -838,7 +838,7 @@
 
         <span class="k">if</span> <span class="n">quantity</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">smoke_3d</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">smoke_3d</span><span class="p">[</span><span class="n">quantity</span><span class="p">]</span> <span class="o">=</span> <span class="n">Smoke3D</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span> <span class="n">quantity</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">smoke_3d</span><span class="p">[</span><span class="n">quantity</span><span class="p">]</span><span class="o">.</span><span class="n">_add_subsmoke</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">meshes</span><span class="p">[</span><span class="n">mesh_index</span><span class="p">],</span> <span class="n">upper_bounds</span><span class="p">,</span> <span class="n">max_length</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">smoke_3d</span><span class="p">[</span><span class="n">quantity</span><span class="p">]</span><span class="o">.</span><span class="n">_add_subsmoke</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">meshes</span><span class="p">[</span><span class="n">mesh_index</span><span class="p">],</span> <span class="n">upper_bounds</span><span class="p">)</span>
 
     <span class="nd">@log_error</span><span class="p">(</span><span class="s2">&quot;isof&quot;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">_load_isosurface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">:</span> <span class="n">TextIO</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
@@ -917,7 +917,7 @@
                         <span class="nb">int</span><span class="p">(</span><span class="n">bnd_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()))</span>
                     <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_q</span><span class="p">[</span><span class="n">i</span><span class="p">]):</span>
                         <span class="n">line</span> <span class="o">=</span> <span class="n">bnd_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
-                        <span class="n">quantity</span> <span class="o">=</span> <span class="n">particle</span><span class="o">.</span><span class="n">quantities</span><span class="p">[</span><span class="n">q</span><span class="p">]</span><span class="o">.</span><span class="n">quantity</span>
+                        <span class="n">quantity</span> <span class="o">=</span> <span class="n">particle</span><span class="o">.</span><span class="n">quantities</span><span class="p">[</span><span class="n">q</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
                         <span class="n">particle</span><span class="o">.</span><span class="n">lower_bounds</span><span class="p">[</span><span class="n">quantity</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
                         <span class="n">particle</span><span class="o">.</span><span class="n">upper_bounds</span><span class="p">[</span><span class="n">quantity</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
         <span class="k">return</span> <span class="n">times</span>

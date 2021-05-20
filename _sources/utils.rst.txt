@@ -25,8 +25,3 @@ _________
    :members:
    :undoc-members:
    :noindex:
-
-.. automodule:: fdsreader.utils.data
-   :members:
-   :undoc-members:
-   :noindex:
