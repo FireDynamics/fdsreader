@@ -106,7 +106,6 @@ class SubSlice:
             self._load_data(file_path, self._data)
         return self._data
 
-    # Todo: Check CC
     @property
     def vector_data(self) -> Dict[str, np.ndarray]:
         """Method to lazy load the slice's vector data if it exists.

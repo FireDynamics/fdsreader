@@ -10,6 +10,7 @@ from fdsreader.geom import Geometry, GeomBoundary, GeometryCollection
 from fdsreader.isof import Isosurface, IsosurfaceCollection
 from fdsreader.part import Particle, ParticleCollection
 from fdsreader.pl3d import Plot3D, Plot3DCollection
+from fdsreader.smoke3d import Smoke3D, Smoke3DCollection
 from fdsreader.slcf import Slice, SliceCollection
 from fdsreader.utils import Mesh, MeshCollection, Dimension, Surface, Quantity, Ventilation, Extent, log_error
 from fdsreader.utils.data import create_hash, get_smv_file, Device
@@ -35,6 +36,7 @@ class Simulation:
     :ivar obstructions: All defined obstructions combined into a :class:`ObstructionCollection`.
     :ivar slices: All defined slices combined into a :class:`SliceCollection`.
     :ivar data_3d: All defined 3D plotting data combined into a :class:`Plot3DCollection`.
+    :ivar smoke_3d: All defined 3D smoke data combine into a :class:`Smoke3DCollecction`
     :ivar isosurfaces: All defined isosurfaces combined into a :class:`IsosurfaceCollection`.
     :ivar particles: All defined particles combined into a :class:`ParticleCollection`.
     :ivar devices: List containing all devices defined in this simulation.
@@ -65,19 +67,23 @@ class Simulation:
                 try:
                     with open(pickle_file_path, 'rb') as f:
                         sim = pickle.load(f)
-                    # Check if pickle file stores a Simulation
-                    assert isinstance(sim, cls)
-                    # Check if the fdsreader version still matches
-                    assert sim.reader_version == __version__
-                    # Check if the smv_file did not change
-                    assert sim._hash == create_hash(smv_file_path)
-
-                    # Return cached sim if it turned out to be valid
-                    return sim
                 except Exception as e:
                     if settings.DEBUG:
                         logging.exception(e)
-                    os.remove(pickle_file_path)
+                else:
+                    valid = True
+                    # Check if pickle file stores a Simulation
+                    valid &= isinstance(sim, cls)
+                    # Check if the fdsreader version still matches
+                    valid &= sim.reader_version == __version__
+                    # Check if the smv_file did not change
+                    valid &= sim._hash == create_hash(smv_file_path)
+
+                    if valid:
+                        # Return cached sim if it turned out to be valid
+                        return sim
+
+                os.remove(pickle_file_path)
 
         return super(Simulation, cls).__new__(cls)
 
@@ -122,6 +128,7 @@ class Simulation:
             # information into data collections
             self.slices = dict()
             self.data_3d = dict()
+            self.smoke_3d = dict()
             self.isosurfaces = dict()
             self.particles = list()
             self.geom_data = list()
@@ -146,8 +153,8 @@ class Simulation:
                             self.steps = self._load_step_data(file_path)
                         elif csv_type == "devc":
                             device_tmp = file_path
-                            self.devices["Time"] = Device(Quantity("Time", "Time", ""),
-                                                          (.0, .0, .0), (.0, .0, .0))
+                            self.devices["Time"] = Device("Time", Quantity("Time", "Time", ""), (.0, .0, .0),
+                                                          (.0, .0, .0))
                     elif keyword == "HRRPUVCUT":
                         self.hrrpuv_cutoff = float(smv_file.readline().strip())
                     elif keyword == "TOFFSET":
@@ -162,20 +169,22 @@ class Simulation:
                     elif keyword == "SURFACE":
                         self.surfaces.append(self._load_surface(smv_file))
                     elif keyword == "DEVICE":
-                        name, device = self._register_device(smv_file)
-                        if name in self.devices:
-                            if type(self.devices) == list:
-                                self.devices[name].append(device)
+                        device_id, device = self._register_device(smv_file)
+                        if device_id in self.devices:
+                            if type(self.devices[device_id]) == list:
+                                self.devices[device_id].append(device)
                             else:
-                                self.devices[name] = [self.devices[name], device]
+                                self.devices[device_id] = [self.devices[device_id], device]
                         else:
-                            self.devices[name] = device
+                            self.devices[device_id] = device
                     elif keyword.startswith("SLC"):
                         self._load_slice(smv_file, keyword)
                     elif "ISOG" in keyword:
                         self._load_isosurface(smv_file, keyword)
                     elif keyword.startswith("PL3D"):
-                        self._load_data_3d(smv_file, keyword)
+                        self._load_plot_3d(smv_file, keyword)
+                    elif keyword.startswith("SMOKG3D") or keyword.startswith("SMOKF3D"):
+                        self._load_smoke_3d(smv_file, keyword)
                     elif keyword.startswith("BNDF"):
                         self._load_boundary_data(smv_file, keyword, cell_centered=False)
                     elif keyword.startswith("BNDC"):
@@ -198,6 +207,23 @@ class Simulation:
             self.ventilations: List[Ventilation] = list(self.ventilations.values())
             self.obstructions = ObstructionCollection(self.obstructions)
 
+            # Combine devices with coordinate ranges
+            for device_id, device in self.devices.items():
+                if type(device) == list:
+                    combined_x = {d.position[0] for d in device}
+                    combined_y = {d.position[1] for d in device}
+                    combined_z = {d.position[2] for d in device}
+                    combined_positions = (
+                        list(combined_x) if len(combined_x) > 1 else combined_x.pop(),
+                        list(combined_y) if len(combined_y) > 1 else combined_y.pop(),
+                        list(combined_z) if len(combined_z) > 1 else combined_z.pop()
+                    )
+                    new_device = Device(device_id, device[0].quantity, position=combined_positions,
+                                        orientation=device[0].orientation)
+                    new_device.data = np.array([d.data for d in device])
+
+                    self.devices[device_id] = new_device
+
             # Combine the gathered temporary information into data collections
             self.geom_data = GeometryCollection(self.geom_data)
             self.slices = SliceCollection(
@@ -205,6 +231,7 @@ class Simulation:
                       slice_data[0]["times"], slice_data[1:]) for slice_data in
                 self.slices.values())
             self.data_3d = Plot3DCollection(self.data_3d.keys(), self.data_3d.values())
+            self.smoke_3d = Smoke3DCollection(self.smoke_3d.values())
             self.isosurfaces = IsosurfaceCollection(self.isosurfaces.values())
             if self.particles is None:
                 self.particles = ParticleCollection((), ())
@@ -214,8 +241,7 @@ class Simulation:
                 # Hash will be saved to simulation pickle file and compared to new hash when loading
                 # the pickled simulation again in the next run of the prpogram.
                 self._hash = create_hash(self.smv_file_path)
-                pickle.dump(self,
-                            open(Simulation._get_pickle_filename(self.root_path, self.chid), 'wb'),
+                pickle.dump(self, open(Simulation._get_pickle_filename(self.root_path, self.chid), 'wb'),
                             protocol=pickle.HIGHEST_PROTOCOL)
 
     @classmethod
@@ -597,7 +623,7 @@ class Simulation:
                                       upper_bounds)
 
     @log_error("pl3d")
-    def _load_data_3d(self, smv_file: TextIO, line: str):
+    def _load_plot_3d(self, smv_file: TextIO, line: str):
         """Loads the pl3d at current pointer position.
         """
         line = line.strip().split()
@@ -617,6 +643,41 @@ class Simulation:
         if time not in self.data_3d:
             self.data_3d[time] = Plot3D(self.root_path, time, quantities)
         self.data_3d[time]._add_subplot(filename, self.meshes[mesh_index])
+
+    @log_error("smoke3d")
+    def _load_smoke_3d(self, smv_file: TextIO, line: str):
+        """Loads the smoke3d at current pointer position.
+        """
+        line = line.strip().split()
+
+        mesh_index = int(line[1]) - 1
+
+        filename = smv_file.readline().strip()
+
+        quantity = smv_file.readline().strip()
+        label = smv_file.readline().strip()
+        unit = smv_file.readline().strip()
+
+        times = list()
+        upper_bounds = list()
+        max_length = 0
+        with open(os.path.join(self.root_path, filename + ".sz"), 'r') as sizefile:
+            # skip version line
+            sizefile.readline()
+            for line in sizefile:
+                line = line.split()
+                times.append(float(line[0]))
+                upper_bounds.append(float(line[-1]))
+                if int(line[1]) > max_length:
+                    max_length = int(line[1])
+        times = np.array(times)
+        upper_bounds = np.array(upper_bounds)
+
+        quantity = Quantity(quantity, label, unit)
+
+        if quantity not in self.smoke_3d:
+            self.smoke_3d[quantity] = Smoke3D(self.root_path, times, quantity)
+        self.smoke_3d[quantity]._add_subsmoke(filename, self.meshes[mesh_index], upper_bounds, max_length)
 
     @log_error("isof")
     def _load_isosurface(self, smv_file: TextIO, line: str):
@@ -720,19 +781,18 @@ class Simulation:
     @log_error("devc")
     def _register_device(self, smv_file: TextIO) -> Tuple[str, Device]:
         line = smv_file.readline().strip().split('%')
-        name = line[0].strip()
-        quantity_label = line[1].strip()
+        device_id = line[0].strip()
+        quantity = line[1].strip()
         line = smv_file.readline().strip().split('#')[0].split()
         position = (float(line[0]), float(line[1]), float(line[2]))
         orientation = (float(line[3]), float(line[4]), float(line[5]))
-        return name, Device(Quantity(name, quantity_label, ""), position, orientation)
+        return device_id, Device(device_id, Quantity(quantity, "", ""), position, orientation)
 
     @log_error("devc")
     def _load_DEVC_data(self, file_path: str):
         with open(file_path, 'r') as infile:
             units = infile.readline().split(',')
-            names = [name.replace('"', '').replace('\n', '').strip() for name in
-                     infile.readline().split(',')]
+            names = [name.replace('"', '').replace('\n', '').strip() for name in infile.readline().split(',')]
             values = np.genfromtxt(infile, delimiter=',', dtype=np.float32, autostrip=True)
             for k in range(len(names)):
                 devc = self.devices[names[k]]
@@ -742,17 +802,20 @@ class Simulation:
                 for i in range(size):
                     devc.data[i] = values[i][k]
 
-        line_path = file_path.replace("devc", "steps")
+        line_path = file_path.replace("devc", "line")
         if os.path.exists(line_path):
             with open(line_path, 'r') as infile:
-                infile.readline()
-                names = infile.readline().split(',')
+                units = infile.readline()
+                names = [name.replace('"', '').replace('\n', '').strip() for name in infile.readline().split(',')]
                 data = np.genfromtxt(infile, delimiter=',', dtype=np.float32, autostrip=True)
                 for k, key in enumerate(names):
                     if key in self.devices:
                         devc = self.devices[key]
                         for i in range(len(devc)):
-                            devc[i] = data[k, i]
+                            devc[i].quantity.unit = units[k]
+                            devc[i].data = data[i, k]
+                    else:
+                        pass  # Probably only x,y,z coordinates
 
     @log_error("csv")
     def _load_HRR_data(self, file_path: str) -> Dict[str, np.ndarray]:
@@ -786,6 +849,8 @@ class Simulation:
                     return self._transform_csv_data(keys, values, dtypes)
                 else:
                     return self._transform_csv_data(keys, values.reshape((1,)), dtypes)
+
+    # def _load_line_data(self):
 
     def _transform_csv_data(self, keys, values, dtypes):
         size = values.shape[0]

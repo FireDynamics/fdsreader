@@ -2,13 +2,13 @@ from typing import Sequence, BinaryIO, Union, Tuple
 import numpy as np
 
 from fdsreader.settings import FORTRAN_DATA_TYPE_CHAR, FORTRAN_DATA_TYPE_FLOAT, FORTRAN_DATA_TYPE_INTEGER, \
-    FORTRAN_BACKWARD
+    FORTRAN_DATA_TYPE_UINT8, FORTRAN_BACKWARD
 
 _BASE_FORMAT = f"{FORTRAN_DATA_TYPE_INTEGER}, {{}}" + (
     f", {FORTRAN_DATA_TYPE_INTEGER}" if FORTRAN_BACKWARD else "")
 
-_DATA_TYPES = {'i': FORTRAN_DATA_TYPE_INTEGER, 'f': FORTRAN_DATA_TYPE_FLOAT,
-               'c': FORTRAN_DATA_TYPE_CHAR, '{}': "{}"}
+_DATA_TYPES = {'i': FORTRAN_DATA_TYPE_INTEGER, 'f': FORTRAN_DATA_TYPE_FLOAT, 'c': FORTRAN_DATA_TYPE_CHAR,
+               'u': FORTRAN_DATA_TYPE_UINT8, '{}': "{}"}
 
 
 def _get_dtype_output_format(d, n):

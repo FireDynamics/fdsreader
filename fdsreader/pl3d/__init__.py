@@ -1,3 +1,3 @@
 from .pl3d import Plot3D
 
-from .Plot3dCollection import Plot3DCollection
+from .Plot3DCollection import Plot3DCollection

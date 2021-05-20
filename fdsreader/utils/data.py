@@ -33,22 +33,19 @@ class Quantity:
 class Device:
     """Represents a single Device.
     """
-    def __init__(self, quantity: Quantity, position: Tuple[float, float, float],
+    def __init__(self, device_id: str, quantity: Quantity, position: Tuple[float, float, float],
                  orientation: Tuple[float, float, float]):
+        self.id = device_id
         self.quantity = quantity
         self.position = position
         self.orientation = orientation
         self.data: np.ndarray = None
 
-    @property
-    def name(self):
-        return self.quantity.quantity
-
     def __eq__(self, other):
-        return self.name == other.name
+        return self.id == other.id
 
     def __repr__(self):
-        return f"Device(name={self.name}, position={self.position}, quantity={self.quantity}, mean={np.mean(self.data)})"
+        return f"Device(id='{self.id}', xyz={self.position}, quantity={self.quantity}, mean={np.mean(self.data)})"
 
 
 def create_hash(path: str):

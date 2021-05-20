@@ -107,7 +107,7 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
         """
         stds = np.zeros((5,))
         n_q = len(self.quantities)
-        for q in range(nq):
+        for q in range(n_q):
             mean = self.mean
             sum = np.sum([np.sum(np.power(subplot.data[:, :, :, q] - mean, 2)) for subplot in self._subplots.values()])
             N = np.sum([subplot.data.size / n_q for subplot in self._subplots.values()])

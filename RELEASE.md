@@ -1,4 +1,8 @@
 ## Release History
+* 1.1.0
+    * Added Smoke3D reader (Simulation.smoke3d)
+    * Bugfixes for devices
+    * Devices now also contain units of output quantities
 * 1.0.11
     * Bugfixes for cell-centered slices
     * Added get_by_id filter for obstructions and meshes
