@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Plot3D files &mdash; fdsreader [fdsreader, version 1.0.11] documentation</title>
+  <title>Plot3D files &mdash; fdsreader [fdsreader, version 1.1.0.rc1] documentation</title>
   
 
   
@@ -186,9 +186,36 @@
 </style>
 <div class="section" id="plot3d-files">
 <h1>Plot3D files<a class="headerlink" href="#plot3d-files" title="Permalink to this headline">¶</a></h1>
-<p>Collection of <code class="xref py py-class docutils literal notranslate"><span class="pre">Plot3D</span></code> objects. Offers extensive functionality for filtering and
+<p><strong>Classes:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Plot3DCollection</span></code>(times, *plot3ds)</p></td>
+<td><p>Collection of <code class="xref py py-class docutils literal notranslate"><span class="pre">Plot3D</span></code> objects.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.pl3d.Plot3DCollection.</span></code><code class="sig-name descname"><span class="pre">Plot3DCollection</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">plot3ds</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.pl3d.pl3d.Plot3D</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/pl3d/Plot3DCollection.html#Plot3DCollection"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Collection of <code class="xref py py-class docutils literal notranslate"><span class="pre">Plot3D</span></code> objects. Offers extensive functionality for filtering and
 using plot3Ds as well as its subclasses such as <code class="xref py py-class docutils literal notranslate"><span class="pre">SubPlot3D</span></code>.</p>
-<p><strong>Miscellaneous:</strong></p>
+<p><strong>Methods:</strong></p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_by_quantity</span></code>(quantity)</p></td>
+<td><p>Filters all plot3d data by a specific quantity.</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Attributes:</strong></p>
 <table class="longtable docutils align-default">
 <colgroup>
 <col style="width: 10%" />
@@ -200,10 +227,18 @@ using plot3Ds as well as its subclasses such as <code class="xref py py-class do
 </tr>
 </tbody>
 </table>
-<dl class="py attribute">
+<dl class="py method">
 <dt>
-<code class="sig-prename descclassname"><span class="pre">fdsreader.pl3d.Plot3DCollection.</span></code><code class="sig-name descname"><span class="pre">quantities</span></code></dt>
+<code class="sig-name descname"><span class="pre">filter_by_quantity</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/pl3d/Plot3DCollection.html#Plot3DCollection.filter_by_quantity"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Filters all plot3d data by a specific quantity.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">quantities</span></code></dt>
 <dd></dd></dl>
+
+</dd></dl>
 
 <p><strong>Classes:</strong></p>
 <table class="longtable docutils align-default">

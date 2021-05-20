@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>fdsreader.pl3d.pl3d &mdash; fdsreader [fdsreader, version 1.0.11] documentation</title>
+  <title>fdsreader.pl3d.pl3d &mdash; fdsreader [fdsreader, version 1.1.0.rc1] documentation</title>
   
 
   
@@ -268,7 +268,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">stds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">5</span><span class="p">,))</span>
         <span class="n">n_q</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">quantities</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nq</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_q</span><span class="p">):</span>
             <span class="n">mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span>
             <span class="nb">sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">subplot</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">q</span><span class="p">]</span> <span class="o">-</span> <span class="n">mean</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="k">for</span> <span class="n">subplot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
             <span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="n">subplot</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">size</span> <span class="o">/</span> <span class="n">n_q</span> <span class="k">for</span> <span class="n">subplot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
