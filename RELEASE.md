@@ -1,4 +1,6 @@
 ## Release History
+* 1.1.1
+    * Slcf hotfixes
 * 1.1.0
     * Added Smoke3D reader (Simulation.smoke3d)
     * Bugfixes for devices

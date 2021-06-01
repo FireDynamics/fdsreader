@@ -27,7 +27,7 @@ class GeometryCollection(FDSDataCollection):
         if type(quantity) != str:
             quantity = quantity.name
         return GeometryCollection(x for x in self if
-                                  x.name.name.lower() == quantity.lower() or x.name.label.lower() == quantity.lower())
+                                  x.quantity.name.lower() == quantity.lower() or x.name.label.lower() == quantity.lower())
 
     def __repr__(self):
         return "GeometryCollection(" + super(GeometryCollection, self).__repr__() + ")"

@@ -304,7 +304,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         coords = {'x': set(), 'y': set(), 'z': set()}
         for dim in ('x', 'y', 'z'):
             for mesh in self._subslices.keys():
-                co = mesh.coordinates[dim]
+                co = mesh.coordinates[dim].copy()
                 # In case the slice is cell-centered, we will shift the coordinates by half a cell
                 # and remove the last coordinate
                 if self.cell_centered:

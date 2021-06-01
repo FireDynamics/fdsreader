@@ -23,8 +23,8 @@ class SliceCollection(FDSDataCollection):
         """
         if type(quantity) != str:
             quantity = quantity.name
-        return SliceCollection(x for x in self if x.name.name.lower() == quantity.lower()
-                               or x.name.label.lower() == quantity.lower())
+        return SliceCollection(x for x in self if x.quantity.name.lower() == quantity.lower()
+                               or x.quantity.label.lower() == quantity.lower())
 
     def get_by_id(self, slice_id: str):
         """Get the slice with corresponding id if it exists.
