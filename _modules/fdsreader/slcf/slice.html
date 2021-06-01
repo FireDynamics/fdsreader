@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>fdsreader.slcf.slice &mdash; fdsreader [fdsreader, version 1.1.0] documentation</title>
+  <title>fdsreader.slcf.slice &mdash; fdsreader [fdsreader, version 1.1.1] documentation</title>
   
 
   
@@ -468,7 +468,7 @@
         <span class="n">coords</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="nb">set</span><span class="p">(),</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="nb">set</span><span class="p">(),</span> <span class="s1">&#39;z&#39;</span><span class="p">:</span> <span class="nb">set</span><span class="p">()}</span>
         <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">mesh</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subslices</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">co</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
+                <span class="n">co</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
                 <span class="c1"># In case the slice is cell-centered, we will shift the coordinates by half a cell</span>
                 <span class="c1"># and remove the last coordinate</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_centered</span><span class="p">:</span>

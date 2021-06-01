@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>fdsreader.geom.GeometryCollection &mdash; fdsreader [fdsreader, version 1.1.0] documentation</title>
+  <title>fdsreader.geom.GeometryCollection &mdash; fdsreader [fdsreader, version 1.1.1] documentation</title>
   
 
   
@@ -191,7 +191,7 @@
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">quantity</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">:</span>
             <span class="n">quantity</span> <span class="o">=</span> <span class="n">quantity</span><span class="o">.</span><span class="n">name</span>
         <span class="k">return</span> <span class="n">GeometryCollection</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span>
-                                  <span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">quantity</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">quantity</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span></div>
+                                  <span class="n">x</span><span class="o">.</span><span class="n">quantity</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">quantity</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">quantity</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span></div>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;GeometryCollection(&quot;</span> <span class="o">+</span> <span class="nb">super</span><span class="p">(</span><span class="n">GeometryCollection</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span></div>

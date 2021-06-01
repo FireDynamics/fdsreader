@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>fdsreader.slcf.SliceCollection &mdash; fdsreader [fdsreader, version 1.1.0] documentation</title>
+  <title>fdsreader.slcf.SliceCollection &mdash; fdsreader [fdsreader, version 1.1.1] documentation</title>
   
 
   
@@ -187,8 +187,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">quantity</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">:</span>
             <span class="n">quantity</span> <span class="o">=</span> <span class="n">quantity</span><span class="o">.</span><span class="n">name</span>
-        <span class="k">return</span> <span class="n">SliceCollection</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">quantity</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-                               <span class="ow">or</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">quantity</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span></div>
+        <span class="k">return</span> <span class="n">SliceCollection</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">quantity</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">quantity</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                               <span class="ow">or</span> <span class="n">x</span><span class="o">.</span><span class="n">quantity</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">quantity</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span></div>
 
 <div class="viewcode-block" id="SliceCollection.get_by_id"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.SliceCollection.SliceCollection.get_by_id">[docs]</a>    <span class="k">def</span> <span class="nf">get_by_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slice_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get the slice with corresponding id if it exists.</span>
