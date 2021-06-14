@@ -1,0 +1,40 @@
+&HEAD CHID='out_Steckler_013', TITLE='Steckler Compartment, Test 013'/
+
+## Computational domain, simulation time and ambient values
+&MESH IJK=18,14,11, XB=0.00,3.60,-1.40,1.40,0.00,2.20 /
+&TIME T_END=1800.0, TIME_SHRINK_FACTOR=10./
+&MISC TMPA=20.0 /
+
+## Fire definition
+&REAC FUEL='METHANE', SOOT_YIELD=0. /
+&SURF ID='BURNER', HRRPUA=1572.0, TMP_FRONT=100.0, COLOR='ORANGE' /
+
+## Geometry, here a wall with a hole
+&OBST XB=2.80,2.90, -1.40,1.40, 0.00,2.20 / Wall with door
+&HOLE XB=2.75,2.95, -0.30,0.30, 0.00,1.83 / Door opening
+
+## Burner surface
+&VENT XB=1.30,1.50, -0.10,0.10, 0.00,0.00, SURF_ID='BURNER' /
+
+## Domain boundary conditions, here open, but in the compartment
+&VENT MB='XMAX',SURF_ID='OPEN'/
+&VENT XB= 2.90,3.60, -1.40,-1.40, 0.00,2.20, SURF_ID='OPEN'/
+&VENT XB= 2.90,3.60,  1.40, 1.40, 0.00,2.20, SURF_ID='OPEN'/
+&VENT XB= 2.90,3.60, -1.40, 1.40, 2.20,2.20, SURF_ID='OPEN'/
+
+## Boundary conditions of the walls, default for all walls
+&SURF ID='FIBER BOARD', DEFAULT=.TRUE., MATL_ID='INSULATION', THICKNESS=0.013 /
+&MATL ID            = 'INSULATION' 
+      DENSITY       = 200.
+      CONDUCTIVITY  = 0.1
+      SPECIFIC_HEAT = 1. /
+
+## Output definition
+&DEVC ID='TC_Room', POINTS=44, XB=2.50,2.50,1.10,1.10,0.02,2.11, QUANTITY='TEMPERATURE', Z_ID='Room_z' /
+&DEVC ID='TC_Door', POINTS=38, XB=2.85,2.85,0.00,0.00,0.02,1.82, QUANTITY='TEMPERATURE', Z_ID='Door_z' /
+&DEVC ID='BP_Door', POINTS=38, XB=2.85,2.85,0.00,0.00,0.02,1.82, QUANTITY='VELOCITY', VELO_INDEX=1, HIDE_COORDINATES=.TRUE. /
+
+&DEVC ID='TC_Door_Single', XB=2.85,2.85,0.00,0.00,1.62,1.62, QUANTITY='TEMPERATURE'/
+&DEVC ID='BP_Door_Single', XB=2.85,2.85,0.00,0.00,1.62,1.62, QUANTITY='VELOCITY'/
+
+&TAIL /
