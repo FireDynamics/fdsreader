@@ -293,7 +293,11 @@ If there are multiple slices with the same distance, a random one will be select
 <dt>
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.slcf.slice.</span></code><code class="sig-name descname"><span class="pre">Slice</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slice_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_centered</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">times</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multimesh_data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Collection</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><dl class="simple">
-<dt>Slice file data container including metadata. Consists of multiple subslices, one for each</dt><dd><p>mesh the slice cuts through.</p>
+<dt>Slice file data container including metadata. Consists of multiple subslices, one for each</dt><dd><p>mesh the slice cuts through. In case a slice cuts right through the border of two meshes, the generated data
+would be duplicated. For edge-centered slices a random of both generated slices will be discarded as the data
+is completely identical. For cell-centered slices the data of both slices will be saved as :class:<a href="#id1"><span class="problematic" id="id2">`</span></a>SubSlice`s,
+therefore it might seem as if all slices would be duplicated, in reality however the slices might contain
+different data.</p>
 </dd>
 </dl>
 <dl class="field-list simple">
@@ -301,7 +305,7 @@ If there are multiple slices with the same distance, a random one will be select
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>cell_centered</strong> – Indicates whether centered positioning for data is used.</p></li>
 <li><p><strong>quantity</strong> – Quantity object containing information about the quantity calculated for this
-slice with the corresponding label and unit.</p></li>
+slice with the corresponding short_name and unit.</p></li>
 <li><p><strong>times</strong> – Numpy array containing all times for which data has been recorded.</p></li>
 <li><p><strong>n_t</strong> – Total number of time steps for which output data has been written.</p></li>
 <li><p><strong>orientation</strong> – Orientation [1,2,3] of the slice in case it is 2D, 0 otherwise.</p></li>

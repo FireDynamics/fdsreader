@@ -213,8 +213,11 @@
     <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;2D-shape of the slice.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="p">)</span>
         <span class="n">shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">cell_centered</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cell_centered</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span>
             <span class="k">return</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">shape</span>
 
@@ -307,11 +310,15 @@
 
 <div class="viewcode-block" id="Slice"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.slice.Slice">[docs]</a><span class="k">class</span> <span class="nc">Slice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">lib</span><span class="o">.</span><span class="n">mixins</span><span class="o">.</span><span class="n">NDArrayOperatorsMixin</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Slice file data container including metadata. Consists of multiple subslices, one for each</span>
-<span class="sd">        mesh the slice cuts through.</span>
+<span class="sd">        mesh the slice cuts through. In case a slice cuts right through the border of two meshes, the generated data</span>
+<span class="sd">        would be duplicated. For edge-centered slices a random of both generated slices will be discarded as the data</span>
+<span class="sd">        is completely identical. For cell-centered slices the data of both slices will be saved as :class:`SubSlice`s,</span>
+<span class="sd">        therefore it might seem as if all slices would be duplicated, in reality however the slices might contain</span>
+<span class="sd">        different data.</span>
 
 <span class="sd">    :ivar cell_centered: Indicates whether centered positioning for data is used.</span>
 <span class="sd">    :ivar quantity: Quantity object containing information about the quantity calculated for this</span>
-<span class="sd">        slice with the corresponding label and unit.</span>
+<span class="sd">        slice with the corresponding short_name and unit.</span>
 <span class="sd">    :ivar times: Numpy array containing all times for which data has been recorded.</span>
 <span class="sd">    :ivar n_t: Total number of time steps for which output data has been written.</span>
 <span class="sd">    :ivar orientation: Orientation [1,2,3] of the slice in case it is 2D, 0 otherwise.</span>
@@ -342,7 +349,7 @@
 
         <span class="k">for</span> <span class="n">mesh_data</span> <span class="ow">in</span> <span class="n">multimesh_data</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">mesh_data</span><span class="p">[</span><span class="s2">&quot;mesh&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subslices</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">quantity</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">(</span><span class="n">mesh_data</span><span class="p">[</span><span class="s2">&quot;quantity&quot;</span><span class="p">],</span> <span class="n">mesh_data</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">quantity</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">(</span><span class="n">mesh_data</span><span class="p">[</span><span class="s2">&quot;quantity&quot;</span><span class="p">],</span> <span class="n">mesh_data</span><span class="p">[</span><span class="s2">&quot;short_name&quot;</span><span class="p">],</span>
                                          <span class="n">mesh_data</span><span class="p">[</span><span class="s2">&quot;unit&quot;</span><span class="p">])</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_subslices</span><span class="p">[</span><span class="n">mesh_data</span><span class="p">[</span><span class="s2">&quot;mesh&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">SubSlice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh_data</span><span class="p">[</span><span class="s2">&quot;filename&quot;</span><span class="p">],</span>
                                                               <span class="n">mesh_data</span><span class="p">[</span><span class="s2">&quot;dimension&quot;</span><span class="p">],</span>
@@ -366,6 +373,7 @@
             <span class="n">extents_tmp</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
             <span class="n">remove_tmp</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
             <span class="k">for</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">sslc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subslices</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">sslc</span><span class="o">.</span><span class="n">extent</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">sslc</span><span class="o">.</span><span class="n">extent</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">extents_tmp</span><span class="p">:</span>
                     <span class="n">extents_tmp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sslc</span><span class="o">.</span><span class="n">extent</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
