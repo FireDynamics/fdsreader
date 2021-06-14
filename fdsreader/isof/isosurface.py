@@ -176,16 +176,16 @@ class Isosurface:
 
     :ivar id: The ID of this isosurface.
     :ivar quantity: Quantity object containing information about the quantity calculated for this
-        isosurface with the corresponding label and unit.
+        isosurface with the corresponding short_name and unit.
     :ivar v_quantity: Information about the color quantity.
     :ivar levels: All isosurface levels.
     """
 
     def __init__(self, isosurface_id: int, double_quantity: bool, quantity: str,
-                 label: str, unit: str, levels: List[float], v_quantity: str = "",
-                 v_label: str = "", v_unit: str = ""):
+                 short_name: str, unit: str, levels: List[float], v_quantity: str = "",
+                 v_short_name: str = "", v_unit: str = ""):
         self.id = isosurface_id
-        self.quantity = Quantity(quantity, label, unit)
+        self.quantity = Quantity(quantity, short_name, unit)
         self._double_quantity = double_quantity
         self.levels = levels
 
@@ -194,7 +194,7 @@ class Isosurface:
         self._subsurfaces: Dict[Mesh, SubSurface] = dict()
 
         if self._double_quantity:
-            self.v_quantity = Quantity(v_quantity, v_label, v_unit)
+            self.v_quantity = Quantity(v_quantity, v_short_name, v_unit)
 
     def _add_subsurface(self, mesh: Mesh, iso_file_path: str,
                         viso_file_path: str = "") -> SubSurface:

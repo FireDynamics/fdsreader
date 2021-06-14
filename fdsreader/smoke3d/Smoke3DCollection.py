@@ -22,7 +22,7 @@ class Smoke3DCollection(FDSDataCollection):
         if type(quantity) != str:
             quantity = quantity.name
         return next(x for x in self if
-                    x.quantity.name.lower() == quantity.lower() or x.name.label.lower() == quantity.lower())
+                    x.quantity.name.lower() == quantity.lower() or x.quantity.short_name.lower() == quantity.lower())
 
     def __repr__(self):
         return "Smoke3DCollection(" + super(Smoke3DCollection, self).__repr__() + ")"

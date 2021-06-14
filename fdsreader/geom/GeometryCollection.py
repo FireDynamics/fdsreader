@@ -15,7 +15,7 @@ class GeometryCollection(FDSDataCollection):
 
         if not settings.LAZY_LOAD:
             for geom in self:
-                geom._load_data()
+                geom._load_prt_data()
 
     @property
     def quantities(self) -> List[Quantity]:
@@ -27,7 +27,7 @@ class GeometryCollection(FDSDataCollection):
         if type(quantity) != str:
             quantity = quantity.name
         return GeometryCollection(x for x in self if
-                                  x.quantity.name.lower() == quantity.lower() or x.name.label.lower() == quantity.lower())
+                                  x.quantity.name.lower() == quantity.lower() or x.quantity.short_name.lower() == quantity.lower())
 
     def __repr__(self):
         return "GeometryCollection(" + super(GeometryCollection, self).__repr__() + ")"

@@ -1,4 +1,4 @@
-from typing import Iterable, List, Union, Tuple
+from typing import Iterable, List, Union
 
 import numpy as np
 
@@ -24,7 +24,7 @@ class SliceCollection(FDSDataCollection):
         if type(quantity) != str:
             quantity = quantity.name
         return SliceCollection(x for x in self if x.quantity.name.lower() == quantity.lower()
-                               or x.quantity.label.lower() == quantity.lower())
+                               or x.quantity.short_name.lower() == quantity.lower())
 
     def get_by_id(self, slice_id: str):
         """Get the slice with corresponding id if it exists.

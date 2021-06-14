@@ -9,6 +9,7 @@ from fdsreader.bndf import Obstruction, Patch, ObstructionCollection, SubObstruc
 from fdsreader.geom import Geometry, GeomBoundary, GeometryCollection
 from fdsreader.isof import Isosurface, IsosurfaceCollection
 from fdsreader.part import Particle, ParticleCollection
+from fdsreader.evac import Evacuation, EvacCollection
 from fdsreader.pl3d import Plot3D, Plot3DCollection
 from fdsreader.smoke3d import Smoke3D, Smoke3DCollection
 from fdsreader.slcf import Slice, SliceCollection
@@ -97,6 +98,7 @@ class Simulation:
             (f"           geometries={len(self.geoms)},\n" if len(self.geoms) > 0 else "") + \
             (f"           slices={len(self.slices)},\n" if len(self.slices) > 0 else "") + \
             (f"           plot3d={len(self.data_3d)},\n" if len(self.data_3d) > 0 else "") + \
+            (f"           smoke3d={len(self.smoke_3d)},\n" if len(self.smoke_3d) > 0 else "") + \
             (f"           isosurfaces={len(self.isosurfaces)},\n" if len(self.isosurfaces) > 0 else "") + \
             (f"           particles={len(self.particles)},\n" if len(self.particles) > 0 else "") + \
             (f"           devices={len(self.devices)},\n" if len(self.devices) > 0 else "")
@@ -131,6 +133,7 @@ class Simulation:
             self.smoke_3d = dict()
             self.isosurfaces = dict()
             self.particles = list()
+            self.evacs = list()
             self.geom_data = list()
             self.meshes = list()
             self.devices: Dict[str, Union[Device, List[Device]]] = dict()
@@ -162,6 +165,8 @@ class Simulation:
                         self.default_texture_origin = tuple(float(offsets[i]) for i in range(3))
                     elif keyword == "CLASS_OF_PARTICLES":
                         self.particles.append(self._register_particle(smv_file))
+                    elif keyword == "CLASS_OF_HUMANS":
+                        self.evacs.append(self._register_evac(smv_file))
                     elif keyword.startswith("GEOM"):
                         self._load_geoms(smv_file, keyword)
                     elif keyword.startswith("GRID"):
@@ -193,6 +198,8 @@ class Simulation:
                         self._load_boundary_data_geom(smv_file, keyword)
                     elif keyword.startswith("PRT5"):
                         self._load_particle_data(smv_file, keyword)
+                    elif keyword.startswith("EVA5"):
+                        self._load_evac_data(smv_file, keyword)
                     elif keyword.startswith("SHOW_OBST"):
                         self._toggle_obst(smv_file, keyword)
                     elif keyword.startswith("HIDE_OBST"):
@@ -214,9 +221,9 @@ class Simulation:
                     combined_y = {d.position[1] for d in device}
                     combined_z = {d.position[2] for d in device}
                     combined_positions = (
-                        list(combined_x) if len(combined_x) > 1 else combined_x.pop(),
-                        list(combined_y) if len(combined_y) > 1 else combined_y.pop(),
-                        list(combined_z) if len(combined_z) > 1 else combined_z.pop()
+                        sorted(list(combined_x)) if len(combined_x) > 1 else combined_x.pop(),
+                        sorted(list(combined_y)) if len(combined_y) > 1 else combined_y.pop(),
+                        sorted(list(combined_z)) if len(combined_z) > 1 else combined_z.pop()
                     )
                     new_device = Device(device_id, device[0].quantity, position=combined_positions,
                                         orientation=device[0].orientation)
@@ -233,8 +240,14 @@ class Simulation:
             self.data_3d = Plot3DCollection(self.data_3d.keys(), self.data_3d.values())
             self.smoke_3d = Smoke3DCollection(self.smoke_3d.values())
             self.isosurfaces = IsosurfaceCollection(self.isosurfaces.values())
-            if self.particles is None:
+            # If no particles are simulates, initialize empty data container for consistency
+            if len(self.particles) == 0:
                 self.particles = ParticleCollection((), ())
+            else:
+                self.particles._post_init()
+            # If no evacs are simulates, initialize empty data container for consistency
+            if len(self.evacs) == 0:
+                self.evacs = EvacCollection((), ())
             self.meshes = MeshCollection(self.meshes)
 
             if settings.ENABLE_CACHING:
@@ -486,7 +499,7 @@ class Simulation:
 
         filename = smv_file.readline().strip()
         quantity = smv_file.readline().strip()
-        label = smv_file.readline().strip()
+        short_name = smv_file.readline().strip()
         unit = smv_file.readline().strip()
 
         file_path = os.path.join(self.root_path, filename)
@@ -505,7 +518,7 @@ class Simulation:
                 {"cell_centered": cell_centered, "times": times, "id": slice_id}]
         self.slices[slice_index].append(
             {"dimension": dimension, "extent": extent, "mesh": mesh, "filename": filename,
-             "quantity": quantity, "label": label, "unit": unit})
+             "quantity": quantity, "short_name": short_name, "unit": unit})
 
     @log_error("bndf")
     def _load_boundary_data(self, smv_file: TextIO, line: str, cell_centered: bool):
@@ -517,7 +530,7 @@ class Simulation:
 
         filename = smv_file.readline().strip()
         quantity = smv_file.readline().strip()
-        label = smv_file.readline().strip()
+        short_name = smv_file.readline().strip()
         unit = smv_file.readline().strip()
 
         bid = int(filename.split('_')[-1][:-3]) - 1
@@ -582,7 +595,7 @@ class Simulation:
             for patch in p:
                 patch._post_init(patch_offset)
 
-            self._subobstructions[mesh][obst_index]._add_patches(bid, cell_centered, quantity, label, unit, p, times,
+            self._subobstructions[mesh][obst_index]._add_patches(bid, cell_centered, quantity, short_name, unit, p, times,
                                                                  n_t, lower_bounds, upper_bounds)
 
     @log_error("geom")
@@ -595,7 +608,7 @@ class Simulation:
         filename_be = smv_file.readline().strip()
         filename_gbf = smv_file.readline().strip()
         quantity = smv_file.readline().strip()
-        label = smv_file.readline().strip()
+        short_name = smv_file.readline().strip()
         unit = smv_file.readline().strip()
 
         bid = int(filename_be.split('_')[-1][:-3]) - 1
@@ -618,7 +631,7 @@ class Simulation:
         n_t = times.shape[0]
 
         if bid >= len(self.geom_data):
-            self.geom_data.append(GeomBoundary(Quantity(quantity, label, unit), times, n_t))
+            self.geom_data.append(GeomBoundary(Quantity(quantity, short_name, unit), times, n_t))
         self.geom_data[bid]._add_data(mesh_index, file_path_be, file_path_gbf, lower_bounds,
                                       upper_bounds)
 
@@ -636,9 +649,9 @@ class Simulation:
         quantities = list()
         for _ in range(5):
             quantity = smv_file.readline().strip()
-            label = smv_file.readline().strip()
+            short_name = smv_file.readline().strip()
             unit = smv_file.readline().strip()
-            quantities.append(Quantity(quantity, label, unit))
+            quantities.append(Quantity(quantity, short_name, unit))
 
         if time not in self.data_3d:
             self.data_3d[time] = Plot3D(self.root_path, time, quantities)
@@ -655,7 +668,7 @@ class Simulation:
         filename = smv_file.readline().strip()
 
         quantity = smv_file.readline().strip()
-        label = smv_file.readline().strip()
+        short_name = smv_file.readline().strip()
         unit = smv_file.readline().strip()
 
         times = list()
@@ -670,7 +683,7 @@ class Simulation:
         times = np.array(times)
         upper_bounds = np.array(upper_bounds)
 
-        quantity = Quantity(quantity, label, unit)
+        quantity = Quantity(quantity, short_name, unit)
 
         if quantity not in self.smoke_3d:
             self.smoke_3d[quantity] = Smoke3D(self.root_path, times, quantity)
@@ -690,11 +703,11 @@ class Simulation:
         if double_quantity:
             viso_file_path = os.path.join(self.root_path, smv_file.readline().strip())
         quantity = smv_file.readline().strip()
-        label = smv_file.readline().strip()
+        short_name = smv_file.readline().strip()
         unit = smv_file.readline().strip()
         if double_quantity:
             v_quantity = smv_file.readline().strip()
-            v_label = smv_file.readline().strip()
+            v_short_name = smv_file.readline().strip()
             v_unit = smv_file.readline().strip()
 
         if iso_id not in self.isosurfaces:
@@ -705,14 +718,14 @@ class Simulation:
                 levels = fdtype.read(infile, dtype_header_levels, 1)[0]
         if double_quantity:
             if iso_id not in self.isosurfaces:
-                self.isosurfaces[iso_id] = Isosurface(iso_id, double_quantity, quantity, label,
+                self.isosurfaces[iso_id] = Isosurface(iso_id, double_quantity, quantity, short_name,
                                                       unit, levels, v_quantity=v_quantity,
-                                                      v_label=v_label, v_unit=v_unit)
+                                                      v_short_name=v_short_name, v_unit=v_unit)
             self.isosurfaces[iso_id]._add_subsurface(self.meshes[mesh_index], iso_file_path,
                                                      viso_file_path=viso_file_path)
         else:
             if iso_id not in self.isosurfaces:
-                self.isosurfaces[iso_id] = Isosurface(iso_id, double_quantity, quantity, label,
+                self.isosurfaces[iso_id] = Isosurface(iso_id, double_quantity, quantity, short_name,
                                                       unit, levels)
             self.isosurfaces[iso_id]._add_subsurface(self.meshes[mesh_index], iso_file_path)
 
@@ -721,41 +734,48 @@ class Simulation:
         particle_class = smv_file.readline().strip()
         color = tuple(float(c) for c in smv_file.readline().strip().split())
 
-        n_q = int(smv_file.readline().strip())
+        n_quantities = int(smv_file.readline().strip())
         quantities = list()
-        for _ in range(n_q):
+        for _ in range(n_quantities):
             quantity = smv_file.readline().strip()
-            label = smv_file.readline().strip()
+            short_name = smv_file.readline().strip()
             unit = smv_file.readline().strip()
-            quantities.append(Quantity(quantity, label, unit))
+            quantities.append(Quantity(quantity, short_name, unit))
         return Particle(particle_class, quantities, color)
 
-    def _load_particle_meta(self, particles: Union[List[Particle], ParticleCollection],
-                            file_path: str, mesh: Mesh) -> List[float]:
+    def _load_prt5_meta(self, prts: Union[List[Particle], ParticleCollection, List[Evacuation], EvacCollection],
+                        file_path: str, mesh: Mesh) -> List[float]:
+        is_evac = type(prts[0]) == Evacuation
         with open(file_path, 'r') as bnd_file:
             line = bnd_file.readline().strip().split()
             n_classes = int(line[1])
             times = list()
-            n_q = list()
+            n_quantities = list()
             for i in range(n_classes):
                 line = bnd_file.readline().strip().split()
-                n_q.append(int(line[0]))
-                for _ in range(n_q[-1]):
+                n_quantities.append(int(line[0]))
+                for _ in range(n_quantities[-1]):
                     bnd_file.readline()
-                particles[i].n_particles[mesh] = list()
+                if is_evac:
+                    prts[i].n_humans[mesh] = list()
+                else:
+                    prts[i].n_particles[mesh] = list()
             bnd_file.seek(0)
 
             for line in bnd_file:
                 times.append(float(line.strip().split()[0]))
                 for i in range(n_classes):
-                    particle = particles[i]
-                    particle.n_particles[mesh].append(
-                        int(bnd_file.readline().strip().split()[1].strip()))
-                    for q in range(n_q[i]):
+                    prt = prts[i]
+                    n = int(bnd_file.readline().strip().split()[1].strip())
+                    if is_evac:
+                        prt.n_humans[mesh].append(n)
+                    else:
+                        prt.n_particles[mesh].append(n)
+                    for q in range(n_quantities[i]):
                         line = bnd_file.readline().strip().split()
-                        quantity = particle.quantities[q].name
-                        particle.lower_bounds[quantity].append(float(line[0]))
-                        particle.upper_bounds[quantity].append(float(line[1]))
+                        quantity = prt.quantities[q].name
+                        prt.lower_bounds[quantity].append(float(line[0]))
+                        prt.upper_bounds[quantity].append(float(line[1]))
         return times
 
     @log_error("part")
@@ -765,7 +785,7 @@ class Simulation:
         mesh_index = int(line.split()[1].strip()) - 1
         mesh = self.meshes[mesh_index]
 
-        times = self._load_particle_meta(self.particles, file_path + '.bnd', mesh)
+        times = self._load_prt5_meta(self.particles, file_path + '.bnd', mesh)
         if type(self.particles) == list:
             self.particles = ParticleCollection(times, self.particles)
 
@@ -773,17 +793,52 @@ class Simulation:
 
         n_classes = int(smv_file.readline().strip())
         for i in range(n_classes):
-            smv_file.readline()
+            smv_file.readline()  # Skip "N" values
+
+    @log_error("evac")
+    def _register_evac(self, smv_file: TextIO) -> Evacuation:
+        class_name = smv_file.readline().split(" % % ")[0].strip()
+        color = tuple(float(c) for c in smv_file.readline().strip().split())
+
+        n_quantities = int(smv_file.readline().strip())
+        quantities = list()
+        for _ in range(n_quantities):
+            quantity = smv_file.readline().strip()
+            short_name = smv_file.readline().strip()
+            unit = smv_file.readline().strip()
+            quantities.append(Quantity(quantity, short_name, unit))
+        return Evacuation(class_name, quantities, color)
+
+    @log_error("evac")
+    def _load_evac_data(self, smv_file: TextIO, line: str):
+        file_path = os.path.join(self.root_path, smv_file.readline().strip())
+
+        mesh_index, z_offset = line.split()[1:]
+        mesh = self.meshes[int(mesh_index) - 1]
+
+        times = self._load_prt5_meta(self.evacs, file_path + '.bnd', mesh)[1:]  # First timestep is weird somehow
+        if type(self.evacs) == list:
+            self.evacs = EvacCollection(times, self.evacs, os.path.join(self.root_path, self.chid + "_evac"))
+
+        self.evacs.z_offsets[mesh] = float(z_offset)
+        self.evacs._file_paths[mesh] = file_path
+
+        n_evacs = int(smv_file.readline().strip())
+        for i in range(n_evacs):
+            smv_file.readline()  # Skip "N" values
 
     @log_error("devc")
     def _register_device(self, smv_file: TextIO) -> Tuple[str, Device]:
         line = smv_file.readline().strip().split('%')
         device_id = line[0].strip()
-        quantity = line[1].strip()
+        quantity = None
+        if len(line) > 1:
+            quantity_name = line[1].strip()
+            quantity = Quantity(quantity_name, quantity_name, "")
         line = smv_file.readline().strip().split('#')[0].split()
         position = (float(line[0]), float(line[1]), float(line[2]))
         orientation = (float(line[3]), float(line[4]), float(line[5]))
-        return device_id, Device(device_id, Quantity(quantity, quantity, ""), position, orientation)
+        return device_id, Device(device_id, quantity, position, orientation)
 
     @log_error("devc")
     def _load_DEVC_data(self, file_path: str):
@@ -846,8 +901,6 @@ class Simulation:
                     return self._transform_csv_data(keys, values, dtypes)
                 else:
                     return self._transform_csv_data(keys, values.reshape((1,)), dtypes)
-
-    # def _load_line_data(self):
 
     def _transform_csv_data(self, keys, values, dtypes):
         size = values.shape[0]

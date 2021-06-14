@@ -49,8 +49,11 @@ class SubSlice:
     def shape(self) -> Tuple[int, int]:
         """2D-shape of the slice.
         """
+        print(self.dimension)
         shape = self.dimension.shape(cell_centered=self.cell_centered)
         if self.orientation != 0:
+            if len(shape) < 2:
+                return shape[0], 1
             return shape[0], shape[1]
         return shape
 
@@ -143,11 +146,15 @@ class SubSlice:
 
 class Slice(np.lib.mixins.NDArrayOperatorsMixin):
     """Slice file data container including metadata. Consists of multiple subslices, one for each
-        mesh the slice cuts through.
+        mesh the slice cuts through. In case a slice cuts right through the border of two meshes, the generated data
+        would be duplicated. For edge-centered slices a random of both generated slices will be discarded as the data
+        is completely identical. For cell-centered slices the data of both slices will be saved as :class:`SubSlice`s,
+        therefore it might seem as if all slices would be duplicated, in reality however the slices might contain
+        different data.
 
     :ivar cell_centered: Indicates whether centered positioning for data is used.
     :ivar quantity: Quantity object containing information about the quantity calculated for this
-        slice with the corresponding label and unit.
+        slice with the corresponding short_name and unit.
     :ivar times: Numpy array containing all times for which data has been recorded.
     :ivar n_t: Total number of time steps for which output data has been written.
     :ivar orientation: Orientation [1,2,3] of the slice in case it is 2D, 0 otherwise.
@@ -178,7 +185,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
 
         for mesh_data in multimesh_data:
             if mesh_data["mesh"] not in self._subslices:
-                self.quantity = Quantity(mesh_data["quantity"], mesh_data["label"],
+                self.quantity = Quantity(mesh_data["quantity"], mesh_data["short_name"],
                                          mesh_data["unit"])
                 self._subslices[mesh_data["mesh"]] = SubSlice(self, mesh_data["filename"],
                                                               mesh_data["dimension"],
@@ -202,6 +209,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             extents_tmp = list()
             remove_tmp = list()
             for mesh, sslc in self._subslices.items():
+                print(sslc.extent)
                 if sslc.extent not in extents_tmp:
                     extents_tmp.append(sslc.extent)
                 else:

@@ -10,25 +10,25 @@ import numpy as np
 
 
 class Quantity:
-    """Object containing information about a quantity with the corresponding label and unit.
+    """Object containing information about a quantity with the corresponding short_name and unit.
 
-    :ivar label: The short label representing the quantity.
+    :ivar short_name: The short short_name representing the quantity.
     :ivar quantity: The name of the quantity.
     :ivar unit: The corresponding unit of the quantity.
     """
-    def __init__(self, quantity: str, label: str, unit: str):
-        self.label = label
+    def __init__(self, quantity: str, short_name: str, unit: str):
+        self.short_name = short_name
         self.unit = unit
         self.name = quantity
 
     def __eq__(self, other):
-        return self.name == other.name and self.label == other.label and self.unit == other.unit
+        return self.name == other.name and self.short_name == other.short_name and self.unit == other.unit
 
     def __hash__(self):
-        return hash(self.label)
+        return hash(self.short_name)
 
     def __repr__(self):
-        return f"Quantity('{self.label}')"
+        return f"Quantity('{self.short_name}')"
 
 
 class Device:

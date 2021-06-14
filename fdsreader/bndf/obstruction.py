@@ -84,7 +84,7 @@ class Boundary:
     """Container for boundary data specific to one quantity.
 
     :ivar quantity: Quantity object containing information about the quantity calculated for this
-        :class:`Obstruction` with the corresponding label and unit.
+        :class:`Obstruction` with the corresponding short_name and unit.
     :ivar times: Numpy array containing all times for which data has been recorded.
     :ivar cell_centered: Indicates whether centered positioning for data is used.
     :ivar lower_bounds: Dictionary with lower bounds for each timestep with meshes as keys.
@@ -167,10 +167,10 @@ class SubObstruction:
         self.hide_times = list()
         self.show_times = list()
 
-    def _add_patches(self, bid: int, cell_centered: bool, quantity: str, label: str, unit: str, patches: List[Patch],
+    def _add_patches(self, bid: int, cell_centered: bool, quantity: str, short_name: str, unit: str, patches: List[Patch],
                      times: np.ndarray, n_t: int, lower_bounds: np.ndarray, upper_bounds: np.ndarray):
         if bid not in self._boundary_data:
-            self._boundary_data[bid] = Boundary(Quantity(quantity, label, unit), cell_centered, times, n_t, patches,
+            self._boundary_data[bid] = Boundary(Quantity(quantity, short_name, unit), cell_centered, times, n_t, patches,
                                                 lower_bounds, upper_bounds)
 
         if not settings.LAZY_LOAD:
@@ -180,7 +180,7 @@ class SubObstruction:
         if type(quantity) != str:
             quantity = quantity.name
         return next(b for b in self._boundary_data.values() if
-                    b.quantity.name.lower() == quantity.lower() or b.quantity.label.lower() == quantity.lower())
+                    b.quantity.name.lower() == quantity.lower() or b.quantity.short_name.lower() == quantity.lower())
 
     def __getitem__(self, item):
         if type(item) == int:
@@ -344,4 +344,4 @@ class Obstruction:
 
     def __repr__(self, *args, **kwargs):
         return f"Obstruction(id={self.id}, Bounding-Box={self.bounding_box}, SubObstructions={len(self._subobstructions)}" + (
-            f", Quantities={[q.label for q in self.quantities]}" if self.has_boundary_data else "") + ")"
+            f", Quantities={[q.short_name for q in self.quantities]}" if self.has_boundary_data else "") + ")"

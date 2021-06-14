@@ -13,7 +13,7 @@ class Mesh:
     :ivar extent: :class:`Extent` object containing 3-dimensional extent information.
     :ivar n: Number of elements for each of the 3 dimensions.
     :ivar n_size: Total number of blocks in this mesh.
-    :var id: Mesh id/label assigned to this mesh.
+    :var id: Mesh id/short_name assigned to this mesh.
     """
     id = None  # Needed for hash to work
 

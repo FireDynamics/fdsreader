@@ -61,7 +61,7 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
 
     :ivar time: The point in time when this data has been recorded.
     :ivar quantities: List with quantity objects containing information about recorded quantities
-     calculated for this Plot3D with the corresponding label and unit.
+     calculated for this Plot3D with the corresponding short_name and unit.
     """
 
     def __init__(self, root_path: str, time: float, quantities: Sequence[Quantity]):
