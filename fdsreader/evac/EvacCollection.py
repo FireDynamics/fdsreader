@@ -148,7 +148,7 @@ class EvacCollection(FDSDataCollection):
             n_t = (os.stat(file_path).st_size - (fdtype.INT.itemsize * 2 + dtype_meta.itemsize)) // \
                   (dtype_time.itemsize + n_grids * (dtype_grid_meta.itemsize + n_i * n_j * dtype_grid_data.itemsize) +
                    n_corrs * dtype_corr.itemsize + fdtype.FLOAT.itemsize + n_devc * (
-                               dtype_devs_meta.itemsize + dtype_devs_data.itemsize))
+                           dtype_devs_meta.itemsize + dtype_devs_data.itemsize))
 
             times = list()
             self._fed = {
@@ -220,7 +220,7 @@ class EvacCollection(FDSDataCollection):
             infile.seek(fdtype.INT.itemsize)
 
             n_fields = (os.stat(file_path).st_size - fdtype.INT.itemsize) // (
-                        n_grids * (dtype_grid_meta.itemsize + n_i * n_j * dtype_grid_data.itemsize))
+                    n_grids * (dtype_grid_meta.itemsize + n_i * n_j * dtype_grid_data.itemsize))
 
             self._eff = np.empty((n_grids, n_fields, n_i, n_j, 2))
 
