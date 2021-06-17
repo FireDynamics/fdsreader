@@ -11,8 +11,8 @@ from fdsreader import settings
 
 
 class EvacCollection(FDSDataCollection):
-    """Collection of :class:`Plot3D` objects. Offers extensive functionality for filtering and
-        using plot3Ds as well as its subclasses such as :class:`SubPlot3D`.
+    """Collection of :class:`Evacuation` objects. Next to agent-class specific data (such as trajectories) lots of
+        other data such as FED-data is provided via this class.
 
         :ivar times: List of all time steps of the simulation.
         :ivar z_offsets: The offset in z-direction for each mesh where the evac plane lays.
@@ -92,8 +92,8 @@ class EvacCollection(FDSDataCollection):
                                          units[i] == "TargetDoorCounter"}
 
     @property
-    def xyz(self) -> np.ndarray:
-        """
+    def xyz(self) -> List[np.ndarray]:
+        """List of xyz-data for each mesh.
         """
         if not hasattr(self, "_xyz"):
             self._load_xyz_data()
@@ -121,18 +121,26 @@ class EvacCollection(FDSDataCollection):
             n_corrs = meta[2]
             n_devc = fdtype.read(infile, fdtype.INT, 1)[0][0][0]
 
-            n_i, n_j, n_k, n = fdtype.read(infile, dtype_grid_meta, 1)[0][0]  # n_k will always be 1
+            n_i = list()
+            n_j = list()
+            for g in range(n_grids):
+                n_i_g, n_j_g, _, _ = fdtype.read(infile, dtype_grid_meta, 1)[0][0]
+                n_i.append(n_i_g)
+                n_j.append(n_j_g)
+                for i in range(n_i_g):
+                    for j in range(n_j_g):
+                        _ = fdtype.read(infile, dtype_grid_data, 1)
 
             # Reset pointer (after file header)
             infile.seek(fdtype.INT.itemsize * 2 + dtype_meta.itemsize)
 
-            self._xyz = np.empty((n_grids, n_i, n_j, 3))
+            self._xyz = [np.empty((n_i[g], n_j[g], 3)) for g in range(n_grids)]
 
             for g in range(n_grids):
                 infile.seek(dtype_grid_meta.itemsize, 1)
-                for i in range(n_i):
-                    for j in range(n_j):
-                        self._xyz[g, i, j] = fdtype.read(infile, dtype_grid_data, 1)[0][0]
+                for i in range(n_i[g]):
+                    for j in range(n_j[g]):
+                        self._xyz[g][i, j] = fdtype.read(infile, dtype_grid_data, 1)[0][0]
 
         if os.path.exists(self._base_path + ".fed"):
             self._load_fed_data(n_corrs)
@@ -183,6 +191,9 @@ class EvacCollection(FDSDataCollection):
             dtype_meta = fdtype.new((('i', 6),))
             dtype_time = fdtype.new((('f', 2),))
             dtype_grid_meta = fdtype.new((('i', 4),))
+            dtype_corr = fdtype.new((('f', 8),))
+            dtype_devs_meta = fdtype.new((('i', 2),))
+            dtype_devs_data = fdtype.new((('i', 1), ('f', 1), ('i', 2), ('f', 1)))
 
             # File header
             file_format = fdtype.read(infile, fdtype.INT, 1)[0][0][0]
@@ -195,26 +206,35 @@ class EvacCollection(FDSDataCollection):
 
             # Read gridsize from first timestep header
             infile.seek(dtype_time.itemsize, 1)
-            n_i, n_j, n_k, n = fdtype.read(infile, dtype_grid_meta, 1)[0][0]  # n_k will always be 1
+
+            n_i = list()
+            n_j = list()
+            n = list()
+            dtype_grid_data = list()
+            for g in range(n_grids):
+                n_i_g, n_j_g, _, n_g = fdtype.read(infile, dtype_grid_meta, 1)[0][0]
+                n_i.append(n_i_g)
+                n_j.append(n_j_g)
+                n.append(n_g)
+                dtype_grid_data.append(fdtype.new((('f', n_g),)))
+                for i in range(n_i_g):
+                    for j in range(n_j_g):
+                        _ = fdtype.read(infile, dtype_grid_data[-1], 1)
 
             # Reset pointer (after file header)
             infile.seek(dtype_meta.itemsize + fdtype.INT.itemsize * 2)
 
-            dtype_grid_data = fdtype.new((('f', n),))
-            dtype_corr = fdtype.new((('f', 8),))
-            dtype_devs_meta = fdtype.new((('i', 2),))
-            dtype_devs_data = fdtype.new((('i', 1), ('f', 1), ('i', 2), ('f', 1)))
-
-            n_t = (os.stat(file_path).st_size - (fdtype.INT.itemsize * 2 + dtype_meta.itemsize)) // \
-                  (dtype_time.itemsize + n_grids * (dtype_grid_meta.itemsize + n_i * n_j * dtype_grid_data.itemsize) +
-                   n_corrs * dtype_corr.itemsize + fdtype.FLOAT.itemsize + n_devc * (
-                           dtype_devs_meta.itemsize + dtype_devs_data.itemsize))
+            n_t = (os.stat(file_path).st_size - (fdtype.INT.itemsize * 2 + dtype_meta.itemsize)) // (
+                        dtype_time.itemsize + sum(
+                    (dtype_grid_meta.itemsize + n_i[g] * n_j[g] * dtype_grid_data[g].itemsize) for g in
+                    range(n_grids)) + n_corrs * dtype_corr.itemsize + fdtype.FLOAT.itemsize + n_devc * (
+                                    dtype_devs_meta.itemsize + dtype_devs_data.itemsize))
 
             times = list()
-            self._fed_grid = dict(co_co2_o2=[np.empty((n_t, n_i, n_j)) for _ in range(n_grids)],
-                                  soot_dens=[np.empty((n_t, n_i, n_j)) for _ in range(n_grids)],
-                                  tmp_g=[np.empty((n_t, n_i, n_j)) for _ in range(n_grids)],
-                                  radflux=[np.empty((n_t, n_i, n_j)) for _ in range(n_grids)])
+            self._fed_grid = dict(co_co2_o2=[np.empty((n_t, n_i[g], n_j[g])) for g in range(n_grids)],
+                                  soot_dens=[np.empty((n_t, n_i[g], n_j[g])) for g in range(n_grids)],
+                                  tmp_g=[np.empty((n_t, n_i[g], n_j[g])) for g in range(n_grids)],
+                                  radflux=[np.empty((n_t, n_i[g], n_j[g])) for g in range(n_grids)])
             self._fed_corr = dict(co_co2_o2=[np.empty((n_t, 2)) for _ in range(n_corrs)],
                                   soot_dens=[np.empty((n_t, 2)) for _ in range(n_corrs)],
                                   tmp_g=[np.empty((n_t, 2)) for _ in range(n_corrs)],
@@ -229,9 +249,9 @@ class EvacCollection(FDSDataCollection):
 
                 for g in range(n_grids):
                     infile.seek(dtype_grid_meta.itemsize, 1)
-                    for i in range(n_i):
-                        for j in range(n_j):
-                            co_co2_o2, soot_dens, tmp_g, radflux = fdtype.read(infile, dtype_grid_data, 1)[0][0][:4]
+                    for i in range(n_i[g]):
+                        for j in range(n_j[g]):
+                            co_co2_o2, soot_dens, tmp_g, radflux = fdtype.read(infile, dtype_grid_data[g], 1)[0][0][:4]
                             self._fed_grid["co_co2_o2"][g][t, i, j] = co_co2_o2
                             self._fed_grid["soot_dens"][g][t, i, j] = soot_dens
                             self._fed_grid["tmp_g"][g][t, i, j] = tmp_g
@@ -271,25 +291,29 @@ class EvacCollection(FDSDataCollection):
 
         with open(file_path, 'rb') as infile:
             dtype_grid_meta = fdtype.new((('i', 3),))
-            dtype_grid_data = fdtype.new((('f', 2),))
+            dtype_grid_data = fdtype.new((('f', 2),))  # u, v
 
             n_grids = fdtype.read(infile, fdtype.INT, 1)[0][0][0]
 
-            n_i, n_j, n_k = fdtype.read(infile, dtype_grid_meta, 1)[0][0]  # n_k will always be 1
+            # n_fields = (os.stat(file_path).st_size - fdtype.INT.itemsize) // (
+            #         sum(dtype_grid_meta.itemsize + n_i[g] * n_j[g] * dtype_grid_data.itemsize for g in range(n_grids)))
+            #
+            # self._eff = np.empty((n_grids, n_fields, n_i, n_j, 2))
+            # for g in range(n_grids):
+            #     for f in range(n_fields):
+            #         infile.seek(dtype_grid_meta.itemsize, 1)
+            #         for i in range(n_i[g]):
+            #             for j in range(n_j[g]):
+            #                 self._eff[g, f, i, j] = fdtype.read(infile, dtype_grid_data, 1)[0][0]
 
-            # Reset pointer (after file header)
-            infile.seek(fdtype.INT.itemsize)
-
-            n_fields = (os.stat(file_path).st_size - fdtype.INT.itemsize) // (
-                    n_grids * (dtype_grid_meta.itemsize + n_i * n_j * dtype_grid_data.itemsize))
-
-            self._eff = np.empty((n_grids, n_fields, n_i, n_j, 2))
-            for g in range(n_grids):
-                for f in range(n_fields):
-                    infile.seek(dtype_grid_meta.itemsize, 1)
-                    for i in range(n_i):
-                        for j in range(n_j):
-                            self._eff[g, f, i, j] = fdtype.read(infile, dtype_grid_data, 1)[0][0]
+            self._eff = list()
+            meta = fdtype.read(infile, dtype_grid_meta, 1)
+            while len(meta) > 0:
+                n_i, n_j, _ = meta[0][0]
+                for i in range(n_i + 2):
+                    for j in range(n_j + 2):
+                        self._eff.append(fdtype.read(infile, dtype_grid_data, 1)[0][0])
+                meta = fdtype.read(infile, dtype_grid_meta, 1)
 
     def get_unfiltered_positions(self, quantity: Union[Quantity, str] = None):
         """Convenience function that combines all trajectories into a single array.
@@ -357,7 +381,10 @@ class EvacCollection(FDSDataCollection):
                     for quantity in evac.quantities:
                         evac._data[quantity.name].append(np.empty((size,), dtype=np.float32))
                     evac._positions.append(np.empty((size, 3), dtype=np.float32))
-                    evac._ap.append(np.empty((size, 4), dtype=np.float32))
+                    evac._body_angles.append(np.empty((size,), dtype=np.float32))
+                    evac._semi_major_axis.append(np.empty((size,), dtype=np.float32))
+                    evac._semi_minor_axis.append(np.empty((size,), dtype=np.float32))
+                    evac._agent_heights.append(np.empty((size,), dtype=np.float32))
                     evac._tags.append(np.empty((size,), dtype=int))
 
         for mesh, file_path in self._file_paths.items():
@@ -385,8 +412,10 @@ class EvacCollection(FDSDataCollection):
                         pos = fdtype.read(infile, dtype_positions, 1)[0][0].reshape((n_humans, 7),
                                                                                     order='F').astype(float)
                         evac._positions[t][offset: offset + n_humans] = pos[:, :3]
-                        # Todo: What might this be for?
-                        evac._ap[t][offset: offset + n_humans] = pos[:, 3:]
+                        evac._body_angles[t][offset: offset + n_humans] = pos[:, 3]
+                        evac._semi_major_axis[t][offset: offset + n_humans] = pos[:, 4]
+                        evac._semi_minor_axis[t][offset: offset + n_humans] = pos[:, 5]
+                        evac._agent_heights[t][offset: offset + n_humans] = pos[:, 6]
                         # Read tags
                         dtype_tags = fdtype.new((('i', n_humans),))
                         evac._tags[t][offset: offset + n_humans] = fdtype.read(infile, dtype_tags, 1)[0][0]

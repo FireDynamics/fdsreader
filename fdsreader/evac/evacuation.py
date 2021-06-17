@@ -54,7 +54,10 @@ class Evacuation:
         self.n_humans: Dict[Mesh, List[int]] = dict()
 
         self._positions: List[np.ndarray] = list()
-        self._ap: List[np.ndarray] = list()
+        self._body_angles: List[np.ndarray] = list()
+        self._semi_major_axis: List[np.ndarray] = list()
+        self._semi_minor_axis: List[np.ndarray] = list()
+        self._agent_heights: List[np.ndarray] = list()
         self._tags: List[np.ndarray] = list()
         self._data: Dict[str, List[np.ndarray]] = {q.name: [] for q in self.quantities}
         self.times: Sequence[float] = list()
@@ -146,12 +149,36 @@ class Evacuation:
         return self._positions
 
     @property
-    def ap(self) -> List[np.ndarray]:
+    def body_angles(self) -> List[np.ndarray]:
         """
         """
         if len(self._positions) == 0 and len(self._tags) == 0:
             self._init_callback()
-        return self._ap
+        return self._body_angles
+
+    @property
+    def semi_major_axis(self) -> List[np.ndarray]:
+        """
+        """
+        if len(self._positions) == 0 and len(self._tags) == 0:
+            self._init_callback()
+        return self._semi_major_axis
+
+    @property
+    def semi_minor_axis(self) -> List[np.ndarray]:
+        """
+        """
+        if len(self._positions) == 0 and len(self._tags) == 0:
+            self._init_callback()
+        return self._semi_minor_axis
+
+    @property
+    def agent_heights(self) -> List[np.ndarray]:
+        """
+        """
+        if len(self._positions) == 0 and len(self._tags) == 0:
+            self._init_callback()
+        return self._agent_heights
 
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory.

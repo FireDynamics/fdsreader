@@ -49,7 +49,6 @@ class SubSlice:
     def shape(self) -> Tuple[int, int]:
         """2D-shape of the slice.
         """
-        print(self.dimension)
         shape = self.dimension.shape(cell_centered=self.cell_centered)
         if self.orientation != 0:
             if len(shape) < 2:
@@ -209,7 +208,6 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             extents_tmp = list()
             remove_tmp = list()
             for mesh, sslc in self._subslices.items():
-                print(sslc.extent)
                 if sslc.extent not in extents_tmp:
                     extents_tmp.append(sslc.extent)
                 else:

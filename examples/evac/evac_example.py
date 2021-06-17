@@ -3,7 +3,7 @@ import fdsreader as fds
 
 
 def main():
-    sim = fds.Simulation("./fds_data")
+    sim = fds.Simulation("fds_fed")
 
     # Get all particles with specified id
     evacs = sim.evacs
