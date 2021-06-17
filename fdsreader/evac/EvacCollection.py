@@ -85,7 +85,7 @@ class EvacCollection(FDSDataCollection):
 
             self.exit_counters = {names[i]: data[names[i]] for i in range(len(names)) if units[i] == "ExitCounter"}
             self.target_exit_counters = {names[i]: data[names[i]] for i in range(len(names)) if
-                                    units[i] == "TargetExitCounter"}
+                                         units[i] == "TargetExitCounter"}
 
             self.door_counters = {names[i]: data[names[i]] for i in range(len(names)) if units[i] == "DoorCounter"}
             self.target_door_counters = {names[i]: data[names[i]] for i in range(len(names)) if
@@ -357,6 +357,7 @@ class EvacCollection(FDSDataCollection):
                     for quantity in evac.quantities:
                         evac._data[quantity.name].append(np.empty((size,), dtype=np.float32))
                     evac._positions.append(np.empty((size, 3), dtype=np.float32))
+                    evac._ap.append(np.empty((size, 4), dtype=np.float32))
                     evac._tags.append(np.empty((size,), dtype=int))
 
         for mesh, file_path in self._file_paths.items():
@@ -381,10 +382,11 @@ class EvacCollection(FDSDataCollection):
                         offset = pointer_location[evac][t]
                         # Read positions
                         dtype_positions = fdtype.new((('f', 7 * n_humans),))
-                        pos = fdtype.read(infile, dtype_positions, 1)[0][0]
-                        evac._positions[t][offset: offset + n_humans] = pos[:3].reshape((n_humans, 3),
-                                                                                        order='F').astype(float)
-                        ap = pos[3:]  # Todo: What might this be for?
+                        pos = fdtype.read(infile, dtype_positions, 1)[0][0].reshape((n_humans, 7),
+                                                                                    order='F').astype(float)
+                        evac._positions[t][offset: offset + n_humans] = pos[:, :3]
+                        # Todo: What might this be for?
+                        evac._ap[t][offset: offset + n_humans] = pos[:, 3:]
                         # Read tags
                         dtype_tags = fdtype.new((('i', n_humans),))
                         evac._tags[t][offset: offset + n_humans] = fdtype.read(infile, dtype_tags, 1)[0][0]
