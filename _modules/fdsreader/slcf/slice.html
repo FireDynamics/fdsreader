@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>fdsreader.slcf.slice &mdash; fdsreader [fdsreader, version 1.2.0.rc2] documentation</title>
+  <title>fdsreader.slcf.slice &mdash; fdsreader [fdsreader, version 1.2.0.rc3] documentation</title>
   
 
   
@@ -214,7 +214,6 @@
     <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;2D-shape of the slice.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="p">)</span>
         <span class="n">shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">cell_centered</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cell_centered</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
@@ -374,7 +373,6 @@
             <span class="n">extents_tmp</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
             <span class="n">remove_tmp</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
             <span class="k">for</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">sslc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subslices</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="nb">print</span><span class="p">(</span><span class="n">sslc</span><span class="o">.</span><span class="n">extent</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">sslc</span><span class="o">.</span><span class="n">extent</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">extents_tmp</span><span class="p">:</span>
                     <span class="n">extents_tmp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sslc</span><span class="o">.</span><span class="n">extent</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
