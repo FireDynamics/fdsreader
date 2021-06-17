@@ -21,7 +21,7 @@ class SliceCollection(FDSDataCollection):
     def filter_by_quantity(self, quantity: Union[str, Quantity]):
         """Filters all slices by a specific quantity.
         """
-        if type(quantity) != str:
+        if type(quantity) == Quantity:
             quantity = quantity.name
         return SliceCollection(x for x in self if x.quantity.name.lower() == quantity.lower()
                                or x.quantity.short_name.lower() == quantity.lower())

@@ -247,7 +247,7 @@ class Simulation:
                 self.particles._post_init()
             # If no evacs are simulates, initialize empty data container for consistency
             if len(self.evacs) == 0:
-                self.evacs = EvacCollection((), ())
+                self.evacs = EvacCollection((), (), "")
             self.meshes = MeshCollection(self.meshes)
 
             if settings.ENABLE_CACHING:
@@ -818,7 +818,7 @@ class Simulation:
 
         times = self._load_prt5_meta(self.evacs, file_path + '.bnd', mesh)[1:]  # First timestep is weird somehow
         if type(self.evacs) == list:
-            self.evacs = EvacCollection(times, self.evacs, os.path.join(self.root_path, self.chid + "_evac"))
+            self.evacs = EvacCollection(self.evacs, os.path.join(self.root_path, self.chid + "_evac"))
 
         self.evacs.z_offsets[mesh] = float(z_offset)
         self.evacs._file_paths[mesh] = file_path

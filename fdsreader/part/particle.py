@@ -100,7 +100,13 @@ class Particle:
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory.
         """
-        del self._data
+        if len(self._positions) != 0:
+            del self._positions
+            self._positions = list()
+            del self._tags
+            self._tags = list()
+            del self._data
+            self._data = {q.name: [] for q in self.quantities}
 
     def __repr__(self):
         return f"Particle(name={self.class_name}, quantities={self.quantities})"

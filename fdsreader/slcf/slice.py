@@ -137,8 +137,8 @@ class SubSlice:
         """
         if hasattr(self, "_data"):
             del self._data
-        if hasattr(self, "_vector_data"):
             del self._vector_data
+            self._vector_data = dict()
 
     def __repr__(self):
         return f"SubSlice(shape={self.shape}, mesh={self.mesh.id}, extent={self.extent})"

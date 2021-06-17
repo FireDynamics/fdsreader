@@ -24,7 +24,7 @@ class Plot3DCollection(FDSDataCollection):
     def filter_by_quantity(self, quantity: Union[str, Quantity]):
         """Filters all plot3d data by a specific quantity.
         """
-        if type(quantity) != str:
+        if type(quantity) == Quantity:
             quantity = quantity.name
         return Plot3DCollection(x for x in self if any(
             q.name.lower() == quantity.lower() or q.short_name.lower() == quantity.lower() for q in

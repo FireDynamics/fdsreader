@@ -1,8 +1,11 @@
 ## Release History
+* 1.2.0
+    * Added evac support
+    * Optimized manual cache clearing functionality
 * 1.1.1
     * Slcf hotfixes
 * 1.1.0
-    * Added Smoke3D reader (Simulation.smoke3d)
+    * Added smoke3d support
     * Bugfixes for devices
     * Devices now also contain units of output quantities
 * 1.0.11
@@ -20,11 +23,11 @@
     * Caching bugfixes
 * 1.0.5
     * Bugfixes for obst slice masks
-    * Added tag convencience function for particles
+    * Added tag convenience function for particles
 * 1.0.4
     * Bugfixes for obst masks
 * 1.0.3
-    * Bufixes for part
+    * Bugfixes for part
 * 1.0.2
     * Bugfixes for Python 3.6/3.7
 * 1.0.1
@@ -38,7 +41,7 @@
 * 0.9.22
     * Bugfixes for bndf
 * 0.9.21
-    * Slice and Pl3D now support np.mean
+    * Slice and pl3d now support numpy.mean
 * 0.9.20
     * Slice coordinates now correctly represent cell-centered slices
 * 0.9.19

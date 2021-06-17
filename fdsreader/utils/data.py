@@ -35,7 +35,7 @@ class Device:
     """Represents a single Device.
 
     :ivar id: The id the device was given.
-    :ivar quantity: The quantity the device measured.
+    :ivar quantity: The :class:`Quantity` the device measured.
     :ivar position: Position of the device in the simulation space.
     :ivar orientation: The direction the device was facing.
     :ivar data: All data the device measured.

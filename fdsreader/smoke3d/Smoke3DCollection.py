@@ -19,7 +19,7 @@ class Smoke3DCollection(FDSDataCollection):
     def get_by_quantity(self, quantity: Union[Quantity, str]):
         """Gets the :class:`Smoke3D`s with a specific quantity.
         """
-        if type(quantity) != str:
+        if type(quantity) == Quantity:
             quantity = quantity.name
         return next(x for x in self if
                     x.quantity.name.lower() == quantity.lower() or x.quantity.short_name.lower() == quantity.lower())

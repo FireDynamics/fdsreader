@@ -177,7 +177,7 @@ class SubObstruction:
             _ = self._boundary_data[bid].data
 
     def get_data(self, quantity: Union[str, Quantity]):
-        if type(quantity) != str:
+        if type(quantity) == Quantity:
             quantity = quantity.name
         return next(b for b in self._boundary_data.values() if
                     b.quantity.name.lower() == quantity.lower() or b.quantity.short_name.lower() == quantity.lower())
@@ -300,7 +300,7 @@ class Obstruction:
         :param orientation: Optionally filter by a specific orientation as well (-3=-z, -2=-y, -1=-x, 1=x, 2=y, 3=z).
             A value of 0 indicates to no filter.
         """
-        if type(quantity) != str:
+        if type(quantity) == Quantity:
             quantity = quantity.name
 
         ret = [subobst.get_data(quantity) for subobst in self._subobstructions]

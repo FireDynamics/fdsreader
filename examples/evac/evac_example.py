@@ -4,16 +4,13 @@ import fdsreader as fds
 
 def main():
     fds.settings.DEBUG = True
-    fds.settings.LAZY_LOAD = False
 
     sim = fds.Simulation("./fds_data")
 
     # Get all particles with specified id
     evacs = sim.evacs
-
-    print(evacs)
-
-    print(evacs.eff, evacs.xyz, evacs.fed, evacs.meta, evacs[0].data)
+    print(evacs.exits)
+    # print(evacs, evacs.eff, evacs.xyz, evacs.fed_grid, evacs.fed_corr, evacs.devc, evacs[0], evacs.get_unfiltered_data("HUMAN_SPEED"))
 
 
 if __name__ == "__main__":

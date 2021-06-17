@@ -1,8 +1,39 @@
-from typing import List, Tuple, Dict, Sequence
+from typing import List, Tuple, Dict, Sequence, Union
 
 import numpy as np
 
-from fdsreader.utils import Quantity, Mesh
+from fdsreader.utils import Quantity, Mesh, Extent
+
+
+# class Entrance:
+#     def __init__(self):
+#         self.id = ""
+#         self.extent = Extent(1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
+#         self.orientation = 1
+#         self.color = (0.0, 0.0, 0.0)
+
+
+# class Exit:
+#     def __init__(self):
+#         self.id = ""
+#         self.extent = Extent(1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
+#         self.xyz = (1.0, 1.0, 1.0)
+#         self.orientation = 1
+#         self.color = (0.0, 0.0, 0.0)
+#         self.count_only = True
+#         self.known_door = True
+
+
+# class Door:
+#     def __init__(self):
+#         self.id = ""
+#         self.extent = Extent(1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
+#         self.xyz = (1.0, 1.0, 1.0)
+#         self.orientation = 1
+#         self.color = (0.0, 0.0, 0.0)
+#         self.to_node = Entrance()
+#         self.known_door = True
+#         self.exit_sign = True
 
 
 class Evacuation:
@@ -23,6 +54,7 @@ class Evacuation:
         self.n_humans: Dict[Mesh, List[int]] = dict()
 
         self._positions: List[np.ndarray] = list()
+        self._ap: List[np.ndarray] = list()
         self._tags: List[np.ndarray] = list()
         self._data: Dict[str, List[np.ndarray]] = {q.name: [] for q in self.quantities}
         self.times: Sequence[float] = list()
@@ -35,6 +67,12 @@ class Evacuation:
     @property
     def id(self):
         return self.class_name
+
+    def has_quantity(self, quantity: Union[Quantity, str]):
+        if type(quantity) == Quantity:
+            quantity = quantity.name
+        return any(
+            q.name.lower() == quantity.lower() or q.short_name.lower() == quantity.lower() for q in self.quantities)
 
     def filter_by_tag(self, tag: int):
         """Filter all evacs by a single one with the specified tag.
@@ -73,11 +111,21 @@ class Evacuation:
     @property
     def data(self) -> Dict[str, List[np.ndarray]]:
         """Dictionary with quantities as keys and a list with a numpy array for each timestep which
-            contains data for each evac in that timestep.
+            contains data for each person in that timestep.
         """
         if len(self._positions) == 0 and len(self._tags) == 0:
             self._init_callback()
         return self._data
+
+    def get_data(self, quantity: Union[Quantity, str]) -> List[np.ndarray]:
+        """Returns a list with a numpy array for each timestep which contains data about the specified quantity for
+            each person in that timestep.
+        """
+        if self.has_quantity(quantity):
+            if type(quantity) == Quantity:
+                quantity = quantity.name
+            return self.data[quantity]
+        return []
 
     @property
     def tags(self) -> List[np.ndarray]:
@@ -97,10 +145,24 @@ class Evacuation:
             self._init_callback()
         return self._positions
 
+    @property
+    def ap(self) -> List[np.ndarray]:
+        """
+        """
+        if len(self._positions) == 0 and len(self._tags) == 0:
+            self._init_callback()
+        return self._ap
+
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory.
         """
-        del self._data
+        if len(self._positions) != 0:
+            del self._positions
+            self._positions = list()
+            del self._tags
+            self._tags = list()
+            del self._data
+            self._data = {q.name: [] for q in self.quantities}
 
     def __repr__(self):
         return f"Evacuation(name={self.class_name}, quantities={self.quantities})"

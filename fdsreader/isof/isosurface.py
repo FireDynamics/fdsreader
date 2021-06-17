@@ -155,8 +155,6 @@ class SubSurface:
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory.
         """
-        if hasattr(self, "times"):
-            del self.times
         if hasattr(self, "_vertices"):
             del self._vertices
         if hasattr(self, "_triangles"):
