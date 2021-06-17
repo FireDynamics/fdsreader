@@ -1,0 +1,633 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>fdsreader.evac.EvacCollection &mdash; fdsreader [fdsreader, version 1.2.0.rc1] documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> fdsreader
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">FDSReader</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../simulation.html">Simulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../slcf.html">Slice files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../bndf.html">Boundary files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../geom.html">Complex Geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../isof.html">Isosurface files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pl3d.html">Plot3D files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../smoke3d.html">Smoke3D files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../part.html">Particles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../devc.html">Devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../evac.html">Evacuation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quantity.html">Quantity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../utils.html">Utilities</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">fdsreader</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>fdsreader.evac.EvacCollection</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for fdsreader.evac.EvacCollection</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">fdsreader.evac</span> <span class="kn">import</span> <span class="n">Evacuation</span>
+<span class="kn">from</span> <span class="nn">fdsreader.utils</span> <span class="kn">import</span> <span class="n">Mesh</span>
+<span class="kn">from</span> <span class="nn">fdsreader.utils.data</span> <span class="kn">import</span> <span class="n">FDSDataCollection</span><span class="p">,</span> <span class="n">Quantity</span>
+<span class="kn">import</span> <span class="nn">fdsreader.utils.fortran_data</span> <span class="k">as</span> <span class="nn">fdtype</span>
+<span class="kn">from</span> <span class="nn">fdsreader</span> <span class="kn">import</span> <span class="n">settings</span>
+
+
+<div class="viewcode-block" id="EvacCollection"><a class="viewcode-back" href="../../../index.html#fdsreader.evac.EvacCollection.EvacCollection">[docs]</a><span class="k">class</span> <span class="nc">EvacCollection</span><span class="p">(</span><span class="n">FDSDataCollection</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Collection of :class:`Plot3D` objects. Offers extensive functionality for filtering and</span>
+<span class="sd">        using plot3Ds as well as its subclasses such as :class:`SubPlot3D`.</span>
+
+<span class="sd">        :ivar times: List of all time steps of the simulation.</span>
+<span class="sd">        :ivar z_offsets: The offset in z-direction for each mesh where the evac plane lays.</span>
+<span class="sd">        :ivar all_agents: Number of all agents per time step.</span>
+<span class="sd">        :ivar agents_inside_mesh: Number of all agents per time step inside a specific mesh.</span>
+<span class="sd">        :ivar number_of_deads: Number of dead agents per time step.</span>
+<span class="sd">        :ivar fed_max: FED max per time step.</span>
+<span class="sd">        :ivar fed_max_alive: FED max alive per time step.</span>
+<span class="sd">        :ivar exit_counters: Exit counts per time step.</span>
+<span class="sd">        :ivar target_exit_counters: Target exit counts per time step.</span>
+<span class="sd">        :ivar door_counters: Door counts per time step.</span>
+<span class="sd">        :ivar target_door_counters: Target door counts per time step.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evacs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Evacuation</span><span class="p">],</span> <span class="n">base_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">evacs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_file_paths</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Mesh</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z_offsets</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Mesh</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_base_path</span> <span class="o">=</span> <span class="n">base_path</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load_csv_data</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">evac</span> <span class="ow">in</span> <span class="n">evacs</span><span class="p">:</span>
+            <span class="n">evac</span><span class="o">.</span><span class="n">times</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">times</span>
+
+        <span class="k">for</span> <span class="n">evac</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">LAZY_LOAD</span><span class="p">:</span>
+                <span class="n">evac</span><span class="o">.</span><span class="n">_init_callback</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_prt_data</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_load_xyz_data</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_load_eff_data</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_load_prt_data</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">quantities</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Quantity</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Gives a list of all quantities that are written out for some (or sometimes all) human classes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">qs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">evac</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">evac</span><span class="o">.</span><span class="n">quantities</span><span class="p">:</span>
+                <span class="n">qs</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">qs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_load_csv_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">file_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_path</span> <span class="o">+</span> <span class="s2">&quot;.csv&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+            <span class="k">return</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
+            <span class="n">units</span> <span class="o">=</span> <span class="p">[</span><span class="n">unit</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">infile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">infile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">genfromtxt</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">autostrip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">dtypes</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
+            <span class="n">dtypes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span>
+            <span class="n">dtypes</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
+
+            <span class="n">size</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">size</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtypes</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">))}</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">arr</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="p">):</span>
+                    <span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">times</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;EVAC_Time&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">all_agents</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;AllAgents&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">agents_inside_mesh</span> <span class="o">=</span> <span class="p">{</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="n">data</span><span class="p">[</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">))</span> <span class="k">if</span>
+                                       <span class="n">units</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;AgentsInsideMesh&quot;</span><span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">number_of_deads</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;Number_of_Deads&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fed_max</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;FED_max&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fed_max_alive</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;FED_max_alive&quot;</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">exit_counters</span> <span class="o">=</span> <span class="p">{</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="n">data</span><span class="p">[</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">))</span> <span class="k">if</span> <span class="n">units</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;ExitCounter&quot;</span><span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target_exit_counters</span> <span class="o">=</span> <span class="p">{</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="n">data</span><span class="p">[</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">))</span> <span class="k">if</span>
+                                    <span class="n">units</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;TargetExitCounter&quot;</span><span class="p">}</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">door_counters</span> <span class="o">=</span> <span class="p">{</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="n">data</span><span class="p">[</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">))</span> <span class="k">if</span> <span class="n">units</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;DoorCounter&quot;</span><span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target_door_counters</span> <span class="o">=</span> <span class="p">{</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="n">data</span><span class="p">[</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">))</span> <span class="k">if</span>
+                                         <span class="n">units</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;TargetDoorCounter&quot;</span><span class="p">}</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">xyz</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_xyz&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_load_xyz_data</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_xyz</span>
+
+    <span class="k">def</span> <span class="nf">_load_xyz_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">file_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_path</span> <span class="o">+</span> <span class="s2">&quot;.xyz&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+            <span class="k">return</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
+            <span class="n">dtype_meta</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">),))</span>
+            <span class="n">dtype_grid_meta</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),))</span>
+            <span class="n">dtype_grid_data</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),))</span>
+
+            <span class="n">file_format</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">INT</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">file_format</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">4</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;The evac xyz file (&quot;</span> <span class="o">+</span> <span class="n">file_path</span> <span class="o">+</span> <span class="s2">&quot;) was written in an unsupported file format. &quot;</span>
+                                                                    <span class="s2">&quot;Please submit an issue on Github!&quot;</span><span class="p">)</span>
+
+            <span class="n">meta</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_meta</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">n_grids</span> <span class="o">=</span> <span class="n">meta</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">n_corrs</span> <span class="o">=</span> <span class="n">meta</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">n_devc</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">INT</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="n">n_i</span><span class="p">,</span> <span class="n">n_j</span><span class="p">,</span> <span class="n">n_k</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_grid_meta</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># n_k will always be 1</span>
+
+            <span class="c1"># Reset pointer (after file header)</span>
+            <span class="n">infile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">fdtype</span><span class="o">.</span><span class="n">INT</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">dtype_meta</span><span class="o">.</span><span class="n">itemsize</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n_grids</span><span class="p">,</span> <span class="n">n_i</span><span class="p">,</span> <span class="n">n_j</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+
+            <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_grids</span><span class="p">):</span>
+                <span class="n">infile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">dtype_grid_meta</span><span class="o">.</span><span class="n">itemsize</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_i</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_j</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_xyz</span><span class="p">[</span><span class="n">g</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_grid_data</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_base_path</span> <span class="o">+</span> <span class="s2">&quot;.fed&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_load_fed_data</span><span class="p">(</span><span class="n">n_corrs</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">fed_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_fed_grid&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_load_xyz_data</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fed_grid</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">fed_corr</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_fed_corr&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_load_xyz_data</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fed_corr</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">devc</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_devc&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_load_xyz_data</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_devc</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">fed_times</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_fed_times&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_load_xyz_data</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fed_times</span>
+
+    <span class="k">def</span> <span class="nf">_load_fed_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_corrs</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">file_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_path</span> <span class="o">+</span> <span class="s2">&quot;.fed&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fed_grid</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">co_co2_o2</span><span class="o">=</span><span class="p">[],</span> <span class="n">soot_dens</span><span class="o">=</span><span class="p">[],</span> <span class="n">tmp_g</span><span class="o">=</span><span class="p">[],</span> <span class="n">radflux</span><span class="o">=</span><span class="p">[])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fed_corr</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">co_co2_o2</span><span class="o">=</span><span class="p">[],</span> <span class="n">soot_dens</span><span class="o">=</span><span class="p">[],</span> <span class="n">tmp_g</span><span class="o">=</span><span class="p">[],</span> <span class="n">radflux</span><span class="o">=</span><span class="p">[])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_devc</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">current</span><span class="o">=</span><span class="p">[],</span> <span class="n">prior</span><span class="o">=</span><span class="p">[],</span> <span class="n">t_change</span><span class="o">=</span><span class="p">[],</span> <span class="n">times</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([]))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fed_times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+            <span class="k">return</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
+            <span class="n">dtype_meta</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">6</span><span class="p">),))</span>
+            <span class="n">dtype_time</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),))</span>
+            <span class="n">dtype_grid_meta</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),))</span>
+
+            <span class="c1"># File header</span>
+            <span class="n">file_format</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">INT</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">file_format</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">4</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;The evac fed file (&quot;</span> <span class="o">+</span> <span class="n">file_path</span> <span class="o">+</span> <span class="s2">&quot;) was written in an unsupported file format. &quot;</span>
+                                                                    <span class="s2">&quot;Please submit an issue on Github!&quot;</span><span class="p">)</span>
+
+            <span class="n">n_grids</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_meta</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">n_devc</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">INT</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="c1"># Read gridsize from first timestep header</span>
+            <span class="n">infile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">dtype_time</span><span class="o">.</span><span class="n">itemsize</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">n_i</span><span class="p">,</span> <span class="n">n_j</span><span class="p">,</span> <span class="n">n_k</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_grid_meta</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># n_k will always be 1</span>
+
+            <span class="c1"># Reset pointer (after file header)</span>
+            <span class="n">infile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">dtype_meta</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">+</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">INT</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+
+            <span class="n">dtype_grid_data</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">n</span><span class="p">),))</span>
+            <span class="n">dtype_corr</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">),))</span>
+            <span class="n">dtype_devs_meta</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),))</span>
+            <span class="n">dtype_devs_data</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+
+            <span class="n">n_t</span> <span class="o">=</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span><span class="o">.</span><span class="n">st_size</span> <span class="o">-</span> <span class="p">(</span><span class="n">fdtype</span><span class="o">.</span><span class="n">INT</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">dtype_meta</span><span class="o">.</span><span class="n">itemsize</span><span class="p">))</span> <span class="o">//</span> \
+                  <span class="p">(</span><span class="n">dtype_time</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">+</span> <span class="n">n_grids</span> <span class="o">*</span> <span class="p">(</span><span class="n">dtype_grid_meta</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">+</span> <span class="n">n_i</span> <span class="o">*</span> <span class="n">n_j</span> <span class="o">*</span> <span class="n">dtype_grid_data</span><span class="o">.</span><span class="n">itemsize</span><span class="p">)</span> <span class="o">+</span>
+                   <span class="n">n_corrs</span> <span class="o">*</span> <span class="n">dtype_corr</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">+</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">FLOAT</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">+</span> <span class="n">n_devc</span> <span class="o">*</span> <span class="p">(</span>
+                           <span class="n">dtype_devs_meta</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">+</span> <span class="n">dtype_devs_data</span><span class="o">.</span><span class="n">itemsize</span><span class="p">))</span>
+
+            <span class="n">times</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fed_grid</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">co_co2_o2</span><span class="o">=</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n_t</span><span class="p">,</span> <span class="n">n_i</span><span class="p">,</span> <span class="n">n_j</span><span class="p">))</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_grids</span><span class="p">)],</span>
+                                  <span class="n">soot_dens</span><span class="o">=</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n_t</span><span class="p">,</span> <span class="n">n_i</span><span class="p">,</span> <span class="n">n_j</span><span class="p">))</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_grids</span><span class="p">)],</span>
+                                  <span class="n">tmp_g</span><span class="o">=</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n_t</span><span class="p">,</span> <span class="n">n_i</span><span class="p">,</span> <span class="n">n_j</span><span class="p">))</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_grids</span><span class="p">)],</span>
+                                  <span class="n">radflux</span><span class="o">=</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n_t</span><span class="p">,</span> <span class="n">n_i</span><span class="p">,</span> <span class="n">n_j</span><span class="p">))</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_grids</span><span class="p">)])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fed_corr</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">co_co2_o2</span><span class="o">=</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n_t</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_corrs</span><span class="p">)],</span>
+                                  <span class="n">soot_dens</span><span class="o">=</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n_t</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_corrs</span><span class="p">)],</span>
+                                  <span class="n">tmp_g</span><span class="o">=</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n_t</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_corrs</span><span class="p">)],</span>
+                                  <span class="n">radflux</span><span class="o">=</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n_t</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_corrs</span><span class="p">)])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_devc</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">i_type</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_devc</span><span class="p">)],</span> <span class="n">devc_id</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_devc</span><span class="p">)],</span>
+                              <span class="n">current</span><span class="o">=</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n_t</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_devc</span><span class="p">)],</span>
+                              <span class="n">prior</span><span class="o">=</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n_t</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_devc</span><span class="p">)],</span>
+                              <span class="n">t_change</span><span class="o">=</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n_t</span><span class="p">,))</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_devc</span><span class="p">)],</span> <span class="n">times</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n_t</span><span class="p">,)))</span>
+
+            <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_t</span><span class="p">):</span>
+                <span class="n">times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_time</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># t, dt_save</span>
+
+                <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_grids</span><span class="p">):</span>
+                    <span class="n">infile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">dtype_grid_meta</span><span class="o">.</span><span class="n">itemsize</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_i</span><span class="p">):</span>
+                        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_j</span><span class="p">):</span>
+                            <span class="n">co_co2_o2</span><span class="p">,</span> <span class="n">soot_dens</span><span class="p">,</span> <span class="n">tmp_g</span><span class="p">,</span> <span class="n">radflux</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_grid_data</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][:</span><span class="mi">4</span><span class="p">]</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_fed_grid</span><span class="p">[</span><span class="s2">&quot;co_co2_o2&quot;</span><span class="p">][</span><span class="n">g</span><span class="p">][</span><span class="n">t</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">co_co2_o2</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_fed_grid</span><span class="p">[</span><span class="s2">&quot;soot_dens&quot;</span><span class="p">][</span><span class="n">g</span><span class="p">][</span><span class="n">t</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">soot_dens</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_fed_grid</span><span class="p">[</span><span class="s2">&quot;tmp_g&quot;</span><span class="p">][</span><span class="n">g</span><span class="p">][</span><span class="n">t</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp_g</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_fed_grid</span><span class="p">[</span><span class="s2">&quot;radflux&quot;</span><span class="p">][</span><span class="n">g</span><span class="p">][</span><span class="n">t</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">radflux</span>
+
+                <span class="c1"># Corr</span>
+                <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_corrs</span><span class="p">):</span>
+                    <span class="n">co_co2_o2_1</span><span class="p">,</span> <span class="n">soot_dens_1</span><span class="p">,</span> <span class="n">tmp_g_1</span><span class="p">,</span> <span class="n">radflux_1</span><span class="p">,</span> <span class="n">co_co2_o2_2</span><span class="p">,</span> <span class="n">soot_dens_2</span><span class="p">,</span> <span class="n">tmp_g_2</span><span class="p">,</span> <span class="n">radflux_2</span> <span class="o">=</span> \
+                        <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_corr</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][:</span><span class="mi">8</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_fed_corr</span><span class="p">[</span><span class="s2">&quot;co_co2_o2&quot;</span><span class="p">][</span><span class="n">c</span><span class="p">][</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">co_co2_o2_1</span><span class="p">,</span> <span class="n">co_co2_o2_2</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_fed_corr</span><span class="p">[</span><span class="s2">&quot;soot_dens&quot;</span><span class="p">][</span><span class="n">c</span><span class="p">][</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">soot_dens_1</span><span class="p">,</span> <span class="n">soot_dens_2</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_fed_corr</span><span class="p">[</span><span class="s2">&quot;tmp_g&quot;</span><span class="p">][</span><span class="n">c</span><span class="p">][</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">tmp_g_1</span><span class="p">,</span> <span class="n">tmp_g_2</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_fed_corr</span><span class="p">[</span><span class="s2">&quot;radflux&quot;</span><span class="p">][</span><span class="n">c</span><span class="p">][</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">radflux_1</span><span class="p">,</span> <span class="n">radflux_2</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_devc</span><span class="p">[</span><span class="s2">&quot;times&quot;</span><span class="p">][</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_devc</span><span class="p">):</span>
+                    <span class="n">i_type</span><span class="p">,</span> <span class="n">devc_id</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_devs_meta</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_devc</span><span class="p">[</span><span class="s2">&quot;i_type&quot;</span><span class="p">][</span><span class="n">d</span><span class="p">]</span> <span class="o">=</span> <span class="n">i_type</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_devc</span><span class="p">[</span><span class="s2">&quot;devc_id&quot;</span><span class="p">][</span><span class="n">d</span><span class="p">]</span> <span class="o">=</span> <span class="n">devc_id</span>
+                    <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">current</span><span class="p">,</span> <span class="n">prior</span><span class="p">,</span> <span class="n">t_change</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_devs_data</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_devc</span><span class="p">[</span><span class="s2">&quot;current&quot;</span><span class="p">][</span><span class="n">d</span><span class="p">][</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">current</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_devc</span><span class="p">[</span><span class="s2">&quot;prior&quot;</span><span class="p">][</span><span class="n">d</span><span class="p">][</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">prior</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_devc</span><span class="p">[</span><span class="s2">&quot;t_change&quot;</span><span class="p">][</span><span class="n">d</span><span class="p">][</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">t_change</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fed_times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">eff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_eff&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_load_eff_data</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eff</span>
+
+    <span class="k">def</span> <span class="nf">_load_eff_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">file_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_path</span> <span class="o">+</span> <span class="s2">&quot;.eff&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
+            <span class="n">dtype_grid_meta</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),))</span>
+            <span class="n">dtype_grid_data</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),))</span>
+
+            <span class="n">n_grids</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">INT</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="n">n_i</span><span class="p">,</span> <span class="n">n_j</span><span class="p">,</span> <span class="n">n_k</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_grid_meta</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># n_k will always be 1</span>
+
+            <span class="c1"># Reset pointer (after file header)</span>
+            <span class="n">infile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">fdtype</span><span class="o">.</span><span class="n">INT</span><span class="o">.</span><span class="n">itemsize</span><span class="p">)</span>
+
+            <span class="n">n_fields</span> <span class="o">=</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span><span class="o">.</span><span class="n">st_size</span> <span class="o">-</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">INT</span><span class="o">.</span><span class="n">itemsize</span><span class="p">)</span> <span class="o">//</span> <span class="p">(</span>
+                    <span class="n">n_grids</span> <span class="o">*</span> <span class="p">(</span><span class="n">dtype_grid_meta</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">+</span> <span class="n">n_i</span> <span class="o">*</span> <span class="n">n_j</span> <span class="o">*</span> <span class="n">dtype_grid_data</span><span class="o">.</span><span class="n">itemsize</span><span class="p">))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_eff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n_grids</span><span class="p">,</span> <span class="n">n_fields</span><span class="p">,</span> <span class="n">n_i</span><span class="p">,</span> <span class="n">n_j</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_grids</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_fields</span><span class="p">):</span>
+                    <span class="n">infile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">dtype_grid_meta</span><span class="o">.</span><span class="n">itemsize</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_i</span><span class="p">):</span>
+                        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_j</span><span class="p">):</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_eff</span><span class="p">[</span><span class="n">g</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_grid_data</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+<div class="viewcode-block" id="EvacCollection.get_unfiltered_positions"><a class="viewcode-back" href="../../../index.html#fdsreader.evac.EvacCollection.EvacCollection.get_unfiltered_positions">[docs]</a>    <span class="k">def</span> <span class="nf">get_unfiltered_positions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Quantity</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Convenience function that combines all trajectories into a single array.</span>
+
+<span class="sd">        :param quantity: Optionally a quantity can be specified to filter all human classes by those who have written</span>
+<span class="sd">            out data for the specific quantity. Can either be a string or :class:`Quantity` object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">filtered_evacs</span> <span class="o">=</span> <span class="p">[</span><span class="n">evac</span> <span class="k">for</span> <span class="n">evac</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span> <span class="n">evac</span><span class="o">.</span><span class="n">has_quantity</span><span class="p">(</span><span class="n">quantity</span><span class="p">)]</span> <span class="k">if</span> <span class="n">quantity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span>
+
+        <span class="n">combined_positions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="p">)):</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">evac</span> <span class="ow">in</span> <span class="n">filtered_evacs</span><span class="p">:</span>
+                <span class="n">size</span> <span class="o">+=</span> <span class="n">evac</span><span class="o">.</span><span class="n">positions</span><span class="p">[</span><span class="n">t</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="n">combined_positions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">size</span><span class="p">,</span> <span class="mi">3</span><span class="p">)))</span>
+            <span class="k">if</span> <span class="n">size</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">size</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">evac</span> <span class="ow">in</span> <span class="n">filtered_evacs</span><span class="p">:</span>
+                    <span class="n">pos</span> <span class="o">=</span> <span class="n">evac</span><span class="o">.</span><span class="n">positions</span><span class="p">[</span><span class="n">t</span><span class="p">]</span>
+                    <span class="n">combined_positions</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">size</span><span class="p">:</span><span class="n">size</span> <span class="o">+</span> <span class="n">pos</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">pos</span>
+                    <span class="n">size</span> <span class="o">+=</span> <span class="n">pos</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">combined_positions</span></div>
+
+<div class="viewcode-block" id="EvacCollection.get_unfiltered_data"><a class="viewcode-back" href="../../../index.html#fdsreader.evac.EvacCollection.EvacCollection.get_unfiltered_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_unfiltered_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Quantity</span><span class="p">,</span> <span class="nb">str</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;Convenience function that combines data for a specific quantity of all humans into a single array.</span>
+
+<span class="sd">        :param quantity: The quantity to get data for. Can either be a string or :class:`Quantity` object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">filtered_evacs</span> <span class="o">=</span> <span class="p">[</span><span class="n">evac</span> <span class="k">for</span> <span class="n">evac</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span> <span class="n">evac</span><span class="o">.</span><span class="n">has_quantity</span><span class="p">(</span><span class="n">quantity</span><span class="p">)]</span>
+
+        <span class="n">combined_data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">evac</span> <span class="ow">in</span> <span class="n">filtered_evacs</span><span class="p">:</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">evac</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">quantity</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="p">)):</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                <span class="n">size</span> <span class="o">+=</span> <span class="n">d</span><span class="p">[</span><span class="n">t</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="n">combined_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">size</span><span class="p">,)))</span>
+            <span class="k">if</span> <span class="n">size</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">size</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                    <span class="n">combined_data</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">size</span><span class="p">:</span><span class="n">size</span> <span class="o">+</span> <span class="n">d</span><span class="p">[</span><span class="n">t</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="n">t</span><span class="p">]</span>
+                    <span class="n">size</span> <span class="o">+=</span> <span class="n">d</span><span class="p">[</span><span class="n">t</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">combined_data</span></div>
+
+    <span class="k">def</span> <span class="nf">_load_prt_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Function to read in all evac data for a simulation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">evacs</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="n">pointer_location</span> <span class="o">=</span> <span class="p">{</span><span class="n">evac</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="p">)</span> <span class="k">for</span> <span class="n">evac</span> <span class="ow">in</span> <span class="n">evacs</span><span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">evac</span> <span class="ow">in</span> <span class="n">evacs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">evac</span><span class="o">.</span><span class="n">_positions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">evac</span><span class="o">.</span><span class="n">_tags</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="p">)):</span>
+                    <span class="n">size</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">for</span> <span class="n">mesh</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_paths</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">size</span> <span class="o">+=</span> <span class="n">evac</span><span class="o">.</span><span class="n">n_humans</span><span class="p">[</span><span class="n">mesh</span><span class="p">][</span><span class="n">t</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">quantity</span> <span class="ow">in</span> <span class="n">evac</span><span class="o">.</span><span class="n">quantities</span><span class="p">:</span>
+                        <span class="n">evac</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">quantity</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">size</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span>
+                    <span class="n">evac</span><span class="o">.</span><span class="n">_positions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">size</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span>
+                    <span class="n">evac</span><span class="o">.</span><span class="n">_tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">size</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">file_path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_paths</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
+                <span class="c1"># Initial offset (ONE, fds version and number of evac classes)</span>
+                <span class="n">offset</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">INT</span><span class="o">.</span><span class="n">itemsize</span>
+                <span class="c1"># Number of quantities for each evac class (plus an INTEGER_ZERO)</span>
+                <span class="n">offset</span> <span class="o">+=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),))</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">evacs</span><span class="p">)</span>
+                <span class="c1"># 30-char long name and unit information for each quantity</span>
+                <span class="n">offset</span> <span class="o">+=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="mi">30</span><span class="p">),))</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">sum</span><span class="p">(</span>
+                    <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">evac</span><span class="o">.</span><span class="n">quantities</span><span class="p">)</span> <span class="k">for</span> <span class="n">evac</span> <span class="ow">in</span> <span class="n">evacs</span><span class="p">])</span>
+                <span class="n">infile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="p">)):</span>
+                    <span class="c1"># Skip time value and meta data</span>
+                    <span class="n">infile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">fdtype</span><span class="o">.</span><span class="n">FLOAT</span><span class="o">.</span><span class="n">itemsize</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+                    <span class="c1"># Read data for each evac class</span>
+                    <span class="k">for</span> <span class="n">evac</span> <span class="ow">in</span> <span class="n">evacs</span><span class="p">:</span>
+                        <span class="c1"># Read number of evacs in each class</span>
+                        <span class="n">n_humans</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">INT</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">offset</span> <span class="o">=</span> <span class="n">pointer_location</span><span class="p">[</span><span class="n">evac</span><span class="p">][</span><span class="n">t</span><span class="p">]</span>
+                        <span class="c1"># Read positions</span>
+                        <span class="n">dtype_positions</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="mi">7</span> <span class="o">*</span> <span class="n">n_humans</span><span class="p">),))</span>
+                        <span class="n">pos</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_positions</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">evac</span><span class="o">.</span><span class="n">_positions</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">offset</span><span class="p">:</span> <span class="n">offset</span> <span class="o">+</span> <span class="n">n_humans</span><span class="p">]</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">n_humans</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+                                                                                        <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                        <span class="n">ap</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span>  <span class="c1"># Todo: What might this be for?</span>
+                        <span class="c1"># Read tags</span>
+                        <span class="n">dtype_tags</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="n">n_humans</span><span class="p">),))</span>
+                        <span class="n">evac</span><span class="o">.</span><span class="n">_tags</span><span class="p">[</span><span class="n">t</span><span class="p">][</span><span class="n">offset</span><span class="p">:</span> <span class="n">offset</span> <span class="o">+</span> <span class="n">n_humans</span><span class="p">]</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_tags</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+                        <span class="c1"># Read actual quantity values</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">evac</span><span class="o">.</span><span class="n">quantities</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">dtype_data</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
+                                <span class="p">((</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">((</span><span class="n">n_humans</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">evac</span><span class="o">.</span><span class="n">quantities</span><span class="p">)))),))</span>
+                            <span class="n">data_raw</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_data</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                                <span class="p">(</span><span class="n">n_humans</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">evac</span><span class="o">.</span><span class="n">quantities</span><span class="p">)),</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
+
+                            <span class="k">for</span> <span class="n">q</span><span class="p">,</span> <span class="n">quantity</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">evac</span><span class="o">.</span><span class="n">quantities</span><span class="p">):</span>
+                                <span class="n">evac</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">quantity</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="n">t</span><span class="p">][</span>
+                                <span class="n">offset</span><span class="p">:</span><span class="n">offset</span> <span class="o">+</span> <span class="n">n_humans</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_raw</span><span class="p">[:,</span> <span class="n">q</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                        <span class="n">pointer_location</span><span class="p">[</span><span class="n">evac</span><span class="p">][</span><span class="n">t</span><span class="p">]</span> <span class="o">+=</span> <span class="n">evac</span><span class="o">.</span><span class="n">n_humans</span><span class="p">[</span><span class="n">mesh</span><span class="p">][</span><span class="n">t</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the evac data for a specific agent/human class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_elements</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">evac</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">evac</span><span class="o">.</span><span class="n">class_name</span> <span class="o">==</span> <span class="n">key</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">evac</span>
+
+    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_elements</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">for</span> <span class="n">evac</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">evac</span><span class="o">.</span><span class="n">class_name</span> <span class="o">==</span> <span class="n">value</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;EvacCollection(&quot;</span> <span class="o">+</span> <span class="nb">super</span><span class="p">(</span><span class="n">EvacCollection</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2020, FZJ IAS-7 (Prof. Dr. Lukas Arnold, Jan Vogelsang).
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
