@@ -1,13 +1,13 @@
 Evacuation
 __________
 
-.. automodule:: fdsreader.part.EvacCollection
+.. automodule:: fdsreader.evac.EvacCollection
    :autosummary:
    :members:
    :undoc-members:
    :noindex:
 
-.. automodule:: fdsreader.part.evacuation
+.. automodule:: fdsreader.evac.evacuation
    :autosummary:
    :members:
    :undoc-members:
