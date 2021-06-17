@@ -94,6 +94,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../smoke3d.html">Smoke3D files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../part.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../devc.html">Devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../evac.html">Evacuation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../quantity.html">Quantity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../utils.html">Utilities</a></li>
 </ul>
@@ -185,7 +186,7 @@
 <div class="viewcode-block" id="SliceCollection.filter_by_quantity"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.SliceCollection.SliceCollection.filter_by_quantity">[docs]</a>    <span class="k">def</span> <span class="nf">filter_by_quantity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">]):</span>
         <span class="sd">&quot;&quot;&quot;Filters all slices by a specific quantity.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">quantity</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">quantity</span><span class="p">)</span> <span class="o">==</span> <span class="n">Quantity</span><span class="p">:</span>
             <span class="n">quantity</span> <span class="o">=</span> <span class="n">quantity</span><span class="o">.</span><span class="n">name</span>
         <span class="k">return</span> <span class="n">SliceCollection</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">quantity</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">quantity</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
                                <span class="ow">or</span> <span class="n">x</span><span class="o">.</span><span class="n">quantity</span><span class="o">.</span><span class="n">short_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">quantity</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span></div>

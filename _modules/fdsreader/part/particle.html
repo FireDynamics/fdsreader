@@ -94,6 +94,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../smoke3d.html">Smoke3D files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../part.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../devc.html">Devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../evac.html">Evacuation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../quantity.html">Quantity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../utils.html">Utilities</a></li>
 </ul>
@@ -264,7 +265,13 @@
 <div class="viewcode-block" id="Particle.clear_cache"><a class="viewcode-back" href="../../../part.html#fdsreader.part.particle.Particle.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span></div>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_positions</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_positions</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_positions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tags</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_tags</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="p">{</span><span class="n">q</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">quantities</span><span class="p">}</span></div>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Particle(name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">class_name</span><span class="si">}</span><span class="s2">, quantities=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">quantities</span><span class="si">}</span><span class="s2">)&quot;</span></div>

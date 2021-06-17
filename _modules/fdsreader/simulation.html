@@ -94,6 +94,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../smoke3d.html">Smoke3D files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../part.html">Particles</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../devc.html">Devices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../evac.html">Evacuation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../quantity.html">Quantity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../utils.html">Utilities</a></li>
 </ul>
@@ -411,7 +412,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">particles</span><span class="o">.</span><span class="n">_post_init</span><span class="p">()</span>
             <span class="c1"># If no evacs are simulates, initialize empty data container for consistency</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">evacs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">evacs</span> <span class="o">=</span> <span class="n">EvacCollection</span><span class="p">((),</span> <span class="p">())</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">evacs</span> <span class="o">=</span> <span class="n">EvacCollection</span><span class="p">((),</span> <span class="p">(),</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">meshes</span> <span class="o">=</span> <span class="n">MeshCollection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meshes</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CACHING</span><span class="p">:</span>
@@ -982,7 +983,7 @@
 
         <span class="n">times</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_prt5_meta</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">evacs</span><span class="p">,</span> <span class="n">file_path</span> <span class="o">+</span> <span class="s1">&#39;.bnd&#39;</span><span class="p">,</span> <span class="n">mesh</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>  <span class="c1"># First timestep is weird somehow</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">evacs</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">evacs</span> <span class="o">=</span> <span class="n">EvacCollection</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">evacs</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chid</span> <span class="o">+</span> <span class="s2">&quot;_evac&quot;</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">evacs</span> <span class="o">=</span> <span class="n">EvacCollection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">evacs</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chid</span> <span class="o">+</span> <span class="s2">&quot;_evac&quot;</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">evacs</span><span class="o">.</span><span class="n">z_offsets</span><span class="p">[</span><span class="n">mesh</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">z_offset</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">evacs</span><span class="o">.</span><span class="n">_file_paths</span><span class="p">[</span><span class="n">mesh</span><span class="p">]</span> <span class="o">=</span> <span class="n">file_path</span>

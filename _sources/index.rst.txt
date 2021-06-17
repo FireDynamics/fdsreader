@@ -14,6 +14,7 @@ FDSReader documentation!
    smoke3d
    part
    devc
+   evac
    quantity
    utils
 
@@ -26,5 +27,6 @@ FDSReader documentation!
 .. include::  smoke3d.rst
 .. include::  part.rst
 .. include::  devc.rst
+.. include::  evac.rst
 .. include::  quantity.rst
 .. include::  utils.rst
