@@ -12,3 +12,15 @@ ___________
    :members:
    :undoc-members:
    :noindex:
+
+.. automodule:: fdsreader.slcf.GeomSliceCollection
+   :autosummary:
+   :members:
+   :undoc-members:
+   :noindex:
+
+.. automodule:: fdsreader.slcf.geomslice
+   :autosummary:
+   :members:
+   :undoc-members:
+   :noindex:
