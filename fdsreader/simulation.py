@@ -12,7 +12,7 @@ from fdsreader.part import Particle, ParticleCollection
 from fdsreader.evac import Evacuation, EvacCollection
 from fdsreader.pl3d import Plot3D, Plot3DCollection
 from fdsreader.smoke3d import Smoke3D, Smoke3DCollection
-from fdsreader.slcf import Slice, SliceCollection
+from fdsreader.slcf import Slice, SliceCollection, GeomSliceCollection, GeomSlice
 from fdsreader.utils import Mesh, MeshCollection, Dimension, Surface, Quantity, Ventilation, Extent, log_error
 from fdsreader.utils.data import create_hash, get_smv_file, Device
 import fdsreader.utils.fortran_data as fdtype
@@ -97,6 +97,7 @@ class Simulation:
             (f"           obstructions={len(self.obstructions)},\n" if len(self.obstructions) > 0 else "") + \
             (f"           geometries={len(self.geoms)},\n" if len(self.geoms) > 0 else "") + \
             (f"           slices={len(self.slices)},\n" if len(self.slices) > 0 else "") + \
+            (f"           slices={len(self.geomslices)},\n" if len(self.geomslices) > 0 else "") + \
             (f"           plot3d={len(self.data_3d)},\n" if len(self.data_3d) > 0 else "") + \
             (f"           smoke3d={len(self.smoke_3d)},\n" if len(self.smoke_3d) > 0 else "") + \
             (f"           isosurfaces={len(self.isosurfaces)},\n" if len(self.isosurfaces) > 0 else "") + \
@@ -129,6 +130,7 @@ class Simulation:
             # First collect all meta-information for any FDS data to later combine the gathered
             # information into data collections
             self.slices = dict()
+            self.geomslices = dict()
             self.data_3d = dict()
             self.smoke_3d = dict()
             self.isosurfaces = dict()
@@ -184,6 +186,8 @@ class Simulation:
                             self.devices[device_id] = device
                     elif keyword.startswith("SLC"):
                         self._load_slice(smv_file, keyword)
+                    elif keyword.startswith("BNDS"):
+                        self._load_geomslice(smv_file, keyword)
                     elif "ISOG" in keyword:
                         self._load_isosurface(smv_file, keyword)
                     elif keyword.startswith("PL3D"):
@@ -235,8 +239,10 @@ class Simulation:
             self.geom_data = GeometryCollection(self.geom_data)
             self.slices = SliceCollection(
                 Slice(self.root_path, slice_data[0]["id"], slice_data[0]["cell_centered"],
-                      slice_data[0]["times"], slice_data[1:]) for slice_data in
-                self.slices.values())
+                      slice_data[0]["times"], slice_data[1:]) for slice_data in self.slices.values())
+            self.geomslices = GeomSliceCollection(
+                GeomSlice(self.root_path, slice_data[0]["id"],
+                      slice_data[0]["times"], slice_data[1:]) for slice_data in self.geomslices.values())
             self.data_3d = Plot3DCollection(self.data_3d.keys(), self.data_3d.values())
             self.smoke_3d = Smoke3DCollection(self.smoke_3d.values())
             self.isosurfaces = IsosurfaceCollection(self.isosurfaces.values())
@@ -247,12 +253,12 @@ class Simulation:
                 self.particles._post_init()
             # If no evacs are simulates, initialize empty data container for consistency
             if len(self.evacs) == 0:
-                self.evacs = EvacCollection((), (), "")
+                self.evacs = EvacCollection((), "")
             self.meshes = MeshCollection(self.meshes)
 
             if settings.ENABLE_CACHING:
                 # Hash will be saved to simulation pickle file and compared to new hash when loading
-                # the pickled simulation again in the next run of the prpogram.
+                # the pickled simulation again in the next run of the program.
                 self._hash = create_hash(self.smv_file_path)
                 pickle.dump(self, open(Simulation._get_pickle_filename(self.root_path, self.chid), 'wb'),
                             protocol=pickle.HIGHEST_PROTOCOL)
@@ -518,6 +524,45 @@ class Simulation:
                 {"cell_centered": cell_centered, "times": times, "id": slice_id}]
         self.slices[slice_index].append(
             {"dimension": dimension, "extent": extent, "mesh": mesh, "filename": filename,
+             "quantity": quantity, "short_name": short_name, "unit": unit})
+
+    @log_error("slcf")
+    def _load_geomslice(self, smv_file: TextIO, line: str):
+        """Loads the geomslice at current pointer position.
+        """
+        slice_index = int(line.split('!')[1].strip().split()[0])
+
+        slice_id = line.split('%')[1].split('&')[0].strip() if '%' in line else ""
+
+        mesh_index = int(line.split('&')[0].strip().split()[1]) - 1
+        mesh = self.meshes[mesh_index]
+
+        # Read in index ranges for x, y and z
+        bound_indices = [int(i.strip()) for i in line.split('&')[1].split('!')[0].strip().split()]
+        extent, _ = self._indices_to_extent(bound_indices, mesh)
+
+        filename = smv_file.readline().strip()
+        geom_filename = smv_file.readline().strip()
+        quantity = smv_file.readline().strip()
+        short_name = smv_file.readline().strip()
+        unit = smv_file.readline().strip()
+
+        file_path = os.path.join(self.root_path, filename)
+
+        if os.path.exists(file_path + ".bnd"):
+            times = list()
+            with open(file_path + ".bnd", 'r') as bnd_file:
+                for line in bnd_file:
+                    times.append(float(line.split()[0]))
+            times = np.array(times)
+        else:
+            times = None
+
+        if slice_index not in self.slices:
+            self.geomslices[slice_index] = [
+                {"times": times, "id": slice_id}]
+        self.geomslices[slice_index].append(
+            {"extent": extent, "mesh": mesh, "filename": filename, "geomfilename": geom_filename,
              "quantity": quantity, "short_name": short_name, "unit": unit})
 
     @log_error("bndf")

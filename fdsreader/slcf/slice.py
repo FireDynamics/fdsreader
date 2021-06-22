@@ -81,9 +81,8 @@ class SubSlice:
         n = self.dimension.size(cell_centered=False)
         dtype_data = fdtype.combine(fdtype.FLOAT, fdtype.new((('f', n),)))
 
-        load_times = False
-        if self.n_t == -1:
-            load_times = True
+        load_times = self.n_t == -1
+        if load_times:
             self._parent_slice.n_t = (os.stat(file_path).st_size - self._offset) // dtype_data.itemsize
             self._parent_slice.times = np.empty(self.n_t)
 
@@ -184,12 +183,9 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
 
         for mesh_data in multimesh_data:
             if mesh_data["mesh"] not in self._subslices:
-                self.quantity = Quantity(mesh_data["quantity"], mesh_data["short_name"],
-                                         mesh_data["unit"])
-                self._subslices[mesh_data["mesh"]] = SubSlice(self, mesh_data["filename"],
-                                                              mesh_data["dimension"],
-                                                              mesh_data["extent"],
-                                                              mesh_data["mesh"])
+                self.quantity = Quantity(mesh_data["quantity"], mesh_data["short_name"], mesh_data["unit"])
+                self._subslices[mesh_data["mesh"]] = SubSlice(self, mesh_data["filename"], mesh_data["dimension"],
+                                                              mesh_data["extent"], mesh_data["mesh"])
 
             if "-VELOCITY" in mesh_data["quantity"]:
                 vector_temp[mesh_data["mesh"]][mesh_data["quantity"]] = mesh_data["filename"]
@@ -476,9 +472,9 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
 
     def __repr__(self):
         if self.type == '3D':  # 3D-Slice
-            return f"Slice([3D] cell_centered={self.cell_centered}, extent={self.extent})"
+            return f"Slice([3D] quantity={self.quantity}, cell_centered={self.cell_centered}, extent={self.extent})"
         else:  # 2D-Slice
-            return f"Slice([2D] cell_centered={self.cell_centered}, extent={self.extent}, " \
+            return f"Slice([2D] quantity={self.quantity}, cell_centered={self.cell_centered}, extent={self.extent}, " \
                    f"extent_dirs={self.extent_dirs}, orientation={self.orientation})"
 
 # __array_function__ implementations
