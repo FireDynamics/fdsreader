@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Boundary files &mdash; fdsreader [fdsreader, version 1.2.1] documentation</title>
+  <title>Boundary files &mdash; fdsreader [fdsreader, version 1.2.2] documentation</title>
   
 
   
@@ -278,7 +278,7 @@ using obstructions as well as dependent such as <code class="xref py py-class do
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Patch</span></code>(file_path, dimension, extent, …)</p></td>
 <td><p>Container for the actual data which is stored as rectangular plane with specific orientation</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SubObstruction</span></code>(side_surfaces, …], …)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">SubObstruction</span></code>(side_surfaces, bound_indices, …)</p></td>
 <td><p>An <code class="xref py py-class docutils literal notranslate"><span class="pre">Obstruction</span></code> consists of 1 or more SubObstructions which can be hidden at specific points in time.</p></td>
 </tr>
 </tbody>
@@ -595,14 +595,14 @@ A value of 0 indicates to no filter.</p></li>
 
 <dl class="py class">
 <dt>
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.bndf.obstruction.</span></code><code class="sig-name descname"><span class="pre">SubObstruction</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">side_surfaces</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.utils.fds_classes.surface.Surface</span><span class="p"><span class="pre">,</span> </span><span class="p"><span class="pre">…</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bound_indices</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extent</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.extent.Extent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#SubObstruction"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.bndf.obstruction.</span></code><code class="sig-name descname"><span class="pre">SubObstruction</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">side_surfaces</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bound_indices</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extent</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.extent.Extent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#SubObstruction"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>An <code class="xref py py-class docutils literal notranslate"><span class="pre">Obstruction</span></code> consists of 1 or more SubObstructions which can be hidden at specific points in time.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>extent</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">Extent</span></code> object containing 3-dimensional extent information.</p></li>
 <li><p><strong>bound_indices</strong> – Indices used to define obstruction bounds in terms of mesh locations.</p></li>
-<li><p><strong>side_surfaces</strong> – Tuple of six surfaces for each side of the cuboid.</p></li>
+<li><p><strong>side_surfaces</strong> – Tuple of six :class:<a href="#id1"><span class="problematic" id="id2">`</span></a>Surface`s for each side of the cuboid.</p></li>
 <li><p><strong>hide_times</strong> – List with points in time from when on the SubObstruction will be hidden.</p></li>
 <li><p><strong>show_times</strong> – List with points in time from when on the SubObstruction will be shown.</p></li>
 </ul>

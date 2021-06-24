@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>fdsreader.simulation &mdash; fdsreader [fdsreader, version 1.2.1] documentation</title>
+  <title>fdsreader.simulation &mdash; fdsreader [fdsreader, version 1.2.2] documentation</title>
   
 
   
@@ -170,6 +170,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pickle</span>
 
+<span class="kn">from</span> <span class="nn">fdsreader.fds_classes</span> <span class="kn">import</span> <span class="n">Mesh</span><span class="p">,</span> <span class="n">MeshCollection</span><span class="p">,</span> <span class="n">Surface</span><span class="p">,</span> <span class="n">Ventilation</span>
 <span class="kn">from</span> <span class="nn">fdsreader.bndf</span> <span class="kn">import</span> <span class="n">Obstruction</span><span class="p">,</span> <span class="n">Patch</span><span class="p">,</span> <span class="n">ObstructionCollection</span><span class="p">,</span> <span class="n">SubObstruction</span>
 <span class="kn">from</span> <span class="nn">fdsreader.geom</span> <span class="kn">import</span> <span class="n">Geometry</span><span class="p">,</span> <span class="n">GeomBoundary</span><span class="p">,</span> <span class="n">GeometryCollection</span>
 <span class="kn">from</span> <span class="nn">fdsreader.isof</span> <span class="kn">import</span> <span class="n">Isosurface</span><span class="p">,</span> <span class="n">IsosurfaceCollection</span>
@@ -178,7 +179,7 @@
 <span class="kn">from</span> <span class="nn">fdsreader.pl3d</span> <span class="kn">import</span> <span class="n">Plot3D</span><span class="p">,</span> <span class="n">Plot3DCollection</span>
 <span class="kn">from</span> <span class="nn">fdsreader.smoke3d</span> <span class="kn">import</span> <span class="n">Smoke3D</span><span class="p">,</span> <span class="n">Smoke3DCollection</span>
 <span class="kn">from</span> <span class="nn">fdsreader.slcf</span> <span class="kn">import</span> <span class="n">Slice</span><span class="p">,</span> <span class="n">SliceCollection</span><span class="p">,</span> <span class="n">GeomSliceCollection</span><span class="p">,</span> <span class="n">GeomSlice</span>
-<span class="kn">from</span> <span class="nn">fdsreader.utils</span> <span class="kn">import</span> <span class="n">Mesh</span><span class="p">,</span> <span class="n">MeshCollection</span><span class="p">,</span> <span class="n">Dimension</span><span class="p">,</span> <span class="n">Surface</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Ventilation</span><span class="p">,</span> <span class="n">Extent</span><span class="p">,</span> <span class="n">log_error</span>
+<span class="kn">from</span> <span class="nn">fdsreader.utils</span> <span class="kn">import</span> <span class="n">Dimension</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">Extent</span><span class="p">,</span> <span class="n">log_error</span>
 <span class="kn">from</span> <span class="nn">fdsreader.utils.data</span> <span class="kn">import</span> <span class="n">create_hash</span><span class="p">,</span> <span class="n">get_smv_file</span><span class="p">,</span> <span class="n">Device</span>
 <span class="kn">import</span> <span class="nn">fdsreader.utils.fortran_data</span> <span class="k">as</span> <span class="nn">fdtype</span>
 <span class="kn">from</span> <span class="nn">fdsreader</span> <span class="kn">import</span> <span class="n">settings</span>
@@ -748,6 +749,7 @@
         <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
 
         <span class="n">patches</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">mesh_patches</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_path</span> <span class="o">+</span> <span class="s2">&quot;.bnd&quot;</span><span class="p">):</span>
             <span class="n">times</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
@@ -791,22 +793,31 @@
                 <span class="n">p</span> <span class="o">=</span> <span class="n">Patch</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">extent</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">cell_centered</span><span class="p">,</span>
                           <span class="n">patch_offset</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">n_t</span><span class="p">)</span>
 
-                <span class="c1"># Skip obstacles with index 0, which just gives the extent of the (whole) mesh faces</span>
-                <span class="c1"># These might be needed in case of &quot;closed&quot; mesh faces</span>
+                <span class="c1"># &quot;Obstacles&quot; with index 0 just give the extent of the (whole) mesh faces and refer to</span>
+                <span class="c1"># &quot;closed&quot; mesh faces, therefore that data will be added to the corresponding mesh instead</span>
                 <span class="k">if</span> <span class="n">obst_index</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">obst_index</span> <span class="o">-=</span> <span class="mi">1</span>  <span class="c1"># Account for fortran indexing</span>
                     <span class="k">if</span> <span class="n">obst_index</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">:</span>
                         <span class="n">patches</span><span class="p">[</span><span class="n">obst_index</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
                     <span class="n">patches</span><span class="p">[</span><span class="n">obst_index</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
-                <span class="n">patch_offset</span> <span class="o">+=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
-                    <span class="p">((</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">cell_centered</span><span class="o">=</span><span class="kc">False</span><span class="p">))),))</span><span class="o">.</span><span class="n">itemsize</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">mesh</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">mesh_patches</span><span class="p">:</span>
+                        <span class="n">mesh_patches</span><span class="p">[</span><span class="n">mesh</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+                    <span class="n">mesh_patches</span><span class="p">[</span><span class="n">mesh</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+                <span class="n">patch_offset</span> <span class="o">+=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">cell_centered</span><span class="o">=</span><span class="kc">False</span><span class="p">))),))</span><span class="o">.</span><span class="n">itemsize</span>
 
         <span class="k">for</span> <span class="n">obst_index</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">patches</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">patch</span> <span class="ow">in</span> <span class="n">p</span><span class="p">:</span>
                 <span class="n">patch</span><span class="o">.</span><span class="n">_post_init</span><span class="p">(</span><span class="n">patch_offset</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">_subobstructions</span><span class="p">[</span><span class="n">mesh</span><span class="p">][</span><span class="n">obst_index</span><span class="p">]</span><span class="o">.</span><span class="n">_add_patches</span><span class="p">(</span><span class="n">bid</span><span class="p">,</span> <span class="n">cell_centered</span><span class="p">,</span> <span class="n">quantity</span><span class="p">,</span> <span class="n">short_name</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span>
-                                                                 <span class="n">n_t</span><span class="p">,</span> <span class="n">lower_bounds</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_subobstructions</span><span class="p">[</span><span class="n">mesh</span><span class="p">][</span><span class="n">obst_index</span><span class="p">]</span><span class="o">.</span><span class="n">_add_patches</span><span class="p">(</span><span class="n">bid</span><span class="p">,</span> <span class="n">cell_centered</span><span class="p">,</span> <span class="n">quantity</span><span class="p">,</span> <span class="n">short_name</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span>
+                                                                 <span class="n">times</span><span class="p">,</span> <span class="n">n_t</span><span class="p">,</span> <span class="n">lower_bounds</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">mesh_patches</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">patch</span> <span class="ow">in</span> <span class="n">p</span><span class="p">:</span>
+                <span class="n">patch</span><span class="o">.</span><span class="n">_post_init</span><span class="p">(</span><span class="n">patch_offset</span><span class="p">)</span>
+            <span class="n">mesh</span><span class="o">.</span><span class="n">_add_patches</span><span class="p">(</span><span class="n">bid</span><span class="p">,</span> <span class="n">cell_centered</span><span class="p">,</span> <span class="n">quantity</span><span class="p">,</span> <span class="n">short_name</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span> <span class="n">n_t</span><span class="p">,</span> <span class="n">lower_bounds</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="p">)</span>
 
     <span class="nd">@log_error</span><span class="p">(</span><span class="s2">&quot;geom&quot;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">_load_boundary_data_geom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">:</span> <span class="n">TextIO</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
