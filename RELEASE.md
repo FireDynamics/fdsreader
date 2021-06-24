@@ -1,4 +1,6 @@
 ## Release History
+* 1.2.2
+    * Support for mesh boundary data
 * 1.2.1
     * Added gslcf support (geomslices)
 * 1.2.0

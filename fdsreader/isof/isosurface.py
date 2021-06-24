@@ -4,7 +4,8 @@ from typing import BinaryIO, Dict, Union, List, Tuple, Optional
 
 import numpy as np
 
-from fdsreader.utils import Quantity, Mesh
+from fdsreader.fds_classes import Mesh
+from fdsreader.utils import Quantity
 from fdsreader import settings
 import fdsreader.utils.fortran_data as fdtype
 

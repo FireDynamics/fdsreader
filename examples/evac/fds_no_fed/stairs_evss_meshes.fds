@@ -1,0 +1,239 @@
+/ -------------------------------------------------------------------
+&HEAD CHID  = "stairs_evss_meshes",
+      TITLE = "case"  /
+
+/ -------------------------------------------------------------------
+/ Mesh - fire
+/ -------------------------------------------------------------------
+
+/ -------------------------------------------------------------------
+/ Mesh - evac
+/ -------------------------------------------------------------------
+&MESH IJK     = 165,100, 1,
+      ID      = "GroundFloor",
+      XB      = 0.0,16.5,-5.0,  5.0, 0.8, 1.6,
+      EVACUATION      = .TRUE.,
+      EVAC_HUMANS     = .TRUE.,
+      EVAC_Z_OFFSET   = 1.0 /
+
+&MESH IJK     = 300,100, 1,
+      ID      = "FirstFloor",
+      XB      =16.5,46.5,-5.0,  5.0, 3.8, 4.6,
+      EVACUATION      = .TRUE.,
+      EVAC_HUMANS     = .TRUE.,
+      EVAC_Z_OFFSET   = 1.0 /
+
+/ -------------------------------------------------------------------
+/ miscellaneous
+/ -------------------------------------------------------------------
+&MISC NO_EVACUATION             = .FALSE.,
+      EVACUATION_INITIALIZATION = .FALSE.,
+      EVACUATION_MC_MODE        = .TRUE.,
+      EVACUATION_DRILL          = .TRUE.,
+      EVACUATION_WRITE_FED      = .FALSE.,
+      EVAC_TIME_ITERATIONS      = 50,
+      EVAC_PRESSURE_ITERATIONS  = 50 /
+
+&DUMP DT_PART = 0.5,
+      DT_HRR  = 0.1,
+      DT_SLCF = 1000000.0,
+      DT_PL3D = 1000000.0,
+      DT_ISOF = 1000000.0 /
+
+/ -------------------------------------------------------------------
+/ simulation time
+/ -------------------------------------------------------------------
+&TIME T_BEGIN           =   0.0,
+      T_END             = 600.0,
+      EVAC_DT_FLOWFIELD =   0.01 /
+
+/ -------------------------------------------------------------------
+/ Evac - EXIT
+/ -------------------------------------------------------------------
+&EXIT ID         = "EXIT",
+      IOR        = -1,
+      COLOR      = "GREEN",
+      COUNT_ONLY = .FALSE.,
+      KNOWN_DOOR = .TRUE.,
+      XYZ        =  0.2, 0.0, 2.0
+      XB         =  0.0, 0.0, -3.0, 3.0, 0.8, 1.6 /
+
+/ -------------------------------------------------------------------
+/ Evac - stair
+/ -------------------------------------------------------------------
+
+&DOOR ID         = 'T01',
+      IOR        = -1,
+      EXIT_SIGN  = .TRUE.,
+      COLOR      = 'ORANGE',
+      KNOWN_DOOR = .TRUE.,
+      XYZ        =16.7, 0.0, 2.0,
+      XB         =16.5,16.5,-1.2, 1.2, 3.8, 4.6,
+      TO_NODE    = 'E00' /
+
+&ENTR ID         = 'E00',
+      XB         =16.5,16.5,-1.2, 1.2, 0.8, 1.6,
+      IOR        = -1,
+      COLOR      = 'ORANGE' /
+
+&EVSS ID                     = 'stair',
+      IOR                    = -1,
+      SHOW                   = .TRUE.,
+      XB                     = 8.0,16.5,-1.2, 1.2, 0.8, 1.6,
+      FAC_V0_UP              = 0.5,
+      FAC_V0_DOWN            = 0.5,
+      FAC_V0_HORI            = 1.0,
+      HEIGHT0                = 0.0,
+      HEIGHT                 = 3.0,
+      MESH_ID                = 'GroundFloor' /
+
+/ -------------------------------------------------------------------
+/ EVAC - counter
+/ -------------------------------------------------------------------
+&EXIT ID         = 'C1',
+      IOR        = -1,
+      COUNT_ONLY = .TRUE.,
+      XYZ        = 6.2, 0.0, 2.0,
+      XB         = 6.0, 6.0,-0.7, 0.7, 0.8, 1.6 /
+
+DOOR ID         = 'T02',
+      IOR        = -1,
+      EXIT_SIGN  = .TRUE.,
+      COLOR      = 'ORANGE',
+      KNOWN_DOOR = .TRUE.,
+      XYZ        = 6.2, 0.0, 2.0,
+      XB         = 6.0, 6.0,-0.7, 0.7, 0.8, 1.6,
+      TO_NODE    = 'E02' /
+OBST XB         = 5.8, 6.0,-0.7,-0.7, 0.0, 6.0, EVACUATION=.TRUE., COLOR='BRICK' /
+ENTR ID         = 'E02',
+      XB         = 5.8, 5.8,-0.7, 0.7, 0.8, 1.6,
+      IOR        = -1,
+      COLOR      = 'ORANGE' /
+
+&EXIT ID         = 'C2',
+      IOR        = -1,
+      COUNT_ONLY = .TRUE.,
+      XYZ        = 8.2, 0.0, 2.0,
+      XB         = 8.0, 8.0,-1.2, 1.2, 0.8, 1.6 /
+
+&EXIT ID         = 'C3',
+      IOR        = -1,
+      COUNT_ONLY = .TRUE.,
+      XYZ        =16.7, 0.0, 2.0,
+      XB         =16.5,16.5,-1.2, 1.2, 3.8, 4.6 /
+
+&EXIT ID         = 'C4',
+      IOR        = -1,
+      COUNT_ONLY = .TRUE.,
+      XYZ        =36.7, 0.0, 2.0,
+      XB         =36.5,36.5,-1.2, 1.2, 3.8, 4.6 /
+
+/ -------------------------------------------------------------------
+/ EVAC - PERS
+/ -------------------------------------------------------------------
+&PERS ID                   = "ADULTS",
+      DEFAULT_PROPERTIES   = "Adult",
+      PRE_EVAC_DIST   = 0,
+          PRE_MEAN    = 0.0,
+      DET_EVAC_DIST   = 0,
+          DET_MEAN    = 0.0,
+      VELOCITY_DIST   = 0,
+          VEL_MEAN    = 1.00,
+      DENS_INIT       = 6.0,
+      OUTPUT_FED           = .FALSE.,
+      OUTPUT_SPEED         = .TRUE.,
+      OUTPUT_CONTACT_FORCE = .FALSE.,
+      OUTPUT_TOTAL_FORCE   = .FALSE.,
+      OUTPUT_DENSITY       = .TRUE.,
+      OUTPUT_NERVOUSNESS   = .FALSE.,
+      OUTPUT_ACCELERATION  = .FALSE.,
+      COLOR_METHOD         = 0 /
+
+&PERS ID                   = 'Students',
+      DEFAULT_PROPERTIES   = 'Adult',
+      I_HERDING_TYPE       = 2,
+      VELOCITY_DIST        = 2,
+           VEL_LOW         = 0.8,
+           VEL_MEAN        = 1.2,
+           VEL_HIGH        = 1.6,
+           VEL_PARA        = 0.20,
+       DET_EVAC_DIST       = 0,
+            DET_MEAN       = 0.00,
+      PRE_EVAC_DIST        = 0,
+           PRE_MEAN        = 0.00,
+      SMOKE_MIN_SPEED      = 0.10,
+      DENS_INIT            = 6.00,
+      HUMAN_SMOKE_HEIGHT   = 1.80,
+      TDET_SMOKE_DENS      = 0.00,
+      COLOR_METHOD         = 4 /
+
+&PERS ID                   = 'School children',
+      DEFAULT_PROPERTIES   = 'Child',
+      I_HERDING_TYPE       = 2,
+      VELOCITY_DIST        = 2,
+           VEL_LOW         = 0.6,
+           VEL_MEAN        = 0.9,
+           VEL_HIGH        = 1.3,
+           VEL_PARA        = 0.30,
+       DET_EVAC_DIST       = 0,
+            DET_MEAN       = 0.00,
+      PRE_EVAC_DIST        = 0,
+           PRE_MEAN        = 0.00,
+      SMOKE_MIN_SPEED      = 0.10,
+      DENS_INIT            = 6.00,
+      HUMAN_SMOKE_HEIGHT   = 1.80,
+      TDET_SMOKE_DENS      = 0.00,
+      COLOR_METHOD         = 4 /
+
+
+/ -------------------------------------------------------------------
+/ EVAC - EVAC
+/ -------------------------------------------------------------------
+&EVAC ID                      = "Agents",
+      NUMBER_INITIAL_PERSONS  =  100,
+      XB                      = 36.5, 46.5,-5.0, 5.0, 3.8, 4.6,
+      AVATAR_COLOR            = "BLUE",
+      PERS_ID                 = "ADULTS" /
+
+&EVAC ID                      = "Students",
+      NUMBER_INITIAL_PERSONS  =  100,
+      XB                      = 36.5, 46.5,-5.0, 5.0, 3.8, 4.6,
+      AVATAR_COLOR            = "BLUE",
+      PERS_ID                 = "Students" /
+
+&EVAC ID                      = "Children",
+      NUMBER_INITIAL_PERSONS  =  100,
+      XB                      = 36.5, 46.5,-5.0, 5.0, 3.8, 4.6,
+      AVATAR_COLOR            = "BLUE",
+      PERS_ID                 = "School children" /
+
+/ -------------------------------------------------------------------
+/ geometry
+/ -------------------------------------------------------------------
+
+&OBST XB= 0.0, 8.0,  3.0, 5.0, 0.0, 6.0, EVACUATION=.TRUE., COLOR='GRAY' /
+&OBST XB= 0.0, 8.0, -5.0,-3.0, 0.0, 6.0, EVACUATION=.TRUE., COLOR='GRAY' /
+
+&OBST XB= 8.0,16.5, -5.0,-1.2, 0.0, 6.0, EVACUATION=.TRUE., COLOR='GRAY' /
+&OBST XB= 8.0,16.5,  1.2, 5.0, 0.0, 6.0, EVACUATION=.TRUE., COLOR='GRAY' /
+
+&OBST XB=16.5,36.5, -5.0,-3.0, 0.0, 6.0, EVACUATION=.TRUE., COLOR='GRAY' /
+&OBST XB=16.5,36.5,  3.0, 5.0, 0.0, 6.0, EVACUATION=.TRUE., COLOR='GRAY' /
+
+&OBST XB= 5.8, 6.0, -3.0,-0.7, 0.0, 6.0, EVACUATION=.TRUE., COLOR='BRICK' /
+&OBST XB= 5.8, 6.0,  0.7, 3.0, 0.0, 6.0, EVACUATION=.TRUE., COLOR='BRICK' /
+
+/ -------------------------------------------------------------------
+/ quantities
+/ -------------------------------------------------------------------
+&SLCF PBZ        = 1.0,
+      QUANTITY   = "VELOCITY",
+      VECTOR     = .TRUE.,
+      EVACUATION = .TRUE. /
+
+&SLCF PBZ        = 4.0,
+      QUANTITY   = "VELOCITY",
+      VECTOR     = .TRUE.,
+      EVACUATION = .TRUE. /
+
+&TAIL /

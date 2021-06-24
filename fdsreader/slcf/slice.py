@@ -6,7 +6,8 @@ import logging
 from typing import Dict, Collection, Tuple, Union, List
 from typing_extensions import Literal
 
-from fdsreader.utils import Dimension, Quantity, Mesh, Extent
+from fdsreader.fds_classes import Mesh
+from fdsreader.utils import Dimension, Quantity, Extent
 from fdsreader import settings
 import fdsreader.utils.fortran_data as fdtype
 

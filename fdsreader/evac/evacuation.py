@@ -2,7 +2,8 @@ from typing import List, Tuple, Dict, Sequence, Union
 
 import numpy as np
 
-from fdsreader.utils import Quantity, Mesh, Extent
+from fdsreader.fds_classes import Mesh
+from fdsreader.utils import Quantity
 
 
 # class Entrance:

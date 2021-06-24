@@ -3,7 +3,7 @@ from typing import List, Dict, Tuple, Union, Sequence
 from typing_extensions import Literal
 import numpy as np
 
-from fdsreader.utils import Surface, Extent, Quantity, Dimension
+from fdsreader.utils import Extent, Quantity, Dimension
 import fdsreader.utils.fortran_data as fdtype
 from fdsreader import settings
 
@@ -149,12 +149,12 @@ class SubObstruction:
 
     :ivar extent: :class:`Extent` object containing 3-dimensional extent information.
     :ivar bound_indices: Indices used to define obstruction bounds in terms of mesh locations.
-    :ivar side_surfaces: Tuple of six surfaces for each side of the cuboid.
+    :ivar side_surfaces: Tuple of six :class:`Surface`s for each side of the cuboid.
     :ivar hide_times: List with points in time from when on the SubObstruction will be hidden.
     :ivar show_times: List with points in time from when on the SubObstruction will be shown.
     """
 
-    def __init__(self, side_surfaces: Tuple[Surface, ...], bound_indices: Tuple[int, int, int, int, int, int],
+    def __init__(self, side_surfaces: Tuple, bound_indices: Tuple[int, int, int, int, int, int],
                  extent: Extent):
         self.extent = extent
         self.side_surfaces = side_surfaces
@@ -167,11 +167,12 @@ class SubObstruction:
         self.hide_times = list()
         self.show_times = list()
 
-    def _add_patches(self, bid: int, cell_centered: bool, quantity: str, short_name: str, unit: str, patches: List[Patch],
-                     times: np.ndarray, n_t: int, lower_bounds: np.ndarray, upper_bounds: np.ndarray):
+    def _add_patches(self, bid: int, cell_centered: bool, quantity: str, short_name: str, unit: str,
+                     patches: List[Patch], times: np.ndarray, n_t: int, lower_bounds: np.ndarray,
+                     upper_bounds: np.ndarray):
         if bid not in self._boundary_data:
-            self._boundary_data[bid] = Boundary(Quantity(quantity, short_name, unit), cell_centered, times, n_t, patches,
-                                                lower_bounds, upper_bounds)
+            self._boundary_data[bid] = Boundary(Quantity(quantity, short_name, unit), cell_centered, times, n_t,
+                                                patches, lower_bounds, upper_bounds)
 
         if not settings.LAZY_LOAD:
             _ = self._boundary_data[bid].data

@@ -1,8 +1,10 @@
-from typing import Dict, Tuple, Sequence
+from typing import Dict, Tuple, Sequence, List, Union
 from typing_extensions import Literal
 import numpy as np
 
-from fdsreader.utils import Dimension, Extent
+from fdsreader import settings
+from fdsreader.utils import Dimension, Extent, Quantity
+from fdsreader.bndf import Boundary, Patch
 
 
 class Mesh:
@@ -36,6 +38,8 @@ class Mesh:
                              extents['z'][0], extents['z'][1])
 
         self.obstructions = list()
+
+        self._boundary_data: Dict[int, Boundary] = dict()
 
     def get_obstruction_mask(self, times: Sequence[float], cell_centered=False) -> np.ndarray:
         """Marks all cells which are blocked by an obstruction.
@@ -85,7 +89,7 @@ class Mesh:
         :param dimension: The dimensions in which to return the indices (1=x, 2=y, 3=z).
         """
         # Convert possible integer input to chars
-        dimension = tuple(('x', 'y', 'z')[dim-1] if type(dim) == int else dim for dim in dimension)
+        dimension = tuple(('x', 'y', 'z')[dim - 1] if type(dim) == int else dim for dim in dimension)
 
         ret = list()
         for i, dim in enumerate(dimension):
@@ -100,6 +104,23 @@ class Mesh:
             else:
                 ret.append(idx)
         return tuple(ret)
+
+    def _add_patches(self, bid: int, cell_centered: bool, quantity: str, short_name: str, unit: str,
+                     patches: List[Patch], times: np.ndarray, n_t: int, lower_bounds: np.ndarray,
+                     upper_bounds: np.ndarray):
+        if bid not in self._boundary_data:
+            self._boundary_data[bid] = Boundary(Quantity(quantity, short_name, unit), cell_centered, times, n_t,
+                                                patches, lower_bounds, upper_bounds)
+
+        if not settings.LAZY_LOAD:
+            _ = self._boundary_data[bid].data
+
+    def get_boundary_data(self, quantity: Union[str, Quantity]):
+        if type(quantity) == Quantity:
+            quantity = quantity.name
+        return next(b for b in self._boundary_data.values() if
+                    b.quantity.name.lower() == quantity.lower() or b.quantity.short_name.lower() == quantity.lower())
+
 
     def __getitem__(self, dimension: Literal[0, 1, 2, 'x', 'y', 'z']) -> np.ndarray:
         """Get all values in given dimension.

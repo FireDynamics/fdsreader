@@ -1,6 +1,6 @@
 from typing import Iterable
 
-from fdsreader.utils import Mesh
+from fdsreader.fds_classes import Mesh
 from fdsreader.utils.data import FDSDataCollection
 
 

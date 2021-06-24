@@ -3,7 +3,8 @@ from typing import Tuple, Dict, Iterable
 
 import numpy as np
 
-from fdsreader.utils import Surface, Quantity
+from fdsreader.fds_classes import Surface
+from fdsreader.utils import Quantity
 import fdsreader.utils.fortran_data as fdtype
 
 

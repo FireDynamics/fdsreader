@@ -4,7 +4,7 @@ from typing import Iterable, Dict, List, Union
 import numpy as np
 
 from fdsreader.evac import Evacuation
-from fdsreader.utils import Mesh
+from fdsreader.fds_classes import Mesh
 from fdsreader.utils.data import FDSDataCollection, Quantity
 import fdsreader.utils.fortran_data as fdtype
 from fdsreader import settings

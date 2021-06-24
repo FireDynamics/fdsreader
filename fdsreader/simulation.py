@@ -5,6 +5,7 @@ from typing import List, TextIO, Dict, AnyStr, Sequence, Tuple, Union
 import numpy as np
 import pickle
 
+from fdsreader.fds_classes import Mesh, MeshCollection, Surface, Ventilation
 from fdsreader.bndf import Obstruction, Patch, ObstructionCollection, SubObstruction
 from fdsreader.geom import Geometry, GeomBoundary, GeometryCollection
 from fdsreader.isof import Isosurface, IsosurfaceCollection
@@ -13,7 +14,7 @@ from fdsreader.evac import Evacuation, EvacCollection
 from fdsreader.pl3d import Plot3D, Plot3DCollection
 from fdsreader.smoke3d import Smoke3D, Smoke3DCollection
 from fdsreader.slcf import Slice, SliceCollection, GeomSliceCollection, GeomSlice
-from fdsreader.utils import Mesh, MeshCollection, Dimension, Surface, Quantity, Ventilation, Extent, log_error
+from fdsreader.utils import Dimension, Quantity, Extent, log_error
 from fdsreader.utils.data import create_hash, get_smv_file, Device
 import fdsreader.utils.fortran_data as fdtype
 from fdsreader import settings
@@ -583,6 +584,7 @@ class Simulation:
         file_path = os.path.join(self.root_path, filename)
 
         patches = dict()
+        mesh_patches = dict()
 
         if os.path.exists(file_path + ".bnd"):
             times = list()
@@ -626,22 +628,31 @@ class Simulation:
                 p = Patch(file_path, dimension, extent, orientation, cell_centered,
                           patch_offset, offset, n_t)
 
-                # Skip obstacles with index 0, which just gives the extent of the (whole) mesh faces
-                # These might be needed in case of "closed" mesh faces
+                # "Obstacles" with index 0 just give the extent of the (whole) mesh faces and refer to
+                # "closed" mesh faces, therefore that data will be added to the corresponding mesh instead
                 if obst_index != 0:
                     obst_index -= 1  # Account for fortran indexing
                     if obst_index not in patches:
                         patches[obst_index] = list()
                     patches[obst_index].append(p)
-                patch_offset += fdtype.new(
-                    (('f', str(p.dimension.shape(cell_centered=False))),)).itemsize
+                else:
+                    if mesh not in mesh_patches:
+                        mesh_patches[mesh] = list()
+                    mesh_patches[mesh].append(p)
+
+                patch_offset += fdtype.new((('f', str(p.dimension.shape(cell_centered=False))),)).itemsize
 
         for obst_index, p in patches.items():
             for patch in p:
                 patch._post_init(patch_offset)
 
-            self._subobstructions[mesh][obst_index]._add_patches(bid, cell_centered, quantity, short_name, unit, p, times,
-                                                                 n_t, lower_bounds, upper_bounds)
+            self._subobstructions[mesh][obst_index]._add_patches(bid, cell_centered, quantity, short_name, unit, p,
+                                                                 times, n_t, lower_bounds, upper_bounds)
+
+        for mesh, p in mesh_patches.items():
+            for patch in p:
+                patch._post_init(patch_offset)
+            mesh._add_patches(bid, cell_centered, quantity, short_name, unit, p, times, n_t, lower_bounds, upper_bounds)
 
     @log_error("geom")
     def _load_boundary_data_geom(self, smv_file: TextIO, line: str):

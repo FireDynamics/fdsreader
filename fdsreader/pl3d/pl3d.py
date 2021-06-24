@@ -4,7 +4,8 @@ from copy import deepcopy
 from typing import Dict, Sequence
 import numpy as np
 
-from fdsreader.utils import Quantity, Mesh
+from fdsreader.fds_classes import Mesh
+from fdsreader.utils import Quantity
 from fdsreader import settings
 import fdsreader.utils.fortran_data as fdtype
 

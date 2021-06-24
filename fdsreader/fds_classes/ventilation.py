@@ -1,6 +1,7 @@
 from typing import Union, Tuple, Dict
 
-from fdsreader.utils import Surface, Extent, Mesh
+from fdsreader.fds_classes import Surface, Mesh
+from fdsreader.utils import Extent
 
 
 class SubVentilation:
