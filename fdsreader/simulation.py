@@ -1,3 +1,4 @@
+import glob
 import logging
 import os
 from typing import List, TextIO, Dict, AnyStr, Sequence, Tuple, Union
@@ -15,7 +16,7 @@ from fdsreader.pl3d import Plot3D, Plot3DCollection
 from fdsreader.smoke3d import Smoke3D, Smoke3DCollection
 from fdsreader.slcf import Slice, SliceCollection, GeomSliceCollection, GeomSlice
 from fdsreader.utils import Dimension, Quantity, Extent, log_error
-from fdsreader.utils.data import create_hash, get_smv_file, Device
+from fdsreader.utils.data import create_hash, get_smv_file, Device, Profile
 import fdsreader.utils.fortran_data as fdtype
 from fdsreader import settings
 from fdsreader._version import __version__
@@ -41,8 +42,10 @@ class Simulation:
     :ivar smoke_3d: All defined 3D smoke data combine into a :class:`Smoke3DCollecction`
     :ivar isosurfaces: All defined isosurfaces combined into a :class:`IsosurfaceCollection`.
     :ivar particles: All defined particles combined into a :class:`ParticleCollection`.
-    :ivar devices: List containing all devices defined in this simulation.
-    :ivar geoms: List containing all geometries defined in this simulation.
+    :ivar evacs: All defined evacuations combined into a :class:`EvacCollection`.
+    :ivar devices: List containing all :class:`Device`s defined in this simulation.
+    :ivar profiles: Dictionary mapping profile ids to the corresponding :class:`Profile`s defined in this simulation.
+    :ivar geoms: List containing all geometries (:class:`Geometry`) defined in this simulation.
     :ivar geom_data: All geometry data by quantity combined into a :class:`GeometryCollection`.
     :ivar cpu: Dictionary mapping .csv header keys to numpy arrays containing cpu data.
     :ivar hrr: Dictionary mapping .csv header keys to numpy arrays containing hrr data.
@@ -103,6 +106,7 @@ class Simulation:
             (f"           smoke3d={len(self.smoke_3d)},\n" if len(self.smoke_3d) > 0 else "") + \
             (f"           isosurfaces={len(self.isosurfaces)},\n" if len(self.isosurfaces) > 0 else "") + \
             (f"           particles={len(self.particles)},\n" if len(self.particles) > 0 else "") + \
+            (f"           evacs={len(self.evacs)},\n" if len(self.evacs) > 0 else "") + \
             (f"           devices={len(self.devices)},\n" if len(self.devices) > 0 else "")
         return r[:-2] + ')'
 
@@ -140,6 +144,7 @@ class Simulation:
             self.geom_data = list()
             self.meshes = list()
             self.devices: Dict[str, Union[Device, List[Device]]] = dict()
+            self.profiles: Dict[str, Profile] = dict()
             device_tmp = str()
 
             with open(self.smv_file_path, 'r') as smv_file:
@@ -211,6 +216,7 @@ class Simulation:
                         self._toggle_obst(smv_file, keyword)
 
                 self.cpu = self._load_CPU_data()
+                self._load_profiles()
                 if device_tmp != "":
                     self._load_DEVC_data(device_tmp)
 
@@ -243,7 +249,7 @@ class Simulation:
                       slice_data[0]["times"], slice_data[1:]) for slice_data in self.slices.values())
             self.geomslices = GeomSliceCollection(
                 GeomSlice(self.root_path, slice_data[0]["id"],
-                      slice_data[0]["times"], slice_data[1:]) for slice_data in self.geomslices.values())
+                          slice_data[0]["times"], slice_data[1:]) for slice_data in self.geomslices.values())
             self.data_3d = Plot3DCollection(self.data_3d.keys(), self.data_3d.values())
             self.smoke_3d = Smoke3DCollection(self.smoke_3d.values())
             self.isosurfaces = IsosurfaceCollection(self.isosurfaces.values())
@@ -628,7 +634,7 @@ class Simulation:
                 p = Patch(file_path, dimension, extent, orientation, cell_centered,
                           patch_offset, offset, n_t)
 
-                # "Obstacles" with index 0 just give the extent of the (whole) mesh faces and refer to
+                # "Obstacles" with index 0 give the extent of the (whole) mesh faces and refer to
                 # "closed" mesh faces, therefore that data will be added to the corresponding mesh instead
                 if obst_index != 0:
                     obst_index -= 1  # Account for fortran indexing
@@ -882,6 +888,24 @@ class Simulation:
         n_evacs = int(smv_file.readline().strip())
         for i in range(n_evacs):
             smv_file.readline()  # Skip "N" values
+
+    @log_error("prof")
+    def _load_profiles(self):
+        for f in glob.glob(str(os.path.join(self.root_path, self.chid)) + "_prof*"):
+            with open(f, 'r') as infile:
+                profile_id = infile.readline()
+                infile.readline()
+                data: np.ndarray = np.genfromtxt(infile, delimiter=',', dtype=np.float32, autostrip=True).T
+                times = data[0]
+                npoints = data[1].astype(int)
+                depths = np.empty((data.shape[1],), dtype=object)
+                values = np.empty((data.shape[1],), dtype=object)
+
+                for i, n in enumerate(npoints):
+                    depths[i] = data[2: 2 + n, i]
+                    values[i] = data[2 + n:, i]
+
+                self.profiles[profile_id] = Profile(profile_id, times, npoints, depths, values)
 
     @log_error("devc")
     def _register_device(self, smv_file: TextIO) -> Tuple[str, Device]:

@@ -73,6 +73,23 @@ class Device:
         return f"Device(id='{self.id}', xyz={self.position}, quantity={self.quantity})"
 
 
+class Profile:
+    """Class containing profile data.
+    """
+    def __init__(self, profile_id: str, times: np.ndarray, npoints: np.ndarray, depths: np.ndarray, values: np.ndarray):
+        self.id = profile_id
+        self.times = times
+        self.npoints = npoints
+        self.depths = depths
+        self.values = values
+
+    def __eq__(self, other):
+        return self.id == other.id
+
+    def __repr__(self):
+        return f"Profile(id='{self.id}', times={self.times}, depths={self.depths}, values={self.values})"
+
+
 def create_hash(path: str):
     """Returns the md5 hash as string for the given file.
     """
