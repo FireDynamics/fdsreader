@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>FDSReader documentation! &mdash; fdsreader [fdsreader, version 1.2.2] documentation</title>
+  <title>FDSReader documentation! &mdash; fdsreader [fdsreader, version 1.2.3] documentation</title>
   
 
   
@@ -232,8 +232,10 @@
 <li><p><strong>smoke_3d</strong> – All defined 3D smoke data combine into a <code class="xref py py-class docutils literal notranslate"><span class="pre">Smoke3DCollecction</span></code></p></li>
 <li><p><strong>isosurfaces</strong> – All defined isosurfaces combined into a <code class="xref py py-class docutils literal notranslate"><span class="pre">IsosurfaceCollection</span></code>.</p></li>
 <li><p><strong>particles</strong> – All defined particles combined into a <code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleCollection</span></code>.</p></li>
-<li><p><strong>devices</strong> – List containing all devices defined in this simulation.</p></li>
-<li><p><strong>geoms</strong> – List containing all geometries defined in this simulation.</p></li>
+<li><p><strong>evacs</strong> – All defined evacuations combined into a <code class="xref py py-class docutils literal notranslate"><span class="pre">EvacCollection</span></code>.</p></li>
+<li><p><strong>devices</strong> – List containing all :class:<a href="#id1"><span class="problematic" id="id2">`</span></a>Device`s defined in this simulation.</p></li>
+<li><p><strong>profiles</strong> – Dictionary mapping profile ids to the corresponding :class:<a href="#id3"><span class="problematic" id="id4">`</span></a>Profile`s defined in this simulation.</p></li>
+<li><p><strong>geoms</strong> – List containing all geometries (<code class="xref py py-class docutils literal notranslate"><span class="pre">Geometry</span></code>) defined in this simulation.</p></li>
 <li><p><strong>geom_data</strong> – All geometry data by quantity combined into a <code class="xref py py-class docutils literal notranslate"><span class="pre">GeometryCollection</span></code>.</p></li>
 <li><p><strong>cpu</strong> – Dictionary mapping .csv header keys to numpy arrays containing cpu data.</p></li>
 <li><p><strong>hrr</strong> – Dictionary mapping .csv header keys to numpy arrays containing hrr data.</p></li>
@@ -368,7 +370,7 @@ If there are multiple slices with the same distance, a random one will be select
 <dd><dl class="simple">
 <dt>Slice file data container including metadata. Consists of multiple subslices, one for each</dt><dd><p>mesh the slice cuts through. In case a slice cuts right through the border of two meshes, the generated data
 would be duplicated. For edge-centered slices a random of both generated slices will be discarded as the data
-is completely identical. For cell-centered slices the data of both slices will be saved as :class:<a href="#id1"><span class="problematic" id="id2">`</span></a>SubSlice`s,
+is completely identical. For cell-centered slices the data of both slices will be saved as :class:<a href="#id5"><span class="problematic" id="id6">`</span></a>SubSlice`s,
 therefore it might seem as if all slices would be duplicated, in reality however the slices might contain
 different data.</p>
 </dd>
@@ -1458,7 +1460,7 @@ A value of 0 indicates to no filter.</p></li>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>extent</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">Extent</span></code> object containing 3-dimensional extent information.</p></li>
 <li><p><strong>bound_indices</strong> – Indices used to define obstruction bounds in terms of mesh locations.</p></li>
-<li><p><strong>side_surfaces</strong> – Tuple of six :class:<a href="#id3"><span class="problematic" id="id4">`</span></a>Surface`s for each side of the cuboid.</p></li>
+<li><p><strong>side_surfaces</strong> – Tuple of six :class:<a href="#id7"><span class="problematic" id="id8">`</span></a>Surface`s for each side of the cuboid.</p></li>
 <li><p><strong>hide_times</strong> – List with points in time from when on the SubObstruction will be hidden.</p></li>
 <li><p><strong>show_times</strong> – List with points in time from when on the SubObstruction will be shown.</p></li>
 </ul>
@@ -2274,7 +2276,7 @@ using Smoke3Ds as well as its subclasses such as <code class="xref py py-class d
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_by_quantity</span></code>(quantity)</p></td>
-<td><p>Gets the :class:<a href="#id5"><span class="problematic" id="id6">`</span></a>Smoke3D`s with a specific quantity.</p></td>
+<td><p>Gets the :class:<a href="#id9"><span class="problematic" id="id10">`</span></a>Smoke3D`s with a specific quantity.</p></td>
 </tr>
 </tbody>
 </table>
@@ -2293,7 +2295,7 @@ using Smoke3Ds as well as its subclasses such as <code class="xref py py-class d
 <dl class="py method">
 <dt>
 <code class="sig-name descname"><span class="pre">get_by_quantity</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">,</span> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/smoke3d/Smoke3DCollection.html#Smoke3DCollection.get_by_quantity"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Gets the :class:<a href="#id7"><span class="problematic" id="id8">`</span></a>Smoke3D`s with a specific quantity.</p>
+<dd><p>Gets the :class:<a href="#id11"><span class="problematic" id="id12">`</span></a>Smoke3D`s with a specific quantity.</p>
 </dd></dl>
 
 <dl class="py method">

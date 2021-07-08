@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Simulation &mdash; fdsreader [fdsreader, version 1.2.2] documentation</title>
+  <title>Simulation &mdash; fdsreader [fdsreader, version 1.2.3] documentation</title>
   
 
   
@@ -214,8 +214,10 @@
 <li><p><strong>smoke_3d</strong> – All defined 3D smoke data combine into a <code class="xref py py-class docutils literal notranslate"><span class="pre">Smoke3DCollecction</span></code></p></li>
 <li><p><strong>isosurfaces</strong> – All defined isosurfaces combined into a <code class="xref py py-class docutils literal notranslate"><span class="pre">IsosurfaceCollection</span></code>.</p></li>
 <li><p><strong>particles</strong> – All defined particles combined into a <code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleCollection</span></code>.</p></li>
-<li><p><strong>devices</strong> – List containing all devices defined in this simulation.</p></li>
-<li><p><strong>geoms</strong> – List containing all geometries defined in this simulation.</p></li>
+<li><p><strong>evacs</strong> – All defined evacuations combined into a <code class="xref py py-class docutils literal notranslate"><span class="pre">EvacCollection</span></code>.</p></li>
+<li><p><strong>devices</strong> – List containing all :class:<a href="#id1"><span class="problematic" id="id2">`</span></a>Device`s defined in this simulation.</p></li>
+<li><p><strong>profiles</strong> – Dictionary mapping profile ids to the corresponding :class:<a href="#id3"><span class="problematic" id="id4">`</span></a>Profile`s defined in this simulation.</p></li>
+<li><p><strong>geoms</strong> – List containing all geometries (<code class="xref py py-class docutils literal notranslate"><span class="pre">Geometry</span></code>) defined in this simulation.</p></li>
 <li><p><strong>geom_data</strong> – All geometry data by quantity combined into a <code class="xref py py-class docutils literal notranslate"><span class="pre">GeometryCollection</span></code>.</p></li>
 <li><p><strong>cpu</strong> – Dictionary mapping .csv header keys to numpy arrays containing cpu data.</p></li>
 <li><p><strong>hrr</strong> – Dictionary mapping .csv header keys to numpy arrays containing hrr data.</p></li>
