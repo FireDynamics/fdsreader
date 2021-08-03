@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>fdsreader.smoke3d.smoke3d &mdash; fdsreader [fdsreader, version 1.2.3] documentation</title>
+  <title>fdsreader.smoke3d.smoke3d &mdash; fdsreader [fdsreader, version 1.2.4] documentation</title>
   
 
   
@@ -166,7 +166,7 @@
 <span></span><span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Literal</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">from</span> <span class="nn">fdsreader.fds_classes</span> <span class="kn">import</span> <span class="n">Mesh</span>
@@ -234,14 +234,14 @@
                         <span class="n">out_pos</span> <span class="o">=</span> <span class="mi">0</span>
                         <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">nchars_out</span><span class="p">:</span>
                             <span class="k">if</span> <span class="n">rle_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">mark</span><span class="p">:</span>
-                                <span class="n">value</span> <span class="o">=</span> <span class="n">rle_data</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
-                                <span class="n">repeats</span> <span class="o">=</span> <span class="n">rle_data</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span>
+                                <span class="n">value</span> <span class="o">=</span> <span class="n">rle_data</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                                <span class="n">repeats</span> <span class="o">=</span> <span class="n">rle_data</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
                                 <span class="n">i</span> <span class="o">+=</span> <span class="mi">3</span>
                             <span class="k">else</span><span class="p">:</span>
                                 <span class="n">value</span> <span class="o">=</span> <span class="n">rle_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
                                 <span class="n">repeats</span> <span class="o">=</span> <span class="mi">1</span>
                                 <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
-                            <span class="n">decoded_data</span><span class="p">[</span><span class="n">out_pos</span><span class="p">:</span><span class="n">out_pos</span><span class="o">+</span><span class="n">repeats</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                            <span class="n">decoded_data</span><span class="p">[</span><span class="n">out_pos</span><span class="p">:</span><span class="n">out_pos</span> <span class="o">+</span> <span class="n">repeats</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
                             <span class="n">out_pos</span> <span class="o">+=</span> <span class="n">repeats</span>
 
                         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">t</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">decoded_data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">data_shape</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
@@ -290,6 +290,40 @@
         <span class="sd">&quot;&quot;&quot;Returns the :class:`SubSmoke` that contains data for the given mesh.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subsmokes</span><span class="p">[</span><span class="n">mesh</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Smoke3D.export_raw_mhd"><a class="viewcode-back" href="../../../smoke3d.html#fdsreader.smoke3d.smoke3d.Smoke3D.export_raw_mhd">[docs]</a>    <span class="k">def</span> <span class="nf">export_raw_mhd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestep</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ordering</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;C&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Exports the 3d arrays to .raw files with corresponding .mhd meta files.</span>
+
+<span class="sd">        :param output_dir: The directory in which to save all files.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">subsmoke</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subsmokes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;smoke-&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">quantity</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;_mesh-&quot;</span> <span class="o">+</span> <span class="n">mesh</span><span class="o">.</span><span class="n">id</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
+
+            <span class="n">data</span> <span class="o">=</span> <span class="n">subsmoke</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">timestep</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">ordering</span> <span class="o">==</span> <span class="s1">&#39;F&#39;</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">T</span>
+
+            <span class="n">data</span><span class="o">.</span><span class="n">tofile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">filename</span> <span class="o">+</span> <span class="s2">&quot;.raw&quot;</span><span class="p">))</span>
+
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">filename</span> <span class="o">+</span> <span class="s2">&quot;.mhd&quot;</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">metafile</span><span class="p">:</span>
+                <span class="c1"># spacing = [int(round(mesh.coordinates[&#39;x&#39;][1] - mesh.coordinates[&#39;x&#39;][0], 3)*1000),</span>
+                <span class="c1">#            int(round(mesh.coordinates[&#39;y&#39;][1] - mesh.coordinates[&#39;y&#39;][0], 3)*1000),</span>
+                <span class="c1">#            int(round(mesh.coordinates[&#39;z&#39;][1] - mesh.coordinates[&#39;z&#39;][0], 3)*1000)]</span>
+                <span class="n">spacing</span> <span class="o">=</span> <span class="p">[</span><span class="n">mesh</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">mesh</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                           <span class="n">mesh</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">mesh</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                           <span class="n">mesh</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">mesh</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="n">metafile</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span>
+                    <span class="p">[</span><span class="s2">&quot;ObjectType = Image&quot;</span><span class="p">,</span>
+                     <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">NDims = 3&quot;</span><span class="p">,</span>
+                     <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">BinaryData = True&quot;</span><span class="p">,</span>
+                     <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">BinaryDataByteOrderMSB = False&quot;</span><span class="p">,</span>
+                     <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">ElementSpacing = </span><span class="si">{</span><span class="n">spacing</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.6</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">spacing</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.6</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">spacing</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">:</span><span class="s2">.6</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                     <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">DimSize = </span><span class="si">{</span><span class="n">subsmoke</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">subsmoke</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">subsmoke</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                     <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">ElementType = MET_CHAR&quot;</span><span class="p">,</span>
+                     <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">ElementDataFile = </span><span class="si">{</span><span class="n">filename</span> <span class="o">+</span> <span class="s1">&#39;.raw&#39;</span><span class="si">}</span><span class="s2">&quot;</span>
+                     <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">[Pixel Data]&quot;</span><span class="p">])</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">vmax</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

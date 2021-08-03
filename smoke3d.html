@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Smoke3D files &mdash; fdsreader [fdsreader, version 1.2.3] documentation</title>
+  <title>Smoke3D files &mdash; fdsreader [fdsreader, version 1.2.4] documentation</title>
   
 
   
@@ -296,13 +296,16 @@ using Smoke3Ds as well as its subclasses such as <code class="xref py py-class d
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_cache</span></code>()</p></td>
 <td><p>Remove all data from the internal cache that has been loaded so far to free memory.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_subsmoke</span></code>(mesh)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">export_raw_mhd</span></code>(timestep, output_dir[, ordering])</p></td>
+<td><p>Exports the 3d arrays to .raw files with corresponding .mhd meta files.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_subsmoke</span></code>(mesh)</p></td>
 <td><p>Returns the <code class="xref py py-class docutils literal notranslate"><span class="pre">SubSmoke</span></code> that contains data for the given mesh.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean</span></code>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean</span></code>()</p></td>
 <td><p>Calculates the mean value of all Smoke3D data for this quantity.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">std</span></code>()</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">std</span></code>()</p></td>
 <td><p>Calculates the standard deviation of all Smoke3D data for this quantity.</p></td>
 </tr>
 </tbody>
@@ -323,6 +326,17 @@ using Smoke3Ds as well as its subclasses such as <code class="xref py py-class d
 <dt>
 <code class="sig-name descname"><span class="pre">clear_cache</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/smoke3d/smoke3d.html#Smoke3D.clear_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Remove all data from the internal cache that has been loaded so far to free memory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname"><span class="pre">export_raw_mhd</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestep</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ordering</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">C</span><span class="p"><span class="pre">,</span> </span><span class="pre">F</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'C'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/smoke3d/smoke3d.html#Smoke3D.export_raw_mhd"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Exports the 3d arrays to .raw files with corresponding .mhd meta files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>output_dir</strong> – The directory in which to save all files.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">

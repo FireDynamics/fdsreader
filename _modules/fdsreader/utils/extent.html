@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>fdsreader.utils.extent &mdash; fdsreader [fdsreader, version 1.2.3] documentation</title>
+  <title>fdsreader.utils.extent &mdash; fdsreader [fdsreader, version 1.2.4] documentation</title>
   
 
   
@@ -163,7 +163,7 @@
            <div itemprop="articleBody">
             
   <h1>Source code for fdsreader.utils.extent</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
 
@@ -191,14 +191,17 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extents</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_extents</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;Extent([</span><span class="si">{:.2f}</span><span class="s2">, </span><span class="si">{:.2f}</span><span class="s2">] x [</span><span class="si">{:.2f}</span><span class="s2">, </span><span class="si">{:.2f}</span><span class="s2">] x [</span><span class="si">{:.2f}</span><span class="s2">, </span><span class="si">{:.2f}</span><span class="s2">])&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_start</span><span class="p">,</span>
-                                                                                       <span class="bp">self</span><span class="o">.</span><span class="n">x_end</span><span class="p">,</span>
-                                                                                       <span class="bp">self</span><span class="o">.</span><span class="n">y_start</span><span class="p">,</span>
-                                                                                       <span class="bp">self</span><span class="o">.</span><span class="n">y_end</span><span class="p">,</span>
-                                                                                       <span class="bp">self</span><span class="o">.</span><span class="n">z_start</span><span class="p">,</span>
-                                                                                       <span class="bp">self</span><span class="o">.</span><span class="n">z_end</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;Extent([</span><span class="si">{:.2f}</span><span class="s2">, </span><span class="si">{:.2f}</span><span class="s2">] x [</span><span class="si">{:.2f}</span><span class="s2">, </span><span class="si">{:.2f}</span><span class="s2">] x [</span><span class="si">{:.2f}</span><span class="s2">, </span><span class="si">{:.2f}</span><span class="s2">])&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_end</span><span class="p">,</span>
+                                                                                       <span class="bp">self</span><span class="o">.</span><span class="n">y_start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_end</span><span class="p">,</span>
+                                                                                       <span class="bp">self</span><span class="o">.</span><span class="n">z_start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_end</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">]]):</span>
+        <span class="k">if</span> <span class="n">item</span> <span class="o">==</span> <span class="s1">&#39;x&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_end</span>
+        <span class="k">elif</span> <span class="n">item</span> <span class="o">==</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_end</span>
+        <span class="k">elif</span> <span class="n">item</span> <span class="o">==</span> <span class="s1">&#39;z&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z_end</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extents</span><span class="p">[</span><span class="n">item</span><span class="p">]</span>
 
     <span class="nd">@property</span>
