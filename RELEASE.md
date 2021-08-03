@@ -1,4 +1,6 @@
 ## Release History
+* 1.2.4
+    * Added to_global convenience function for non-uniform meshes
 * 1.2.3
     * Support for profile data (prof)
 * 1.2.2

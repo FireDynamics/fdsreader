@@ -1,4 +1,4 @@
-from typing import Tuple, List
+from typing import Tuple, List, Union
 
 from typing_extensions import Literal
 
@@ -26,14 +26,17 @@ class Extent:
         return self._extents == other._extents
 
     def __repr__(self, *args, **kwargs):
-        return "Extent([{:.2f}, {:.2f}] x [{:.2f}, {:.2f}] x [{:.2f}, {:.2f}])".format(self.x_start,
-                                                                                       self.x_end,
-                                                                                       self.y_start,
-                                                                                       self.y_end,
-                                                                                       self.z_start,
-                                                                                       self.z_end)
+        return "Extent([{:.2f}, {:.2f}] x [{:.2f}, {:.2f}] x [{:.2f}, {:.2f}])".format(self.x_start, self.x_end,
+                                                                                       self.y_start, self.y_end,
+                                                                                       self.z_start, self.z_end)
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: Union[int, Literal['x', 'y', 'z']]):
+        if item == 'x':
+            return self.x_start, self.x_end
+        elif item == 'y':
+            return self.y_start, self.y_end
+        elif item == 'z':
+            return self.z_start, self.z_end
         return self._extents[item]
 
     @property

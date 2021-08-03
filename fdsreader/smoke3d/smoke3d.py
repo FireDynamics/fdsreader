@@ -1,7 +1,7 @@
 import logging
 import os
 from copy import deepcopy
-from typing import Dict
+from typing import Dict, Literal
 import numpy as np
 
 from fdsreader.fds_classes import Mesh
@@ -69,14 +69,14 @@ class SubSmoke3D:
                         out_pos = 0
                         while i < nchars_out:
                             if rle_data[i] == mark:
-                                value = rle_data[i+1]
-                                repeats = rle_data[i+2]
+                                value = rle_data[i + 1]
+                                repeats = rle_data[i + 2]
                                 i += 3
                             else:
                                 value = rle_data[i]
                                 repeats = 1
                                 i += 1
-                            decoded_data[out_pos:out_pos+repeats] = value
+                            decoded_data[out_pos:out_pos + repeats] = value
                             out_pos += repeats
 
                         self._data[t, :, :, :] = decoded_data.reshape(data_shape, order='F')
@@ -125,6 +125,40 @@ class Smoke3D(np.lib.mixins.NDArrayOperatorsMixin):
         """Returns the :class:`SubSmoke` that contains data for the given mesh.
         """
         return self._subsmokes[mesh]
+
+    def export_raw_mhd(self, timestep: int, output_dir: str, ordering: Literal['C', 'F'] = 'C'):
+        """Exports the 3d arrays to .raw files with corresponding .mhd meta files.
+
+        :param output_dir: The directory in which to save all files.
+        """
+        for mesh, subsmoke in self._subsmokes.items():
+            filename = "smoke-" + self.quantity.name.lower() + "_mesh-" + mesh.id
+            filename = filename.replace(" ", "_")
+
+            data = subsmoke.data[timestep].astype(np.uint8)
+
+            if ordering == 'F':
+                data = data.T
+
+            data.tofile(os.path.join(output_dir, filename + ".raw"))
+
+            with open(os.path.join(output_dir, filename + ".mhd"), 'w') as metafile:
+                # spacing = [int(round(mesh.coordinates['x'][1] - mesh.coordinates['x'][0], 3)*1000),
+                #            int(round(mesh.coordinates['y'][1] - mesh.coordinates['y'][0], 3)*1000),
+                #            int(round(mesh.coordinates['z'][1] - mesh.coordinates['z'][0], 3)*1000)]
+                spacing = [mesh.coordinates['x'][1] - mesh.coordinates['x'][0],
+                           mesh.coordinates['y'][1] - mesh.coordinates['y'][0],
+                           mesh.coordinates['z'][1] - mesh.coordinates['z'][0]]
+                metafile.writelines(
+                    ["ObjectType = Image",
+                     "\nNDims = 3",
+                     "\nBinaryData = True",
+                     "\nBinaryDataByteOrderMSB = False",
+                     f"\nElementSpacing = {spacing[0]:.6} {spacing[1]:.6} {spacing[2]:.6}",
+                     f"\nDimSize = {subsmoke.data.shape[1]} {subsmoke.data.shape[2]} {subsmoke.data.shape[3]}",
+                     "\nElementType = MET_CHAR",
+                     f"\nElementDataFile = {filename + '.raw'}"
+                     "\n[Pixel Data]"])
 
     @property
     def vmax(self):

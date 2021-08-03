@@ -8,14 +8,16 @@ import fdsreader as fds
 
 
 def main():
-    sim = fds.Simulation("C:\\Users\\janv1\\Downloads\\rep_110751")
+    sim = fds.Simulation("./fds_steckler/")
+    sim = fds.Simulation("C:\\Users\\janv1\\Documents\\Unreal Projects\\TBRaymarchProject\\fds_data")
 
     # Select the seconds mesh (index counting starts at 0)
     mesh = sim.meshes[0]
     extent = mesh.extent
 
     # Get 3D smoke data for a specific quantity in one of the meshes
-    smoke = sim.smoke_3d.get_by_quantity("SOOT MASS FRACTION")
+    quantity = "Temperature"  # "SOOT MASS FRACTION"
+    smoke = sim.smoke_3d.get_by_quantity(quantity)
     data = smoke[mesh].data
 
     # Create 3D grid

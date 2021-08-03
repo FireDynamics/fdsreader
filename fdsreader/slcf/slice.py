@@ -306,13 +306,14 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         """
         coords = {'x': set(), 'y': set(), 'z': set()}
         for dim in ('x', 'y', 'z'):
-            for mesh in self._subslices.keys():
+            for mesh, slc in self._subslices.items():
                 co = mesh.coordinates[dim].copy()
                 # In case the slice is cell-centered, we will shift the coordinates by half a cell
                 # and remove the last coordinate
                 if self.cell_centered:
                     co = co[:-1]
                     co -= (co[1] - co[0]) / 2
+                co = co[np.where(np.logical_and(co >= slc.extent[dim][0], co <= slc.extent[dim][1]))]
                 coords[dim].update(co)
             coords[dim] = np.array(sorted(list(coords[dim])))
 
@@ -335,18 +336,26 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
     def sort_subslices_cartesian(self):
         """Returns all subslices sorted in cartesian coordinates (2D-slices only).
         """
-        assert self.type == '2D', "The sort_subslices_cartesian method only works on 2D-slices!"
-
         slices = list(self._subslices.values())
         slices_cart = [[slices[0]]]
         orientation = abs(slices[0].orientation)
+        if orientation == 0:
+            # 3D-slices have an orientation of 0, so we have to find the orientation ourself
+            if slices[0].extent.x_start == slices[1].extent.x_start:
+                orientation = 1
+            elif slices[0].extent.y_start == slices[1].extent.y_start:
+                orientation = 2
+            elif slices[0].extent.z_start == slices[1].extent.z_start:
+                orientation = 3
+
         if orientation == 1:  # x
             slices.sort(key=lambda p: (p.extent.y_start, p.extent.z_start))
         elif orientation == 2:  # y
             slices.sort(key=lambda p: (p.extent.x_start, p.extent.z_start))
-        elif orientation == 3:  # z
+        else:  # z
             slices.sort(key=lambda p: (p.extent.x_start, p.extent.y_start))
 
+        # Form a list of lists (2D-array) of the sorted slices
         if orientation == 1:
             for slc in slices[1:]:
                 if slc.extent.y_start == slices_cart[-1][-1].extent.y_start:
@@ -361,10 +370,10 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                     slices_cart.append([slc])
         return slices_cart
 
-    def to_global(self) -> np.ndarray:
+    def to_global_uniform(self) -> np.ndarray:
         """Creates a global 2D-numpy ndarray from all subslices (2D-slices only).
             Note: This method will only return valid output if evenly sized and spaced meshes were
-            used in the simulation. Other cases will require individual custom combination logic.
+            used in the simulation.
         """
         assert self.type == '2D', "The to_global method only works on 2D-slices!"
 
@@ -392,6 +401,53 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             dim1_pos += d1
             dim2_pos = 0
         return slc_array
+
+    def to_global_nonuniform(self) -> np.ndarray:
+        # The global grid will use the finest mesh as base and duplicate values of the coarser meshes
+        # Therefore we first find the finest mesh and calculate the step size in each dimension
+        coords = self.coordinates
+        step_sizes = {'x': coords['x'][-1] - coords['x'][0],
+                      'y': coords['y'][-1] - coords['y'][0],
+                      'z': coords['z'][-1] - coords['z'][0]}
+        step_sizes_inv = {'x': 0, 'y': 0, 'z': 0}
+        steps = dict()
+        for mesh in self._subslices.keys():
+            for dim in ('x', 'y', 'z'):
+                step_size = mesh.coordinates[dim][1] - mesh.coordinates[dim][0]
+                step_sizes[dim] = min(step_size, step_sizes[dim])
+                step_sizes_inv[dim] = max(step_size, step_sizes_inv[dim])
+
+        for dim in ('x', 'y', 'z'):
+            if step_sizes[dim] == 0:
+                step_sizes[dim] = np.inf
+            steps[dim] = max(
+                int((coords[dim][-1] - coords[dim][0]) / step_sizes[dim] + step_sizes_inv[dim] / step_sizes[dim]), 1)
+
+        grid = np.full((self.n_t, steps['x'], steps['y'], steps['z']), np.nan)
+
+        start_coordinates = {'x': coords['x'][0], 'y': coords['y'][0], 'z': coords['z'][0]}
+        start_idx = dict()
+        end_idx = dict()
+        for mesh, slc in self._subslices.items():
+            slc_data = slc.data
+            for axis in (0, 1, 2):
+                dim = ('x', 'y', 'z')[axis]
+                n_repeat = max(int((mesh.coordinates[dim][1] - mesh.coordinates[dim][0]) / step_sizes[dim]), 1)
+                start_idx[dim] = int((mesh.coordinates[dim][0] - start_coordinates[dim]) / step_sizes[dim])
+                end_idx[dim] = int((mesh.coordinates[dim][-1] - start_coordinates[dim]) / step_sizes[dim]) + n_repeat
+
+                if n_repeat > 1:
+                    slc_data = np.repeat(slc_data, n_repeat, axis=axis+1)
+
+            grid[:, start_idx['x']: end_idx['x'], start_idx['y']: end_idx['y'],
+            start_idx['z']: end_idx['z']] = slc_data.reshape(
+                (self.n_t, end_idx['x'] - start_idx['x'], end_idx['y'] - start_idx['y'], end_idx['z'] - start_idx['z']))
+
+        # Remove empty dimensions, but make sure to note remove the time dimension if there is only a single timestep
+        grid = np.squeeze(grid)
+        if len(grid.shape) == 2:
+            grid = grid[np.newaxis, :, :]
+        return grid
 
     @property
     def type(self) -> Literal['2D', '3D']:

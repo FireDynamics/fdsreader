@@ -894,7 +894,7 @@ class Simulation:
         for f in glob.glob(str(os.path.join(self.root_path, self.chid)) + "_prof*"):
             with open(f, 'r') as infile:
                 profile_id = infile.readline()
-                infile.readline()
+                infile.readline()  # Skip header
                 data: np.ndarray = np.genfromtxt(infile, delimiter=',', dtype=np.float32, autostrip=True).T
                 times = data[0]
                 npoints = data[1].astype(int)
