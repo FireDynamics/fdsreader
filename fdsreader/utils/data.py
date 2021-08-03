@@ -24,6 +24,14 @@ class Quantity:
     def __eq__(self, other):
         return self.name == other.name and self.short_name == other.short_name and self.unit == other.unit
 
+    @property
+    def quantity(self):
+        return self.name
+
+    @property
+    def label(self):
+        return self.short_name
+
     def __hash__(self):
         return hash(self.short_name)
 
