@@ -1,4 +1,6 @@
 ## Release History
+* 1.2.7
+    * Fixed issues with imports 
 * 1.2.6 
     * Modified smoke3d exporter to export 4d data instead of 3d
 * 1.2.5

@@ -1,7 +1,8 @@
 import logging
 import os
 from copy import deepcopy
-from typing import Dict, Literal
+from typing import Dict
+from typing_extensions import Literal
 import numpy as np
 
 from fdsreader.fds_classes import Mesh
