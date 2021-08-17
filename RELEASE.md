@@ -1,4 +1,6 @@
 ## Release History
+* 1.2.8
+    * Modified smoke3d exporter to export yaml instead of mhd
 * 1.2.7
     * Fixed issues with imports 
 * 1.2.6 
