@@ -52,7 +52,7 @@ class SubSmoke3D:
                 nx, ny, nz = int(header[3]), int(header[5]), int(header[7])
                 data_shape = (nx + 1, ny + 1, nz + 1)
 
-                self._data = np.empty((self.times.size,) + data_shape)
+                self._data = np.empty((self.times.size,) + data_shape, dtype=np.float32)
 
                 for t in range(self.times.size):
                     fdtype.read(infile, fdtype.FLOAT, 1)  # Skip time value
@@ -127,32 +127,27 @@ class Smoke3D(np.lib.mixins.NDArrayOperatorsMixin):
         """
         return self._subsmokes[mesh]
 
-    def export_raw(self, output_dir: str, bytesize: int, ordering: Literal['C', 'F'] = 'C'):
+    def export_raw(self, output_dir: str, ordering: Literal['C', 'F'] = 'C'):
         """Exports the 3d arrays to raw binary files with corresponding .yaml meta files.
 
         :param output_dir: The directory in which to save all files.
-        :param bytesize: The number of bytes used to save the data.
         :param ordering: Whether to write the data in C or Fortran ordering.
         """
-        if bytesize == 1:
-            dtype = np.uint8
-            dtype_str = "uchar"
-        elif bytesize == 2:
-            dtype = np.uint16
-            dtype_str = "ushort"
-        else:
-            dtype = np.uint32
-            dtype_str = "uint"
+        # Create all requested directories if they don't exist yet
+        from pathlib import Path
+        Path(output_dir).mkdir(parents=True, exist_ok=True)
 
-        meta = {"DataType": dtype_str, "Meshes": str(len(self._subsmokes)), "MeshData": list()}
+        meta = {"DataValMax": -100000.0, "DataValMin": 100000.0, "MeshNum": len(self._subsmokes), "Meshes": list()}
 
-        filename_base = "smoke-" + self.quantity.name.lower()
+        filename_base = ("smoke-" + self.quantity.name.lower()).replace(" ", "_").replace(".", "-")
         for mesh, subsmoke in self._subsmokes.items():
-            filename = filename_base + "_mesh-" + mesh.id
-            filename = filename.replace(" ", "_").replace(".", "-")
-            filename += ".dat"
+            mesh_id = mesh.id.replace(" ", "_").replace(".", "-")
+            filename = filename_base + "_mesh-" + mesh_id + ".dat"
 
-            data = subsmoke.data.astype(dtype)
+            data_max = np.max(subsmoke.data)
+            meta["DataValMax"] = 1000  # max(meta["DataValMax"], data_max)
+            meta["DataValMin"] = 0  # min(meta["DataValMin"], np.min(subsmoke.data))
+            data = (subsmoke.data * (255.0 / data_max)).astype(np.uint8)[:, :-1, :-1, :-1]
 
             with open(os.path.join(output_dir, filename), 'wb') as rawfile:
                 for d in data:
@@ -164,14 +159,16 @@ class Smoke3D(np.lib.mixins.NDArrayOperatorsMixin):
                        mesh.coordinates['x'][1] - mesh.coordinates['x'][0],
                        mesh.coordinates['y'][1] - mesh.coordinates['y'][0],
                        mesh.coordinates['z'][1] - mesh.coordinates['z'][0]]
-            meta["MeshData"].append({
-                "Mesh": mesh.id.replace(" ", "_").replace(".", "-"),
+            meta["Meshes"].append({
+                "Mesh": mesh_id,
                 "DataFile": filename,
                 "MeshPos": f"{mesh.coordinates['x'][0]:.6} {mesh.coordinates['y'][0]:.6} {mesh.coordinates['z'][0]:.6}",
                 "Spacing": f"{spacing[0]:.6} {spacing[1]:.6} {spacing[2]:.6} {spacing[3]:.6}",
-                "DimSize": f"{subsmoke.data.shape[0]} {subsmoke.data.shape[1]} {subsmoke.data.shape[2]} {subsmoke.data.shape[3]}"
+                "DimSize": f"{data.shape[0]} {data.shape[1]} {data.shape[2]} {data.shape[3]}"
             })
 
+        meta["DataValMax"] = float(meta["DataValMax"])
+        meta["DataValMin"] = float(meta["DataValMin"])
         import yaml
         with open(os.path.join(output_dir, filename_base + ".yaml"), 'w') as metafile:
             yaml.dump(meta, metafile)
