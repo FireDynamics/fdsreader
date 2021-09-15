@@ -287,6 +287,7 @@ class EvacCollection(FDSDataCollection):
     def _load_eff_data(self):
         file_path = self._base_path + ".eff"
         if not os.path.exists(file_path):
+            self._eff = None
             return
 
         with open(file_path, 'rb') as infile:

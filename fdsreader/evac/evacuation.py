@@ -66,7 +66,7 @@ class Evacuation:
         self.lower_bounds = {q.name: [] for q in self.quantities}
         self.upper_bounds = {q.name: [] for q in self.quantities}
 
-        self._init_callback = None
+        self._init_callback = lambda: None
 
     @property
     def id(self):

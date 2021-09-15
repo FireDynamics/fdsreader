@@ -1,4 +1,6 @@
 ## Release History
+* 1.2.10
+    * Fixed some edge cases for evac when no data existed 
 * 1.2.9
     * Bugfixes for smoke3d exporter 
 * 1.2.8
