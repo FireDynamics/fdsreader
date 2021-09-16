@@ -88,6 +88,12 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
         """
         return self._subplots[mesh]
 
+    def get_quantity_index(self, quantity: str):
+        """Returns the index of the quantity for the fourth dimension of the data array.
+        """
+        return next(i for i, q in enumerate(self.quantities) if
+                    q.name.lower() == quantity.lower() or q.short_name.lower() == quantity.lower())
+
     @implements(np.mean)
     def mean(self) -> np.ndarray:
         """Calculates the mean for each quantity individually of the whole Plot3D.

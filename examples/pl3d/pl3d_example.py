@@ -23,7 +23,7 @@ def main():
     points = np.stack((x.flatten(), y.flatten(), z.flatten()), axis=1)
 
     # Select a quantity
-    quantity_idx = 0
+    quantity_idx = pl_t1.get_quantity_index("Temperature")
     quantity = pl_t1.quantities[quantity_idx]
 
     # Get 3D data for a specific quantity in one of the meshes

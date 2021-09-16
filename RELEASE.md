@@ -1,4 +1,8 @@
 ## Release History
+* 1.2.12
+    * Added a convenience function for quantity filtering to pl3d
+* 1.2.11
+    * Finished the slcf exporter
 * 1.2.10
     * Fixed some edge cases for evac when no data existed 
 * 1.2.9
