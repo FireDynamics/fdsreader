@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>fdsreader.pl3d.pl3d &mdash; fdsreader [fdsreader, version 1.2.9] documentation</title>
+  <title>fdsreader.pl3d.pl3d &mdash; fdsreader [fdsreader, version 1.3.0] documentation</title>
   
 
   
@@ -252,6 +252,12 @@
         <span class="sd">&quot;&quot;&quot;Returns the :class:`SubPlot` that contains data for the given mesh.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="p">[</span><span class="n">mesh</span><span class="p">]</span>
+
+<div class="viewcode-block" id="Plot3D.get_quantity_index"><a class="viewcode-back" href="../../../pl3d.html#fdsreader.pl3d.pl3d.Plot3D.get_quantity_index">[docs]</a>    <span class="k">def</span> <span class="nf">get_quantity_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the index of the quantity for the fourth dimension of the data array.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">quantities</span><span class="p">)</span> <span class="k">if</span>
+                    <span class="n">q</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">quantity</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="n">q</span><span class="o">.</span><span class="n">short_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">quantity</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span></div>
 
 <div class="viewcode-block" id="Plot3D.mean"><a class="viewcode-back" href="../../../pl3d.html#fdsreader.pl3d.pl3d.Plot3D.mean">[docs]</a>    <span class="nd">@implements</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>

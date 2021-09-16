@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>FDSReader documentation! &mdash; fdsreader [fdsreader, version 1.2.9] documentation</title>
+  <title>FDSReader documentation! &mdash; fdsreader [fdsreader, version 1.3.0] documentation</title>
   
 
   
@@ -233,8 +233,8 @@
 <li><p><strong>isosurfaces</strong> – All defined isosurfaces combined into a <code class="xref py py-class docutils literal notranslate"><span class="pre">IsosurfaceCollection</span></code>.</p></li>
 <li><p><strong>particles</strong> – All defined particles combined into a <code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleCollection</span></code>.</p></li>
 <li><p><strong>evacs</strong> – All defined evacuations combined into a <code class="xref py py-class docutils literal notranslate"><span class="pre">EvacCollection</span></code>.</p></li>
-<li><p><strong>devices</strong> – List containing all :class:<a href="#id1"><span class="problematic" id="id2">`</span></a>Device`s defined in this simulation.</p></li>
-<li><p><strong>profiles</strong> – Dictionary mapping profile ids to the corresponding :class:<a href="#id3"><span class="problematic" id="id4">`</span></a>Profile`s defined in this simulation.</p></li>
+<li><p><strong>devices</strong> – List containing all <code class="xref py py-class docutils literal notranslate"><span class="pre">Device</span></code> s defined in this simulation.</p></li>
+<li><p><strong>profiles</strong> – Dictionary mapping profile ids to the corresponding <code class="xref py py-class docutils literal notranslate"><span class="pre">Profile</span></code> s defined in this simulation.</p></li>
 <li><p><strong>geoms</strong> – List containing all geometries (<code class="xref py py-class docutils literal notranslate"><span class="pre">Geometry</span></code>) defined in this simulation.</p></li>
 <li><p><strong>geom_data</strong> – All geometry data by quantity combined into a <code class="xref py py-class docutils literal notranslate"><span class="pre">GeometryCollection</span></code>.</p></li>
 <li><p><strong>cpu</strong> – Dictionary mapping .csv header keys to numpy arrays containing cpu data.</p></li>
@@ -370,7 +370,7 @@ If there are multiple slices with the same distance, a random one will be select
 <dd><dl class="simple">
 <dt>Slice file data container including metadata. Consists of multiple subslices, one for each</dt><dd><p>mesh the slice cuts through. In case a slice cuts right through the border of two meshes, the generated data
 would be duplicated. For edge-centered slices a random of both generated slices will be discarded as the data
-is completely identical. For cell-centered slices the data of both slices will be saved as :class:<a href="#id5"><span class="problematic" id="id6">`</span></a>SubSlice`s,
+is completely identical. For cell-centered slices the data of both slices will be saved as <code class="xref py py-class docutils literal notranslate"><span class="pre">SubSlice</span></code> s,
 therefore it might seem as if all slices would be duplicated, in reality however the slices might contain
 different data.</p>
 </dd>
@@ -1468,7 +1468,7 @@ A value of 0 indicates to no filter.</p></li>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>extent</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">Extent</span></code> object containing 3-dimensional extent information.</p></li>
 <li><p><strong>bound_indices</strong> – Indices used to define obstruction bounds in terms of mesh locations.</p></li>
-<li><p><strong>side_surfaces</strong> – Tuple of six :class:<a href="#id7"><span class="problematic" id="id8">`</span></a>Surface`s for each side of the cuboid.</p></li>
+<li><p><strong>side_surfaces</strong> – Tuple of six <code class="xref py py-class docutils literal notranslate"><span class="pre">Surface</span></code> s for each side of the cuboid.</p></li>
 <li><p><strong>hide_times</strong> – List with points in time from when on the SubObstruction will be hidden.</p></li>
 <li><p><strong>show_times</strong> – List with points in time from when on the SubObstruction will be shown.</p></li>
 </ul>
@@ -2160,10 +2160,13 @@ calculated for this Plot3D with the corresponding short_name and unit.</p></li>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_cache</span></code>()</p></td>
 <td><p>Remove all data from the internal cache that has been loaded so far to free memory.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean</span></code>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_quantity_index</span></code>(quantity)</p></td>
+<td><p>Returns the index of the quantity for the fourth dimension of the data array.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean</span></code>()</p></td>
 <td><p>Calculates the mean for each quantity individually of the whole Plot3D.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">std</span></code>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">std</span></code>()</p></td>
 <td><p>Calculates the standard deviation for each quantity individually of the whole Plot3D.</p></td>
 </tr>
 </tbody>
@@ -2172,6 +2175,12 @@ calculated for this Plot3D with the corresponding short_name and unit.</p></li>
 <dt>
 <code class="sig-name descname"><span class="pre">clear_cache</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/pl3d/pl3d.html#Plot3D.clear_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Remove all data from the internal cache that has been loaded so far to free memory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname"><span class="pre">get_quantity_index</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/pl3d/pl3d.html#Plot3D.get_quantity_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Returns the index of the quantity for the fourth dimension of the data array.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -2275,7 +2284,7 @@ calculated for this Plot3D with the corresponding short_name and unit.</p></li>
 <dt>
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.smoke3d.Smoke3DCollection.</span></code><code class="sig-name descname"><span class="pre">Smoke3DCollection</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">smoke3ds</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.smoke3d.smoke3d.Smoke3D</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/smoke3d/Smoke3DCollection.html#Smoke3DCollection"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Collection of <code class="xref py py-class docutils literal notranslate"><span class="pre">Smoke3D</span></code> objects. Offers extensive functionality for filtering and
-using Smoke3Ds as well as its subclasses such as <code class="xref py py-class docutils literal notranslate"><span class="pre">SubSmoke3D</span></code>.</p>
+using Smoke3Ds as well as its subclasses such as <code class="xref py py-class docutils literal notranslate"><span class="pre">SubSmoke3D</span></code> .</p>
 <p><strong>Methods:</strong></p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -2284,7 +2293,7 @@ using Smoke3Ds as well as its subclasses such as <code class="xref py py-class d
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_by_quantity</span></code>(quantity)</p></td>
-<td><p>Gets the :class:<a href="#id9"><span class="problematic" id="id10">`</span></a>Smoke3D`s with a specific quantity.</p></td>
+<td><p>Gets the :class:<a href="#id1"><span class="problematic" id="id2">`</span></a>Smoke3D`s with a specific quantity.</p></td>
 </tr>
 </tbody>
 </table>
@@ -2303,7 +2312,7 @@ using Smoke3Ds as well as its subclasses such as <code class="xref py py-class d
 <dl class="py method">
 <dt>
 <code class="sig-name descname"><span class="pre">get_by_quantity</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">,</span> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/smoke3d/Smoke3DCollection.html#Smoke3DCollection.get_by_quantity"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Gets the :class:<a href="#id11"><span class="problematic" id="id12">`</span></a>Smoke3D`s with a specific quantity.</p>
+<dd><p>Gets the :class:<a href="#id3"><span class="problematic" id="id4">`</span></a>Smoke3D`s with a specific quantity.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -2990,6 +2999,165 @@ timestep.</p>
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">quantity</span></code></dt>
 <dd></dd></dl>
 
+</dd></dl>
+
+</div>
+<div class="section" id="fds-classes">
+<h2>FDS classes<a class="headerlink" href="#fds-classes" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.fds_classes.mesh.</span></code><code class="sig-name descname"><span class="pre">Mesh</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coordinates</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">x</span><span class="p"><span class="pre">,</span> </span><span class="pre">y</span><span class="p"><span class="pre">,</span> </span><span class="pre">z</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extents</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">x</span><span class="p"><span class="pre">,</span> </span><span class="pre">y</span><span class="p"><span class="pre">,</span> </span><span class="pre">z</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mesh_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/fds_classes/mesh.html#Mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>3-dimensional Mesh of fixed, defined size.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coordinates</strong> – Coordinate values for each of the 3 dimension.</p></li>
+<li><p><strong>dimensions</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">Dimension</span></code> describing the size of the 3 dimensions regarding indices.</p></li>
+<li><p><strong>extent</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">Extent</span></code> object containing 3-dimensional extent information.</p></li>
+<li><p><strong>n</strong> – Number of elements for each of the 3 dimensions.</p></li>
+<li><p><strong>n_size</strong> – Total number of blocks in this mesh.</p></li>
+<li><p><strong>id</strong> – Mesh id/short_name assigned to this mesh.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>coordinates</strong> – Coordinate values of the three axes.</p></li>
+<li><p><strong>extents</strong> – Extent of the mesh in each dimension.</p></li>
+<li><p><strong>mesh_id</strong> – ID of this mesh.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt>
+<code class="sig-name descname"><span class="pre">coordinate_to_index</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coordinate</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="p"><span class="pre">…</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimension</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">1</span><span class="p"><span class="pre">,</span> </span><span class="pre">2</span><span class="p"><span class="pre">,</span> </span><span class="pre">3</span><span class="p"><span class="pre">,</span> </span><span class="pre">x</span><span class="p"><span class="pre">,</span> </span><span class="pre">y</span><span class="p"><span class="pre">,</span> </span><span class="pre">z</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="p"><span class="pre">…</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">('x',</span> <span class="pre">'y',</span> <span class="pre">'z')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_centered</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="p"><span class="pre">…</span></span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="_modules/fdsreader/fds_classes/mesh.html#Mesh.coordinate_to_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Finds the nearest point in the mesh’s grid and returns its indices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coordinate</strong> – Tuple of 3 floats. If the dimension parameter is supplied, up to 2
+dimensions can be left out from the tuple.</p></li>
+<li><p><strong>dimension</strong> – The dimensions in which to return the indices (1=x, 2=y, 3=z).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname"><span class="pre">get_boundary_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/fds_classes/mesh.html#Mesh.get_boundary_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname"><span class="pre">get_obstruction_mask</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cell_centered</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.ndarray</span><a class="reference internal" href="_modules/fdsreader/fds_classes/mesh.html#Mesh.get_obstruction_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Marks all cells which are blocked by an obstruction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>times</strong> – All timesteps of the simulation.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A 4-dimensional array with time as first and x,y,z as last dimensions. The array depends on time as
+as obstructions may be hidden as specific points in time.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname"><span class="pre">get_obstruction_mask_slice</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subslice</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/fds_classes/mesh.html#Mesh.get_obstruction_mask_slice"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Marks all cells of a single slice which are blocked by an obstruction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A 4-dimensional array with time as first and x,y,z as last dimensions. The array depends on time as
+as obstructions may be hidden as specific points in time.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt>
+<code class="sig-name descname"><span class="pre">id</span></code><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.fds_classes.surface.</span></code><code class="sig-name descname"><span class="pre">Surface</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmpm</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">material_emissivity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">surface_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texture_width</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texture_height</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texture_map</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rgb</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transparency</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/fds_classes/surface.html#Surface"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><dl class="simple">
+<dt>Surface objects describe what bounding surfaces consist of. Boundary conditions for</dt><dd><p>obstructions and vents are prescribed by referencing the appropriate surface.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – Name of the surface.</p></li>
+<li><p><strong>material_emissivity</strong> – Emissivity of the material.</p></li>
+<li><p><strong>surface_type</strong> – Type of the surface.</p></li>
+</ul>
+</dd>
+</dl>
+<p>:ivar texture_width:Width of the texture of the surface.
+:ivar texture_height: Height of the texture of the surface.
+:ivar texture_map: Path to the texture map used for the surface.
+:ivar rgb: Color of the surface in form of a 3-element tuple.
+:ivar transparency: Transparency of the color (alpha channel).</p>
+<dl class="py method">
+<dt>
+<code class="sig-name descname"><span class="pre">id</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/fds_classes/surface.html#Surface.id"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.fds_classes.ventilation.</span></code><code class="sig-name descname"><span class="pre">SubVentilation</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.fds_classes.mesh.Mesh</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extent</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.utils.extent.Extent</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/fds_classes/ventilation.html#SubVentilation"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Part of a <code class="xref py py-class docutils literal notranslate"><span class="pre">Ventilation</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>extent</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">Extent</span></code> object containing 3-dimensional extent information.</p></li>
+<li><p><strong>mesh</strong> – The mesh that contains this part of the ventilation.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">fdsreader.fds_classes.ventilation.</span></code><code class="sig-name descname"><span class="pre">Ventilation</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">surface</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.fds_classes.surface.Surface</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bound_indices</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_index</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">draw_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rgba</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">(</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texture_origin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">(</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">circular_vent_origin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">(</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/fds_classes/ventilation.html#Ventilation"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><dl class="simple">
+<dt>A ventilation can be used to model components of the ventilation system in a building, like a</dt><dd><p>diffuser or a return.
+A ventilation can also be used as a means of applying a particular boundary condition to a
+rectangular patch on a solid surface.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> – ID of the ventilation.</p></li>
+<li><p><strong>extent</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">Extent</span></code> object containing 3-dimensional extent information.</p></li>
+<li><p><strong>surface</strong> – Surface object used for the ventilation.</p></li>
+<li><p><strong>bound_indices</strong> – Indices used to define ventilation bounds in terms of mesh locations.</p></li>
+<li><p><strong>color_index</strong> – Type of coloring used to color ventilation.
+-99 or +99 - use default color
+-n or +n - use n’th palette color
+&lt; 0 - do not draw boundary file over vent
+&gt; 0 - draw boundary file over vent</p></li>
+<li><p><strong>draw_type</strong> – Defines how the ventilation is drawn.
+0 - solid surface
+2 - outline
+-2 - hidden</p></li>
+<li><p><strong>open_time</strong> – Point in time the ventilation should open.</p></li>
+<li><p><strong>close_time</strong> – Point in time the ventilation should close.</p></li>
+<li><p><strong>rgba</strong> – Color of the ventilation in form of a 4-element tuple (ranging from 0.0 to 1.0).</p></li>
+<li><p><strong>texture_origin</strong> – Origin position of the texture provided by the surface. When the texture does have a pattern,
+for example windows or bricks, the texture_origin specifies where the pattern should begin.</p></li>
+<li><p><strong>circular_vent_origin</strong> – Origin of the ventilation relative to bounding box.</p></li>
+<li><p><strong>radius</strong> – Radius of the ventilation circle.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </div>

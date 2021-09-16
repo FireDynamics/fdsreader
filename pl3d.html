@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Plot3D files &mdash; fdsreader [fdsreader, version 1.2.9] documentation</title>
+  <title>Plot3D files &mdash; fdsreader [fdsreader, version 1.3.0] documentation</title>
   
 
   
@@ -297,10 +297,13 @@ calculated for this Plot3D with the corresponding short_name and unit.</p></li>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_cache</span></code>()</p></td>
 <td><p>Remove all data from the internal cache that has been loaded so far to free memory.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean</span></code>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_quantity_index</span></code>(quantity)</p></td>
+<td><p>Returns the index of the quantity for the fourth dimension of the data array.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean</span></code>()</p></td>
 <td><p>Calculates the mean for each quantity individually of the whole Plot3D.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">std</span></code>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">std</span></code>()</p></td>
 <td><p>Calculates the standard deviation for each quantity individually of the whole Plot3D.</p></td>
 </tr>
 </tbody>
@@ -309,6 +312,12 @@ calculated for this Plot3D with the corresponding short_name and unit.</p></li>
 <dt>
 <code class="sig-name descname"><span class="pre">clear_cache</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/pl3d/pl3d.html#Plot3D.clear_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Remove all data from the internal cache that has been loaded so far to free memory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
+<code class="sig-name descname"><span class="pre">get_quantity_index</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/pl3d/pl3d.html#Plot3D.get_quantity_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Returns the index of the quantity for the fourth dimension of the data array.</p>
 </dd></dl>
 
 <dl class="py method">
