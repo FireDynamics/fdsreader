@@ -149,7 +149,7 @@ class SubObstruction:
 
     :ivar extent: :class:`Extent` object containing 3-dimensional extent information.
     :ivar bound_indices: Indices used to define obstruction bounds in terms of mesh locations.
-    :ivar side_surfaces: Tuple of six :class:`Surface`s for each side of the cuboid.
+    :ivar side_surfaces: Tuple of six :class:`Surface` s for each side of the cuboid.
     :ivar hide_times: List with points in time from when on the SubObstruction will be hidden.
     :ivar show_times: List with points in time from when on the SubObstruction will be shown.
     """

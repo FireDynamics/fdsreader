@@ -147,7 +147,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
     """Slice file data container including metadata. Consists of multiple subslices, one for each
         mesh the slice cuts through. In case a slice cuts right through the border of two meshes, the generated data
         would be duplicated. For edge-centered slices a random of both generated slices will be discarded as the data
-        is completely identical. For cell-centered slices the data of both slices will be saved as :class:`SubSlice`s,
+        is completely identical. For cell-centered slices the data of both slices will be saved as :class:`SubSlice` s,
         therefore it might seem as if all slices would be duplicated, in reality however the slices might contain
         different data.
 

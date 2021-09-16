@@ -6,7 +6,7 @@ from fdsreader.utils.data import FDSDataCollection, Quantity
 
 class Smoke3DCollection(FDSDataCollection):
     """Collection of :class:`Smoke3D` objects. Offers extensive functionality for filtering and
-        using Smoke3Ds as well as its subclasses such as :class:`SubSmoke3D`.
+        using Smoke3Ds as well as its subclasses such as :class:`SubSmoke3D` .
     """
 
     def __init__(self, *smoke3ds: Iterable[Smoke3D]):

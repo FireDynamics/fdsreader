@@ -1,4 +1,6 @@
 ## Release History
+* 1.3.0
+    * Fixed documentation 
 * 1.2.12
     * Added a convenience function for quantity filtering to pl3d
 * 1.2.11

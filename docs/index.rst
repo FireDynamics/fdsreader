@@ -16,6 +16,7 @@ FDSReader documentation!
    devc
    evac
    quantity
+   fds classes
    utils
 
 .. include::  simulation.rst
@@ -29,4 +30,5 @@ FDSReader documentation!
 .. include::  devc.rst
 .. include::  evac.rst
 .. include::  quantity.rst
+.. include::  fds_classes.rst
 .. include::  utils.rst

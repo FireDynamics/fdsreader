@@ -43,8 +43,8 @@ class Simulation:
     :ivar isosurfaces: All defined isosurfaces combined into a :class:`IsosurfaceCollection`.
     :ivar particles: All defined particles combined into a :class:`ParticleCollection`.
     :ivar evacs: All defined evacuations combined into a :class:`EvacCollection`.
-    :ivar devices: List containing all :class:`Device`s defined in this simulation.
-    :ivar profiles: Dictionary mapping profile ids to the corresponding :class:`Profile`s defined in this simulation.
+    :ivar devices: List containing all :class:`Device` s defined in this simulation.
+    :ivar profiles: Dictionary mapping profile ids to the corresponding :class:`Profile` s defined in this simulation.
     :ivar geoms: List containing all geometries (:class:`Geometry`) defined in this simulation.
     :ivar geom_data: All geometry data by quantity combined into a :class:`GeometryCollection`.
     :ivar cpu: Dictionary mapping .csv header keys to numpy arrays containing cpu data.
