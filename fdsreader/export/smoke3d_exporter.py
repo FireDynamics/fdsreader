@@ -1,4 +1,3 @@
-import yaml
 import os
 from pathlib import Path
 import numpy as np
@@ -54,4 +53,5 @@ def export_smoke_raw(smoke3d: Smoke3D, output_dir: str, ordering: Literal['C', '
         })
 
     with open(os.path.join(output_dir, filename_base + ".yaml"), 'w') as metafile:
+        import yaml
         yaml.dump(meta, metafile)

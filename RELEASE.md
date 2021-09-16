@@ -1,4 +1,6 @@
 ## Release History
+* 1.3.1
+    * Fixed imports 
 * 1.3.0
     * Fixed documentation 
 * 1.2.12
