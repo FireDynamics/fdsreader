@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>fdsreader.bndf.obstruction &mdash; fdsreader [fdsreader, version 1.3.0] documentation</title>
+  <title>fdsreader.bndf.obstruction &mdash; fdsreader [fdsreader, version 1.3.2] documentation</title>
   
 
   
@@ -342,6 +342,10 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">LAZY_LOAD</span><span class="p">:</span>
             <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="p">[</span><span class="n">bid</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">has_boundary_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span>
+
 <div class="viewcode-block" id="SubObstruction.get_data"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.SubObstruction.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">]):</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">quantity</span><span class="p">)</span> <span class="o">==</span> <span class="n">Quantity</span><span class="p">:</span>
             <span class="n">quantity</span> <span class="o">=</span> <span class="n">quantity</span><span class="o">.</span><span class="n">name</span>
@@ -469,7 +473,7 @@
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">quantity</span><span class="p">)</span> <span class="o">==</span> <span class="n">Quantity</span><span class="p">:</span>
             <span class="n">quantity</span> <span class="o">=</span> <span class="n">quantity</span><span class="o">.</span><span class="n">name</span>
 
-        <span class="n">ret</span> <span class="o">=</span> <span class="p">[</span><span class="n">subobst</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">quantity</span><span class="p">)</span> <span class="k">for</span> <span class="n">subobst</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subobstructions</span><span class="p">]</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">[</span><span class="n">subobst</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">quantity</span><span class="p">)</span> <span class="k">for</span> <span class="n">subobst</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subobstructions</span> <span class="k">if</span> <span class="n">subobst</span><span class="o">.</span><span class="n">has_boundary_data</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">ret</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">bndf</span> <span class="k">for</span> <span class="n">bndf</span> <span class="ow">in</span> <span class="n">ret</span> <span class="k">if</span> <span class="n">orientation</span> <span class="ow">in</span> <span class="n">bndf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span></div>
@@ -478,7 +482,7 @@
     <span class="k">def</span> <span class="nf">has_boundary_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Whether boundary data has been output in the simulation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_subobstructions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_boundary_data</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">subobst</span><span class="o">.</span><span class="n">has_boundary_data</span> <span class="k">for</span> <span class="n">subobst</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subobstructions</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Obstruction.clear_cache"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Obstruction.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
