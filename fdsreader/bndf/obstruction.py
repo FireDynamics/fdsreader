@@ -177,6 +177,10 @@ class SubObstruction:
         if not settings.LAZY_LOAD:
             _ = self._boundary_data[bid].data
 
+    @property
+    def has_boundary_data(self):
+        return len(self._boundary_data) != 0
+
     def get_data(self, quantity: Union[str, Quantity]):
         if type(quantity) == Quantity:
             quantity = quantity.name
@@ -304,7 +308,7 @@ class Obstruction:
         if type(quantity) == Quantity:
             quantity = quantity.name
 
-        ret = [subobst.get_data(quantity) for subobst in self._subobstructions]
+        ret = [subobst.get_data(quantity) for subobst in self._subobstructions if subobst.has_boundary_data]
         if orientation == 0:
             return ret
         return [bndf for bndf in ret if orientation in bndf.data.keys()]
@@ -313,7 +317,7 @@ class Obstruction:
     def has_boundary_data(self):
         """Whether boundary data has been output in the simulation.
         """
-        return len(self._subobstructions[0]._boundary_data) != 0
+        return any(subobst.has_boundary_data for subobst in self._subobstructions)
 
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory.

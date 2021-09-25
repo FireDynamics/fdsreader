@@ -1,4 +1,6 @@
 ## Release History
+* 1.3.2
+    * Fixed a bndf bug when no data existed for one or more Subobstructions
 * 1.3.1
     * Fixed imports 
 * 1.3.0

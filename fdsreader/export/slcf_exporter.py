@@ -13,9 +13,9 @@ def export_slcf_raw(slc: Slice, output_dir: str, ordering: Literal['C', 'F'] = '
     :param ordering: Whether to write the data in C or Fortran ordering.
     """
     slc2d = slc.type == '2D'
-    meta = {"2D": slc2d, "DataValMax": float(slc.vmax), "DataValMin": float(slc.vmin), "MeshNum": len(slc.subslices), "Meshes": list()}
+    meta = {"DataValMax": float(slc.vmax), "DataValMin": float(slc.vmin), "MeshNum": len(slc.subslices), "Meshes": list()}
 
-    filename_base = ("slice" + ("2D-" if slc.type else "3D-") + slc.quantity.name.lower()).replace(" ", "_").replace(".", "-")
+    filename_base = ("slice" + ("2D-" if slc2d else "3D-") + slc.quantity.name.lower()).replace(" ", "_").replace(".", "-")
     # Create all requested directories if they don't exist yet
     Path(os.path.join(output_dir, filename_base + "-data")).mkdir(parents=True, exist_ok=True)
 
