@@ -924,7 +924,7 @@ class Simulation:
     def _load_DEVC_data(self, file_path: str):
         with open(file_path, 'r') as infile:
             units = infile.readline().split(',')
-            names = [name.replace('"', '').replace('\n', '').strip() for name in infile.readline().split(',')]
+            names = [name.replace('"', '').replace('\n', '').strip() for name in infile.readline().split(',"')]
             values = np.genfromtxt(infile, delimiter=',', dtype=np.float32, autostrip=True)
             for k in range(len(names)):
                 devc = self.devices[names[k]]
@@ -938,7 +938,7 @@ class Simulation:
         if os.path.exists(line_path):
             with open(line_path, 'r') as infile:
                 units = infile.readline()
-                names = [name.replace('"', '').replace('\n', '').strip() for name in infile.readline().split(',')]
+                names = [name.replace('"', '').replace('\n', '').strip() for name in infile.readline().split(',"')]
                 data = np.genfromtxt(infile, delimiter=',', dtype=np.float32, autostrip=True)
                 for k, key in enumerate(names):
                     if key in self.devices:
@@ -953,7 +953,7 @@ class Simulation:
     def _load_HRR_data(self, file_path: str) -> Dict[str, np.ndarray]:
         with open(file_path, 'r') as infile:
             infile.readline()
-            keys = infile.readline().split(',')
+            keys = [name.replace('"', '').replace('\n', '').strip() for name in infile.readline().split(',')]
             values = np.genfromtxt(infile, delimiter=',', dtype=np.float32, autostrip=True)
             return self._transform_csv_data(keys, values, [np.float32] * len(keys))
 
@@ -961,7 +961,7 @@ class Simulation:
     def _load_step_data(self, file_path: str) -> Dict[str, np.ndarray]:
         with open(file_path, 'r') as infile:
             infile.readline()
-            keys = infile.readline().split(',')
+            keys = [name.replace('"', '').replace('\n', '').strip() for name in infile.readline().split(',')]
             dtypes = [np.float32] * len(keys)
             dtypes[0] = int
             dtypes[1] = np.dtype("datetime64[ms]")
@@ -973,7 +973,7 @@ class Simulation:
         file_path = os.path.join(self.root_path, self.chid + "_cpu.csv")
         if os.path.exists(file_path):
             with open(file_path, 'r') as infile:
-                keys = infile.readline().split(",")
+                keys = [name.replace('"', '').replace('\n', '').strip() for name in infile.readline().split(',')]
                 dtypes = [np.float32] * len(keys)
                 dtypes[0] = int
                 values = np.genfromtxt(infile, delimiter=',', dtype=dtypes, autostrip=True)
