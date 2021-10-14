@@ -2,6 +2,8 @@ import os
 from pathlib import Path
 import numpy as np
 from typing_extensions import Literal
+from pathos.pools import ProcessPool as Pool
+from multiprocess import Lock, Manager
 from ..smoke3d import Smoke3D
 
 
@@ -16,23 +18,29 @@ def export_smoke_raw(smoke3d: Smoke3D, output_dir: str, ordering: Literal['C', '
     # Create all requested directories if they don't exist yet
     Path(os.path.join(output_dir, filename_base + "-data")).mkdir(parents=True, exist_ok=True)
 
-    meta = {"DataValMax": -100000.0, "DataValMin": 100000.0, "MeshNum": len(smoke3d.subsmokes), "Meshes": list()}
+    meta = {"DataValMax": -100000.0, "DataValMin": 100000.0, "ScaleFactor": 1, "MeshNum": len(smoke3d.subsmokes),
+            "Quantity": smoke3d.quantity.name}
 
     for subsmoke in smoke3d._subsmokes.values():
         meta["DataValMax"] = max(meta["DataValMax"], np.max(subsmoke.data))
         meta["DataValMin"] = min(meta["DataValMin"], np.min(subsmoke.data))
     meta["DataValMax"] = float(meta["DataValMax"])
     meta["DataValMin"] = float(meta["DataValMin"])
+    meta["ScaleFactor"] = 255.0 / meta["DataValMax"]
 
     # Abort if no useful data is available
     if meta["DataValMax"] <= 0:
         return
 
-    for mesh, subsmoke in smoke3d._subsmokes.items():
+    m = Manager()
+    meta["Meshes"] = m.list()
+    lock = m.Lock()
+
+    def worker(mesh, subsmoke):
         mesh_id = mesh.id.replace(" ", "_").replace(".", "-")
         filename = filename_base + "_mesh-" + mesh_id + ".dat"
 
-        data = (subsmoke.data * (255.0 / meta["DataValMax"])).astype(np.uint8)
+        data = (subsmoke.data * meta["ScaleFactor"]).astype(np.uint8)
 
         with open(os.path.join(output_dir, filename_base + "-data", filename), 'wb') as rawfile:
             for d in data:
@@ -44,13 +52,18 @@ def export_smoke_raw(smoke3d: Smoke3D, output_dir: str, ordering: Literal['C', '
                    mesh.coordinates['x'][1] - mesh.coordinates['x'][0],
                    mesh.coordinates['y'][1] - mesh.coordinates['y'][0],
                    mesh.coordinates['z'][1] - mesh.coordinates['z'][0]]
-        meta["Meshes"].append({
-            "Mesh": mesh_id,
-            "DataFile": os.path.join(filename_base + "-data", filename),
-            "MeshPos": f"{mesh.coordinates['x'][0]:.6} {mesh.coordinates['y'][0]:.6} {mesh.coordinates['z'][0]:.6}",
-            "Spacing": f"{spacing[0]:.6} {spacing[1]:.6} {spacing[2]:.6} {spacing[3]:.6}",
-            "DimSize": f"{data.shape[0]} {data.shape[1]} {data.shape[2]} {data.shape[3]}"
-        })
+        with lock:
+            meta["Meshes"].append({
+                "Mesh": mesh_id,
+                "DataFile": os.path.join(filename_base + "-data", filename),
+                "MeshPos": f"{mesh.coordinates['x'][0]:.6} {mesh.coordinates['y'][0]:.6} {mesh.coordinates['z'][0]:.6}",
+                "Spacing": f"{spacing[0]:.6} {spacing[1]:.6} {spacing[2]:.6} {spacing[3]:.6}",
+                "DimSize": f"{data.shape[0]} {data.shape[1]} {data.shape[2]} {data.shape[3]}"
+            })
+
+    Pool(8).map(lambda args: worker(*args), list(smoke3d._subsmokes.items()))
+
+    meta["Meshes"] = list(meta["Meshes"])
 
     with open(os.path.join(output_dir, filename_base + ".yaml"), 'w') as metafile:
         import yaml

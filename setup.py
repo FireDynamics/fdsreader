@@ -4,7 +4,7 @@ import setuptools
 
 base_dir = os.path.dirname(os.path.realpath(__file__))
 
-with open(os.path.join(base_dir, "README.md"), 'r') as f:
+with open(os.path.join(base_dir, "README.md"), 'r', encoding="utf-8") as f:
     long_description = f.read()
 
 setuptools.setup(

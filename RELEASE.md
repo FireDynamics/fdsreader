@@ -1,5 +1,7 @@
 ## Release History
 
+* 1.3.4
+    * Fixing an issue with pip when the working directory contains chinese characters 
 * 1.3.3
     * Fixed the reading of the column names of HRR/CPU data
 * 1.3.2
