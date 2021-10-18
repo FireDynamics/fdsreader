@@ -1,5 +1,8 @@
 ## Release History
 
+* 1.3.5
+    * Added obst/bndf exporter
+    * Fixed some slcf bugs
 * 1.3.4
     * Fixing an issue with pip when the working directory contains chinese characters 
 * 1.3.3

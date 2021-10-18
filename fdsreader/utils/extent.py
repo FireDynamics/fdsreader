@@ -30,14 +30,14 @@ class Extent:
                                                                                        self.y_start, self.y_end,
                                                                                        self.z_start, self.z_end)
 
-    def __getitem__(self, item: Union[int, Literal['x', 'y', 'z']]):
+    def __getitem__(self, item: Union[Literal['x', 'y', 'z', 1, 2, 3]]):
         if item == 'x':
             return self.x_start, self.x_end
         elif item == 'y':
             return self.y_start, self.y_end
         elif item == 'z':
             return self.z_start, self.z_end
-        return self._extents[item]
+        return self._extents[item - 1]
 
     @property
     def x_start(self):

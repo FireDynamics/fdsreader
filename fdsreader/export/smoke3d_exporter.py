@@ -18,7 +18,7 @@ def export_smoke_raw(smoke3d: Smoke3D, output_dir: str, ordering: Literal['C', '
     # Create all requested directories if they don't exist yet
     Path(os.path.join(output_dir, filename_base + "-data")).mkdir(parents=True, exist_ok=True)
 
-    meta = {"DataValMax": -100000.0, "DataValMin": 100000.0, "ScaleFactor": 1, "MeshNum": len(smoke3d.subsmokes),
+    meta = {"DataValMax": -100000., "DataValMin": 100000., "ScaleFactor": 1, "MeshNum": len(smoke3d.subsmokes),
             "Quantity": smoke3d.quantity.name}
 
     for subsmoke in smoke3d._subsmokes.values():

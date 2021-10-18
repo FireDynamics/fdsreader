@@ -58,7 +58,7 @@ class SubSlice:
         return shape
 
     @property
-    def orientation(self) -> Literal[1, 2, 3]:
+    def orientation(self) -> Literal[0, 1, 2, 3]:
         """Orientation [1,2,3] of the slice in case it is 2D, 0 otherwise.
         """
         return self._parent_slice.orientation
@@ -234,6 +234,60 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             for _, subslice in self._subslices.items():
                 _ = subslice.data
 
+    def get_2d_slice_from_3d(self, slice_direction: Literal['x', 'y', 'z', 1, 2, 3], value: float):
+        """Creates a 2D-Slice from a 3D-Slice by slicing the Slice.
+        :param slice_direction: The direction in which to cut through the slice.
+        :param value: The position at which to start cutting through the slice.
+        """
+        if type(slice_direction) == str:
+            slice_direction = {'x': 1, 'y': 2, 'z': 3}[slice_direction]
+        new_slice = deepcopy(self)
+
+        to_remove = list()
+        for mesh in new_slice._subslices.keys():
+            subslc = new_slice._subslices[mesh]
+            # Check if the new slice cuts through the subslice
+            if subslc.extent[slice_direction - 1][0] <= value <= subslc.extent[slice_direction - 1][1]:
+                shape = subslc.dimension.shape(cell_centered=self.cell_centered)
+                indices = [slice(subslc.n_t)]
+                cut_index = mesh.coordinate_to_index((value,), (('x', 'y', 'z')[slice_direction - 1],),
+                                                     cell_centered=self.cell_centered)
+
+                if subslc.dimension.x == 1 or subslc.dimension.y == 1 or subslc.dimension.z == 1:
+                    indices.extend((slice(shape[0]), slice(shape[1])))
+                else:
+                    indices.extend((slice(shape[0]), slice(shape[1]), slice(shape[2])))
+                    indices[slice_direction - 1] = slice(cut_index[0], cut_index[0] + 1, 1)
+
+                subslc._data = subslc.data[tuple(indices)]
+                for direction in subslc.vector_filenames.keys():
+                    subslc._vector_data[direction] = subslc.vector_data[direction][tuple(indices)]
+                subslc.extent._extents[slice_direction - 1] = (0, 0)
+            else:
+                to_remove.append(mesh)
+
+        for mesh in to_remove:
+            del new_slice._subslices[mesh]
+
+        vals = new_slice._subslices.values()
+        new_slice.extent = Extent(min(vals, key=lambda e: e.extent.x_start).extent.x_start,
+                                  max(vals, key=lambda e: e.extent.x_end).extent.x_end,
+                                  min(vals, key=lambda e: e.extent.y_start).extent.y_start,
+                                  max(vals, key=lambda e: e.extent.y_end).extent.y_end,
+                                  min(vals, key=lambda e: e.extent.z_start).extent.z_start,
+                                  max(vals, key=lambda e: e.extent.z_end).extent.z_end)
+
+        if new_slice.extent.x_start == new_slice.extent.x_end:
+            new_slice.orientation = 1
+        elif new_slice.extent.y_start == new_slice.extent.y_end:
+            new_slice.orientation = 2
+        elif new_slice.extent.z_start == new_slice.extent.z_end:
+            new_slice.orientation = 3
+        else:
+            new_slice.orientation = 0
+
+        return new_slice
+
     def get_subslice(self, key: Union[int, Mesh]) -> SubSlice:
         """Returns the :class:`SubSlice` that cuts through the given mesh. When an int is provided
             the nth SubSlice will be returned.
@@ -334,7 +388,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             subslice.clear_cache()
 
     def sort_subslices_cartesian(self):
-        """Returns all subslices sorted in cartesian coordinates (2D-slices only).
+        """Returns all subslices sorted in cartesian coordinates.
         """
         slices = list(self._subslices.values())
         slices_cart = [[slices[0]]]
@@ -403,6 +457,9 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         return slc_array
 
     def to_global_nonuniform(self) -> np.ndarray:
+        """Creates a global 2D-numpy ndarray from all subslices (2D-slices only).
+            Beware, this method might create sparse np-arrays that consume lots of memory.
+        """
         # The global grid will use the finest mesh as base and duplicate values of the coarser meshes
         # Therefore we first find the finest mesh and calculate the step size in each dimension
         coords = self.coordinates
@@ -437,7 +494,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                 end_idx[dim] = int((mesh.coordinates[dim][-1] - start_coordinates[dim]) / step_sizes[dim]) + n_repeat
 
                 if n_repeat > 1:
-                    slc_data = np.repeat(slc_data, n_repeat, axis=axis+1)
+                    slc_data = np.repeat(slc_data, n_repeat, axis=axis + 1)
 
             grid[:, start_idx['x']: end_idx['x'], start_idx['y']: end_idx['y'],
             start_idx['z']: end_idx['z']] = slc_data.reshape(

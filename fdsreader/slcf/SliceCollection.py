@@ -16,7 +16,7 @@ class SliceCollection(FDSDataCollection):
 
     @property
     def quantities(self) -> List[Quantity]:
-        return list({slc.name for slc in self})
+        return list({slc.quantity.name for slc in self})
 
     def filter_by_quantity(self, quantity: Union[str, Quantity]):
         """Filters all slices by a specific quantity.

@@ -68,7 +68,7 @@ class Mesh:
             as obstructions may be hidden as specific points in time.
         """
         orientation = subslice.orientation
-        value = subslice.extent[orientation - 1][0]
+        value = subslice.extent[orientation][0]
         cell_centered = subslice.cell_centered
 
         slc_index = self.coordinate_to_index((value,), dimension=(orientation,), cell_centered=cell_centered)[0]
