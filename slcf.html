@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Slice files &mdash; fdsreader [fdsreader, version 1.3.4] documentation</title>
+  <title>Slice files &mdash; fdsreader [fdsreader, version 1.3.5] documentation</title>
   
 
   
@@ -324,28 +324,31 @@ slice with the corresponding short_name and unit.</p></li>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_cache</span></code>()</p></td>
 <td><p>Remove all data from the internal cache that has been loaded so far to free memory.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_nearest_index</span></code>(dimension, value)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_2d_slice_from_3d</span></code>(slice_direction, value)</p></td>
+<td><p>Creates a 2D-Slice from a 3D-Slice by slicing the Slice.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_nearest_index</span></code>(dimension, value)</p></td>
 <td><p>Get the nearest mesh coordinate index in a specific dimension.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_nearest_timestep</span></code>(time)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_nearest_timestep</span></code>(time)</p></td>
 <td><p>Calculates the nearest timestep for which data has been output for this slice.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_subslice</span></code>(key)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_subslice</span></code>(key)</p></td>
 <td><p>Returns the <code class="xref py py-class docutils literal notranslate"><span class="pre">SubSlice</span></code> that cuts through the given mesh.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean</span></code>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean</span></code>()</p></td>
 <td><p>Calculates the mean over the whole slice.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_subslices_cartesian</span></code>()</p></td>
-<td><p>Returns all subslices sorted in cartesian coordinates (2D-slices only).</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_subslices_cartesian</span></code>()</p></td>
+<td><p>Returns all subslices sorted in cartesian coordinates.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">std</span></code>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">std</span></code>()</p></td>
 <td><p>Calculates the standard deviation over the whole slice.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_global_nonuniform</span></code>()</p></td>
-<td><p></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_global_nonuniform</span></code>()</p></td>
+<td><p>Creates a global 2D-numpy ndarray from all subslices (2D-slices only).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_global_uniform</span></code>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_global_uniform</span></code>()</p></td>
 <td><p>Creates a global 2D-numpy ndarray from all subslices (2D-slices only).</p></td>
 </tr>
 </tbody>
@@ -401,6 +404,14 @@ For cell-centered slices, the coordinates are adjusted to represent cell-centere
 
 <dl class="py method">
 <dt>
+<code class="sig-name descname"><span class="pre">get_2d_slice_from_3d</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slice_direction</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">x</span><span class="p"><span class="pre">,</span> </span><span class="pre">y</span><span class="p"><span class="pre">,</span> </span><span class="pre">z</span><span class="p"><span class="pre">,</span> </span><span class="pre">1</span><span class="p"><span class="pre">,</span> </span><span class="pre">2</span><span class="p"><span class="pre">,</span> </span><span class="pre">3</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice.get_2d_slice_from_3d"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Creates a 2D-Slice from a 3D-Slice by slicing the Slice.
+:param slice_direction: The direction in which to cut through the slice.
+:param value: The position at which to start cutting through the slice.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt>
 <code class="sig-name descname"><span class="pre">get_nearest_index</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimension</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">x</span><span class="p"><span class="pre">,</span> </span><span class="pre">y</span><span class="p"><span class="pre">,</span> </span><span class="pre">z</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">int</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice.get_nearest_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Get the nearest mesh coordinate index in a specific dimension.</p>
 </dd></dl>
@@ -438,7 +449,7 @@ the nth SubSlice will be returned.</p>
 <dl class="py method">
 <dt>
 <code class="sig-name descname"><span class="pre">sort_subslices_cartesian</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice.sort_subslices_cartesian"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Returns all subslices sorted in cartesian coordinates (2D-slices only).</p>
+<dd><p>Returns all subslices sorted in cartesian coordinates.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -461,7 +472,9 @@ the nth SubSlice will be returned.</p>
 <dl class="py method">
 <dt>
 <code class="sig-name descname"><span class="pre">to_global_nonuniform</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.ndarray</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice.to_global_nonuniform"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd></dd></dl>
+<dd><p>Creates a global 2D-numpy ndarray from all subslices (2D-slices only).
+Beware, this method might create sparse np-arrays that consume lots of memory.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt>
