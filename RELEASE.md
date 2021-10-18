@@ -1,5 +1,7 @@
 ## Release History
 
+* 1.3.6
+    * Fixed a typo in code 
 * 1.3.5
     * Added obst/bndf exporter
     * Fixed some slcf bugs
