@@ -87,6 +87,7 @@ class Mesh:
         :param coordinate: Tuple of 3 floats. If the dimension parameter is supplied, up to 2
             dimensions can be left out from the tuple.
         :param dimension: The dimensions in which to return the indices (1=x, 2=y, 3=z).
+        :param cell_centered: Instead of finding the nearest point on the mesh, find the center of the nearest cell.
         """
         # Convert possible integer input to chars
         dimension = tuple(('x', 'y', 'z')[dim - 1] if type(dim) == int else dim for dim in dimension)
@@ -103,6 +104,25 @@ class Mesh:
                 ret.append(idx - 1)
             else:
                 ret.append(idx)
+        return tuple(ret)
+
+    def get_nearest_coordinate(self, coordinate: Tuple[float, ...],
+                            dimension: Tuple[Literal[1, 2, 3, 'x', 'y', 'z'], ...] = ('x', 'y', 'z'),
+                            cell_centered=False) -> Tuple[float, ...]:
+        """Finds the nearest point in the mesh's grid.
+
+        :param coordinate: Tuple of 3 floats. If the dimension parameter is supplied, up to 2
+            dimensions can be left out from the tuple.
+        :param dimension: The dimensions in which to return the indices (1=x, 2=y, 3=z).
+        :param cell_centered: Instead of finding the nearest point on the mesh, find the center of the nearest cell.
+        """
+        indices = self.coordinate_to_index(coordinate, dimension, cell_centered)
+        ret = list()
+        for i, dim in enumerate(dimension):
+            coords = self.coordinates[dim]
+            if cell_centered:
+                coords = coords[:-1] + (coords[1] - coords[0]) / 2
+            ret.append(coords[indices[i]])
         return tuple(ret)
 
     def _add_patches(self, bid: int, cell_centered: bool, quantity: str, short_name: str, unit: str,

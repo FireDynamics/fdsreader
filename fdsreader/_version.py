@@ -7,5 +7,5 @@ Provides fdsreader version information.
 
 from incremental import Version
 
-__version__ = Version('fdsreader', 1, 3, 5)
+__version__ = Version('fdsreader', 1, 3, 6)
 __all__ = ["__version__"]

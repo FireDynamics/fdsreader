@@ -234,60 +234,6 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             for _, subslice in self._subslices.items():
                 _ = subslice.data
 
-    def get_2d_slice_from_3d(self, slice_direction: Literal['x', 'y', 'z', 1, 2, 3], value: float):
-        """Creates a 2D-Slice from a 3D-Slice by slicing the Slice.
-        :param slice_direction: The direction in which to cut through the slice.
-        :param value: The position at which to start cutting through the slice.
-        """
-        if type(slice_direction) == str:
-            slice_direction = {'x': 1, 'y': 2, 'z': 3}[slice_direction]
-        new_slice = deepcopy(self)
-
-        to_remove = list()
-        for mesh in new_slice._subslices.keys():
-            subslc = new_slice._subslices[mesh]
-            # Check if the new slice cuts through the subslice
-            if subslc.extent[slice_direction - 1][0] <= value <= subslc.extent[slice_direction - 1][1]:
-                shape = subslc.dimension.shape(cell_centered=self.cell_centered)
-                indices = [slice(subslc.n_t)]
-                cut_index = mesh.coordinate_to_index((value,), (('x', 'y', 'z')[slice_direction - 1],),
-                                                     cell_centered=self.cell_centered)
-
-                if subslc.dimension.x == 1 or subslc.dimension.y == 1 or subslc.dimension.z == 1:
-                    indices.extend((slice(shape[0]), slice(shape[1])))
-                else:
-                    indices.extend((slice(shape[0]), slice(shape[1]), slice(shape[2])))
-                    indices[slice_direction - 1] = slice(cut_index[0], cut_index[0] + 1, 1)
-
-                subslc._data = subslc.data[tuple(indices)]
-                for direction in subslc.vector_filenames.keys():
-                    subslc._vector_data[direction] = subslc.vector_data[direction][tuple(indices)]
-                subslc.extent._extents[slice_direction - 1] = (0, 0)
-            else:
-                to_remove.append(mesh)
-
-        for mesh in to_remove:
-            del new_slice._subslices[mesh]
-
-        vals = new_slice._subslices.values()
-        new_slice.extent = Extent(min(vals, key=lambda e: e.extent.x_start).extent.x_start,
-                                  max(vals, key=lambda e: e.extent.x_end).extent.x_end,
-                                  min(vals, key=lambda e: e.extent.y_start).extent.y_start,
-                                  max(vals, key=lambda e: e.extent.y_end).extent.y_end,
-                                  min(vals, key=lambda e: e.extent.z_start).extent.z_start,
-                                  max(vals, key=lambda e: e.extent.z_end).extent.z_end)
-
-        if new_slice.extent.x_start == new_slice.extent.x_end:
-            new_slice.orientation = 1
-        elif new_slice.extent.y_start == new_slice.extent.y_end:
-            new_slice.orientation = 2
-        elif new_slice.extent.z_start == new_slice.extent.z_end:
-            new_slice.orientation = 3
-        else:
-            new_slice.orientation = 0
-
-        return new_slice
-
     def get_subslice(self, key: Union[int, Mesh]) -> SubSlice:
         """Returns the :class:`SubSlice` that cuts through the given mesh. When an int is provided
             the nth SubSlice will be returned.
@@ -312,8 +258,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         return list(self._subslices.values())
 
     @property
-    def extent_dirs(self) -> Tuple[
-        Literal['x', 'y', 'z'], Literal['x', 'y', 'z'], Literal['x', 'y', 'z']]:
+    def extent_dirs(self) -> Tuple[Literal['x', 'y', 'z'], Literal['x', 'y', 'z'], Literal['x', 'y', 'z']]:
         """The directions in which there is an extent. All three dimensions in case the slice is 3D.
         """
         ior = self.orientation
@@ -386,6 +331,65 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         """
         for subslice in self._subslices.values():
             subslice.clear_cache()
+
+    def get_2d_slice_from_3d(self, slice_direction: Literal['x', 'y', 'z', 1, 2, 3], value: float):
+        """Creates a 2D-Slice from a 3D-Slice by slicing the Slice.
+        :param slice_direction: The direction in which to cut through the slice.
+        :param value: The position at which to start cutting through the slice.
+        """
+        if type(slice_direction) == str:
+            slice_dim = {'x': 1, 'y': 2, 'z': 3}[slice_direction]
+        else:
+            slice_dim = slice_direction
+            slice_direction = ('x', 'y', 'z')[slice_dim - 1]
+        new_slice = deepcopy(self)
+
+        to_remove = list()
+        for mesh in new_slice._subslices.keys():
+            subslc = new_slice._subslices[mesh]
+            # Check if the new slice cuts through the subslice
+            cut_index = mesh.coordinate_to_index((value,), (slice_direction,),
+                                                 cell_centered=self.cell_centered)
+            cut_value = mesh.get_nearest_coordinate((value,), (slice_direction,),
+                                                    cell_centered=self.cell_centered)[0]
+            if mesh.coordinates[slice_direction][0] <= value <= mesh.coordinates[slice_direction][-1] and subslc.extent[slice_dim - 1][0] <= cut_value <= subslc.extent[slice_dim - 1][1]:
+                shape = subslc.dimension.shape(cell_centered=self.cell_centered)
+                indices = [slice(subslc.n_t)]
+
+                if subslc.dimension.x == 1 or subslc.dimension.y == 1 or subslc.dimension.z == 1:
+                    indices.extend((slice(shape[0]), slice(shape[1])))
+                else:
+                    indices.extend((slice(shape[0]), slice(shape[1]), slice(shape[2])))
+                    indices[slice_dim - 1] = slice(cut_index[0], cut_index[0] + 1, 1)
+
+                subslc._data = subslc.data[tuple(indices)]
+                for direction in subslc.vector_filenames.keys():
+                    subslc._vector_data[direction] = subslc.vector_data[direction][tuple(indices)]
+                subslc.extent._extents[slice_dim - 1] = (0, 0)
+            else:
+                to_remove.append(mesh)
+
+        for mesh in to_remove:
+            del new_slice._subslices[mesh]
+
+        vals = new_slice._subslices.values()
+        new_slice.extent = Extent(min(vals, key=lambda e: e.extent.x_start).extent.x_start,
+                                  max(vals, key=lambda e: e.extent.x_end).extent.x_end,
+                                  min(vals, key=lambda e: e.extent.y_start).extent.y_start,
+                                  max(vals, key=lambda e: e.extent.y_end).extent.y_end,
+                                  min(vals, key=lambda e: e.extent.z_start).extent.z_start,
+                                  max(vals, key=lambda e: e.extent.z_end).extent.z_end)
+
+        if new_slice.extent.x_start == new_slice.extent.x_end:
+            new_slice.orientation = 1
+        elif new_slice.extent.y_start == new_slice.extent.y_end:
+            new_slice.orientation = 2
+        elif new_slice.extent.z_start == new_slice.extent.z_end:
+            new_slice.orientation = 3
+        else:
+            new_slice.orientation = 0
+
+        return new_slice
 
     def sort_subslices_cartesian(self):
         """Returns all subslices sorted in cartesian coordinates.
