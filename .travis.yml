@@ -43,3 +43,9 @@ jobs:
       python: 3.9
       install: pip install fdsreader
       script: python -m unittest discover
+notifications:
+  email:
+    recipients:
+      - j.vogelsang@fz-juelich.de
+    on_success: never
+    on_failure: always

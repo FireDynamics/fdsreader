@@ -2,8 +2,6 @@ import os
 from pathlib import Path
 import numpy as np
 from typing_extensions import Literal
-from pathos.pools import ProcessPool as Pool
-from multiprocess import Lock, Manager
 from ..smoke3d import Smoke3D
 
 
@@ -14,6 +12,8 @@ def export_smoke_raw(smoke3d: Smoke3D, output_dir: str, ordering: Literal['C', '
     :param output_dir: The directory in which to save all files.
     :param ordering: Whether to write the data in C or Fortran ordering.
     """
+    from pathos.pools import ProcessPool as Pool
+    from multiprocess import Lock, Manager
     filename_base = ("smoke-" + smoke3d.quantity.name.lower()).replace(" ", "_").replace(".", "-")
     # Create all requested directories if they don't exist yet
     Path(os.path.join(output_dir, filename_base + "-data")).mkdir(parents=True, exist_ok=True)

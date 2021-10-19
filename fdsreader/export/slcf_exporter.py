@@ -2,8 +2,6 @@ import os
 from pathlib import Path
 import numpy as np
 from typing_extensions import Literal
-from pathos.pools import ProcessPool as Pool
-from multiprocess import Lock, Manager
 from ..slcf import Slice
 
 
@@ -14,6 +12,8 @@ def export_slcf_raw(slc: Slice, output_dir: str, ordering: Literal['C', 'F'] = '
     :param output_dir: The directory in which to save all files.
     :param ordering: Whether to write the data in C or Fortran ordering.
     """
+    from pathos.pools import ProcessPool as Pool
+    from multiprocess import Lock, Manager
     slc2d = slc.type == '2D'
     meta = {"DataValMax": float(slc.vmax), "DataValMin": float(slc.vmin), "ScaleFactor": 255. / (float(slc.vmax) - float(slc.vmin)),
             "MeshNum": len(slc.subslices), "Quantity": slc.quantity.name}
