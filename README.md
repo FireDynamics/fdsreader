@@ -11,6 +11,7 @@ The package is available on PyPI and can be installed using pip:
 ```sh
 pip install fdsreader
 ```
+_FDS Version 6.7.5 and above are fully supported. Versions below 6.7.5 might work, but are not guaranteed to work._
 
 ## Usage example
 ```python
