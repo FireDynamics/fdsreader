@@ -40,42 +40,42 @@ class Extent:
         return self._extents[item - 1]
 
     @property
-    def x_start(self):
+    def x_start(self) -> float:
         """Gives the absolute extent in x-direction.
         """
         return self._extents[0][0]
 
     @property
-    def y_start(self):
+    def y_start(self) -> float:
         """Gives the absolute extent in y-direction.
         """
         return self._extents[1][0]
 
     @property
-    def z_start(self):
+    def z_start(self) -> float:
         """Gives the absolute extent in z-direction.
         """
         return self._extents[2][0]
 
     @property
-    def x_end(self):
+    def x_end(self) -> float:
         """Gives the absolute extent in x-direction.
         """
         return self._extents[0][1]
 
     @property
-    def y_end(self):
+    def y_end(self) -> float:
         """Gives the absolute extent in y-direction.
         """
         return self._extents[1][1]
 
     @property
-    def z_end(self):
+    def z_end(self) -> float:
         """Gives the absolute extent in z-direction.
         """
         return self._extents[2][1]
 
-    def as_tuple(self, reduced=True) -> Tuple:
+    def as_tuple(self, reduced=True) -> Tuple[float, ...]:
         """Gives the extent in tuple notation (without empty extents).
 
         :param reduced: Whether to leave out empty extents or not.
@@ -89,7 +89,7 @@ class Extent:
                 return self.x_start, self.x_end, self.y_start, self.y_end
         return self.x_start, self.x_end, self.y_start, self.y_end, self.z_start, self.z_end
 
-    def as_list(self, reduced=True) -> List:
+    def as_list(self, reduced=True) -> List[float]:
         """Gives the extent in list notation (without empty extents).
 
         :param reduced: Whether to leave out empty extents or not.
