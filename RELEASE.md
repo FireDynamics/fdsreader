@@ -1,10 +1,11 @@
 ## Release History
 
+* 1.3.10
+    * Fixed some dependency conflicts
 * 1.3.9
     * Fixed rounding issues with slices
 * 1.3.8
-    * Made exporter imports optional 
-    * Fixed some dependency conflicts
+    * Made exporter imports optional
 * 1.3.7
     * Fixed bug for 3d to 2d slcf function
 * 1.3.6
