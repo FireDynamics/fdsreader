@@ -1,3 +1,4 @@
+import math
 import os
 from copy import deepcopy
 
@@ -311,10 +312,24 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                 # and remove the last coordinate
                 if self.cell_centered:
                     co = co[:-1]
-                    co -= (co[1] - co[0]) / 2
+                    co += abs(co[1] - co[0]) / 2
                 co = co[np.where(np.logical_and(co >= slc.extent[dim][0], co <= slc.extent[dim][1]))]
                 coords[dim].update(co)
             coords[dim] = np.array(sorted(list(coords[dim])))
+
+            if len(coords[dim]) == 0:
+                slice_coordinate = self.extent[dim][0]
+                nearest_coordinate = np.inf
+                for mesh in self._subslices.keys():
+                    mesh_coords = mesh.coordinates[dim]
+                    idx = np.searchsorted(mesh_coords, slice_coordinate, side="left")
+                    if idx > 0 and (idx == mesh_coords.size or np.math.fabs(
+                            slice_coordinate - mesh_coords[idx - 1]) < np.math.fabs(
+                            slice_coordinate - mesh_coords[idx])):
+                        idx = idx + 1
+                    if mesh_coords[idx] - slice_coordinate < nearest_coordinate - slice_coordinate:
+                        nearest_coordinate = mesh_coords[idx]
+                coords[dim] = np.array([nearest_coordinate])
 
         return coords
 
@@ -352,7 +367,8 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                                                  cell_centered=self.cell_centered)
             cut_value = mesh.get_nearest_coordinate((value,), (slice_direction,),
                                                     cell_centered=self.cell_centered)[0]
-            if mesh.coordinates[slice_direction][0] <= value <= mesh.coordinates[slice_direction][-1] and subslc.extent[slice_dim - 1][0] <= cut_value <= subslc.extent[slice_dim - 1][1]:
+            if mesh.coordinates[slice_direction][0] <= value <= mesh.coordinates[slice_direction][-1] and \
+                    subslc.extent[slice_dim - 1][0] <= cut_value <= subslc.extent[slice_dim - 1][1]:
                 shape = subslc.dimension.shape(cell_centered=self.cell_centered)
                 indices = [slice(subslc.n_t)]
 
@@ -480,9 +496,9 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
 
         for dim in ('x', 'y', 'z'):
             if step_sizes[dim] == 0:
-                step_sizes[dim] = np.inf
-            steps[dim] = max(
-                int((coords[dim][-1] - coords[dim][0]) / step_sizes[dim] + step_sizes_inv[dim] / step_sizes[dim]), 1)
+                step_sizes[dim] = math.inf
+            steps[dim] = max(int(round(
+                (coords[dim][-1] - coords[dim][0]) / step_sizes[dim] + step_sizes_inv[dim] / step_sizes[dim])), 1)
 
         grid = np.full((self.n_t, steps['x'], steps['y'], steps['z']), np.nan)
 
@@ -493,9 +509,15 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             slc_data = slc.data
             for axis in (0, 1, 2):
                 dim = ('x', 'y', 'z')[axis]
-                n_repeat = max(int((mesh.coordinates[dim][1] - mesh.coordinates[dim][0]) / step_sizes[dim]), 1)
-                start_idx[dim] = int((mesh.coordinates[dim][0] - start_coordinates[dim]) / step_sizes[dim])
-                end_idx[dim] = int((mesh.coordinates[dim][-1] - start_coordinates[dim]) / step_sizes[dim]) + n_repeat
+                n_repeat = max(int(round((mesh.coordinates[dim][1] - mesh.coordinates[dim][0]) / step_sizes[dim])), 1)
+                if self.cell_centered:
+                    start_idx[dim] = int(math.ceil((mesh.coordinates[dim][0] - start_coordinates[dim]) / step_sizes[dim]))
+                    end_idx[dim] = int(
+                        math.floor((mesh.coordinates[dim][-1] - start_coordinates[dim]) / step_sizes[dim])) + n_repeat
+                else:
+                    start_idx[dim] = int(round((mesh.coordinates[dim][0] - start_coordinates[dim]) / step_sizes[dim]))
+                    end_idx[dim] = int(
+                        round((mesh.coordinates[dim][-1] - start_coordinates[dim]) / step_sizes[dim])) + n_repeat
 
                 if n_repeat > 1:
                     slc_data = np.repeat(slc_data, n_repeat, axis=axis + 1)

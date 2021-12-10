@@ -1,5 +1,7 @@
 ## Release History
 
+* 1.3.9
+    * Fixed rounding issues with slices
 * 1.3.8
     * Made exporter imports optional 
     * Fixed some dependency conflicts
