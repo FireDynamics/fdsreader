@@ -288,7 +288,11 @@ class Obstruction:
     def quantities(self) -> List[Quantity]:
         """Get a list of all quantities for which boundary data exists.
         """
-        return [b.quantity for b in self._subobstructions[0]._boundary_data.values()]
+        qs = set()
+        for subobst in self._subobstructions:
+            for b in subobst._boundary_data.values():
+                qs.add(b.quantity)
+        return list(qs)
 
     def filter_by_orientation(self, orientation: Literal[-3, -2, -1, 0, 1, 2, 3] = 0) -> List[SubObstruction]:
         """Filter all SubObstructions by a specific orientation. All returned SubObstructions will contain boundary data

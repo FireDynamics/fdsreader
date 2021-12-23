@@ -61,7 +61,10 @@ def export_smoke_raw(smoke3d: Smoke3D, output_dir: str, ordering: Literal['C', '
                 "DimSize": f"{data.shape[0]} {data.shape[1]} {data.shape[2]} {data.shape[3]}"
             })
 
-    Pool(8).map(lambda args: worker(*args), list(smoke3d._subsmokes.items()))
+    pool = Pool(8)
+    pool.map(lambda args: worker(*args), list(smoke3d._subsmokes.items()))
+    pool.close()
+    pool.join()
 
     meta["Meshes"] = list(meta["Meshes"])
 

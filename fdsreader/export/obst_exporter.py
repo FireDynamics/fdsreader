@@ -67,37 +67,37 @@ def export_obst_raw(obst: Obstruction, output_dir: str, ordering: Literal['C', '
         if out["DataValMax"] <= 0:
             return
 
-        for orientation in (-3, -2, -1, 1, 2, 3):
-            patches = list()
-            for bndf in bndf_data:
-                if orientation in bndf.data:
-                    patches.append(bndf.data[orientation])
+        with open(os.path.join(output_dir, quantity_name, filename), 'wb') as rawfile:
+            for orientation in (-3, -2, -1, 1, 2, 3):
+                patches = list()
+                for bndf in bndf_data:
+                    if orientation in bndf.data:
+                        patches.append(bndf.data[orientation])
 
-            if len(patches) == 0:
-                continue
+                if len(patches) == 0:
+                    continue
 
-            # Combine patches to a single face for plotting
-            patches = sort_patches_cartesian(patches)
+                # Combine patches to a single face for plotting
+                patches = sort_patches_cartesian(patches)
 
-            shape_dim1 = sum([patch_row[0].shape[0] for patch_row in patches])
-            shape_dim2 = sum([patch.shape[1] for patch in patches[0]])
-            n_t = patches[0][0].n_t  # Number of time steps
+                shape_dim1 = sum([patch_row[0].shape[0] for patch_row in patches])
+                shape_dim2 = sum([patch.shape[1] for patch in patches[0]])
+                n_t = patches[0][0].n_t  # Number of time steps
 
-            face = np.empty(shape=(n_t, shape_dim1, shape_dim2))
-            dim1_pos = 0
-            dim2_pos = 0
-            for patch_row in patches:
-                d1 = patch_row[0].shape[0]
-                for patch in patch_row:
-                    d2 = patch.shape[1]
-                    face[:, dim1_pos:dim1_pos + d1, dim2_pos:dim2_pos + d2] = patch.data
-                    dim2_pos += d2
-                dim1_pos += d1
+                face = np.empty(shape=(n_t, shape_dim1, shape_dim2))
+                dim1_pos = 0
                 dim2_pos = 0
+                for patch_row in patches:
+                    d1 = patch_row[0].shape[0]
+                    for patch in patch_row:
+                        d2 = patch.shape[1]
+                        face[:, dim1_pos:dim1_pos + d1, dim2_pos:dim2_pos + d2] = patch.data
+                        dim2_pos += d2
+                    dim1_pos += d1
+                    dim2_pos = 0
 
-            face = (face * out["ScaleFactor"]).astype(np.uint8)
+                face = (face * out["ScaleFactor"]).astype(np.uint8)
 
-            with open(os.path.join(output_dir, quantity_name, filename), 'wb') as rawfile:
                 for d in face:
                     if ordering == 'F':
                         d = d.T
@@ -112,7 +112,8 @@ def export_obst_raw(obst: Obstruction, output_dir: str, ordering: Literal['C', '
         # Create all requested directories if they don't exist yet
         Path(os.path.join(output_dir, bndf_quantity.name.replace(" ", "_").replace(".", "-"))).mkdir(parents=True,
                                                                                                      exist_ok=True)
-    Pool(len(obst.quantities)).map(lambda args: worker(*args), worker_args)
+    with Pool(len(obst.quantities)) as pool:
+        pool.map(lambda args: worker(*args), worker_args)
 
     meta["Quantities"] = list(meta["Quantities"])
 

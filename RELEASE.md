@@ -1,5 +1,6 @@
 ## Release History
-
+* 1.3.11
+    * Fixed obst exporter
 * 1.3.10
     * Fixed some dependency conflicts
 * 1.3.9

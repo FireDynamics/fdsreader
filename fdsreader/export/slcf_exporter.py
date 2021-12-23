@@ -54,7 +54,10 @@ def export_slcf_raw(slc: Slice, output_dir: str, ordering: Literal['C', 'F'] = '
                 "DimSize": f"{shape[0]} {shape[1]} {shape[2]} {shape[3]}"
             })
 
-    Pool(8).map(lambda args: worker(*args), list(slc._subslices.items()))
+    pool = Pool(8)
+    pool.map(lambda args: worker(*args), list(slc._subslices.items()))
+    pool.close()
+    pool.join()
 
     meta["Meshes"] = list(meta["Meshes"])
 
