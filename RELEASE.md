@@ -1,4 +1,6 @@
 ## Release History
+* 1.3.12
+    * Fixed a bug that did not allow spaces in Mesh IDs
 * 1.3.11
     * Fixed obst exporter
 * 1.3.10

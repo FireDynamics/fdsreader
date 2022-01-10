@@ -279,7 +279,7 @@ class Simulation:
     def _load_mesh(self, smv_file: TextIO, line: str) -> Mesh:
         """Load information for a single mesh from the smv file at current pointer position.
         """
-        mesh_id = line.split()[1]
+        mesh_id = "".join(line.split()[1:])
 
         grid_numbers = smv_file.readline().strip().split()
         grid_dimensions = {'x': int(grid_numbers[0]) + 1, 'y': int(grid_numbers[1]) + 1,
@@ -501,7 +501,7 @@ class Simulation:
 
         slice_index = int(line.split('!')[1].strip().split()[0])
 
-        slice_id = line.split('%')[1].split('&')[0].strip() if '%' in line else ""
+        slice_id = "".join(line.split('%')[1].split('&')).strip() if '%' in line else ""
 
         mesh_index = int(line.split('&')[0].strip().split()[1]) - 1
         mesh = self.meshes[mesh_index]
@@ -539,7 +539,7 @@ class Simulation:
         """
         slice_index = int(line.split('!')[1].strip().split()[0])
 
-        slice_id = line.split('%')[1].split('&')[0].strip() if '%' in line else ""
+        slice_id = "".join(line.split('%')[1].split('&')).strip() if '%' in line else ""
 
         mesh_index = int(line.split('&')[0].strip().split()[1]) - 1
         mesh = self.meshes[mesh_index]
