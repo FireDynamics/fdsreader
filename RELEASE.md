@@ -1,4 +1,6 @@
 ## Release History
+* 1.4.0
+    * Added option to ignore all non-critical errors and warnings to provide optional cli-friendliness
 * 1.3.12
     * Fixed a bug that did not allow spaces in Mesh IDs
 * 1.3.11

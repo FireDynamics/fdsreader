@@ -4,6 +4,8 @@ ENABLE_CACHING = True
 
 DEBUG = False
 
+IGNORE_ERRORS = False
+
 # As the binary representation of raw data is compiler dependent, this information must be provided
 # by the user
 FORTRAN_DATA_TYPE_INTEGER = "<i4"  # <i4 -> 4-byte integer (little-endian)

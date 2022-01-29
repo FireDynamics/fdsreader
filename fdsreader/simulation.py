@@ -1,6 +1,7 @@
 import glob
 import logging
 import os
+import warnings
 from typing import List, TextIO, Dict, AnyStr, Sequence, Tuple, Union
 
 import numpy as np
@@ -116,6 +117,9 @@ class Simulation:
             to the .smv file for the simulation in case that multiple simulation output was written to
             the same directory.
         """
+        if settings.IGNORE_ERRORS:
+            warnings.filterwarnings("ignore")
+
         # Check if the file has already been instantiated via a cached pickle file
         if not hasattr(self, "_hash"):
             self.reader_version = __version__
