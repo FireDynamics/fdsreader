@@ -117,6 +117,9 @@ def export_obst_raw(obst: Obstruction, output_dir: str, ordering: Literal['C', '
 
     meta["Quantities"] = list(meta["Quantities"])
 
-    with open(os.path.join(output_dir, obst_filename_base + ".yaml"), 'w') as metafile:
+    meta_file_path = os.path.join(output_dir, obst_filename_base + ".yaml")
+    with open(meta_file_path, 'w') as meta_file:
         import yaml
-        yaml.dump(meta, metafile)
+        yaml.dump(meta, meta_file)
+
+    return meta_file_path

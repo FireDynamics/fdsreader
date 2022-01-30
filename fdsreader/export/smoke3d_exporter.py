@@ -61,13 +61,14 @@ def export_smoke_raw(smoke3d: Smoke3D, output_dir: str, ordering: Literal['C', '
                 "DimSize": f"{data.shape[0]} {data.shape[1]} {data.shape[2]} {data.shape[3]}"
             })
 
-    pool = Pool(8)
-    pool.map(lambda args: worker(*args), list(smoke3d._subsmokes.items()))
-    pool.close()
-    pool.join()
+    with Pool() as pool:
+        pool.map(lambda args: worker(*args), list(smoke3d._subsmokes.items()))
 
     meta["Meshes"] = list(meta["Meshes"])
 
-    with open(os.path.join(output_dir, filename_base + ".yaml"), 'w') as metafile:
+    meta_file_path = os.path.join(output_dir, filename_base + ".yaml")
+    with open(meta_file_path, 'w') as meta_file:
         import yaml
-        yaml.dump(meta, metafile)
+        yaml.dump(meta, meta_file)
+
+    return meta_file_path

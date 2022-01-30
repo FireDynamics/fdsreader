@@ -505,7 +505,7 @@ class Simulation:
 
         slice_index = int(line.split('!')[1].strip().split()[0])
 
-        slice_id = "".join(line.split('%')[1].split('&')).strip() if '%' in line else ""
+        slice_id = line.split('%')[1].split('&')[0].strip() if '%' in line else ""
 
         mesh_index = int(line.split('&')[0].strip().split()[1]) - 1
         mesh = self.meshes[mesh_index]

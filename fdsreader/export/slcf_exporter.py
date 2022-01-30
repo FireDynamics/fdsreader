@@ -54,13 +54,14 @@ def export_slcf_raw(slc: Slice, output_dir: str, ordering: Literal['C', 'F'] = '
                 "DimSize": f"{shape[0]} {shape[1]} {shape[2]} {shape[3]}"
             })
 
-    pool = Pool(8)
-    pool.map(lambda args: worker(*args), list(slc._subslices.items()))
-    pool.close()
-    pool.join()
+    with Pool() as pool:
+        pool.map(lambda args: worker(*args), list(slc._subslices.items()))
 
     meta["Meshes"] = list(meta["Meshes"])
 
-    with open(os.path.join(output_dir, filename_base + ".yaml"), 'w') as metafile:
+    meta_file_path = os.path.join(output_dir, filename_base + ".yaml")
+    with open(meta_file_path, 'w') as meta_file:
         import yaml
-        yaml.dump(meta, metafile)
+        yaml.dump(meta, meta_file)
+
+    return meta_file_path
