@@ -352,6 +352,9 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         :param slice_direction: The direction in which to cut through the slice.
         :param value: The position at which to start cutting through the slice.
         """
+        if self.type == "2D":
+            logging.error("Trying to slice a 2D-slice, which might not yield the desired result.")
+
         if type(slice_direction) == str:
             slice_dim = {'x': 1, 'y': 2, 'z': 3}[slice_direction]
         else:

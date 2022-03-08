@@ -257,7 +257,7 @@ class Simulation:
             self.data_3d = Plot3DCollection(self.data_3d.keys(), self.data_3d.values())
             self.smoke_3d = Smoke3DCollection(self.smoke_3d.values())
             self.isosurfaces = IsosurfaceCollection(self.isosurfaces.values())
-            # If no particles are simulates, initialize empty data container for consistency
+            # If no particles are simulated, initialize empty data container for consistency
             if len(self.particles) == 0:
                 self.particles = ParticleCollection((), ())
             else:
