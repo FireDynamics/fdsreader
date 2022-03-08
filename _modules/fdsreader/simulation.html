@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>fdsreader.simulation &mdash; fdsreader [fdsreader, version 1.4.1] documentation</title><link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <title>fdsreader.simulation &mdash; fdsreader [fdsreader, version 1.4.2] documentation</title><link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
@@ -333,7 +333,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">data_3d</span> <span class="o">=</span> <span class="n">Plot3DCollection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_3d</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_3d</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">smoke_3d</span> <span class="o">=</span> <span class="n">Smoke3DCollection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">smoke_3d</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">isosurfaces</span> <span class="o">=</span> <span class="n">IsosurfaceCollection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isosurfaces</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-            <span class="c1"># If no particles are simulates, initialize empty data container for consistency</span>
+            <span class="c1"># If no particles are simulated, initialize empty data container for consistency</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">particles</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">particles</span> <span class="o">=</span> <span class="n">ParticleCollection</span><span class="p">((),</span> <span class="p">())</span>
             <span class="k">else</span><span class="p">:</span>
