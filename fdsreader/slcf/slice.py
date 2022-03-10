@@ -292,7 +292,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
     def get_nearest_index(self, dimension: Literal['x', 'y', 'z'], value: float) -> int:
         """Get the nearest mesh coordinate index in a specific dimension.
         """
-        coords = self.coordinates[dimension]
+        coords = self.get_coordinates()[dimension]
         idx = np.searchsorted(coords, value, side="left")
         if idx > 0 and (idx == coords.size or np.math.fabs(value - coords[idx - 1]) < np.math.fabs(
                 value - coords[idx])):
@@ -306,18 +306,23 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         """
         return list(self._subslices.keys())
 
-    @property
-    def coordinates(self) -> Dict[Literal['x', 'y', 'z'], np.ndarray]:
+    def get_coordinates(self, ignore_self_centered: bool = False) -> Dict[Literal['x', 'y', 'z'], np.ndarray]:
         """Returns a dictionary containing a numpy ndarray with coordinates for each dimension.
             For cell-centered slices, the coordinates are adjusted to represent cell-centered coordinates.
+
+            :param ignore_self_centered: Whether to shift the coordinates when the slice is cell_centered or not.
         """
+        orientation = ('x', 'y', 'z')[self.orientation-1] if self.orientation != 0 else ''
         coords = {'x': set(), 'y': set(), 'z': set()}
         for dim in ('x', 'y', 'z'):
+            if orientation == dim:
+                coords[dim] = np.array([self.extent[dim][0]])
+                continue
             for mesh, slc in self._subslices.items():
                 co = mesh.coordinates[dim].copy()
                 # In case the slice is cell-centered, we will shift the coordinates by half a cell
                 # and remove the last coordinate
-                if self.cell_centered:
+                if self.cell_centered and not ignore_self_centered:
                     co = co[:-1]
                     co += abs(co[1] - co[0]) / 2
                 co = co[np.where(np.logical_and(co >= slc.extent[dim][0], co <= slc.extent[dim][1]))]
@@ -332,7 +337,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                     idx = np.searchsorted(mesh_coords, slice_coordinate, side="left")
                     if idx > 0 and (idx == mesh_coords.size or np.math.fabs(
                             slice_coordinate - mesh_coords[idx - 1]) < np.math.fabs(
-                        slice_coordinate - mesh_coords[idx])):
+                            slice_coordinate - mesh_coords[idx])):
                         idx = idx + 1
                     if mesh_coords[idx] - slice_coordinate < nearest_coordinate - slice_coordinate:
                         nearest_coordinate = mesh_coords[idx]
@@ -398,22 +403,17 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         for mesh in to_remove:
             del new_slice._subslices[mesh]
 
-        vals = new_slice._subslices.values()
-        new_slice.extent = Extent(min(vals, key=lambda e: e.extent.x_start).extent.x_start,
-                                  max(vals, key=lambda e: e.extent.x_end).extent.x_end,
-                                  min(vals, key=lambda e: e.extent.y_start).extent.y_start,
-                                  max(vals, key=lambda e: e.extent.y_end).extent.y_end,
-                                  min(vals, key=lambda e: e.extent.z_start).extent.z_start,
-                                  max(vals, key=lambda e: e.extent.z_end).extent.z_end)
-
-        if new_slice.extent.x_start == new_slice.extent.x_end:
-            new_slice.orientation = 1
-        elif new_slice.extent.y_start == new_slice.extent.y_end:
-            new_slice.orientation = 2
-        elif new_slice.extent.z_start == new_slice.extent.z_end:
-            new_slice.orientation = 3
-        else:
-            new_slice.orientation = 0
+        new_slice.orientation = slice_dim
+        subslices = new_slice._subslices.values()
+        x_start, x_end, y_start, y_end, z_start, z_end = min(subslices, key=lambda e: e.extent.x_start).extent.x_start, \
+                                                         max(subslices, key=lambda e: e.extent.x_end).extent.x_end, \
+                                                         min(subslices, key=lambda e: e.extent.y_start).extent.y_start, \
+                                                         max(subslices, key=lambda e: e.extent.y_end).extent.y_end, \
+                                                         min(subslices, key=lambda e: e.extent.z_start).extent.z_start, \
+                                                         max(subslices, key=lambda e: e.extent.z_end).extent.z_end
+        new_slice.extent = Extent(x_start, x_start if new_slice.orientation == 1 else x_end,
+                                  y_start, y_start if new_slice.orientation == 2 else y_end,
+                                  z_start, z_start if new_slice.orientation == 3 else z_end)
 
         return new_slice
 
@@ -492,7 +492,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         """
         # The global grid will use the finest mesh as base and duplicate values of the coarser meshes
         # Therefore we first find the finest mesh and calculate the step size in each dimension
-        coords = self.coordinates
+        coords = self.get_coordinates(ignore_self_centered=True)
         step_sizes = {'x': coords['x'][-1] - coords['x'][0],
                       'y': coords['y'][-1] - coords['y'][0],
                       'z': coords['z'][-1] - coords['z'][0]}
@@ -516,19 +516,20 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         start_idx = dict()
         end_idx = dict()
         for mesh, slc in self._subslices.items():
-            slc_data = slc.data if slc.orientation == 0 else np.expand_dims(slc.data, slc.orientation)
+            slc_data = slc.data if slc.orientation == 0 else np.expand_dims(slc.data, axis=slc.orientation)
             for axis in (0, 1, 2):
                 dim = ('x', 'y', 'z')[axis]
+                if axis == slc.orientation - 1:
+                    start_idx[dim] = 0
+                    end_idx[dim] = 1
+                    continue
                 n_repeat = max(int(round((mesh.coordinates[dim][1] - mesh.coordinates[dim][0]) / step_sizes[dim])), 1)
                 if self.cell_centered:
-                    start_idx[dim] = int(
-                        math.ceil((mesh.coordinates[dim][0] - start_coordinates[dim]) / step_sizes[dim]))
-                    end_idx[dim] = int(
-                        math.floor((mesh.coordinates[dim][-1] - start_coordinates[dim]) / step_sizes[dim])) + n_repeat
+                    start_idx[dim] = int(round((mesh.coordinates[dim][0] - start_coordinates[dim]) / step_sizes[dim]))
+                    end_idx[dim] = int(round((mesh.coordinates[dim][-1] - start_coordinates[dim]) / step_sizes[dim]))
                 else:
                     start_idx[dim] = int(round((mesh.coordinates[dim][0] - start_coordinates[dim]) / step_sizes[dim]))
-                    end_idx[dim] = int(
-                        round((mesh.coordinates[dim][-1] - start_coordinates[dim]) / step_sizes[dim])) + n_repeat
+                    end_idx[dim] = int(round((mesh.coordinates[dim][-1] - start_coordinates[dim]) / step_sizes[dim])) + 1
 
                 if n_repeat > 1:
                     slc_data = np.repeat(slc_data, n_repeat, axis=axis + 1)

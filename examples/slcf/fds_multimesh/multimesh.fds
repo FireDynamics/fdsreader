@@ -66,5 +66,6 @@ VENT   MB ='ZMIN', SURF_ID='OPEN' /
 / Animated Planar Slices - SLCF
 / -----------------------------
 &SLCF PBZ= 0.5, QUANTITY='TEMPERATURE' /
+&SLCF PBZ= 0.5, QUANTITY='TEMPERATURE' , CELL_CENTERED=.TRUE./
 
 &TAIL /

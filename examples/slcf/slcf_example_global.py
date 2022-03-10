@@ -8,8 +8,7 @@ def main():
     sim = fds.Simulation("./fds_multimesh")
 
     # Get the first slice
-    slc = sim.slices[0]
-
+    slc = sim.slices[1]
     data = slc.to_global_nonuniform()
 
     # Plot the slice
