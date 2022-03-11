@@ -1,5 +1,4 @@
 import os
-import yaml
 from typing_extensions import Literal
 import fdsreader.export as exp
 from .. import Simulation
@@ -30,6 +29,7 @@ def export_sim(sim: Simulation, output_dir: str, ordering: Literal['C', 'F'] = '
     meta["NumSlices"] = len(meta["Slices"])
     meta["NumVolumes"] = len(meta["Volumes"])
 
+    import yaml
     meta_file_path = os.path.join(output_dir, sim.chid + "-smv.yaml")
     with open(meta_file_path, 'w') as metafile:
         yaml.dump(meta, metafile)
