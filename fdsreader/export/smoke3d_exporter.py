@@ -26,7 +26,8 @@ def export_smoke_raw(smoke3d: Smoke3D, output_dir: str, ordering: Literal['C', '
         meta["DataValMin"] = min(meta["DataValMin"], np.min(subsmoke.data))
     meta["DataValMax"] = float(meta["DataValMax"])
     meta["DataValMin"] = float(meta["DataValMin"])
-    meta["ScaleFactor"] = 255.0 / meta["DataValMax"]
+    meta["ScaleFactor"] =\
+        255.0 / meta["DataValMax"]
 
     # Abort if no useful data is available
     if meta["DataValMax"] <= 0:
