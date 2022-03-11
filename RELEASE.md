@@ -1,4 +1,10 @@
 ## Release History
+* 1.4.4
+    * Added sim exporter
+* 1.4.3
+    * Fixed some slcf bugs
+* 1.4.2
+    * Added cli-friendliness to exporters
 * 1.4.1
     * Fixed slcf reader slice_id bug and improved export example
 * 1.4.0

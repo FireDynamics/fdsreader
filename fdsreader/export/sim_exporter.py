@@ -16,15 +16,15 @@ def export_sim(sim: Simulation, output_dir: str, ordering: Literal['C', 'F'] = '
 
     for obst in sim.obstructions:
         obst_path = exp.export_obst_raw(obst, os.path.join(output_dir, "obst"), ordering)
-        meta["Obstructions"].append(os.path.relpath(obst_path, output_dir))
+        meta["Obstructions"].append(os.path.relpath(obst_path, output_dir).replace("\\", "/"))
 
     for slc in sim.slices:
         slice_path = exp.export_slcf_raw(slc, os.path.join(output_dir, "slices", slc.quantity.name.replace(' ', '_').lower()), ordering)
-        meta["Slices"].append(os.path.relpath(slice_path, output_dir))
+        meta["Slices"].append(os.path.relpath(slice_path, output_dir).replace("\\", "/"))
 
     for smoke in sim.smoke_3d:
         volume_path = exp.export_smoke_raw(smoke, os.path.join(output_dir, "smoke", smoke.quantity.name.replace(' ', '_').lower()), ordering)
-        meta["Volumes"].append(os.path.relpath(volume_path, output_dir))
+        meta["Volumes"].append(os.path.relpath(volume_path, output_dir).replace("\\", "/"))
 
     meta["NumObstructions"] = len(meta["Obstructions"])
     meta["NumSlices"] = len(meta["Slices"])
