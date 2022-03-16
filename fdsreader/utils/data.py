@@ -4,9 +4,14 @@ Collection of internal utilities (convenience functions and classes) for data ha
 import glob
 import hashlib
 import os
-from collections import Iterable
 from typing import Tuple
 import numpy as np
+try:
+    # Python <= 3.9
+    from collections import Iterable
+except ImportError:
+    # Python > 3.9
+    from collections.abc import Iterable
 
 
 class Quantity:
