@@ -16,7 +16,7 @@ def export_obst_raw(obst: Obstruction, output_dir: str, ordering: Literal['C', '
     :param ordering: Whether to write the data in C or Fortran ordering.
     """
     if len(obst.quantities) == 0:
-        return
+        return ""
 
     from pathos.pools import ProcessPool as Pool
     from multiprocess import Lock, Manager

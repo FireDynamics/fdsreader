@@ -1,4 +1,6 @@
 ## Release History
+* 1.5.1
+    * Fixed sim exporter
 * 1.5.0
     * Added python 3.10+ support
 * 1.4.4

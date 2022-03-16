@@ -4,11 +4,10 @@ import fdsreader.export
 
 
 def main():
-    base_path = "C:\\Users\\janv1\\Documents\\UnrealProjects\\VRSmokeVis"
-    case = "Apartment"
-    sim = fds.Simulation(os.path.join(base_path, "fds_data", case))
+    sim_path = "C:\\Users\\janv1\\PycharmProjects\\fdsreader\\examples\\slcf\\fds_multimesh"
+    sim = fds.Simulation(sim_path)
 
-    print(fds.export.export_sim(sim, os.path.join(base_path, "fds_post", case), ordering='F'))
+    print(fds.export.export_sim(sim, os.path.join(sim_path, "SmokeVisIntermediate"), ordering='F'))
 
 
 if __name__ == "__main__":
