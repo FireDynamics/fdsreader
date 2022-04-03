@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>fdsreader.evac.EvacCollection &mdash; fdsreader [fdsreader, version 1.5.1] documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <title>fdsreader.evac.EvacCollection &mdash; fdsreader [fdsreader, version 1.5.2] documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
@@ -103,7 +103,7 @@
 <span class="sd">        :ivar target_door_counters: Target door counts per time step.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evacs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Evacuation</span><span class="p">],</span> <span class="n">base_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evacs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Evacuation</span><span class="p">],</span> <span class="n">base_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">times</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">evacs</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_file_paths</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Mesh</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
@@ -111,6 +111,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_base_path</span> <span class="o">=</span> <span class="n">base_path</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_load_csv_data</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">times</span> <span class="o">=</span> <span class="n">times</span>
 
         <span class="k">for</span> <span class="n">evac</span> <span class="ow">in</span> <span class="n">evacs</span><span class="p">:</span>
             <span class="n">evac</span><span class="o">.</span><span class="n">times</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">times</span>
@@ -180,6 +182,7 @@
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_load_fed_data</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
