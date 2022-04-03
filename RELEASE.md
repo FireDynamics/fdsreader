@@ -1,4 +1,6 @@
 ## Release History
+* 1.5.2
+    * Fixed evac
 * 1.5.1
     * Fixed sim exporter
 * 1.5.0

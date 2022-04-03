@@ -27,7 +27,7 @@ class EvacCollection(FDSDataCollection):
         :ivar target_door_counters: Target door counts per time step.
     """
 
-    def __init__(self, evacs: Iterable[Evacuation], base_path: str):
+    def __init__(self, evacs: Iterable[Evacuation], base_path: str, times: Iterable[float]):
         super().__init__(evacs)
 
         self._file_paths: Dict[Mesh, str] = dict()
@@ -35,6 +35,8 @@ class EvacCollection(FDSDataCollection):
         self._base_path = base_path
 
         self._load_csv_data()
+
+        self.times = times
 
         for evac in evacs:
             evac.times = self.times
@@ -104,6 +106,7 @@ class EvacCollection(FDSDataCollection):
 
         if not os.path.exists(file_path):
             self._xyz = np.array([])
+            self._load_fed_data(0)
             return
 
         with open(file_path, 'rb') as infile:

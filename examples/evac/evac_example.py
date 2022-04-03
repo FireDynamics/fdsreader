@@ -1,9 +1,9 @@
-import pyvista as pv
 import fdsreader as fds
 
 
 def main():
-    sim = fds.Simulation("fds_fed")
+    fds.settings.DEBUG = True
+    sim = fds.Simulation("fds_no_fed/stairs_evss_meshes_evmc.smv")
 
     # Get all particles with specified id
     evacs = sim.evacs

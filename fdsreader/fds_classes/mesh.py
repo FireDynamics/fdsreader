@@ -65,7 +65,7 @@ class Mesh:
         """Marks all cells of a single slice which are blocked by an obstruction.
 
         :returns: A 4-dimensional array with time as first and x,y,z as last dimensions. The array depends on time as
-            as obstructions may be hidden as specific points in time.
+            obstructions may be hidden as specific points in time.
         """
         orientation = subslice.orientation
         value = subslice.extent[orientation][0]

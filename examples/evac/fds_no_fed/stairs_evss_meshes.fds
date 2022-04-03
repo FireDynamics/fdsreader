@@ -27,8 +27,7 @@
 / miscellaneous
 / -------------------------------------------------------------------
 &MISC NO_EVACUATION             = .FALSE.,
-      EVACUATION_INITIALIZATION = .FALSE.,
-      EVACUATION_MC_MODE        = .TRUE.,
+      EVACUATION_ALL_STEPS      = .TRUE.
       EVACUATION_DRILL          = .TRUE.,
       EVACUATION_WRITE_FED      = .FALSE.,
       EVAC_TIME_ITERATIONS      = 50,
