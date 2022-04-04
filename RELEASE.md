@@ -1,8 +1,6 @@
 ## Release History
-* 1.5.8
-    * Fixed setuptools error for some python versions
-* 1.5.2
-    * Fixed evac
+* 1.6.0
+    * Fixed evac reader, now works with latest evac changes
 * 1.5.1
     * Fixed sim exporter
 * 1.5.0
