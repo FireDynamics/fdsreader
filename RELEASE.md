@@ -1,4 +1,6 @@
 ## Release History
+* 1.5.3
+    * Fixed dependency errors for some python versions 
 * 1.5.2
     * Fixed evac
 * 1.5.1
