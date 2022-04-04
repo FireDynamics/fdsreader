@@ -27,7 +27,7 @@ jobs:
       language: python
       python: 3.6
       install: pip install fdsreader
-      script: python -m pip install -- upgrade importlib-metadata && python -m unittest discover
+      script: python -m pip install --upgrade importlib-metadata && python -m unittest discover
     - stage: test37
       language: python
       python: 3.7
