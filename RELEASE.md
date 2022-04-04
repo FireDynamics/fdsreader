@@ -1,5 +1,5 @@
 ## Release History
-* 1.5.5
+* 1.5.8
     * Fixed setuptools error for some python versions
 * 1.5.2
     * Fixed evac
