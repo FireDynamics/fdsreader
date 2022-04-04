@@ -25,26 +25,22 @@ jobs:
           keep_history: true
     - stage: test36
       language: python
-      env: PYTHON_VERSION=3.6.9
-      python: 3.6
-      install: pip install fdsreader
-      script: python -m pip install --upgrade setuptools && python -m unittest discover
-    - stage: test37
-      language: python
-      env: PYTHON_VERSION=3.7.9
-      python: 3.7
+      python: 3.6.9
       install: pip install fdsreader
       script: python -m unittest discover
+    - stage: test37
+      language: python
+      python: 3.7.9
+      install: pip install fdsreader
+      script: python -m pip install --upgrade setuptools && python -m unittest discover
     - stage: test38
       language: python
-      env: PYTHON_VERSION=3.8.9
-      python: 3.8
+      python: 3.8.9
       install: pip install fdsreader
       script: python -m unittest discover
     - stage: test39
       language: python
-      env: PYTHON_VERSION=3.9.7
-      python: 3.9
+      python: 3.9.7
       install: pip install fdsreader
       script: python -m unittest discover
 notifications:
