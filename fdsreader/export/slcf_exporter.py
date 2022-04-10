@@ -49,7 +49,7 @@ def export_slcf_raw(slc: Slice, output_dir: str, ordering: Literal['C', 'F'] = '
             meta["Meshes"].append({
                 "Mesh": mesh_id,
                 "DataFile": os.path.join(filename_base + "-data", filename),
-                "MeshPos": f"{mesh.coordinates['x'][0]:.6} {mesh.coordinates['y'][0]:.6} {mesh.coordinates['z'][0]:.6}",
+                "MeshPos": f"{subslice.extent['x'][0]:.6} {subslice.extent['y'][0]:.6} {subslice.extent['z'][0]:.6}",
                 "Spacing": f"{spacing[0]:.6} {spacing[1]:.6} {spacing[2]:.6} {spacing[3]:.6}",
                 "DimSize": f"{shape[0]} {shape[1]} {shape[2]} {shape[3]}"
             })

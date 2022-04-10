@@ -1,4 +1,6 @@
 ## Release History
+* 1.6.1
+    * Fixed slcf exporter
 * 1.6.0
     * Fixed evac reader, now works with latest evac changes
 * 1.5.1
