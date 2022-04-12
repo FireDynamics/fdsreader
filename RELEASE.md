@@ -1,4 +1,6 @@
 ## Release History
+* 1.6.2
+    * Added cell-centered information to slcf exporter
 * 1.6.1
     * Fixed slcf exporter
 * 1.6.0

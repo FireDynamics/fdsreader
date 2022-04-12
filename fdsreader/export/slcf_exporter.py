@@ -15,7 +15,7 @@ def export_slcf_raw(slc: Slice, output_dir: str, ordering: Literal['C', 'F'] = '
     from pathos.pools import ProcessPool as Pool
     from multiprocess import Lock, Manager
     slc2d = slc.type == '2D'
-    meta = {"DataValMax": float(slc.vmax), "DataValMin": float(slc.vmin), "ScaleFactor": 255. / (float(slc.vmax) - float(slc.vmin)),
+    meta = {"CellCentered": 1 if slc.cell_centered else 0, "DataValMax": float(slc.vmax), "DataValMin": float(slc.vmin), "ScaleFactor": 255. / (float(slc.vmax) - float(slc.vmin)),
             "MeshNum": len(slc.subslices), "Quantity": slc.quantity.name}
 
     filename_base = ("slice" + ("2D-" if slc2d else "3D-") + slc.id.lower()).replace(" ", "_").replace(".", "-")
