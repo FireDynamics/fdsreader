@@ -1,4 +1,6 @@
 ## Release History
+* 1.6.3
+    * Fixed slcf reader for irregular meshes
 * 1.6.2
     * Added cell-centered information to slcf exporter
 * 1.6.1

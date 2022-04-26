@@ -200,22 +200,10 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             if "W-VELOCITY" in vector_filenames:
                 self._subslices[mesh].vector_filenames["w"] = vector_filenames["W-VELOCITY"]
 
-        # Iterate over all subslices and remove duplicated ones which will be created when the slice
-        # cuts exactly through two mesh borders. Only required for non-cell-centered slices.
-        if not self.cell_centered:
-            extents_tmp = list()
-            remove_tmp = list()
-            for mesh, sslc in self._subslices.items():
-                if sslc.extent not in extents_tmp:
-                    extents_tmp.append(sslc.extent)
-                else:
-                    remove_tmp.append(mesh)
-            for mesh in remove_tmp:
-                del self._subslices[mesh]
-
         subslices = self._subslices.values()
         orientations = list()
-        # Check if all subslices are 2D. If so, the whole slice is 2D, even though it would have a 3D bounding box
+        # Check if all subslices are 2D. If so, the whole slice is 2D, even though it would have a 3D bounding box as
+        # meshes can have different resolutions, therefore the subslices will not necessarily align
         for subslice in subslices:
             if subslice.extent.x_start == subslice.extent.x_end:
                 orientations.append(1)
@@ -226,6 +214,30 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             else:
                 orientations.append(0)
         self.orientation = 0 if any(o != orientations[0] for o in orientations) else orientations[0]
+
+        # Iterate over all subslices and remove duplicated ones which will be created when the slice
+        # cuts exactly through two mesh borders. Only required for non-cell-centered slices. To do so, we have to check
+        # if to subslices overlap and only keep one of the two
+        # Todo: Known issue - This will not necessarily work if the simulation space is no cuboid and the slice touches
+        # the border of the simulation space somewhere
+        if not self.cell_centered:
+            if self.orientation != 0:
+                remove_tmp = list()
+                for mesh, sslc in self._subslices.items():
+                    # Look at the subslices as if they were simple rectangles
+                    left1, right1, bottom1, top1 = sslc.extent.as_tuple(reduced=True)
+                    for other_mesh, other_sslc in self._subslices.items():
+                        if mesh.extent[self.orientation][1] == other_mesh.extent[self.orientation][0]:
+                            left2, right2, bottom2, top2 = other_sslc.extent.as_tuple(reduced=True)
+                            # Check if the two rectangles overlap, if they do, remove one of them
+                            if left1 <= right2 and right1 >= left2 and top1 >= bottom2 and bottom1 <= top2:
+                                # We cannot remove the subslice while iterating over the subslices
+                                remove_tmp.append(mesh)
+                                # Break the inner loop, so we continue checking the next subslice
+                                break
+
+                for mesh in remove_tmp:
+                    del self._subslices[mesh]
 
         x_start, x_end, y_start, y_end, z_start, z_end = min(subslices, key=lambda e: e.extent.x_start).extent.x_start, \
                                                          max(subslices, key=lambda e: e.extent.x_end).extent.x_end, \
@@ -306,11 +318,11 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         """
         return list(self._subslices.keys())
 
-    def get_coordinates(self, ignore_self_centered: bool = False) -> Dict[Literal['x', 'y', 'z'], np.ndarray]:
+    def get_coordinates(self, ignore_cell_centered: bool = False) -> Dict[Literal['x', 'y', 'z'], np.ndarray]:
         """Returns a dictionary containing a numpy ndarray with coordinates for each dimension.
             For cell-centered slices, the coordinates are adjusted to represent cell-centered coordinates.
 
-            :param ignore_self_centered: Whether to shift the coordinates when the slice is cell_centered or not.
+            :param ignore_cell_centered: Whether to shift the coordinates when the slice is cell_centered or not.
         """
         orientation = ('x', 'y', 'z')[self.orientation-1] if self.orientation != 0 else ''
         coords = {'x': set(), 'y': set(), 'z': set()}
@@ -322,7 +334,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                 co = mesh.coordinates[dim].copy()
                 # In case the slice is cell-centered, we will shift the coordinates by half a cell
                 # and remove the last coordinate
-                if self.cell_centered and not ignore_self_centered:
+                if self.cell_centered and not ignore_cell_centered:
                     co = co[:-1]
                     co += abs(co[1] - co[0]) / 2
                 co = co[np.where(np.logical_and(co >= slc.extent[dim][0], co <= slc.extent[dim][1]))]
@@ -487,22 +499,24 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         return slc_array
 
     def to_global_nonuniform(self) -> np.ndarray:
-        """Creates a global 2D-numpy ndarray from all subslices (2D-slices only).
+        """Creates a global numpy ndarray from all subslices (only tested for 2D-slices).
             Beware, this method might create sparse np-arrays that consume lots of memory.
         """
         # The global grid will use the finest mesh as base and duplicate values of the coarser meshes
         # Therefore we first find the finest mesh and calculate the step size in each dimension
-        coords = self.get_coordinates(ignore_self_centered=True)
+        coords = self.get_coordinates(ignore_cell_centered=True)
         step_sizes = {'x': coords['x'][-1] - coords['x'][0],
                       'y': coords['y'][-1] - coords['y'][0],
                       'z': coords['z'][-1] - coords['z'][0]}
         step_sizes_inv = {'x': 0, 'y': 0, 'z': 0}
         steps = dict()
+        global_max = {'x': -math.inf, 'y': -math.inf, 'z': -math.inf}
         for mesh in self._subslices.keys():
             for dim in ('x', 'y', 'z'):
                 step_size = mesh.coordinates[dim][1] - mesh.coordinates[dim][0]
                 step_sizes[dim] = min(step_size, step_sizes[dim])
                 step_sizes_inv[dim] = max(step_size, step_sizes_inv[dim])
+                global_max[dim] = max(mesh.coordinates[dim][-1], global_max[dim])
 
         for dim in ('x', 'y', 'z'):
             if step_sizes[dim] == 0:
@@ -524,15 +538,32 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                     end_idx[dim] = 1
                     continue
                 n_repeat = max(int(round((mesh.coordinates[dim][1] - mesh.coordinates[dim][0]) / step_sizes[dim])), 1)
-                if self.cell_centered:
-                    start_idx[dim] = int(round((mesh.coordinates[dim][0] - start_coordinates[dim]) / step_sizes[dim]))
-                    end_idx[dim] = int(round((mesh.coordinates[dim][-1] - start_coordinates[dim]) / step_sizes[dim]))
-                else:
-                    start_idx[dim] = int(round((mesh.coordinates[dim][0] - start_coordinates[dim]) / step_sizes[dim]))
-                    end_idx[dim] = int(round((mesh.coordinates[dim][-1] - start_coordinates[dim]) / step_sizes[dim])) + 1
+
+                start_idx[dim] = int(round((mesh.coordinates[dim][0] - start_coordinates[dim]) / step_sizes[dim]))
+                end_idx[dim] = int(round((mesh.coordinates[dim][-1] - start_coordinates[dim]) / step_sizes[dim]))
+
+                # We ignore border points unless they are actually on the border of the simulation space as all other
+                # border points actually appear twice, as the subslices overlap
+                if not self.cell_centered:
+                    if axis != slc.orientation - 1:
+                        reduced_shape = list(slc_data.shape)
+                        reduced_shape[axis + 1] -= 1
+                        reduced_data_slices = tuple(slice(s) for s in reduced_shape)
+                        slc_data = slc_data[reduced_data_slices]
+
+                    # Temporarily save border points to add them back to the array again later
+                    if mesh.coordinates[dim][-1] == global_max[dim]:
+                        end_idx[dim] += 1
+                        temp_data_slices = [slice(s) for s in slc_data.shape]
+                        temp_data_slices[axis + 1] = slice(slc_data.shape[axis + 1] - 1, None)
+                        temp_data = slc_data[tuple(temp_data_slices)]
 
                 if n_repeat > 1:
                     slc_data = np.repeat(slc_data, n_repeat, axis=axis + 1)
+
+                # Add border points back again if needed
+                if not self.cell_centered and mesh.coordinates[dim][-1] == global_max[dim]:
+                    slc_data = np.concatenate((slc_data, temp_data), axis=axis + 1)
 
             grid[:, start_idx['x']: end_idx['x'], start_idx['y']: end_idx['y'],
             start_idx['z']: end_idx['z']] = slc_data.reshape(
