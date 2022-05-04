@@ -18,6 +18,7 @@ FDSReader documentation!
    quantity
    fds classes
    utils
+   export
 
 .. include::  simulation.rst
 .. include::  slcf.rst
@@ -32,3 +33,4 @@ FDSReader documentation!
 .. include::  quantity.rst
 .. include::  fds_classes.rst
 .. include::  utils.rst
+.. include::  export.rst
