@@ -11,7 +11,7 @@ def export_sim(sim: Simulation, output_dir: str, ordering: Literal['C', 'F'] = '
     :param output_dir: The directory in which to save all files.
     :param ordering: Whether to write the data in C or Fortran ordering.
     """
-    meta = {"Obstructions": list(), "Slices": list(), "Volumes": list()}
+    meta = {"Obstructions": list(), "Slices": list(), "Volumes": list(), "Hash": sim._hash}
 
     for obst in sim.obstructions:
         obst_path = export_obst_raw(obst, os.path.join(output_dir, "obst"), ordering)
