@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Slice files &mdash; fdsreader [fdsreader, version 1.6.4] documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <title>Slice files &mdash; fdsreader [fdsreader, version 1.6.5] documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
@@ -259,11 +259,8 @@ slice with the corresponding short_name and unit.</p></li>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">std</span></code>()</p></td>
 <td><p>Calculates the standard deviation over the whole slice.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_global_nonuniform</span></code>()</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_global</span></code>()</p></td>
 <td><p>Creates a global numpy ndarray from all subslices (only tested for 2D-slices).</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_global_uniform</span></code>()</p></td>
-<td><p>Creates a global 2D-numpy ndarray from all subslices (2D-slices only).</p></td>
 </tr>
 </tbody>
 </table>
@@ -318,7 +315,7 @@ slice with the corresponding short_name and unit.</p></li>
 <dt>
 <code class="sig-name descname"><span class="pre">get_coordinates</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ignore_cell_centered</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">x</span><span class="p"><span class="pre">,</span> </span><span class="pre">y</span><span class="p"><span class="pre">,</span> </span><span class="pre">z</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice.get_coordinates"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Returns a dictionary containing a numpy ndarray with coordinates for each dimension.
-For cell-centered slices, the coordinates are adjusted to represent cell-centered coordinates.</p>
+For cell-centered slices, the coordinates can be adjusted to represent cell-centered coordinates.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>ignore_cell_centered</strong> – Whether to shift the coordinates when the slice is cell_centered or not.</p>
@@ -387,17 +384,9 @@ the nth SubSlice will be returned.</p>
 
 <dl class="py method">
 <dt>
-<code class="sig-name descname"><span class="pre">to_global_nonuniform</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.ndarray</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice.to_global_nonuniform"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">to_global</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.ndarray</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice.to_global"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Creates a global numpy ndarray from all subslices (only tested for 2D-slices).
-Beware, this method might create sparse np-arrays that consume lots of memory.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt>
-<code class="sig-name descname"><span class="pre">to_global_uniform</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.ndarray</span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice.to_global_uniform"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Creates a global 2D-numpy ndarray from all subslices (2D-slices only).
-Note: This method will only return valid output if evenly sized and spaced meshes were
-used in the simulation.</p>
+Note: This method might create a sparse np-array that consumes lots of memory.</p>
 </dd></dl>
 
 <dl class="py method">
