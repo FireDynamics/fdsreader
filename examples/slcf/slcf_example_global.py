@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-import numpy as np
 
 import fdsreader as fds
 
@@ -9,7 +8,7 @@ def main():
 
     # Get the first slice
     slc = sim.slices[1]
-    data = slc.to_global_nonuniform()
+    data = slc.to_global()
 
     # Plot the slice
     plt.imshow(data[-1].T, vmin=19, vmax=20, origin="lower")
