@@ -1,7 +1,6 @@
 # FDSReader
 > Fast and easy-to-use Python reader for FDS data
 
-[![Build Status](https://travis-ci.com/FireDynamics/fdsreader.svg?branch=master)](https://travis-ci.com/FireDynamics/fdsreader)  
 [![PyPI version](https://badge.fury.io/py/fdsreader.png)](https://badge.fury.io/py/fdsreader)  
 
 
