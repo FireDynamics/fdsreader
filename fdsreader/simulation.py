@@ -931,7 +931,14 @@ class Simulation:
             names = [name.replace('"', '').replace('\n', '').strip() for name in infile.readline().split(',"')]
             values = np.genfromtxt(infile, delimiter=',', dtype=np.float32, autostrip=True)
             for k in range(len(names)):
-                devc = self.devices[names[k]]
+                if type(self.devices[names[k]]) == list:
+                    for devc in self.devices[names[k]]:
+                        if devc.data is None:
+                            # Find the first device in the list that does not yet have any data associated with it
+                            break
+                else:
+                    devc = self.devices[names[k]]
+
                 devc.quantity.unit = units[k]
                 size = values.shape[0]
                 devc.data = np.empty((size,), dtype=np.float32)

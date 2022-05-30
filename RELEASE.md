@@ -1,4 +1,6 @@
 ## Release History
+* 1.6.6
+    * Fixed exception when devices with duplicated IDs are given
 * 1.6.5
     * Fixed slcf to_global methods for specific cell-centered slice scenarios
 * 1.6.4
