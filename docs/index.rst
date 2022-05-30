@@ -16,7 +16,7 @@ FDSReader documentation!
    devc
    evac
    quantity
-   fds classes
+   fds_classes
    utils
    export
 

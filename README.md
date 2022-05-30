@@ -51,6 +51,13 @@ documentation of all classes check the API Documentation below.
 ## API Documentation
 [https://firedynamics.github.io/fdsreader/](https://firedynamics.github.io/fdsreader/)
 
+## Deployment
+
+```bash
+docker build . -t fdsreader-ci
+docker run --it --rm fdsreader-ci
+```
+
 ## Meta
 
 *  Jan Vogelsang – j.vogelsang@fz-juelich.de

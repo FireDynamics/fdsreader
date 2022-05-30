@@ -5,8 +5,8 @@ from fdsreader.utils.data import FDSDataCollection, Quantity
 
 
 class Smoke3DCollection(FDSDataCollection):
-    """Collection of :class:`Smoke3D` objects. Offers extensive functionality for filtering and
-        using Smoke3Ds as well as its subclasses such as :class:`SubSmoke3D` .
+    """Collection of :class:`Smoke3D` objects. Offers extensive functionality for filtering and using Smoke3Ds as well
+        as its subclasses such as :class:`SubSmoke3D`.
     """
 
     def __init__(self, *smoke3ds: Iterable[Smoke3D]):
@@ -17,7 +17,7 @@ class Smoke3DCollection(FDSDataCollection):
         return [smoke3d.name for smoke3d in self]
 
     def get_by_quantity(self, quantity: Union[Quantity, str]):
-        """Gets the :class:`Smoke3D`s with a specific quantity.
+        """Gets the :class:`Smoke3D` with a specific quantity.
         """
         if type(quantity) == Quantity:
             quantity = quantity.name
