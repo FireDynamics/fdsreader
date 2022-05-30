@@ -51,10 +51,12 @@ documentation of all classes check the API Documentation below.
 [https://firedynamics.github.io/fdsreader/](https://firedynamics.github.io/fdsreader/)
 
 ## Deployment
-
+As the fdsreader has come a long way and the free capabilities of Travis CI have been used up, we now moved to manual CI/CD using a local docker container.  
+To deploy the fdsreader to PyPI and update the Github Pages (Documentation), run the following commands after pushing your changed to GitHub.
 ```bash
+cd $REPO_ROOT_DIR
 docker build . -t fdsreader-ci
-docker run --it --rm fdsreader-ci
+docker run --rm fdsreader-ci
 ```
 
 ## Meta
