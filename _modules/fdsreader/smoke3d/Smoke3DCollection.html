@@ -48,6 +48,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../devc.html">Devices</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../evac.html">Evacuation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../quantity.html">Quantity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../fds_classes.html">FDS classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../utils.html">Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../export.html">Export</a></li>
 </ul>
@@ -84,8 +85,8 @@
 
 
 <div class="viewcode-block" id="Smoke3DCollection"><a class="viewcode-back" href="../../../smoke3d.html#fdsreader.smoke3d.Smoke3DCollection.Smoke3DCollection">[docs]</a><span class="k">class</span> <span class="nc">Smoke3DCollection</span><span class="p">(</span><span class="n">FDSDataCollection</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Collection of :class:`Smoke3D` objects. Offers extensive functionality for filtering and</span>
-<span class="sd">        using Smoke3Ds as well as its subclasses such as :class:`SubSmoke3D` .</span>
+    <span class="sd">&quot;&quot;&quot;Collection of :class:`Smoke3D` objects. Offers extensive functionality for filtering and using Smoke3Ds as well</span>
+<span class="sd">        as its subclasses such as :class:`SubSmoke3D`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">smoke3ds</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Smoke3D</span><span class="p">]):</span>
@@ -96,7 +97,7 @@
         <span class="k">return</span> <span class="p">[</span><span class="n">smoke3d</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">smoke3d</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">]</span>
 
 <div class="viewcode-block" id="Smoke3DCollection.get_by_quantity"><a class="viewcode-back" href="../../../smoke3d.html#fdsreader.smoke3d.Smoke3DCollection.Smoke3DCollection.get_by_quantity">[docs]</a>    <span class="k">def</span> <span class="nf">get_by_quantity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Quantity</span><span class="p">,</span> <span class="nb">str</span><span class="p">]):</span>
-        <span class="sd">&quot;&quot;&quot;Gets the :class:`Smoke3D`s with a specific quantity.</span>
+        <span class="sd">&quot;&quot;&quot;Gets the :class:`Smoke3D` with a specific quantity.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">quantity</span><span class="p">)</span> <span class="o">==</span> <span class="n">Quantity</span><span class="p">:</span>
             <span class="n">quantity</span> <span class="o">=</span> <span class="n">quantity</span><span class="o">.</span><span class="n">name</span>

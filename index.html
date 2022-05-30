@@ -50,6 +50,7 @@
 <li class="toctree-l1"><a class="reference internal" href="devc.html">Devices</a></li>
 <li class="toctree-l1"><a class="reference internal" href="evac.html">Evacuation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quantity.html">Quantity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fds_classes.html">FDS classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="utils.html">Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="export.html">Export</a></li>
 </ul>
@@ -117,6 +118,7 @@
 <li class="toctree-l1"><a class="reference internal" href="devc.html">Devices</a></li>
 <li class="toctree-l1"><a class="reference internal" href="evac.html">Evacuation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quantity.html">Quantity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fds_classes.html">FDS classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="utils.html">Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="export.html">Export</a></li>
 </ul>
@@ -2222,8 +2224,8 @@ calculated for this Plot3D with the corresponding short_name and unit.</p></li>
 <dl class="py class">
 <dt class="sig sig-object py">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fdsreader.smoke3d.Smoke3DCollection.</span></span><span class="sig-name descname"><span class="pre">Smoke3DCollection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">smoke3ds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.smoke3d.smoke3d.Smoke3D</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/smoke3d/Smoke3DCollection.html#Smoke3DCollection"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Collection of <code class="xref py py-class docutils literal notranslate"><span class="pre">Smoke3D</span></code> objects. Offers extensive functionality for filtering and
-using Smoke3Ds as well as its subclasses such as <code class="xref py py-class docutils literal notranslate"><span class="pre">SubSmoke3D</span></code> .</p>
+<dd><p>Collection of <code class="xref py py-class docutils literal notranslate"><span class="pre">Smoke3D</span></code> objects. Offers extensive functionality for filtering and using Smoke3Ds as well
+as its subclasses such as <code class="xref py py-class docutils literal notranslate"><span class="pre">SubSmoke3D</span></code>.</p>
 <p><strong>Methods:</strong></p>
 <table class="autosummary longtable docutils align-default">
 <colgroup>
@@ -2232,7 +2234,7 @@ using Smoke3Ds as well as its subclasses such as <code class="xref py py-class d
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_by_quantity</span></code>(quantity)</p></td>
-<td><p>Gets the :class:<a href="#id1"><span class="problematic" id="id2">`</span></a>Smoke3D`s with a specific quantity.</p></td>
+<td><p>Gets the <code class="xref py py-class docutils literal notranslate"><span class="pre">Smoke3D</span></code> with a specific quantity.</p></td>
 </tr>
 </tbody>
 </table>
@@ -2251,7 +2253,7 @@ using Smoke3Ds as well as its subclasses such as <code class="xref py py-class d
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">get_by_quantity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/smoke3d/Smoke3DCollection.html#Smoke3DCollection.get_by_quantity"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Gets the :class:<a href="#id3"><span class="problematic" id="id4">`</span></a>Smoke3D`s with a specific quantity.</p>
+<dd><p>Gets the <code class="xref py py-class docutils literal notranslate"><span class="pre">Smoke3D</span></code> with a specific quantity.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -3041,7 +3043,7 @@ obstructions may be hidden as specific points in time.</p>
 <dt class="sig sig-object py">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fdsreader.fds_classes.surface.</span></span><span class="sig-name descname"><span class="pre">Surface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmpm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">material_emissivity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">surface_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texture_width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texture_height</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">texture_map</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rgb</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transparency</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/fds_classes/surface.html#Surface"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><dl class="simple">
-<dt>Surface objects describe what bounding surfaces consist of. Boundary conditions for</dt><dd><p>obstructions and vents are prescribed by referencing the appropriate surface.</p>
+<dt>Surface objects describe what bounding surfaces consist of. Boundary conditions for obstructions and vents are</dt><dd><p>prescribed by referencing the appropriate surface.</p>
 </dd>
 </dl>
 <dl class="field-list simple">
