@@ -47,6 +47,32 @@ class SubSlice:
         self.vector_filenames = dict()
         self._vector_data = dict()
 
+    def get_coordinates(self, ignore_cell_centered: bool = False) -> Dict[Literal['x', 'y', 'z'], np.ndarray]:
+        """Returns a dictionary containing a numpy ndarray with coordinates for each dimension.
+            For cell-centered slices, the coordinates can be adjusted to represent cell-centered coordinates.
+
+            :param ignore_cell_centered: Whether to shift the coordinates when the slice is cell_centered or not.
+        """
+        # orientation = ('x', 'y', 'z')[self.orientation - 1] if self.orientation != 0 else ''
+        # coords = {'x': set(), 'y': set(), 'z': set()}
+        coords: Dict[Literal['x', 'y', 'z'], np.ndarray] = {}
+        for dim in ('x', 'y', 'z'):
+            # if orientation == dim:
+            #     coords[dim] = np.array([self.extent[dim][0]])
+            #     continue
+            co = self.mesh.coordinates[dim].copy()
+            # In case the slice is cell-centered, we will shift the coordinates by half a cell
+            # and remove the last coordinate
+            if self.cell_centered and not ignore_cell_centered:
+                co = co[:-1]
+                co += abs(co[1] - co[0]) / 2
+
+            coords[dim] = co[np.where(np.logical_and(co >= self.extent[dim][0], co <= self.extent[dim][1]))]
+            if coords[dim].size == 0:
+                coords[dim] = np.array([co[np.argmin(np.abs(co - self.extent[dim][0]))]])
+
+        return coords
+
     @property
     def shape(self) -> Tuple[int, int]:
         """2D-shape of the slice.
@@ -332,14 +358,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                 coords[dim] = np.array([self.extent[dim][0]])
                 continue
             for mesh, slc in self._subslices.items():
-                co = mesh.coordinates[dim].copy()
-                # In case the slice is cell-centered, we will shift the coordinates by half a cell
-                # and remove the last coordinate
-                if self.cell_centered and not ignore_cell_centered:
-                    co = co[:-1]
-                    co += abs(co[1] - co[0]) / 2
-                co = co[np.where(np.logical_and(co >= slc.extent[dim][0], co <= slc.extent[dim][1]))]
-                coords[dim].update(co)
+                coords[dim].update(slc.get_coordinates(ignore_cell_centered))
             coords[dim] = np.array(sorted(list(coords[dim])))
 
             if len(coords[dim]) == 0:
@@ -515,94 +534,112 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             dim2_pos = 0
         return slc_array
 
-    def to_global(self) -> np.ndarray:
+    def to_global(self) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
         """Creates a global numpy ndarray from all subslices (only tested for 2D-slices).
             Note: This method might create a sparse np-array that consumes lots of memory.
         """
-        subslices = self._subslices.copy()
+        subslice_sets = [dict(), dict()]
 
-        coord_min = {'x': math.inf, 'y': math.inf, 'z': math.inf}
-        coord_max = {'x': -math.inf, 'y': -math.inf, 'z': -math.inf}
-        for dim in ('x', 'y', 'z'):
-            for mesh, slc in subslices.items():
-                co = mesh.coordinates[dim]
-                co = co[np.where(np.logical_and(co >= slc.extent[dim][0], co <= slc.extent[dim][1]))]
-                coord_min[dim] = min(co[0], coord_min[dim])
-                coord_max[dim] = max(co[-1], coord_max[dim])
+        dimension = ['x', 'y', 'z'][self.orientation - 1]
+        base_coord = next(iter(self._subslices.values())).get_coordinates(ignore_cell_centered=False)[dimension][0]
 
-        # The global grid will use the finest mesh as base and duplicate values of the coarser meshes
-        # Therefore we first find the finest mesh and calculate the step size in each dimension
-        step_sizes_min = {'x': coord_max['x'] - coord_min['x'],
-                      'y': coord_max['y'] - coord_min['y'],
-                      'z': coord_max['z'] - coord_min['z']}
-        step_sizes_max = {'x': 0, 'y': 0, 'z': 0}
-        steps = dict()
-        global_max = {'x': -math.inf, 'y': -math.inf, 'z': -math.inf}
-
-        for dim in ('x', 'y', 'z'):
-            for mesh in subslices.keys():
-                step_size = mesh.coordinates[dim][1] - mesh.coordinates[dim][0]
-                step_sizes_min[dim] = min(step_size, step_sizes_min[dim])
-                step_sizes_max[dim] = max(step_size, step_sizes_max[dim])
-                global_max[dim] = max(mesh.coordinates[dim][-1], global_max[dim])
-
-        for dim in ('x', 'y', 'z'):
-            if step_sizes_min[dim] == 0:
-                step_sizes_min[dim] = math.inf
-                steps[dim] = 1
+        for mesh, slc in self._subslices.items():
+            coords = slc.get_coordinates(ignore_cell_centered=False)
+            if coords[dimension][0] == base_coord:
+                subslice_sets[0][mesh] = slc
             else:
-                steps[dim] = max(int(round((coord_max[dim] - coord_min[dim]) / step_sizes_min[dim])), 1) + (0 if self.cell_centered else 1)  # + step_sizes_max[dim] / step_sizes_min[dim]
+                subslice_sets[1][mesh] = slc
+        if len(subslice_sets[1]) == 0:
+            subslice_sets.pop(1)
 
-        grid = np.full((self.n_t, steps['x'], steps['y'], steps['z']), np.nan)
+        first_result_grid = None
+        for subslices in subslice_sets:
+            coord_min = {'x': math.inf, 'y': math.inf, 'z': math.inf}
+            coord_max = {'x': -math.inf, 'y': -math.inf, 'z': -math.inf}
+            for dim in ('x', 'y', 'z'):
+                for mesh, slc in subslices.items():
+                    co = mesh.coordinates[dim]
+                    co = co[np.where(np.logical_and(co >= slc.extent[dim][0], co <= slc.extent[dim][1]))]
+                    coord_min[dim] = min(co[0], coord_min[dim])
+                    coord_max[dim] = max(co[-1], coord_max[dim])
 
-        start_coordinates = {'x': coord_min['x'], 'y': coord_min['y'], 'z': coord_min['z']}
-        start_idx = dict()
-        end_idx = dict()
-        for mesh, slc in subslices.items():
-            slc_data = slc.data if slc.orientation == 0 else np.expand_dims(slc.data, axis=slc.orientation)
-            for axis in (0, 1, 2):
-                dim = ('x', 'y', 'z')[axis]
-                if axis == slc.orientation - 1:
-                    start_idx[dim] = 0
-                    end_idx[dim] = 1
-                    continue
-                n_repeat = max(int(round((mesh.coordinates[dim][1] - mesh.coordinates[dim][0]) / step_sizes_min[dim])), 1)
+            # The global grid will use the finest mesh as base and duplicate values of the coarser meshes
+            # Therefore we first find the finest mesh and calculate the step size in each dimension
+            step_sizes_min = {'x': coord_max['x'] - coord_min['x'],
+                          'y': coord_max['y'] - coord_min['y'],
+                          'z': coord_max['z'] - coord_min['z']}
+            step_sizes_max = {'x': 0, 'y': 0, 'z': 0}
+            steps = dict()
+            global_max = {'x': -math.inf, 'y': -math.inf, 'z': -math.inf}
 
-                start_idx[dim] = int(round((mesh.coordinates[dim][0] - start_coordinates[dim]) / step_sizes_min[dim]))
-                end_idx[dim] = int(round((mesh.coordinates[dim][-1] - start_coordinates[dim]) / step_sizes_min[dim]))
+            for dim in ('x', 'y', 'z'):
+                for mesh in subslices.keys():
+                    step_size = mesh.coordinates[dim][1] - mesh.coordinates[dim][0]
+                    step_sizes_min[dim] = min(step_size, step_sizes_min[dim])
+                    step_sizes_max[dim] = max(step_size, step_sizes_max[dim])
+                    global_max[dim] = max(mesh.coordinates[dim][-1], global_max[dim])
 
-                # We ignore border points unless they are actually on the border of the simulation space as all other
-                # border points actually appear twice, as the subslices overlap
-                if not self.cell_centered:
-                    if axis != slc.orientation - 1:
-                        reduced_shape = list(slc_data.shape)
-                        reduced_shape[axis + 1] -= 1
-                        reduced_data_slices = tuple(slice(s) for s in reduced_shape)
-                        slc_data = slc_data[reduced_data_slices]
+            for dim in ('x', 'y', 'z'):
+                if step_sizes_min[dim] == 0:
+                    step_sizes_min[dim] = math.inf
+                    steps[dim] = 1
+                else:
+                    steps[dim] = max(int(round((coord_max[dim] - coord_min[dim]) / step_sizes_min[dim])), 1) + (0 if self.cell_centered else 1)  # + step_sizes_max[dim] / step_sizes_min[dim]
 
-                    # Temporarily save border points to add them back to the array again later
-                    if mesh.coordinates[dim][-1] == global_max[dim]:
-                        end_idx[dim] += 1
-                        temp_data_slices = [slice(s) for s in slc_data.shape]
-                        temp_data_slices[axis + 1] = slice(slc_data.shape[axis + 1] - 1, None)
-                        temp_data = slc_data[tuple(temp_data_slices)]
+            grid = np.full((self.n_t, steps['x'], steps['y'], steps['z']), np.nan)
 
-                if n_repeat > 1:
-                    slc_data = np.repeat(slc_data, n_repeat, axis=axis + 1)
+            start_coordinates = {'x': coord_min['x'], 'y': coord_min['y'], 'z': coord_min['z']}
+            start_idx = dict()
+            end_idx = dict()
+            for mesh, slc in subslices.items():
+                slc_data = slc.data if slc.orientation == 0 else np.expand_dims(slc.data, axis=slc.orientation)
+                for axis in (0, 1, 2):
+                    dim = ('x', 'y', 'z')[axis]
+                    if axis == slc.orientation - 1:
+                        start_idx[dim] = 0
+                        end_idx[dim] = 1
+                        continue
+                    n_repeat = max(int(round((mesh.coordinates[dim][1] - mesh.coordinates[dim][0]) / step_sizes_min[dim])), 1)
 
-                # Add border points back again if needed
-                if not self.cell_centered and mesh.coordinates[dim][-1] == global_max[dim]:
-                    slc_data = np.concatenate((slc_data, temp_data), axis=axis + 1)
+                    start_idx[dim] = int(round((mesh.coordinates[dim][0] - start_coordinates[dim]) / step_sizes_min[dim]))
+                    end_idx[dim] = int(round((mesh.coordinates[dim][-1] - start_coordinates[dim]) / step_sizes_min[dim]))
 
-            grid[:, start_idx['x']: end_idx['x'], start_idx['y']: end_idx['y'],
-            start_idx['z']: end_idx['z']] = slc_data.reshape(
-                (self.n_t, end_idx['x'] - start_idx['x'], end_idx['y'] - start_idx['y'], end_idx['z'] - start_idx['z']))
+                    # We ignore border points unless they are actually on the border of the simulation space as all
+                    # other border points actually appear twice, as the subslices overlap
+                    if not self.cell_centered:
+                        if axis != slc.orientation - 1:
+                            reduced_shape = list(slc_data.shape)
+                            reduced_shape[axis + 1] -= 1
+                            reduced_data_slices = tuple(slice(s) for s in reduced_shape)
+                            slc_data = slc_data[reduced_data_slices]
 
-        # Remove empty dimensions, but make sure to note remove the time dimension if there is only a single timestep
-        grid = np.squeeze(grid)
-        if len(grid.shape) == 2:
-            grid = grid[np.newaxis, :, :]
-        return grid
+                        # Temporarily save border points to add them back to the array again later
+                        if mesh.coordinates[dim][-1] == global_max[dim]:
+                            end_idx[dim] += 1
+                            temp_data_slices = [slice(s) for s in slc_data.shape]
+                            temp_data_slices[axis + 1] = slice(slc_data.shape[axis + 1] - 1, None)
+                            temp_data = slc_data[tuple(temp_data_slices)]
+
+                    if n_repeat > 1:
+                        slc_data = np.repeat(slc_data, n_repeat, axis=axis + 1)
+
+                    # Add border points back again if needed
+                    if not self.cell_centered and mesh.coordinates[dim][-1] == global_max[dim]:
+                        slc_data = np.concatenate((slc_data, temp_data), axis=axis + 1)
+
+                grid[:, start_idx['x']: end_idx['x'], start_idx['y']: end_idx['y'],
+                start_idx['z']: end_idx['z']] = slc_data.reshape(
+                    (self.n_t, end_idx['x'] - start_idx['x'], end_idx['y'] - start_idx['y'], end_idx['z'] - start_idx['z']))
+
+            # Remove empty dimensions, but make sure to note remove the time dimension if there is only a single timestep
+            grid = np.squeeze(grid)
+            if len(grid.shape) == 2:
+                grid = grid[np.newaxis, :, :]
+            if first_result_grid is not None:
+                return first_result_grid, grid
+            else:
+                first_result_grid = grid
+        return first_result_grid
 
     @property
     def type(self) -> Literal['2D', '3D']:

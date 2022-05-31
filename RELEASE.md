@@ -1,4 +1,6 @@
 ## Release History
+* 1.7.0
+    * Changed the behavior of the to_global slcf method to return two slices for cases where slices cut right through mesh boundaries
 * 1.6.6
     * Fixed exception when devices with duplicated IDs are given
 * 1.6.5
