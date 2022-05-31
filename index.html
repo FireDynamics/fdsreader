@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FDSReader documentation! &mdash; fdsreader [fdsreader, version 1.6.6] documentation</title>
+  <title>FDSReader documentation! &mdash; fdsreader [fdsreader, version 1.7.0] documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -464,7 +464,7 @@ the nth SubSlice will be returned.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">to_global</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice.to_global"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<span class="sig-name descname"><span class="pre">to_global</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice.to_global"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Creates a global numpy ndarray from all subslices (only tested for 2D-slices).
 Note: This method might create a sparse np-array that consumes lots of memory.</p>
 </dd></dl>
@@ -545,6 +545,9 @@ Note: This method might create a sparse np-array that consumes lots of memory.</
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_cache</span></code>()</p></td>
 <td><p>Remove all data from the internal cache that has been loaded so far to free memory.</p></td>
 </tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_coordinates</span></code>([ignore_cell_centered])</p></td>
+<td><p>Returns a dictionary containing a numpy ndarray with coordinates for each dimension.</p></td>
+</tr>
 </tbody>
 </table>
 <dl class="py property">
@@ -563,6 +566,18 @@ Note: This method might create a sparse np-array that consumes lots of memory.</
 <dt class="sig sig-object py">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span></em></dt>
 <dd><p>Method to lazy load the slice’s data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">get_coordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ignore_cell_centered</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">typing_extensions.Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">x</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">y</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">z</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#SubSlice.get_coordinates"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Returns a dictionary containing a numpy ndarray with coordinates for each dimension.
+For cell-centered slices, the coordinates can be adjusted to represent cell-centered coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ignore_cell_centered</strong> – Whether to shift the coordinates when the slice is cell_centered or not.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
