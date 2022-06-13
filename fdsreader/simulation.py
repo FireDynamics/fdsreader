@@ -56,18 +56,17 @@ class Simulation:
     _loading = False
 
     def __new__(cls, path: str):
+        smv_file_path = get_smv_file(path)
+        root_path = os.path.dirname(smv_file_path)
+
+        with open(smv_file_path, 'r') as infile:
+            for line in infile:
+                if line.strip() == "CHID":
+                    chid = infile.readline().strip()
+                    break
+
+        pickle_file_path = Simulation._get_pickle_filename(root_path, chid)
         if settings.ENABLE_CACHING:
-            smv_file_path = get_smv_file(path)
-            root_path = os.path.dirname(smv_file_path)
-
-            with open(smv_file_path, 'r') as infile:
-                for line in infile:
-                    if line.strip() == "CHID":
-                        chid = infile.readline().strip()
-                        break
-
-            pickle_file_path = Simulation._get_pickle_filename(root_path, chid)
-
             if not Simulation._loading and os.path.isfile(pickle_file_path):
                 Simulation._loading = True
                 try:
@@ -90,7 +89,8 @@ class Simulation:
                         return sim
 
                 os.remove(pickle_file_path)
-
+        else:
+            os.remove(pickle_file_path)
         return super(Simulation, cls).__new__(cls)
 
     def __getnewargs__(self):
@@ -151,78 +151,12 @@ class Simulation:
             self.profiles: Dict[str, Profile] = dict()
             device_tmp = str()
 
-            with open(self.smv_file_path, 'r') as smv_file:
-                for line in smv_file:
-                    keyword = line.strip()
-                    if keyword == "VERSION":
-                        self.fds_version = smv_file.readline().strip()
-                    elif keyword == "CHID":
-                        self.chid = smv_file.readline().strip()
-                    elif keyword == "CSVF":
-                        csv_type = smv_file.readline().strip()
-                        filename = smv_file.readline().strip()
-                        file_path = os.path.join(self.root_path, filename)
-                        if csv_type == "hrr":
-                            self.hrr = self._load_HRR_data(file_path)
-                        elif csv_type == "steps":
-                            self.steps = self._load_step_data(file_path)
-                        elif csv_type == "devc":
-                            device_tmp = file_path
-                            self.devices["Time"] = Device("Time", Quantity("TIME", "TIME", "s"), (.0, .0, .0),
-                                                          (.0, .0, .0))
-                    elif keyword == "HRRPUVCUT":
-                        self.hrrpuv_cutoff = float(smv_file.readline().strip())
-                    elif keyword == "TOFFSET":
-                        offsets = smv_file.readline().strip().split()
-                        self.default_texture_origin = tuple(float(offsets[i]) for i in range(3))
-                    elif keyword == "CLASS_OF_PARTICLES":
-                        self.particles.append(self._register_particle(smv_file))
-                    elif keyword == "CLASS_OF_HUMANS":
-                        self.evacs.append(self._register_evac(smv_file))
-                    elif keyword.startswith("GEOM"):
-                        self._load_geoms(smv_file, keyword)
-                    elif keyword.startswith("GRID"):
-                        self.meshes.append(self._load_mesh(smv_file, keyword))
-                    elif keyword == "SURFACE":
-                        self.surfaces.append(self._load_surface(smv_file))
-                    elif keyword == "DEVICE":
-                        device_id, device = self._register_device(smv_file)
-                        if device_id in self.devices:
-                            if type(self.devices[device_id]) == list:
-                                self.devices[device_id].append(device)
-                            else:
-                                self.devices[device_id] = [self.devices[device_id], device]
-                        else:
-                            self.devices[device_id] = device
-                    elif keyword.startswith("SLC"):
-                        self._load_slice(smv_file, keyword)
-                    elif keyword.startswith("BNDS"):
-                        self._load_geomslice(smv_file, keyword)
-                    elif "ISOG" in keyword:
-                        self._load_isosurface(smv_file, keyword)
-                    elif keyword.startswith("PL3D"):
-                        self._load_plot_3d(smv_file, keyword)
-                    elif keyword.startswith("SMOKG3D") or keyword.startswith("SMOKF3D"):
-                        self._load_smoke_3d(smv_file, keyword)
-                    elif keyword.startswith("BNDF"):
-                        self._load_boundary_data(smv_file, keyword, cell_centered=False)
-                    elif keyword.startswith("BNDC"):
-                        self._load_boundary_data(smv_file, keyword, cell_centered=True)
-                    elif keyword.startswith("BNDE"):
-                        self._load_boundary_data_geom(smv_file, keyword)
-                    elif keyword.startswith("PRT5"):
-                        self._load_particle_data(smv_file, keyword)
-                    elif keyword.startswith("EVA5"):
-                        self._load_evac_data(smv_file, keyword)
-                    elif keyword.startswith("SHOW_OBST"):
-                        self._toggle_obst(smv_file, keyword)
-                    elif keyword.startswith("HIDE_OBST"):
-                        self._toggle_obst(smv_file, keyword)
+            self.parse_smv_file()
 
-                self.cpu = self._load_CPU_data()
-                self._load_profiles()
-                if device_tmp != "":
-                    self._load_DEVC_data(device_tmp)
+            self.cpu = self._load_CPU_data()
+            self._load_profiles()
+            if device_tmp != "":
+                self._load_DEVC_data(device_tmp)
 
             # POST INIT (post read)
             self.out_file_path = os.path.join(self.root_path, self.chid + ".out")
@@ -258,7 +192,7 @@ class Simulation:
             self.smoke_3d = Smoke3DCollection(self.smoke_3d.values())
             self.isosurfaces = IsosurfaceCollection(self.isosurfaces.values())
             # If no particles are simulated, initialize empty data container for consistency
-            if len(self.particles) == 0:
+            if type(self.particles) == list:
                 self.particles = ParticleCollection((), ())
             else:
                 self.particles._post_init()
@@ -273,6 +207,75 @@ class Simulation:
                 self._hash = create_hash(self.smv_file_path)
                 pickle.dump(self, open(Simulation._get_pickle_filename(self.root_path, self.chid), 'wb'),
                             protocol=pickle.HIGHEST_PROTOCOL)
+
+    def parse_smv_file(self):
+        with open(self.smv_file_path, 'r') as smv_file:
+            for line in smv_file:
+                keyword = line.strip()
+                if keyword == "VERSION":
+                    self.fds_version = smv_file.readline().strip()
+                elif keyword == "CHID":
+                    self.chid = smv_file.readline().strip()
+                elif keyword == "CSVF":
+                    csv_type = smv_file.readline().strip()
+                    filename = smv_file.readline().strip()
+                    file_path = os.path.join(self.root_path, filename)
+                    if csv_type == "hrr":
+                        self.hrr = self._load_HRR_data(file_path)
+                    elif csv_type == "steps":
+                        self.steps = self._load_step_data(file_path)
+                    elif csv_type == "devc":
+                        device_tmp = file_path
+                        self.devices["Time"] = Device("Time", Quantity("TIME", "TIME", "s"), (.0, .0, .0),
+                                                      (.0, .0, .0))
+                elif keyword == "HRRPUVCUT":
+                    self.hrrpuv_cutoff = float(smv_file.readline().strip())
+                elif keyword == "TOFFSET":
+                    offsets = smv_file.readline().strip().split()
+                    self.default_texture_origin = tuple(float(offsets[i]) for i in range(3))
+                elif keyword == "CLASS_OF_PARTICLES":
+                    self.particles.append(self._register_particle(smv_file))
+                elif keyword == "CLASS_OF_HUMANS":
+                    self.evacs.append(self._register_evac(smv_file))
+                elif keyword.startswith("GEOM"):
+                    self._load_geoms(smv_file, keyword)
+                elif keyword.startswith("GRID"):
+                    self.meshes.append(self._load_mesh(smv_file, keyword))
+                elif keyword == "SURFACE":
+                    self.surfaces.append(self._load_surface(smv_file))
+                elif keyword == "DEVICE":
+                    device_id, device = self._register_device(smv_file)
+                    if device_id in self.devices:
+                        if type(self.devices[device_id]) == list:
+                            self.devices[device_id].append(device)
+                        else:
+                            self.devices[device_id] = [self.devices[device_id], device]
+                    else:
+                        self.devices[device_id] = device
+                elif keyword.startswith("SLC"):
+                    self._load_slice(smv_file, keyword)
+                elif keyword.startswith("BNDS"):
+                    self._load_geomslice(smv_file, keyword)
+                elif "ISOG" in keyword:
+                    self._load_isosurface(smv_file, keyword)
+                elif keyword.startswith("PL3D"):
+                    self._load_plot_3d(smv_file, keyword)
+                elif keyword.startswith("SMOKG3D") or keyword.startswith("SMOKF3D"):
+                    self._load_smoke_3d(smv_file, keyword)
+                elif keyword.startswith("BNDF"):
+                    self._load_boundary_data(smv_file, keyword, cell_centered=False)
+                elif keyword.startswith("BNDC"):
+                    self._load_boundary_data(smv_file, keyword, cell_centered=True)
+                elif keyword.startswith("BNDE"):
+                    self._load_boundary_data_geom(smv_file, keyword)
+                elif keyword.startswith("PRT5"):
+                    self._load_particle_data(smv_file, keyword)
+                elif keyword.startswith("EVA5"):
+                    self._load_evac_data(smv_file, keyword)
+                elif keyword.startswith("SHOW_OBST"):
+                    self._toggle_obst(smv_file, keyword)
+                elif keyword.startswith("HIDE_OBST"):
+                    self._toggle_obst(smv_file, keyword)
 
     @classmethod
     def _get_pickle_filename(cls, root_path: str, chid: str) -> AnyStr:
@@ -965,19 +968,21 @@ class Simulation:
         with open(file_path, 'r') as infile:
             infile.readline()
             keys = [name.replace('"', '').replace('\n', '').strip() for name in infile.readline().split(',')]
-            values = np.genfromtxt(infile, delimiter=',', dtype=np.float32, autostrip=True)
-            return self._transform_csv_data(keys, values, [np.float32] * len(keys))
+
+        values = np.loadtxt(file_path, delimiter=',', ndmin=2, skiprows=2)
+        return self._transform_csv_data(keys, values)
 
     @log_error("csv")
     def _load_step_data(self, file_path: str) -> Dict[str, np.ndarray]:
         with open(file_path, 'r') as infile:
             infile.readline()
-            keys = [name.replace('"', '').replace('\n', '').strip() for name in infile.readline().split(',')]
-            dtypes = [np.float32] * len(keys)
-            dtypes[0] = int
-            dtypes[1] = np.dtype("datetime64[ms]")
-            values = np.genfromtxt(infile, delimiter=',', dtype=dtypes, autostrip=True)
-            return self._transform_csv_data(keys, values, dtypes)
+            keys = [name.replace('"', '').replace('\n', '').strip() for name in infile.readline().split(',')][2:]
+        timesteps = np.loadtxt(file_path, dtype=np.dtype("datetime64[ms]"), delimiter=',', ndmin=1, usecols=1,
+                               skiprows=2)
+        float_values = np.loadtxt(file_path, delimiter=',', usecols=range(2, len(keys)+2), ndmin=2, skiprows=2)
+        data = self._transform_csv_data(keys, float_values)
+        data["Time Step"] = timesteps
+        return data
 
     @log_error("csv")
     def _load_CPU_data(self) -> Dict[str, np.ndarray]:
@@ -985,17 +990,14 @@ class Simulation:
         if os.path.exists(file_path):
             with open(file_path, 'r') as infile:
                 keys = [name.replace('"', '').replace('\n', '').strip() for name in infile.readline().split(',')]
-                dtypes = [np.float32] * len(keys)
-                dtypes[0] = int
-                values = np.genfromtxt(infile, delimiter=',', dtype=dtypes, autostrip=True)
-                if len(values.shape) != 0:
-                    return self._transform_csv_data(keys, values, dtypes)
-                else:
-                    return self._transform_csv_data(keys, values.reshape((1,)), dtypes)
+            values = np.loadtxt(file_path, delimiter=',', ndmin=2, skiprows=1)
+        data = self._transform_csv_data(keys, values)
+        data["Rank"] = data["Rank"].astype(int)
+        return data
 
-    def _transform_csv_data(self, keys, values, dtypes):
+    def _transform_csv_data(self, keys, values):
         size = values.shape[0]
-        data = {keys[i]: np.empty((size,), dtype=dtypes[i]) for i in range(len(keys))}
+        data = {keys[i]: np.empty((size,), dtype=float) for i in range(len(keys))}
         for k, arr in enumerate(data.values()):
             for i in range(size):
                 arr[i] = values[i][k]

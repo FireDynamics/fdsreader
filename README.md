@@ -59,7 +59,7 @@ GitHub: https://github.com/settings/tokens/new (set the repo_deployment and publ
 Now add these Tokens in the Dockerfile. To now deploy the fdsreader to PyPI and update the Github Pages (Documentation), run the following commands after pushing your changes to the FDSReader to GitHub (apart from the Dockerfile).
 ```bash
 cd $REPO_ROOT_DIR
-docker build . -t fdsreader-ci
+docker build . -t fdsreader-ci  # Only needed the very first time
 docker run --rm fdsreader-ci
 ```
 
