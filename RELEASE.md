@@ -1,4 +1,6 @@
 ## Release History
+* 1.7.2
+    * Fixed naming in \_\_repr\_\_ string
 * 1.7.1
     * Fixed cpu, hrr and steps reader
 * 1.7.0
