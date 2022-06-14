@@ -38,7 +38,8 @@ fds.settings.DEBUG = True
 |----------------|---------|---------|-------------|
 |    LAZY_LOAD   | boolean |   True  | Load all data when initially loading the simulation (False) or only when specific data is needed (True). |
 | ENABLE_CACHING | boolean |   True  | Cache the loaded simulation to reduce startup times when loading the same simulation again. |
-|     DEBUG      | boolean |  False  | Crash on non-critical errors with an exception (True) or hide non-critical errors (False). |
+|     DEBUG      | boolean |  False  | Crash on non-critical errors with an exception (True) or output non-critical errors as warnings (False). |
+| IGNORE_ERRORS  | boolean |  False  | Ignore any non-critical errors completely. |
 
 
 ### Data structure
