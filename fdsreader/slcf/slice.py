@@ -291,7 +291,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         if type(key) == int:
             return tuple(self._subslices.values())[key]
         elif type(key) == str:
-            key = [mesh for mesh in self.meshes if mesh.id == key]
+            key = [mesh for mesh in self.meshes if mesh.id == key][0]
         return self._subslices[key]
 
     def __len__(self):

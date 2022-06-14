@@ -1,4 +1,6 @@
 ## Release History
+* 1.7.5
+    * Fixed bug in get_subslice method
 * 1.7.4
     * Several bugfixes
 * 1.7.3
