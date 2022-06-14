@@ -90,7 +90,8 @@ class Simulation:
 
                 os.remove(pickle_file_path)
         else:
-            os.remove(pickle_file_path)
+            if os.path.isfile(pickle_file_path):
+                os.remove(pickle_file_path)
         return super(Simulation, cls).__new__(cls)
 
     def __getnewargs__(self):

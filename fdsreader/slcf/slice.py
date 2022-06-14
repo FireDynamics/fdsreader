@@ -278,18 +278,20 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             for _, subslice in self._subslices.items():
                 _ = subslice.data
 
-    def get_subslice(self, key: Union[int, Mesh]) -> SubSlice:
+    def get_subslice(self, key: Union[int, str, Mesh]) -> SubSlice:
         """Returns the :class:`SubSlice` that cuts through the given mesh. When an int is provided
             the nth SubSlice will be returned.
         """
         return self[key]
 
-    def __getitem__(self, key: Union[int, Mesh]) -> SubSlice:
+    def __getitem__(self, key: Union[int, str, Mesh]) -> SubSlice:
         """Returns the :class:`SubSlice` that cuts through the given mesh. When an int is provided
             the nth SubSlice will be returned.
         """
         if type(key) == int:
             return tuple(self._subslices.values())[key]
+        elif type(key) == str:
+            key = [mesh for mesh in self.meshes if mesh.id == key]
         return self._subslices[key]
 
     def __len__(self):
@@ -350,6 +352,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
 
             :param ignore_cell_centered: Whether to shift the coordinates when the slice is cell_centered or not.
         """
+        # Todo: Fix duplicates for multimesh
         orientation = ('x', 'y', 'z')[self.orientation-1] if self.orientation != 0 else ''
         coords = {'x': set(), 'y': set(), 'z': set()}
         for dim in ('x', 'y', 'z'):

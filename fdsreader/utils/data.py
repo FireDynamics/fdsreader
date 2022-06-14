@@ -41,7 +41,7 @@ class Quantity:
         return hash(self.short_name)
 
     def __repr__(self):
-        return f"Quantity('{self.short_name}')"
+        return f"Quantity('{self.name}')"
 
 
 class Device:
