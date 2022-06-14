@@ -57,9 +57,6 @@ class SubSlice:
         # coords = {'x': set(), 'y': set(), 'z': set()}
         coords: Dict[Literal['x', 'y', 'z'], np.ndarray] = {}
         for dim in ('x', 'y', 'z'):
-            # if orientation == dim:
-            #     coords[dim] = np.array([self.extent[dim][0]])
-            #     continue
             co = self.mesh.coordinates[dim].copy()
             # In case the slice is cell-centered, we will shift the coordinates by half a cell
             # and remove the last coordinate
@@ -322,6 +319,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         """Calculates the nearest timestep for which data has been output for this slice.
         """
         idx = np.searchsorted(self.times, time, side="left")
+        # Todo: side="right"
         if time > 0 and (idx == len(self.times) or np.math.fabs(
                 time - self.times[idx - 1]) < np.math.fabs(time - self.times[idx])):
             return idx - 1
@@ -331,6 +329,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
     def get_nearest_index(self, dimension: Literal['x', 'y', 'z'], value: float) -> int:
         """Get the nearest mesh coordinate index in a specific dimension.
         """
+        # Todo: Fix
         coords = self.get_coordinates()[dimension]
         idx = np.searchsorted(coords, value, side="left")
         if idx > 0 and (idx == coords.size or np.math.fabs(value - coords[idx - 1]) < np.math.fabs(
@@ -358,7 +357,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                 coords[dim] = np.array([self.extent[dim][0]])
                 continue
             for mesh, slc in self._subslices.items():
-                coords[dim].update(slc.get_coordinates(ignore_cell_centered))
+                coords[dim].update(slc.get_coordinates(ignore_cell_centered)[dim])
             coords[dim] = np.array(sorted(list(coords[dim])))
 
             if len(coords[dim]) == 0:

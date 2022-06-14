@@ -1,4 +1,6 @@
 ## Release History
+* 1.7.3
+    * Fixed bug in sublices get_coordinates method
 * 1.7.2
     * Fixed naming in \_\_repr\_\_ string
 * 1.7.1
