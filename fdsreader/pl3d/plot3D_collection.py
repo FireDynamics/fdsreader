@@ -16,7 +16,7 @@ class Plot3DCollection(FDSDataCollection):
     @property
     def quantities(self) -> List[Quantity]:
         qs = set()
-        for pl3d in self:
+        for pl3d in self._elements:
             for q in pl3d.quantities:
                 qs.add(q)
         return list(qs)
@@ -26,7 +26,7 @@ class Plot3DCollection(FDSDataCollection):
         """
         if type(quantity) == Quantity:
             quantity = quantity.name
-        return Plot3DCollection(x for x in self if any(
+        return Plot3DCollection(x for x in self._elements if any(
             q.name.lower() == quantity.lower() or q.short_name.lower() == quantity.lower() for q in
             x.quantities))
 

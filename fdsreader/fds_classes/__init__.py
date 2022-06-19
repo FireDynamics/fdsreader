@@ -1,6 +1,6 @@
 from .mesh import Mesh
 
-from .MeshCollection import MeshCollection
+from .mesh_collection import MeshCollection
 
 from .surface import Surface
 

@@ -4,7 +4,6 @@ Collection of internal utilities (convenience functions and classes) for data ha
 import glob
 import hashlib
 import os
-from typing import Tuple
 import numpy as np
 try:
     # Python <= 3.9
@@ -42,48 +41,6 @@ class Quantity:
 
     def __repr__(self):
         return f"Quantity('{self.name}')"
-
-
-class Device:
-    """Represents a single Device.
-
-    :ivar id: The id the device was given.
-    :ivar quantity: The :class:`Quantity` the device measured.
-    :ivar position: Position of the device in the simulation space.
-    :ivar orientation: The direction the device was facing.
-    :ivar data: All data the device measured.
-    """
-    def __init__(self, device_id: str, quantity: Quantity, position: Tuple[float, float, float],
-                 orientation: Tuple[float, float, float]):
-        self.id = device_id
-        self.quantity = quantity
-        self.position = position
-        self.orientation = orientation
-        self.data: np.ndarray = None
-
-    @property
-    def quantity_name(self):
-        """Alias for :class:`Device`.quantity.name.
-        """
-        return self.quantity.name
-
-    @property
-    def unit(self):
-        """Alias for :class:`Device`.quantity.unit.
-        """
-        return self.quantity.unit
-
-    @property
-    def xyz(self):
-        """Alias for :class:`Device`.position.
-        """
-        return self.position
-
-    def __eq__(self, other):
-        return self.id == other.id
-
-    def __repr__(self):
-        return f"Device(id='{self.id}', xyz={self.position}, quantity={self.quantity})"
 
 
 class Profile:

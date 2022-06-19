@@ -1,3 +1,3 @@
 from .evacuation import Evacuation
 
-from .EvacCollection import EvacCollection
+from .evac_collection import EvacCollection

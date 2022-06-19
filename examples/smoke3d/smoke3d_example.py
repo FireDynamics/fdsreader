@@ -9,7 +9,6 @@ import fdsreader as fds
 
 def main():
     sim = fds.Simulation("./fds_steckler/")
-    sim = fds.Simulation("C:\\Users\\janv1\\Documents\\Unreal Projects\\TBRaymarchProject\\fds_data")
 
     # Select the seconds mesh (index counting starts at 0)
     mesh = sim.meshes[0]

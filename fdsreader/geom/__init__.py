@@ -1,3 +1,3 @@
 from .geometry import Geometry, GeomBoundary
 
-from .GeometryCollection import GeometryCollection
+from .geometry_collection import GeometryCollection

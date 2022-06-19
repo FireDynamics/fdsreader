@@ -10,42 +10,16 @@ def main():
     sim = Simulation("./fds_data")
 
     # Get first obstruction
-    obst = sim.obstructions.get_nearest_obstruction((-0.8, 1, 1))
-    obst = sim.obstructions[3]
+    obst = sim.obstructions.get_nearest(-0.8, 1, 1)
 
     # Get all patches with orientation=1 (equals positive x-dimension)
     orientation = 1
     quantity = "Wall Temperature"
-    patches = list()
-    for sub_obst in obst.filter_by_orientation(orientation):
-        # Get boundary data for a specific quantity
-        sub_obst_data = sub_obst.get_data(quantity)
-        patches.append(sub_obst_data.data[orientation])
-
-    # Combine patches to a single face for plotting
-    patches = sort_patches_cartesian(patches)
-
-    shape_dim1 = sum([patch_row[0].shape[0] for patch_row in patches])
-    shape_dim2 = sum([patch.shape[1] for patch in patches[0]])
-    n_t = patches[0][0].n_t  # Number of timesteps
-
-    face = np.empty(shape=(n_t, shape_dim1, shape_dim2))
-    dim1_pos = 0
-    dim2_pos = 0
-    for patch_row in patches:
-        d1 = patch_row[0].shape[0]
-        for patch in patch_row:
-            d2 = patch.shape[1]
-            face[:, dim1_pos:dim1_pos + d1,
-            dim2_pos:dim2_pos + d2] = patch.data
-            dim2_pos += d2
-        dim1_pos += d1
-        dim2_pos = 0
+    face = obst.get_global_boundary_data_arrays(quantity)[orientation]
 
     # Value range
     vmax = np.ceil(obst.vmax(quantity))
-    # vmin = np.floor(obst.vmin(quantity))
-    vmin = 40 - vmax
+    vmin = np.floor(obst.vmin(quantity))
 
     # Value ticks
     ticks = [vmin+i*(vmax-vmin)/10 for i in range(11)]

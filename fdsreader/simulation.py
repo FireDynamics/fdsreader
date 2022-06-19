@@ -16,8 +16,9 @@ from fdsreader.evac import Evacuation, EvacCollection
 from fdsreader.pl3d import Plot3D, Plot3DCollection
 from fdsreader.smoke3d import Smoke3D, Smoke3DCollection
 from fdsreader.slcf import Slice, SliceCollection, GeomSliceCollection, GeomSlice
+from fdsreader.devc import Device, DeviceCollection
 from fdsreader.utils import Dimension, Quantity, Extent, log_error
-from fdsreader.utils.data import create_hash, get_smv_file, Device, Profile
+from fdsreader.utils.data import create_hash, get_smv_file, Profile
 import fdsreader.utils.fortran_data as fdtype
 from fdsreader import settings
 from fdsreader._version import __version__
@@ -99,17 +100,17 @@ class Simulation:
 
     def __repr__(self):
         r = f"Simulation(chid={self.chid},\n" + \
-            f"           meshes={len(self.meshes)},\n" + \
-            (f"           obstructions={len(self.obstructions)},\n" if len(self.obstructions) > 0 else "") + \
+            f"           meshes={len(self._meshes)},\n" + \
+            (f"           obstructions={len(self._obstructions)},\n" if len(self._obstructions) > 0 else "") + \
             (f"           geoms={len(self.geoms)},\n" if len(self.geoms) > 0 else "") + \
-            (f"           slices={len(self.slices)},\n" if len(self.slices) > 0 else "") + \
-            (f"           geomslices={len(self.geomslices)},\n" if len(self.geomslices) > 0 else "") + \
-            (f"           data_3d={len(self.data_3d)},\n" if len(self.data_3d) > 0 else "") + \
-            (f"           smoke_3d={len(self.smoke_3d)},\n" if len(self.smoke_3d) > 0 else "") + \
-            (f"           isosurfaces={len(self.isosurfaces)},\n" if len(self.isosurfaces) > 0 else "") + \
-            (f"           particles={len(self.particles)},\n" if len(self.particles) > 0 else "") + \
-            (f"           evacs={len(self.evacs)},\n" if len(self.evacs) > 0 else "") + \
-            (f"           devices={len(self.devices)},\n" if len(self.devices) > 0 else "")
+            (f"           slices={len(self._slices)},\n" if len(self._slices) > 0 else "") + \
+            (f"           geomslices={len(self._geomslices)},\n" if len(self._geomslices) > 0 else "") + \
+            (f"           data_3d={len(self._data_3d)},\n" if len(self._data_3d) > 0 else "") + \
+            (f"           smoke_3d={len(self._smoke_3d)},\n" if len(self._smoke_3d) > 0 else "") + \
+            (f"           isosurfaces={len(self._isosurfaces)},\n" if len(self._isosurfaces) > 0 else "") + \
+            (f"           particles={len(self._particles)},\n" if len(self._particles) > 0 else "") + \
+            (f"           evacs={len(self._evacs)},\n" if len(self._evacs) > 0 else "") + \
+            (f"           devices={len(self._devices)},\n" if len(self._devices) > 0 else "")
         return r[:-2] + ')'
 
     def __init__(self, path: str):
@@ -131,83 +132,86 @@ class Simulation:
 
             self.geoms: List[Geometry] = list()
             self.surfaces: List[Surface] = list()
-            self.obstructions = list()
             self.ventilations = dict()
 
             # Will only be used during the loading process to map boundary data to the correct obstruction
             self._subobstructions: Dict[Mesh, List[SubObstruction]] = dict()
 
             # First collect all meta-information for any FDS data to later combine the gathered
-            # information into data collections
-            self.slices = dict()
-            self.geomslices = dict()
-            self.data_3d = dict()
-            self.smoke_3d = dict()
-            self.isosurfaces = dict()
-            self.particles = list()
-            self.evacs = list()
-            self.geom_data = list()
-            self.meshes = list()
-            self.devices: Dict[str, Union[Device, List[Device]]] = dict()
+            # information into data collections. While collecting the meta-data simple python containers are used.
+            self._obstructions = list()
+            self._slices = dict()
+            self._geomslices = dict()
+            self._data_3d = dict()
+            self._smoke_3d = dict()
+            self._isosurfaces = dict()
+            self._particles = list()
+            self._evacs = list()
+            self._geom_data = list()
+            self._meshes = list()
+            self._devices = dict()
+
             self.profiles: Dict[str, Profile] = dict()
-            device_tmp = str()
 
             self.parse_smv_file()
 
             self.cpu = self._load_CPU_data()
             self._load_profiles()
-            if device_tmp != "":
-                self._load_DEVC_data(device_tmp)
 
             # POST INIT (post read)
             self.out_file_path = os.path.join(self.root_path, self.chid + ".out")
             self.ventilations: List[Ventilation] = list(self.ventilations.values())
-            self.obstructions = ObstructionCollection(self.obstructions)
 
-            # Combine devices with coordinate ranges
-            for device_id, device in self.devices.items():
+            for device_id, device in self._devices.items():
                 if type(device) == list:
-                    combined_x = {d.position[0] for d in device}
-                    combined_y = {d.position[1] for d in device}
-                    combined_z = {d.position[2] for d in device}
-                    combined_positions = (
-                        sorted(list(combined_x)) if len(combined_x) > 1 else combined_x.pop(),
-                        sorted(list(combined_y)) if len(combined_y) > 1 else combined_y.pop(),
-                        sorted(list(combined_z)) if len(combined_z) > 1 else combined_z.pop()
-                    )
-                    new_device = Device(device_id, device[0].quantity, position=combined_positions,
-                                        orientation=device[0].orientation)
-                    new_device.data = np.array([d.data for d in device])
-
-                    self.devices[device_id] = new_device
+                    # Combine devices with coordinate ranges
+                    # combined_x = {d.position[0] for d in device}
+                    # combined_y = {d.position[1] for d in device}
+                    # combined_z = {d.position[2] for d in device}
+                    # combined_positions = (
+                    #     sorted(list(combined_x)) if len(combined_x) > 1 else combined_x.pop(),
+                    #     sorted(list(combined_y)) if len(combined_y) > 1 else combined_y.pop(),
+                    #     sorted(list(combined_z)) if len(combined_z) > 1 else combined_z.pop()
+                    # )
+                    # new_device = Device(device_id, device[0].quantity, position=combined_positions,
+                    #                     orientation=device[0].orientation)
+                    # new_device.data = np.array([d.data for d in device])
+                    #
+                    # self.devices[device_id] = new_device
+                    for devc in device:
+                        devc._data_callback = self._load_DEVC_data
+                else:
+                    device._data_callback = self._load_DEVC_data
 
             # Combine the gathered temporary information into data collections
-            self.geom_data = GeometryCollection(self.geom_data)
+            self.geom_data = GeometryCollection(self._geom_data)
             self.slices = SliceCollection(
                 Slice(self.root_path, slice_data[0]["id"], slice_data[0]["cell_centered"],
-                      slice_data[0]["times"], slice_data[1:]) for slice_data in self.slices.values())
+                      slice_data[0]["times"], slice_data[1:]) for slice_data in self._slices.values())
             self.geomslices = GeomSliceCollection(
                 GeomSlice(self.root_path, slice_data[0]["id"],
-                          slice_data[0]["times"], slice_data[1:]) for slice_data in self.geomslices.values())
-            self.data_3d = Plot3DCollection(self.data_3d.keys(), self.data_3d.values())
-            self.smoke_3d = Smoke3DCollection(self.smoke_3d.values())
-            self.isosurfaces = IsosurfaceCollection(self.isosurfaces.values())
+                          slice_data[0]["times"], slice_data[1:]) for slice_data in self._geomslices.values())
+            self.data_3d = Plot3DCollection(self._data_3d.keys(), self._data_3d.values())
+            self.smoke_3d = Smoke3DCollection(self._smoke_3d.values())
+            self.isosurfaces = IsosurfaceCollection(self._isosurfaces.values())
+            self.devices = DeviceCollection(self._devices.values())
+            self.obstructions = ObstructionCollection(self._obstructions)
             # If no particles are simulated, initialize empty data container for consistency
-            if type(self.particles) == list:
+            if type(self._particles) == list:
                 self.particles = ParticleCollection((), ())
             else:
                 self.particles._post_init()
             # If no evacs are simulates, initialize empty data container for consistency
-            if len(self.evacs) == 0:
+            if len(self._evacs) == 0:
                 self.evacs = EvacCollection((), "", ())
-            self.meshes = MeshCollection(self.meshes)
+            self.meshes = MeshCollection(self._meshes)
+            del self._geom_data, self._geomslices, self._slices, self._obstructions, self._data_3d, self._smoke_3d, self._isosurfaces, self._devices, self._particles, self._evacs, self._meshes, self._subobstructions
 
             if settings.ENABLE_CACHING:
                 # Hash will be saved to simulation pickle file and compared to new hash when loading
                 # the pickled simulation again in the next run of the program.
                 self._hash = create_hash(self.smv_file_path)
-                pickle.dump(self, open(Simulation._get_pickle_filename(self.root_path, self.chid), 'wb'),
-                            protocol=pickle.HIGHEST_PROTOCOL)
+                pickle.dump(self, open(Simulation._get_pickle_filename(self.root_path, self.chid), 'wb'), protocol=4)
 
     def parse_smv_file(self):
         with open(self.smv_file_path, 'r') as smv_file:
@@ -226,33 +230,33 @@ class Simulation:
                     elif csv_type == "steps":
                         self.steps = self._load_step_data(file_path)
                     elif csv_type == "devc":
-                        device_tmp = file_path
-                        self.devices["Time"] = Device("Time", Quantity("TIME", "TIME", "s"), (.0, .0, .0),
-                                                      (.0, .0, .0))
+                        self.devc_path = file_path
+                        self._devices["Time"] = Device("Time", Quantity("TIME", "TIME", "s"), (.0, .0, .0),
+                                                       (.0, .0, .0))
                 elif keyword == "HRRPUVCUT":
                     self.hrrpuv_cutoff = float(smv_file.readline().strip())
                 elif keyword == "TOFFSET":
                     offsets = smv_file.readline().strip().split()
                     self.default_texture_origin = tuple(float(offsets[i]) for i in range(3))
                 elif keyword == "CLASS_OF_PARTICLES":
-                    self.particles.append(self._register_particle(smv_file))
+                    self._particles.append(self._register_particle(smv_file))
                 elif keyword == "CLASS_OF_HUMANS":
-                    self.evacs.append(self._register_evac(smv_file))
+                    self._evacs.append(self._register_evac(smv_file))
                 elif keyword.startswith("GEOM"):
                     self._load_geoms(smv_file, keyword)
                 elif keyword.startswith("GRID"):
-                    self.meshes.append(self._load_mesh(smv_file, keyword))
+                    self._meshes.append(self._load_mesh(smv_file, keyword))
                 elif keyword == "SURFACE":
                     self.surfaces.append(self._load_surface(smv_file))
                 elif keyword == "DEVICE":
                     device_id, device = self._register_device(smv_file)
-                    if device_id in self.devices:
-                        if type(self.devices[device_id]) == list:
-                            self.devices[device_id].append(device)
+                    if device_id in self._devices:
+                        if type(self._devices[device_id]) == list:
+                            self._devices[device_id].append(device)
                         else:
-                            self.devices[device_id] = [self.devices[device_id], device]
+                            self._devices[device_id] = [self._devices[device_id], device]
                     else:
-                        self.devices[device_id] = device
+                        self._devices[device_id] = device
                 elif keyword.startswith("SLC"):
                     self._load_slice(smv_file, keyword)
                 elif keyword.startswith("BNDS"):
@@ -355,22 +359,22 @@ class Simulation:
             block_type = int(line[7])
             rgba = tuple(float(line[i]) for i in range(8, 12)) if color_index == -3 else ()
 
-            obst = next((o for o in self.obstructions if obst_ordinal == o.id), None)
+            obst = next((o for o in self._obstructions if obst_ordinal == o.id), None)
             if obst is None:
                 obst = Obstruction(obst_ordinal, color_index, block_type, texture_origin, rgba)
-                self.obstructions.append(obst)
+                self._obstructions.append(obst)
 
             if not any(obst_ordinal == o.id for o in mesh.obstructions):
                 mesh.obstructions.append(obst)
 
-            subobst = SubObstruction(side_surfaces, bound_indices, extent)
+            subobst = SubObstruction(side_surfaces, bound_indices, extent, mesh)
 
             self._subobstructions[mesh].append(subobst)
-            obst._subobstructions.append(subobst)
+            obst._subobstructions[mesh] = subobst
 
     def _toggle_obst(self, smv_file: TextIO, line: str):
         line = line.split()
-        mesh = self.meshes[int(line[-1]) - 1]
+        mesh = self._meshes[int(line[-1]) - 1]
 
         obst_index, time = smv_file.readline().split()
         time = float(time)
@@ -512,7 +516,7 @@ class Simulation:
         slice_id = line.split('%')[1].split('&')[0].strip() if '%' in line else ""
 
         mesh_index = int(line.split('&')[0].strip().split()[1]) - 1
-        mesh = self.meshes[mesh_index]
+        mesh = self._meshes[mesh_index]
 
         # Read in index ranges for x, y and z
         bound_indices = [int(i.strip()) for i in line.split('&')[1].split('!')[0].strip().split()]
@@ -534,10 +538,10 @@ class Simulation:
         else:
             times = None
 
-        if slice_index not in self.slices:
-            self.slices[slice_index] = [
+        if slice_index not in self._slices:
+            self._slices[slice_index] = [
                 {"cell_centered": cell_centered, "times": times, "id": slice_id}]
-        self.slices[slice_index].append(
+        self._slices[slice_index].append(
             {"dimension": dimension, "extent": extent, "mesh": mesh, "filename": filename,
              "quantity": quantity, "short_name": short_name, "unit": unit})
 
@@ -550,7 +554,7 @@ class Simulation:
         slice_id = "".join(line.split('%')[1].split('&')).strip() if '%' in line else ""
 
         mesh_index = int(line.split('&')[0].strip().split()[1]) - 1
-        mesh = self.meshes[mesh_index]
+        mesh = self._meshes[mesh_index]
 
         # Read in index ranges for x, y and z
         bound_indices = [int(i.strip()) for i in line.split('&')[1].split('!')[0].strip().split()]
@@ -573,10 +577,10 @@ class Simulation:
         else:
             times = None
 
-        if slice_index not in self.slices:
-            self.geomslices[slice_index] = [
+        if slice_index not in self._slices:
+            self._geomslices[slice_index] = [
                 {"times": times, "id": slice_id}]
-        self.geomslices[slice_index].append(
+        self._geomslices[slice_index].append(
             {"extent": extent, "mesh": mesh, "filename": filename, "geomfilename": geom_filename,
              "quantity": quantity, "short_name": short_name, "unit": unit})
 
@@ -586,7 +590,7 @@ class Simulation:
         """
         line = line.split()
         mesh_index = int(line[1]) - 1
-        mesh = self.meshes[mesh_index]
+        mesh = self._meshes[mesh_index]
 
         filename = smv_file.readline().strip()
         quantity = smv_file.readline().strip()
@@ -640,7 +644,7 @@ class Simulation:
                 obst_index = patch_info[7]
 
                 p = Patch(file_path, dimension, extent, orientation, cell_centered,
-                          patch_offset, offset, n_t)
+                          patch_offset, offset, n_t, mesh)
 
                 # "Obstacles" with index 0 give the extent of the (whole) mesh faces and refer to
                 # "closed" mesh faces, therefore that data will be added to the corresponding mesh instead
@@ -700,10 +704,10 @@ class Simulation:
         upper_bounds = np.array(upper_bounds, dtype=np.float32)
         n_t = times.shape[0]
 
-        if bid >= len(self.geom_data):
-            self.geom_data.append(GeomBoundary(Quantity(quantity, short_name, unit), times, n_t))
-        self.geom_data[bid]._add_data(mesh_index, file_path_be, file_path_gbf, lower_bounds,
-                                      upper_bounds)
+        if bid >= len(self._geom_data):
+            self._geom_data.append(GeomBoundary(Quantity(quantity, short_name, unit), times, n_t))
+        self._geom_data[bid]._add_data(mesh_index, file_path_be, file_path_gbf, lower_bounds,
+                                       upper_bounds)
 
     @log_error("pl3d")
     def _load_plot_3d(self, smv_file: TextIO, line: str):
@@ -723,9 +727,9 @@ class Simulation:
             unit = smv_file.readline().strip()
             quantities.append(Quantity(quantity, short_name, unit))
 
-        if time not in self.data_3d:
-            self.data_3d[time] = Plot3D(self.root_path, time, quantities)
-        self.data_3d[time]._add_subplot(filename, self.meshes[mesh_index])
+        if time not in self._data_3d:
+            self._data_3d[time] = Plot3D(self.root_path, time, quantities)
+        self._data_3d[time]._add_subplot(filename, self._meshes[mesh_index])
 
     @log_error("smoke3d")
     def _load_smoke_3d(self, smv_file: TextIO, line: str):
@@ -755,9 +759,9 @@ class Simulation:
 
         quantity = Quantity(quantity, short_name, unit)
 
-        if quantity not in self.smoke_3d:
-            self.smoke_3d[quantity] = Smoke3D(self.root_path, times, quantity)
-        self.smoke_3d[quantity]._add_subsmoke(filename, self.meshes[mesh_index], upper_bounds)
+        if quantity not in self._smoke_3d:
+            self._smoke_3d[quantity] = Smoke3D(self.root_path, times, quantity)
+        self._smoke_3d[quantity]._add_subsmoke(filename, self._meshes[mesh_index], upper_bounds)
 
     @log_error("isof")
     def _load_isosurface(self, smv_file: TextIO, line: str):
@@ -780,24 +784,24 @@ class Simulation:
             v_short_name = smv_file.readline().strip()
             v_unit = smv_file.readline().strip()
 
-        if iso_id not in self.isosurfaces:
+        if iso_id not in self._isosurfaces:
             with open(iso_file_path, 'rb') as infile:
                 nlevels = fdtype.read(infile, fdtype.INT, 3)[2][0][0]
 
                 dtype_header_levels = fdtype.new((('f', nlevels),))
                 levels = fdtype.read(infile, dtype_header_levels, 1)[0]
         if double_quantity:
-            if iso_id not in self.isosurfaces:
-                self.isosurfaces[iso_id] = Isosurface(iso_id, double_quantity, quantity, short_name,
-                                                      unit, levels, v_quantity=v_quantity,
-                                                      v_short_name=v_short_name, v_unit=v_unit)
-            self.isosurfaces[iso_id]._add_subsurface(self.meshes[mesh_index], iso_file_path,
-                                                     viso_file_path=viso_file_path)
+            if iso_id not in self._isosurfaces:
+                self._isosurfaces[iso_id] = Isosurface(iso_id, double_quantity, quantity, short_name,
+                                                       unit, levels, v_quantity=v_quantity,
+                                                       v_short_name=v_short_name, v_unit=v_unit)
+            self._isosurfaces[iso_id]._add_subsurface(self._meshes[mesh_index], iso_file_path,
+                                                      viso_file_path=viso_file_path)
         else:
-            if iso_id not in self.isosurfaces:
-                self.isosurfaces[iso_id] = Isosurface(iso_id, double_quantity, quantity, short_name,
-                                                      unit, levels)
-            self.isosurfaces[iso_id]._add_subsurface(self.meshes[mesh_index], iso_file_path)
+            if iso_id not in self._isosurfaces:
+                self._isosurfaces[iso_id] = Isosurface(iso_id, double_quantity, quantity, short_name,
+                                                       unit, levels)
+            self._isosurfaces[iso_id]._add_subsurface(self._meshes[mesh_index], iso_file_path)
 
     @log_error("part")
     def _register_particle(self, smv_file: TextIO) -> Particle:
@@ -853,13 +857,13 @@ class Simulation:
         file_path = os.path.join(self.root_path, smv_file.readline().strip())
 
         mesh_index = int(line.split()[1].strip()) - 1
-        mesh = self.meshes[mesh_index]
+        mesh = self._meshes[mesh_index]
 
-        times = self._load_prt5_meta(self.particles, file_path + '.bnd', mesh)
-        if type(self.particles) == list:
-            self.particles = ParticleCollection(times, self.particles)
+        times = self._load_prt5_meta(self._particles, file_path + '.bnd', mesh)
+        if type(self._particles) == list:
+            self._particles = ParticleCollection(times, self._particles)
 
-        self.particles._file_paths[mesh] = file_path
+        self._particles._file_paths[mesh] = file_path
 
         n_classes = int(smv_file.readline().strip())
         for i in range(n_classes):
@@ -884,11 +888,11 @@ class Simulation:
         file_path = os.path.join(self.root_path, smv_file.readline().strip())
 
         mesh_index, z_offset = line.split()[1:]
-        mesh = self.meshes[int(mesh_index) - 1]
+        mesh = self._meshes[int(mesh_index) - 1]
 
-        times = self._load_prt5_meta(self.evacs, file_path + '.bnd', mesh)[1:]  # First timestep is weird somehow
-        if type(self.evacs) == list:
-            self.evacs = EvacCollection(self.evacs, os.path.join(self.root_path, self.chid + "_evac"), times)
+        times = self._load_prt5_meta(self._evacs, file_path + '.bnd', mesh)[1:]  # First timestep is weird somehow
+        if type(self._evacs) == list:
+            self.evacs = EvacCollection(self._evacs, os.path.join(self.root_path, self.chid + "_evac"), times)
 
         self.evacs.z_offsets[mesh] = float(z_offset)
         self.evacs._file_paths[mesh] = file_path
@@ -928,39 +932,38 @@ class Simulation:
         orientation = (float(line[3]), float(line[4]), float(line[5]))
         return device_id, Device(device_id, quantity, position, orientation)
 
-    @log_error("devc")
-    def _load_DEVC_data(self, file_path: str):
-        with open(file_path, 'r') as infile:
+    def _load_DEVC_data(self):
+        with open(self.devc_path, 'r') as infile:
             units = infile.readline().split(',')
             names = [name.replace('"', '').replace('\n', '').strip() for name in infile.readline().split(',"')]
             values = np.genfromtxt(infile, delimiter=',', dtype=np.float32, autostrip=True)
             for k in range(len(names)):
-                if type(self.devices[names[k]]) == list:
-                    for devc in self.devices[names[k]]:
-                        if devc.data is None:
+                if type(self._devices[names[k]]) == list:
+                    for devc in self._devices[names[k]]:
+                        if not hasattr(devc, "_data"):
                             # Find the first device in the list that does not yet have any data associated with it
                             break
                 else:
-                    devc = self.devices[names[k]]
+                    devc = self._devices[names[k]]
 
                 devc.quantity.unit = units[k]
                 size = values.shape[0]
-                devc.data = np.empty((size,), dtype=np.float32)
+                devc._data = np.empty((size,), dtype=np.float32)
                 for i in range(size):
-                    devc.data[i] = values[i][k]
+                    devc._data[i] = values[i][k]
 
-        line_path = file_path.replace("devc", "line")
+        line_path = self.devc_path.replace("devc", "line")
         if os.path.exists(line_path):
             with open(line_path, 'r') as infile:
                 units = infile.readline()
                 names = [name.replace('"', '').replace('\n', '').strip() for name in infile.readline().split(',"')]
                 data = np.genfromtxt(infile, delimiter=',', dtype=np.float32, autostrip=True)
                 for k, key in enumerate(names):
-                    if key in self.devices:
-                        devc = self.devices[key]
+                    if key in self._devices:
+                        devc = self._devices[key]
                         for i in range(len(devc)):
                             devc[i].quantity.unit = units[k]
-                            devc[i].data = data[i, k]
+                            devc[i]._data = data[i, k]
                     else:
                         pass  # Probably only x,y,z coordinates
 
@@ -980,7 +983,7 @@ class Simulation:
             keys = [name.replace('"', '').replace('\n', '').strip() for name in infile.readline().split(',')][2:]
         timesteps = np.loadtxt(file_path, dtype=np.dtype("datetime64[ms]"), delimiter=',', ndmin=1, usecols=1,
                                skiprows=2)
-        float_values = np.loadtxt(file_path, delimiter=',', usecols=range(2, len(keys)+2), ndmin=2, skiprows=2)
+        float_values = np.loadtxt(file_path, delimiter=',', usecols=range(2, len(keys) + 2), ndmin=2, skiprows=2)
         data = self._transform_csv_data(keys, float_values)
         data["Time Step"] = timesteps
         return data
@@ -1026,9 +1029,13 @@ class Simulation:
         """
         self.slices.clear_cache()
         self.data_3d.clear_cache()
+        self.smoke_3d.clear_cache()
         self.isosurfaces.clear_cache()
         self.particles.clear_cache()
         self.obstructions.clear_cache()
+        self.devices.clear_cache()
+        self.evacs.clear_cache()
+        self.particles.clear_cache()
 
         if clear_persistent_cache:
             os.remove(Simulation._get_pickle_filename(self.root_path, self.chid))

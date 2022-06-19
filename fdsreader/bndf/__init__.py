@@ -1,3 +1,3 @@
 from .obstruction import Obstruction, SubObstruction, Patch, Boundary
 
-from .ObstructionCollection import ObstructionCollection
+from .obstruction_collection import ObstructionCollection

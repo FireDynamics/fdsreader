@@ -7,7 +7,7 @@ from fdsreader.utils.data import FDSDataCollection, Quantity
 
 
 class SliceCollection(FDSDataCollection):
-    """Collection of :class:`Slice` objects. Offers extensive functionality for filtering and
+    """Collection of :class:`Slice` objects. Offers additional functionality for filtering and
         using slices as well as its subclasses such as :class:`SubSlice`.
     """
 
@@ -35,6 +35,7 @@ class SliceCollection(FDSDataCollection):
         """Filters the slice with the shortest distance to the given point.
             If there are multiple slices with the same distance, a random one will be selected.
         """
+
         d_min = np.finfo(float).max
         slices_min = list()
 

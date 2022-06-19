@@ -238,31 +238,6 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                 orientations.append(0)
         self.orientation = 0 if any(o != orientations[0] for o in orientations) else orientations[0]
 
-        # Iterate over all subslices and remove duplicated ones which will be created when the slice
-        # cuts exactly through two mesh borders. Only required for non-cell-centered slices. To do so, we have to check
-        # if to subslices overlap and only keep one of the two
-        # Todo: Known issue - This will not necessarily work if the simulation space is no cuboid and the slice touches
-        # the border of the simulation space somewhere where it's not the outermost end, as it is the case for U-shaped
-        # spaces for example
-        # if not self.cell_centered:
-        #     if self.orientation != 0:
-        #         remove_tmp = list()
-        #         for mesh, sslc in self._subslices.items():
-        #             # Look at the subslices as if they were simple rectangles
-        #             left1, right1, bottom1, top1 = sslc.extent.as_tuple(reduced=True)
-        #             for other_mesh, other_sslc in self._subslices.items():
-        #                 if mesh.extent[self.orientation][1] == other_mesh.extent[self.orientation][0]:
-        #                     left2, right2, bottom2, top2 = other_sslc.extent.as_tuple(reduced=True)
-        #                     # Check if the two rectangles overlap, if they do, remove one of them
-        #                     if left1 < right2 and right1 > left2 and top1 > bottom2 and bottom1 < top2:
-        #                         # We cannot remove the subslice while iterating over the subslices
-        #                         remove_tmp.append(mesh)
-        #                         # Break the inner loop, so we continue checking the next subslice
-        #                         break
-        #
-        #         for mesh in remove_tmp:
-        #             del self._subslices[mesh]
-
         x_start, x_end, y_start, y_end, z_start, z_end = min(subslices, key=lambda e: e.extent.x_start).extent.x_start, \
                                                          max(subslices, key=lambda e: e.extent.x_end).extent.x_end, \
                                                          min(subslices, key=lambda e: e.extent.y_start).extent.y_start, \
@@ -291,7 +266,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         if type(key) == int:
             return tuple(self._subslices.values())[key]
         elif type(key) == str:
-            key = [mesh for mesh in self.meshes if mesh.id == key][0]
+            key = tuple(mesh for mesh in self.meshes if mesh.id == key)[0]
         return self._subslices[key]
 
     def __len__(self):
@@ -321,7 +296,6 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         """Calculates the nearest timestep for which data has been output for this slice.
         """
         idx = np.searchsorted(self.times, time, side="left")
-        # Todo: side="right"
         if time > 0 and (idx == len(self.times) or np.math.fabs(
                 time - self.times[idx - 1]) < np.math.fabs(time - self.times[idx])):
             return idx - 1
@@ -331,7 +305,6 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
     def get_nearest_index(self, dimension: Literal['x', 'y', 'z'], value: float) -> int:
         """Get the nearest mesh coordinate index in a specific dimension.
         """
-        # Todo: Fix
         coords = self.get_coordinates()[dimension]
         idx = np.searchsorted(coords, value, side="left")
         if idx > 0 and (idx == coords.size or np.math.fabs(value - coords[idx - 1]) < np.math.fabs(
@@ -352,16 +325,26 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
 
             :param ignore_cell_centered: Whether to shift the coordinates when the slice is cell_centered or not.
         """
-        # Todo: Fix duplicates for multimesh
         orientation = ('x', 'y', 'z')[self.orientation-1] if self.orientation != 0 else ''
         coords = {'x': set(), 'y': set(), 'z': set()}
         for dim in ('x', 'y', 'z'):
             if orientation == dim:
                 coords[dim] = np.array([self.extent[dim][0]])
                 continue
-            for mesh, slc in self._subslices.items():
-                coords[dim].update(slc.get_coordinates(ignore_cell_centered)[dim])
+            min_delta = 0
+            for slc in self._subslices.values():
+                co = slc.get_coordinates(ignore_cell_centered)[dim]
+                min_delta = min(min_delta, co[1] - co[0])
+                coords[dim].update(co)
+
             coords[dim] = np.array(sorted(list(coords[dim])))
+            to_remove = list()
+            for i in range(len(coords[dim])-1):
+                if coords[dim][i] - coords[dim][i+1] < min_delta/2:
+                    to_remove.append(coords[dim][i+1])
+            for val in to_remove:
+                coords[dim].remove(val)
+            del to_remove
 
             if len(coords[dim]) == 0:
                 slice_coordinate = self.extent[dim][0]
@@ -488,54 +471,6 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                     slices_cart.append([slc])
         return slices_cart
 
-    def _to_global_uniform(self) -> np.ndarray:
-        """[Deprecated] Creates a global 2D-numpy ndarray from all subslices (2D-slices only).
-            Note: This method will only return valid output if evenly sized and spaced meshes were
-            used in the simulation. Will create a dense array.
-        """
-        assert self.type == '2D', "The to_global_uniform method only works for 2D-slices!"
-
-        # First check if the meshes are evenly sized and spaced
-        ref_slc = next(iter(self._subslices.values()))
-        ref_extent = ref_slc.extent
-        ref_abs_extent = tuple(abs(ext[1] - ext[0]) for ext in ref_extent)
-        ref_coords = tuple(c[0] for c in ref_slc.mesh.coordinates.values())
-        for mesh, slc in self._subslices.items():
-            # Check if size is the same
-            if slc.extent != ref_extent:
-                logging.error("Meshes are not evenly sized, cannot use the to_global_uniform method, use to_global_nonuniform instead!")
-                return np.empty((0,))
-            # Check if the mesh is an even number of times shifted in any direction
-            start_coords = tuple(c[0] for c in mesh.coordinates.values())
-            if not all(((start_coords[i] - ref_coords[i]) / ref_abs_extent[i]) < 0.0001 for i in range(3)):
-                logging.error("Meshes are not evenly spaced, cannot use the to_global_uniform method, use to_global_nonuniform instead!")
-                return np.empty((0,))
-
-        slices = self.sort_subslices_cartesian()
-
-        shape_dim1 = sum([slice_row[0].shape[0] for slice_row in slices])
-        if not self.cell_centered:
-            shape_dim1 -= len(slices) - 1
-        shape_dim2 = sum([slc.shape[1] for slc in slices[0]])
-        if not self.cell_centered:
-            shape_dim2 -= len(slices[0]) - 1
-        slc_array = np.empty(shape=(self.n_t, shape_dim1, shape_dim2))
-        dim1_pos = 0
-        dim2_pos = 0
-        for i, slice_row in enumerate(slices):
-            d1 = slice_row[0].shape[0]
-            if not self.cell_centered:
-                d1 -= 1 if i + 1 != len(slices) else 0
-            for j, slc in enumerate(slice_row):
-                d2 = slc.shape[1]
-                if not self.cell_centered:
-                    d2 -= 1 if j + 1 != len(slice_row) else 0
-                slc_array[:, dim1_pos:dim1_pos + d1, dim2_pos:dim2_pos + d2] = slc.data[:, :d1, :d2]
-                dim2_pos += d2
-            dim1_pos += d1
-            dim2_pos = 0
-        return slc_array
-
     def to_global(self) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
         """Creates a global numpy ndarray from all subslices (only tested for 2D-slices).
             Note: This method might create a sparse np-array that consumes lots of memory.
@@ -590,7 +525,6 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
 
             grid = np.full((self.n_t, steps['x'], steps['y'], steps['z']), np.nan)
 
-            start_coordinates = {'x': coord_min['x'], 'y': coord_min['y'], 'z': coord_min['z']}
             start_idx = dict()
             end_idx = dict()
             for mesh, slc in subslices.items():
@@ -603,11 +537,12 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                         continue
                     n_repeat = max(int(round((mesh.coordinates[dim][1] - mesh.coordinates[dim][0]) / step_sizes_min[dim])), 1)
 
-                    start_idx[dim] = int(round((mesh.coordinates[dim][0] - start_coordinates[dim]) / step_sizes_min[dim]))
-                    end_idx[dim] = int(round((mesh.coordinates[dim][-1] - start_coordinates[dim]) / step_sizes_min[dim]))
+                    start_idx[dim] = int(round((mesh.coordinates[dim][0] - coord_min[dim]) / step_sizes_min[dim]))
+                    end_idx[dim] = int(round((mesh.coordinates[dim][-1] - coord_min[dim]) / step_sizes_min[dim]))
 
                     # We ignore border points unless they are actually on the border of the simulation space as all
-                    # other border points actually appear twice, as the subslices overlap
+                    # other border points actually appear twice, as the subslices overlap. This only
+                    # applies for face_centered slices, as cell_centered slices will not overlap.
                     if not self.cell_centered:
                         if axis != slc.orientation - 1:
                             reduced_shape = list(slc_data.shape)

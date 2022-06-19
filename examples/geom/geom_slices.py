@@ -1,8 +1,4 @@
-import time
-
-import pyvista as pv
 from fdsreader import Simulation
-import numpy as np
 
 
 def main():

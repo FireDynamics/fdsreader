@@ -13,6 +13,7 @@ pip install fdsreader
 _FDS Version 6.7.5 and above are fully supported. Versions below 6.7.5 might work, but are not guaranteed to work._
 
 ## Usage example
+
 ```python
 import fdsreader as fds
 
@@ -20,7 +21,7 @@ import fdsreader as fds
 sim = fds.Simulation("./sample_data")
 
 # Examples of data that can be easily accessed
-print(sim.meshes, sim.surfaces, sim.slices, sim.data_3d, sim.isosurfaces, sim.particles, sim.obstructions)
+print(sim.meshes, sim.surfaces, sim.slices, sim.data_3d, sim.smoke_3d, sim.isosurfaces, sim.particles, sim.obstructions)
 ```
 
 More advanced examples can be found in the respective data type directories inside of the examples directory.  

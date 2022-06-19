@@ -41,7 +41,7 @@ class EvacCollection(FDSDataCollection):
         for evac in evacs:
             evac.times = self.times
 
-        for evac in self:
+        for evac in self._elements:
             if settings.LAZY_LOAD:
                 evac._init_callback = self._load_prt_data
             else:

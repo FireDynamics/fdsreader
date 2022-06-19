@@ -1,4 +1,8 @@
 ## Release History
+* 1.8.1
+    * Lots of improvements and convenience methods for obstructions
+* 1.8.0
+    * Reworked Devices: Now using a DeviceCollection with pandas support, devices do now lazyload as well
 * 1.7.5
     * Fixed bug in get_subslice method
 * 1.7.4

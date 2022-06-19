@@ -1,7 +1,7 @@
 from .slice import Slice
 
-from .SliceCollection import SliceCollection
+from .slice_collection import SliceCollection
 
 from .geomslice import GeomSlice
 
-from .GeomSliceCollection import GeomSliceCollection
+from .geomslice_collection import GeomSliceCollection
