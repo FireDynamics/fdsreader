@@ -1,7 +1,7 @@
 Devices
 _______
 
-.. autoclass:: fdsreader.utils.data.Device
+.. autoclass:: fdsreader.devc.Device
    :members:
    :undoc-members:
-   :noindex:
+   :noindex:g
