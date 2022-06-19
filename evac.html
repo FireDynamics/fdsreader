@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Evacuation &mdash; fdsreader [fdsreader, version 1.7.5] documentation</title>
+  <title>Evacuation &mdash; fdsreader [fdsreader, version 1.8.1] documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -105,147 +105,43 @@
 </style>
 <section id="evacuation">
 <h1>Evacuation<a class="headerlink" href="#evacuation" title="Permalink to this headline"></a></h1>
-<p><strong>Classes:</strong></p>
-<table class="autosummary longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">EvacCollection</span></code>(evacs, base_path, times)</p></td>
-<td><p>Collection of <code class="xref py py-class docutils literal notranslate"><span class="pre">Evacuation</span></code> objects.</p></td>
-</tr>
-</tbody>
-</table>
-<dl class="py class">
-<dt class="sig sig-object py">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">fdsreader.evac.EvacCollection.</span></span><span class="sig-name descname"><span class="pre">EvacCollection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">evacs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.evac.evacuation.Evacuation</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">times</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/evac/EvacCollection.html#EvacCollection"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Collection of <code class="xref py py-class docutils literal notranslate"><span class="pre">Evacuation</span></code> objects. Next to agent-class specific data (such as trajectories) lots of
+<p>Collection of <code class="xref py py-class docutils literal notranslate"><span class="pre">Evacuation</span></code> objects. Next to agent-class specific data (such as trajectories) lots of
 other data such as FED-data is provided via this class.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Variables</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>times</strong> – List of all time steps of the simulation.</p></li>
-<li><p><strong>z_offsets</strong> – The offset in z-direction for each mesh where the evac plane lays.</p></li>
-<li><p><strong>all_agents</strong> – Number of all agents per time step.</p></li>
-<li><p><strong>agents_inside_mesh</strong> – Number of all agents per time step inside a specific mesh.</p></li>
-<li><p><strong>number_of_deads</strong> – Number of dead agents per time step.</p></li>
-<li><p><strong>fed_max</strong> – FED max per time step.</p></li>
-<li><p><strong>fed_max_alive</strong> – FED max alive per time step.</p></li>
-<li><p><strong>exit_counters</strong> – Exit counts per time step.</p></li>
-<li><p><strong>target_exit_counters</strong> – Target exit counts per time step.</p></li>
-<li><p><strong>door_counters</strong> – Door counts per time step.</p></li>
-<li><p><strong>target_door_counters</strong> – Target door counts per time step.</p></li>
-</ul>
+<dt class="field-odd">ivar times</dt>
+<dd class="field-odd"><p>List of all time steps of the simulation.</p>
+</dd>
+<dt class="field-even">ivar z_offsets</dt>
+<dd class="field-even"><p>The offset in z-direction for each mesh where the evac plane lays.</p>
+</dd>
+<dt class="field-odd">ivar all_agents</dt>
+<dd class="field-odd"><p>Number of all agents per time step.</p>
+</dd>
+<dt class="field-even">ivar agents_inside_mesh</dt>
+<dd class="field-even"><p>Number of all agents per time step inside a specific mesh.</p>
+</dd>
+<dt class="field-odd">ivar number_of_deads</dt>
+<dd class="field-odd"><p>Number of dead agents per time step.</p>
+</dd>
+<dt class="field-even">ivar fed_max</dt>
+<dd class="field-even"><p>FED max per time step.</p>
+</dd>
+<dt class="field-odd">ivar fed_max_alive</dt>
+<dd class="field-odd"><p>FED max alive per time step.</p>
+</dd>
+<dt class="field-even">ivar exit_counters</dt>
+<dd class="field-even"><p>Exit counts per time step.</p>
+</dd>
+<dt class="field-odd">ivar target_exit_counters</dt>
+<dd class="field-odd"><p>Target exit counts per time step.</p>
+</dd>
+<dt class="field-even">ivar door_counters</dt>
+<dd class="field-even"><p>Door counts per time step.</p>
+</dd>
+<dt class="field-odd">ivar target_door_counters</dt>
+<dd class="field-odd"><p>Target door counts per time step.</p>
 </dd>
 </dl>
-<p><strong>Attributes:</strong></p>
-<table class="autosummary longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">devc</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">eff</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fed_corr</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fed_grid</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fed_times</span></code></p></td>
-<td><p></p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">quantities</span></code></p></td>
-<td><p>Gives a list of all quantities that are written out for some (or sometimes all) human classes.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">xyz</span></code></p></td>
-<td><p>List of xyz-data for each mesh.</p></td>
-</tr>
-</tbody>
-</table>
-<p><strong>Methods:</strong></p>
-<table class="autosummary longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_unfiltered_data</span></code>(quantity)</p></td>
-<td><p>Convenience function that combines data for a specific quantity of all humans into a single array.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_unfiltered_positions</span></code>([quantity])</p></td>
-<td><p>Convenience function that combines all trajectories into a single array.</p></td>
-</tr>
-</tbody>
-</table>
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">devc</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">eff</span></span></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fed_corr</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fed_grid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fed_times</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span></em></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">get_unfiltered_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/evac/EvacCollection.html#EvacCollection.get_unfiltered_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Convenience function that combines data for a specific quantity of all humans into a single array.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>quantity</strong> – The quantity to get data for. Can either be a string or <code class="xref py py-class docutils literal notranslate"><span class="pre">Quantity</span></code> object.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">get_unfiltered_positions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/evac/EvacCollection.html#EvacCollection.get_unfiltered_positions"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Convenience function that combines all trajectories into a single array.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>quantity</strong> – Optionally a quantity can be specified to filter all human classes by those who have written
-out data for the specific quantity. Can either be a string or <code class="xref py py-class docutils literal notranslate"><span class="pre">Quantity</span></code> object.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">quantities</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">fdsreader.utils.data.Quantity</span><span class="p"><span class="pre">]</span></span></em></dt>
-<dd><p>Gives a list of all quantities that are written out for some (or sometimes all) human classes.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">xyz</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em></dt>
-<dd><p>List of xyz-data for each mesh.</p>
-</dd></dl>
-
-</dd></dl>
-
 <p><strong>Classes:</strong></p>
 <table class="autosummary longtable docutils align-default">
 <colgroup>
