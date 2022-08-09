@@ -5,6 +5,7 @@ import fdsreader as fds
 
 
 def main():
+    fds.settings.DEBUG = True
     sim = fds.Simulation("./fds_data")
 
     # Get the first mesh defined in fds file
@@ -21,7 +22,7 @@ def main():
     fill = 0
     # Mask the data
     mask = mesh.get_obstruction_mask_slice(subslice)
-    sslc_data = np.where(mask[t], subslice.data[t], fill)
+    sslc_data = np.where(np.squeeze(mask)[t], subslice.data[t], fill)
 
     # Plot the slice
     plt.imshow(sslc_data.T, origin="lower")
