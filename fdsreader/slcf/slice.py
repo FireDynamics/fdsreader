@@ -471,9 +471,14 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                     slices_cart.append([slc])
         return slices_cart
 
-    def to_global(self) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
+    def to_global(self, masked: bool = False, fill: float = 0) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
         """Creates a global numpy ndarray from all subslices (only tested for 2D-slices).
             Note: This method might create a sparse np-array that consumes lots of memory.
+            Will create two global slices in cases where face-centered slices cut right through one
+            or more mesh borders.
+
+            :param masked: Whether to apply the obstruction mask to the slice or not.
+            :param fill: The fill value to use for masked slice entries. Only used when masked=True.
         """
         subslice_sets = [dict(), dict()]
 
@@ -563,6 +568,10 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                     # Add border points back again if needed
                     if not self.cell_centered and mesh.coordinates[dim][-1] == global_max[dim]:
                         slc_data = np.concatenate((slc_data, temp_data), axis=axis + 1)
+
+                if masked:
+                    mask = mesh.get_obstruction_mask_slice(slc)
+                    slc_data = np.where(mask, slc_data, fill)
 
                 grid[:, start_idx['x']: end_idx['x'], start_idx['y']: end_idx['y'],
                 start_idx['z']: end_idx['z']] = slc_data.reshape(

@@ -1,6 +1,6 @@
 import math
 import os
-from typing import List, Dict, Tuple, Union
+from typing import List, Dict, Tuple, Union, Sequence
 from typing_extensions import Literal
 import numpy as np
 
@@ -122,7 +122,7 @@ class Boundary:
     :ivar n_t: Total number of time steps for which output data has been written.
     """
 
-    def __init__(self, quantity: Quantity, cell_centered: bool, times: np.ndarray, n_t: int, patches: List[Patch],
+    def __init__(self, quantity: Quantity, cell_centered: bool, times: Sequence[float], n_t: int, patches: List[Patch],
                  lower_bounds: np.ndarray, upper_bounds: np.ndarray):
         self.quantity = quantity
         self.cell_centered = cell_centered
@@ -215,7 +215,7 @@ class SubObstruction:
         self.show_times = list()
 
     def _add_patches(self, bid: int, cell_centered: bool, quantity: str, short_name: str, unit: str,
-                     patches: List[Patch], times: np.ndarray, n_t: int, lower_bounds: np.ndarray,
+                     patches: List[Patch], times: Sequence[float], n_t: int, lower_bounds: np.ndarray,
                      upper_bounds: np.ndarray):
         if bid not in self._boundary_data:
             self._boundary_data[bid] = Boundary(Quantity(quantity, short_name, unit), cell_centered, times, n_t,
@@ -276,20 +276,28 @@ class SubObstruction:
 
     @property
     def n_t(self):
-        return next(iter(self._boundary_data.values())).n_t
+        """Returns the number of timesteps for which boundary data is available.
+        """
+        if self.has_boundary_data:
+            return next(iter(self._boundary_data.values())).n_t
+        else:
+            return 0
 
     @property
     def times(self):
-        return next(iter(self._boundary_data.values())).times
+        """Return all timesteps for which boundary data is available, if any.
+        """
+        if self.has_boundary_data:
+            return next(iter(self._boundary_data.values())).times
+        else:
+            return np.array([])
 
-    @property
-    def visible_times(self) -> np.ndarray:
-        """Returns an ndarray containing all time steps when there is data available for the SubObstruction. Will return an
-            empty list when no data is output at all.
+    def get_visible_times(self, times: Sequence[float]) -> np.ndarray:
+        """Returns an ndarray filtering all time steps when theSubObstruction is visible/not hidden.
         """
         ret = list()
         hidden = False
-        for time in self.times:
+        for time in times:
             if time in self.show_times:
                 hidden = False
             if time in self.hide_times:
@@ -375,15 +383,20 @@ class Obstruction:
 
     @property
     def n_t(self):
+        """Returns the number of timesteps for which boundary data is available.
+        """
         return next(iter(self._subobstructions.values())).n_t
 
     @property
     def times(self):
+        """Return all timesteps for which boundary data is available, if any.
+        """
         return next(iter(self._subobstructions.values())).times
 
-    @property
-    def visible_times(self):
-        return next(iter(self._subobstructions.values())).visible_times
+    def get_visible_times(self, times: Sequence[float]):
+        """Returns an ndarray filtering all time steps when theSubObstruction is visible/not hidden.
+        """
+        return next(iter(self._subobstructions.values())).get_visible_times(times)
 
     def get_coordinates(self, ignore_cell_centered: bool = False) -> Dict[
         int, Dict[Literal['x', 'y', 'z'], np.ndarray]]:
@@ -489,7 +502,7 @@ class Obstruction:
     def get_nearest_timestep(self, time: float, visible_only: bool = False) -> int:
         """Calculates the nearest timestep for which data has been output for this obstruction.
         """
-        times = self.visible_times if visible_only else self.times
+        times = self.get_visible_times(self.times) if visible_only else self.times
         idx = np.searchsorted(times, time, side="left")
         if time > 0 and (idx == len(times) or np.math.fabs(
                 time - times[idx - 1]) < np.math.fabs(time - times[idx])):

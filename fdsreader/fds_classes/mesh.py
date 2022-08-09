@@ -57,12 +57,12 @@ class Mesh:
                 x1, x2 = subobst.bound_indices['x']
                 y1, y2 = subobst.bound_indices['y']
                 z1, z2 = subobst.bound_indices['z']
-                for t, _ in enumerate(subobst.visible_times(times)):
+                for t, _ in enumerate(subobst.get_visible_times(times)):
                     mask[t, x1:max(x2 + c, x1 + 1), y1:max(y2 + c, y1 + 1), z1:max(z2 + c, z1 + 1)] = False
         return mask
 
     def get_obstruction_mask_slice(self, subslice):
-        """Marks all cells of a single slice which are blocked by an obstruction.
+        """Marks all cells of a single subslice which are blocked by an obstruction.
 
         :returns: A 4-dimensional array with time as first and x,y,z as last dimensions. The array depends on time as
             obstructions may be hidden as specific points in time.
@@ -77,7 +77,7 @@ class Mesh:
         mask_indices[orientation] = slice(slc_index, slc_index + 1, 1)
         mask_indices = tuple(mask_indices)
 
-        return np.squeeze(self.get_obstruction_mask(subslice.times, cell_centered=cell_centered)[mask_indices])
+        return self.get_obstruction_mask(subslice.times, cell_centered=cell_centered)[mask_indices]
 
     def coordinate_to_index(self, coordinate: Tuple[float, ...],
                             dimension: Tuple[Literal[1, 2, 3, 'x', 'y', 'z'], ...] = ('x', 'y', 'z'),

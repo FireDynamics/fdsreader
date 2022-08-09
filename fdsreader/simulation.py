@@ -995,6 +995,8 @@ class Simulation:
             with open(file_path, 'r') as infile:
                 keys = [name.replace('"', '').replace('\n', '').strip() for name in infile.readline().split(',')]
             values = np.loadtxt(file_path, delimiter=',', ndmin=2, skiprows=1)
+        else:
+            return dict()
         data = self._transform_csv_data(keys, values)
         data["Rank"] = data["Rank"].astype(int)
         return data

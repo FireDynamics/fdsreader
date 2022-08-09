@@ -1,4 +1,6 @@
 ## Release History
+* 1.8.2
+    * Added option to mask global slice and fixed csv and slice mask bugs
 * 1.8.1
     * Lots of improvements and convenience methods for obstructions
 * 1.8.0
