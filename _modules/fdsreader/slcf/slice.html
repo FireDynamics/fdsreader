@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>fdsreader.slcf.slice &mdash; fdsreader [fdsreader, version 1.8.1] documentation</title>
+  <title>fdsreader.slcf.slice &mdash; fdsreader [fdsreader, version 1.8.2] documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -13,6 +13,7 @@
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -551,9 +552,14 @@
                     <span class="n">slices_cart</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">slc</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">slices_cart</span></div>
 
-<div class="viewcode-block" id="Slice.to_global"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.slice.Slice.to_global">[docs]</a>    <span class="k">def</span> <span class="nf">to_global</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+<div class="viewcode-block" id="Slice.to_global"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.slice.Slice.to_global">[docs]</a>    <span class="k">def</span> <span class="nf">to_global</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">masked</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fill</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
         <span class="sd">&quot;&quot;&quot;Creates a global numpy ndarray from all subslices (only tested for 2D-slices).</span>
 <span class="sd">            Note: This method might create a sparse np-array that consumes lots of memory.</span>
+<span class="sd">            Will create two global slices in cases where face-centered slices cut right through one</span>
+<span class="sd">            or more mesh borders.</span>
+
+<span class="sd">            :param masked: Whether to apply the obstruction mask to the slice or not.</span>
+<span class="sd">            :param fill: The fill value to use for masked slice entries. Only used when masked=True.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">subslice_sets</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(),</span> <span class="nb">dict</span><span class="p">()]</span>
 
@@ -643,6 +649,10 @@
                     <span class="c1"># Add border points back again if needed</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">cell_centered</span> <span class="ow">and</span> <span class="n">mesh</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">global_max</span><span class="p">[</span><span class="n">dim</span><span class="p">]:</span>
                         <span class="n">slc_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">slc_data</span><span class="p">,</span> <span class="n">temp_data</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">masked</span><span class="p">:</span>
+                    <span class="n">mask</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">get_obstruction_mask_slice</span><span class="p">(</span><span class="n">slc</span><span class="p">)</span>
+                    <span class="n">slc_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">slc_data</span><span class="p">,</span> <span class="n">fill</span><span class="p">)</span>
 
                 <span class="n">grid</span><span class="p">[:,</span> <span class="n">start_idx</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]:</span> <span class="n">end_idx</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">start_idx</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]:</span> <span class="n">end_idx</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span>
                 <span class="n">start_idx</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">]:</span> <span class="n">end_idx</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">slc_data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
