@@ -1,16 +1,20 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Export &mdash; fdsreader [fdsreader, version 1.8.2] documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <title>Export &mdash; fdsreader [fdsreader, version 1.8.3] documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="_static/js/theme.js"></script>
@@ -34,7 +38,7 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption"><span class="caption-text">FDSReader</span></p>
+              <p class="caption" role="heading"><span class="caption-text">FDSReader</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="simulation.html">Simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slcf.html">Slice files</a></li>
@@ -99,11 +103,11 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="export">
-<h1>Export<a class="headerlink" href="#export" title="Permalink to this headline"></a></h1>
+<section id="export">
+<h1>Export<a class="headerlink" href="#export" title="Permalink to this heading"></a></h1>
 <dl class="py function">
-<dt>
-<code class="sig-prename descclassname"><span class="pre">fdsreader.export.sim_exporter.</span></code><code class="sig-name descname"><span class="pre">export_sim</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sim</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.simulation.Simulation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ordering</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">C</span><span class="p"><span class="pre">,</span> </span><span class="pre">F</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'C'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/export/sim_exporter.html#export_sim"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">fdsreader.export.sim_exporter.</span></span><span class="sig-name descname"><span class="pre">export_sim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Simulation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ordering</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'C'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'F'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'C'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/export/sim_exporter.html#export_sim"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Exports the 3d arrays to raw binary files with corresponding .yaml meta files.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -117,8 +121,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt>
-<code class="sig-prename descclassname"><span class="pre">fdsreader.export.slcf_exporter.</span></code><code class="sig-name descname"><span class="pre">export_slcf_raw</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slc</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.slcf.slice.Slice</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ordering</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">C</span><span class="p"><span class="pre">,</span> </span><span class="pre">F</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'C'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/export/slcf_exporter.html#export_slcf_raw"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">fdsreader.export.slcf_exporter.</span></span><span class="sig-name descname"><span class="pre">export_slcf_raw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Slice</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ordering</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'C'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'F'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'C'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/export/slcf_exporter.html#export_slcf_raw"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Exports the 3d arrays to raw binary files with corresponding .yaml meta files.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -132,8 +136,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt>
-<code class="sig-prename descclassname"><span class="pre">fdsreader.export.obst_exporter.</span></code><code class="sig-name descname"><span class="pre">export_obst_raw</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obst</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.bndf.obstruction.Obstruction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ordering</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">C</span><span class="p"><span class="pre">,</span> </span><span class="pre">F</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'C'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/export/obst_exporter.html#export_obst_raw"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">fdsreader.export.obst_exporter.</span></span><span class="sig-name descname"><span class="pre">export_obst_raw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obst</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Obstruction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ordering</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'C'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'F'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'C'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/export/obst_exporter.html#export_obst_raw"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Exports the 3d arrays to raw binary files with corresponding .yaml meta files.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -147,8 +151,8 @@
 </dd></dl>
 
 <dl class="py function">
-<dt>
-<code class="sig-prename descclassname"><span class="pre">fdsreader.export.smoke3d_exporter.</span></code><code class="sig-name descname"><span class="pre">export_smoke_raw</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smoke3d</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">fdsreader.smoke3d.smoke3d.Smoke3D</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ordering</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">C</span><span class="p"><span class="pre">,</span> </span><span class="pre">F</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'C'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/export/smoke3d_exporter.html#export_smoke_raw"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">fdsreader.export.smoke3d_exporter.</span></span><span class="sig-name descname"><span class="pre">export_smoke_raw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smoke3d</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Smoke3D</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ordering</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'C'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'F'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'C'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/fdsreader/export/smoke3d_exporter.html#export_smoke_raw"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Exports the 3d arrays to raw binary files with corresponding .yaml meta files.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -161,7 +165,7 @@
 </dl>
 </dd></dl>
 
-</div>
+</section>
 
 
            </div>

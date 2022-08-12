@@ -3,14 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>fdsreader.export.obst_exporter &mdash; fdsreader [fdsreader, version 1.8.2] documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <title>fdsreader.export.obst_exporter &mdash; fdsreader [fdsreader, version 1.8.3] documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -33,7 +36,7 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption"><span class="caption-text">FDSReader</span></p>
+              <p class="caption" role="heading"><span class="caption-text">FDSReader</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../simulation.html">Simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../slcf.html">Slice files</a></li>
@@ -78,12 +81,11 @@
   <h1>Source code for fdsreader.export.obst_exporter</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
-<span class="kn">from</span> <span class="nn">..bndf</span> <span class="kn">import</span> <span class="n">Obstruction</span><span class="p">,</span> <span class="n">Boundary</span>
-<span class="kn">from</span> <span class="nn">..bndf.utils</span> <span class="kn">import</span> <span class="n">sort_patches_cartesian</span>
+<span class="kn">from</span> <span class="nn">..bndf</span> <span class="kn">import</span> <span class="n">Obstruction</span>
 
 
 <div class="viewcode-block" id="export_obst_raw"><a class="viewcode-back" href="../../../index.html#fdsreader.export.obst_exporter.export_obst_raw">[docs]</a><span class="k">def</span> <span class="nf">export_obst_raw</span><span class="p">(</span><span class="n">obst</span><span class="p">:</span> <span class="n">Obstruction</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ordering</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;C&#39;</span><span class="p">):</span>
@@ -107,7 +109,7 @@
     <span class="n">lock</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
     <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;Quantities&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
 
-    <span class="n">random_bndf</span> <span class="o">=</span> <span class="n">obst</span><span class="o">.</span><span class="n">get_boundary_data</span><span class="p">(</span><span class="n">obst</span><span class="o">.</span><span class="n">quantities</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">random_bndf</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">obst</span><span class="o">.</span><span class="n">get_boundary_data</span><span class="p">(</span><span class="n">obst</span><span class="o">.</span><span class="n">quantities</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
     <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;TimeSteps&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">random_bndf</span><span class="o">.</span><span class="n">times</span><span class="p">)</span>
     <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;NumOrientations&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">random_bndf</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">face</span> <span class="ow">in</span> <span class="n">random_bndf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -128,55 +130,26 @@
             <span class="s2">&quot;DimSize&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">face</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">face</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">})</span>
 
-    <span class="k">def</span> <span class="nf">worker</span><span class="p">(</span><span class="n">quantity</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">bndf_data</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Boundary</span><span class="p">]):</span>
+    <span class="k">def</span> <span class="nf">worker</span><span class="p">(</span><span class="n">quantity</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">faces</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]],</span> <span class="n">vmin</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+               <span class="n">vmax</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="n">quantity_name</span> <span class="o">=</span> <span class="n">quantity</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="n">obst_filename_base</span> <span class="o">+</span> <span class="s2">&quot;_quantity-&quot;</span> <span class="o">+</span> <span class="n">quantity_name</span> <span class="o">+</span> <span class="s2">&quot;.dat&quot;</span>
 
-        <span class="n">out</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;BoundaryQuantity&quot;</span><span class="p">:</span> <span class="n">quantity</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">),</span> <span class="s2">&quot;DataValMax&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">100000.</span><span class="p">,</span>
-               <span class="s2">&quot;DataValMin&quot;</span><span class="p">:</span> <span class="mf">100000.</span><span class="p">,</span> <span class="s2">&quot;ScaleFactor&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;DataFile&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">quantity_name</span><span class="p">,</span> <span class="n">filename</span><span class="p">)}</span>
-        <span class="k">for</span> <span class="n">bndf</span> <span class="ow">in</span> <span class="n">bndf_data</span><span class="p">:</span>
-            <span class="n">out</span><span class="p">[</span><span class="s2">&quot;DataValMax&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;DataValMax&quot;</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">bndf</span><span class="o">.</span><span class="n">upper_bounds</span><span class="p">))</span>
-            <span class="n">out</span><span class="p">[</span><span class="s2">&quot;DataValMin&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;DataValMin&quot;</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">bndf</span><span class="o">.</span><span class="n">lower_bounds</span><span class="p">))</span>
-        <span class="n">out</span><span class="p">[</span><span class="s2">&quot;DataValMax&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;DataValMax&quot;</span><span class="p">))</span>
-        <span class="n">out</span><span class="p">[</span><span class="s2">&quot;DataValMin&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;DataValMin&quot;</span><span class="p">))</span>
-        <span class="n">out</span><span class="p">[</span><span class="s2">&quot;ScaleFactor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">255.0</span> <span class="o">/</span> <span class="n">out</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;DataValMax&quot;</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;BoundaryQuantity&quot;</span><span class="p">:</span> <span class="n">quantity</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;DataFile&quot;</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">quantity_name</span><span class="p">,</span> <span class="n">filename</span><span class="p">),</span>
+            <span class="s2">&quot;DataValMax&quot;</span><span class="p">:</span> <span class="n">vmax</span><span class="p">,</span>
+            <span class="s2">&quot;DataValMin&quot;</span><span class="p">:</span> <span class="n">vmin</span><span class="p">,</span>
+            <span class="s2">&quot;ScaleFactor&quot;</span><span class="p">:</span> <span class="mf">255.0</span> <span class="o">/</span> <span class="n">vmax</span>
+        <span class="p">}</span>
 
         <span class="c1"># Abort if no useful data is available</span>
         <span class="k">if</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;DataValMax&quot;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span>
 
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">quantity_name</span><span class="p">,</span> <span class="n">filename</span><span class="p">),</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">rawfile</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">orientation</span> <span class="ow">in</span> <span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
-                <span class="n">patches</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-                <span class="k">for</span> <span class="n">bndf</span> <span class="ow">in</span> <span class="n">bndf_data</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">orientation</span> <span class="ow">in</span> <span class="n">bndf</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
-                        <span class="n">patches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bndf</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">orientation</span><span class="p">])</span>
-
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">patches</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="k">continue</span>
-
-                <span class="c1"># Combine patches to a single face for plotting</span>
-                <span class="n">patches</span> <span class="o">=</span> <span class="n">sort_patches_cartesian</span><span class="p">(</span><span class="n">patches</span><span class="p">)</span>
-
-                <span class="n">shape_dim1</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">patch_row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">patch_row</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">])</span>
-                <span class="n">shape_dim2</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">patch</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">patch</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
-                <span class="n">n_t</span> <span class="o">=</span> <span class="n">patches</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">n_t</span>  <span class="c1"># Number of time steps</span>
-
-                <span class="n">face</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_t</span><span class="p">,</span> <span class="n">shape_dim1</span><span class="p">,</span> <span class="n">shape_dim2</span><span class="p">))</span>
-                <span class="n">dim1_pos</span> <span class="o">=</span> <span class="mi">0</span>
-                <span class="n">dim2_pos</span> <span class="o">=</span> <span class="mi">0</span>
-                <span class="k">for</span> <span class="n">patch_row</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">:</span>
-                    <span class="n">d1</span> <span class="o">=</span> <span class="n">patch_row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                    <span class="k">for</span> <span class="n">patch</span> <span class="ow">in</span> <span class="n">patch_row</span><span class="p">:</span>
-                        <span class="n">d2</span> <span class="o">=</span> <span class="n">patch</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-                        <span class="n">face</span><span class="p">[:,</span> <span class="n">dim1_pos</span><span class="p">:</span><span class="n">dim1_pos</span> <span class="o">+</span> <span class="n">d1</span><span class="p">,</span> <span class="n">dim2_pos</span><span class="p">:</span><span class="n">dim2_pos</span> <span class="o">+</span> <span class="n">d2</span><span class="p">]</span> <span class="o">=</span> <span class="n">patch</span><span class="o">.</span><span class="n">data</span>
-                        <span class="n">dim2_pos</span> <span class="o">+=</span> <span class="n">d2</span>
-                    <span class="n">dim1_pos</span> <span class="o">+=</span> <span class="n">d1</span>
-                    <span class="n">dim2_pos</span> <span class="o">=</span> <span class="mi">0</span>
-
-                <span class="n">face</span> <span class="o">=</span> <span class="p">(</span><span class="n">face</span> <span class="o">*</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;ScaleFactor&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
-
-                <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">face</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">face</span> <span class="ow">in</span> <span class="n">faces</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>  <span class="c1"># face for each orientation</span>
+                <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="p">(</span><span class="n">face</span> <span class="o">*</span> <span class="n">out</span><span class="p">[</span><span class="s2">&quot;ScaleFactor&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">):</span>
                     <span class="k">if</span> <span class="n">ordering</span> <span class="o">==</span> <span class="s1">&#39;F&#39;</span><span class="p">:</span>
                         <span class="n">d</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">T</span>
                     <span class="n">d</span><span class="o">.</span><span class="n">tofile</span><span class="p">(</span><span class="n">rawfile</span><span class="p">)</span>
@@ -186,10 +159,14 @@
 
     <span class="n">worker_args</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">bndf_quantity</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">obst</span><span class="o">.</span><span class="n">quantities</span><span class="p">):</span>
-        <span class="n">worker_args</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">bndf_quantity</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">obst</span><span class="o">.</span><span class="n">get_boundary_data</span><span class="p">(</span><span class="n">bndf_quantity</span><span class="p">)))</span>
+        <span class="n">worker_args</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">bndf_quantity</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">obst</span><span class="o">.</span><span class="n">get_global_boundary_data_arrays</span><span class="p">(</span><span class="n">bndf_quantity</span><span class="p">),</span>
+                            <span class="n">obst</span><span class="o">.</span><span class="n">vmin</span><span class="p">(</span><span class="n">bndf_quantity</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">obst</span><span class="o">.</span><span class="n">vmax</span><span class="p">(</span><span class="n">bndf_quantity</span><span class="p">,</span> <span class="mi">0</span><span class="p">)))</span>
         <span class="c1"># Create all requested directories if they don&#39;t exist yet</span>
         <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">bndf_quantity</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)))</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                                                                                      <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># for args in worker_args:</span>
+    <span class="c1">#     worker(*args)</span>
     <span class="k">with</span> <span class="n">Pool</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">obst</span><span class="o">.</span><span class="n">quantities</span><span class="p">))</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
         <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">args</span><span class="p">:</span> <span class="n">worker</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">),</span> <span class="n">worker_args</span><span class="p">)</span>
 
