@@ -84,8 +84,6 @@ def export_obst_raw(obst: Obstruction, output_dir: str, ordering: Literal['C', '
         Path(os.path.join(output_dir, bndf_quantity.name.replace(" ", "_").replace(".", "-"))).mkdir(parents=True,
                                                                                                      exist_ok=True)
 
-    # for args in worker_args:
-    #     worker(*args)
     with Pool(len(obst.quantities)) as pool:
         pool.map(lambda args: worker(*args), worker_args)
 

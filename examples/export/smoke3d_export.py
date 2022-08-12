@@ -4,7 +4,7 @@ import fdsreader.export
 
 
 def main():
-    base_path = "C:\\Users\\janv1\\Documents\\UnrealProjects\\VRSmokeVis"
+    base_path = "."
     case = "Apartment"
     sim = fds.Simulation(os.path.join(base_path, "fds_data", case))
 
