@@ -65,6 +65,18 @@ docker build . -t fdsreader-ci  # Only needed the very first time
 docker run --rm fdsreader-ci
 ```
 
+### Manual deployment
+It is also possible to deploy to PyPI and Github pages manually using the following steps:
+1. python setup.py sdist bdist_wheel
+2. twine upload dist/*
+3. sphinx-build -b html docs docs/build
+4. cd .. && mkdir gh-pages && cd gh-pages
+5. git init && git remote add origin git@github.com:FireDynamics/fdsreader.git
+6. git fetch --all
+7. git checkout gh-pages
+8. cp -r ../docs/build/* .
+9. git add . && git commit -m "..." && git push origin HEAD:gh-pages
+
 ## Meta
 
 *  Jan Vogelsang – j.vogelsang@fz-juelich.de

@@ -11,8 +11,8 @@ from fdsreader import settings
 
 
 class EvacCollection(FDSDataCollection):
-    """Collection of :class:`Evacuation` objects. Next to agent-class specific data (such as trajectories) lots of
-        other data such as FED-data is provided via this class.
+    """Collection of :class:`Evacuation` objects. Next to agent-class specific data (such as
+        trajectories) lots of other data such as FED-data is provided via this class.
 
         :ivar times: List of all time steps of the simulation.
         :ivar z_offsets: The offset in z-direction for each mesh where the evac plane lays.
