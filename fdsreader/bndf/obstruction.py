@@ -10,6 +10,7 @@ from fdsreader import settings
 
 # Unfortunately, this is necessary due to a cyclic reference. "Mesh" is only needed for static type hints anyway
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from fdsreader.fds_classes import Mesh
 
@@ -228,7 +229,9 @@ class SubObstruction:
     def orientations(self):
         """Return all orientations for which there is data available.
         """
-        return next(iter(self._boundary_data.values())).orientations
+        if self.has_boundary_data:
+            return next(iter(self._boundary_data.values())).orientations
+        return []
 
     def get_coordinates(self, ignore_cell_centered: bool = False) -> Dict[
         int, Dict[Literal['x', 'y', 'z'], np.ndarray]]:
@@ -237,19 +240,23 @@ class SubObstruction:
 
             :param ignore_cell_centered: Whether to shift the coordinates when the bndf is cell_centered or not.
         """
-        return {orientation: patch.get_coordinates(ignore_cell_centered) for orientation, patch in
-                next(iter(self._boundary_data.values())).data.items()}
+        if self.has_boundary_data:
+            return {orientation: patch.get_coordinates(ignore_cell_centered) for orientation, patch in
+                    next(iter(self._boundary_data.values())).data.items()}
+        return {}
 
     def get_nearest_index(self, dimension: Literal['x', 'y', 'z'], orientation: int, value: float) -> int:
         """Get the nearest mesh coordinate index in a specific dimension for a specific orientation.
         """
-        coords = self.get_coordinates()[orientation][dimension]
-        idx = np.searchsorted(coords, value, side="left")
-        if idx > 0 and (idx == coords.size or np.math.fabs(value - coords[idx - 1]) < np.math.fabs(
-                value - coords[idx])):
-            return idx - 1
-        else:
-            return idx
+        if self.has_boundary_data:
+            coords = self.get_coordinates()[orientation][dimension]
+            idx = np.searchsorted(coords, value, side="left")
+            if idx > 0 and (idx == coords.size or np.math.fabs(value - coords[idx - 1]) < np.math.fabs(
+                    value - coords[idx])):
+                return idx - 1
+            else:
+                return idx
+        return np.nan
 
     @property
     def has_boundary_data(self):
@@ -280,8 +287,7 @@ class SubObstruction:
         """
         if self.has_boundary_data:
             return next(iter(self._boundary_data.values())).n_t
-        else:
-            return 0
+        return np.nan
 
     @property
     def times(self):
@@ -289,22 +295,21 @@ class SubObstruction:
         """
         if self.has_boundary_data:
             return next(iter(self._boundary_data.values())).times
-        else:
-            return np.array([])
+        return np.array([])
 
     def get_visible_times(self, times: Sequence[float]) -> np.ndarray:
         """Returns an ndarray filtering all time steps when theSubObstruction is visible/not hidden.
         """
         ret = list()
-        hidden = False
-        for time in times:
-            if time in self.show_times:
-                hidden = False
-            if time in self.hide_times:
-                hidden = True
-            if not hidden:
-                ret.append(time)
-
+        if self.has_boundary_data:
+            hidden = False
+            for time in times:
+                if time in self.show_times:
+                    hidden = False
+                if time in self.hide_times:
+                    hidden = True
+                if not hidden:
+                    ret.append(time)
         return np.array(ret)
 
     def vmin(self, quantity: Union[str, Quantity], orientation: Literal[-3, -2, -1, 0, 1, 2, 3] = 0) -> float:
@@ -312,14 +317,18 @@ class SubObstruction:
 
         :param orientation: Optionally filter by patches with a specific orientation.
         """
-        return self.get_data(quantity).vmin(orientation)
+        if self.has_boundary_data:
+            return self.get_data(quantity).vmin(orientation)
+        return np.nan
 
     def vmax(self, quantity: Union[str, Quantity], orientation: Literal[-3, -2, -1, 0, 1, 2, 3] = 0) -> float:
         """Maximum value of all patches at any time for a specific quantity.
 
         :param orientation: Optionally filter by patches with a specific orientation.
         """
-        return self.get_data(quantity).vmax(orientation)
+        if self.has_boundary_data:
+            return self.get_data(quantity).vmax(orientation)
+        return np.nan
 
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory.
@@ -376,27 +385,38 @@ class Obstruction:
     def orientations(self):
         """Return all orientations for which there is data available.
         """
-        orientations = set()
-        for subobst in self._subobstructions.values():
-            orientations.update(subobst.orientations)
-        return sorted(list(orientations))
+        if self.has_boundary_data:
+            orientations = set()
+            for subobst in self._subobstructions.values():
+                orientations.update(subobst.orientations)
+            return sorted(list(orientations))
+        return []
 
     @property
     def n_t(self):
         """Returns the number of timesteps for which boundary data is available.
         """
-        return next(iter(self._subobstructions.values())).n_t
+        for subobst in self._subobstructions.values():
+            if subobst.has_boundary_data:
+                return subobst.n_t
+        return np.nan
 
     @property
     def times(self):
         """Return all timesteps for which boundary data is available, if any.
         """
-        return next(iter(self._subobstructions.values())).times
+        for subobst in self._subobstructions.values():
+            if subobst.has_boundary_data:
+                return subobst.times
+        return np.array([])
 
     def get_visible_times(self, times: Sequence[float]):
         """Returns an ndarray filtering all time steps when theSubObstruction is visible/not hidden.
         """
-        return next(iter(self._subobstructions.values())).get_visible_times(times)
+        for subobst in self._subobstructions.values():
+            if subobst.has_boundary_data:
+                return subobst.get_visible_times(times)
+        return np.array([])
 
     def get_coordinates(self, ignore_cell_centered: bool = False) -> Dict[
         int, Dict[Literal['x', 'y', 'z'], np.ndarray]]:
@@ -405,69 +425,75 @@ class Obstruction:
 
             :param ignore_cell_centered: Whether to shift the coordinates when the bndf is cell_centered or not.
         """
-        all_coords = dict()
-        for orientation_int in self.orientations:
-            orientation = ('x', 'y', 'z')[abs(orientation_int) - 1]
-            coords = {'x': set(), 'y': set(), 'z': set()}
-            for dim in ('x', 'y', 'z'):
-                if orientation == dim:
-                    bounding_box_index = 0 if orientation_int < 0 else 1
-                    coords[dim] = np.array([self.bounding_box[dim][bounding_box_index]])
-                    continue
-                min_delta = math.inf
-                for subobst in self._subobstructions.values():
-                    subobst_coords = subobst.get_coordinates(ignore_cell_centered)
-                    if orientation_int not in subobst_coords:
+        if self.has_boundary_data:
+            all_coords = dict()
+            for orientation_int in self.orientations:
+                orientation = ('x', 'y', 'z')[abs(orientation_int) - 1]
+                coords = {'x': set(), 'y': set(), 'z': set()}
+                for dim in ('x', 'y', 'z'):
+                    if orientation == dim:
+                        bounding_box_index = 0 if orientation_int < 0 else 1
+                        coords[dim] = np.array([self.bounding_box[dim][bounding_box_index]])
                         continue
-                    co = subobst_coords[orientation_int][dim]
-                    min_delta = min(min_delta, co[1] - co[0])
-                    coords[dim].update(co)
+                    min_delta = math.inf
+                    for subobst in self._subobstructions.values():
+                        subobst_coords = subobst.get_coordinates(ignore_cell_centered)
+                        if orientation_int not in subobst_coords:
+                            continue
+                        co = subobst_coords[orientation_int][dim]
+                        min_delta = min(min_delta, co[1] - co[0])
+                        coords[dim].update(co)
 
-                coords[dim] = np.array(sorted(list(coords[dim])))
-                to_keep = np.full(coords[dim].shape, True)
-                for i in range(len(coords[dim]) - 1):
-                    if abs(coords[dim][i] - coords[dim][i + 1]) < min_delta / 2:
-                        to_keep[i+1] = False
-                coords[dim] = coords[dim][to_keep]
+                    coords[dim] = np.array(sorted(list(coords[dim])))
+                    to_keep = np.full(coords[dim].shape, True)
+                    for i in range(len(coords[dim]) - 1):
+                        if abs(coords[dim][i] - coords[dim][i + 1]) < min_delta / 2:
+                            to_keep[i + 1] = False
+                    coords[dim] = coords[dim][to_keep]
 
-                if len(coords[dim]) == 0:
-                    bounding_box_index = 0 if orientation_int < 0 else 1
-                    single_coordinate = self.bounding_box[dim][bounding_box_index]
-                    nearest_coordinate = np.inf
-                    for mesh in self._subobstructions.keys():
-                        mesh_coords = mesh.coordinates[dim]
-                        idx = np.searchsorted(mesh_coords, single_coordinate, side="left")
-                        if idx > 0 and (idx == mesh_coords.size or np.math.fabs(
-                                single_coordinate - mesh_coords[idx - 1]) < np.math.fabs(
-                            single_coordinate - mesh_coords[idx])):
-                            idx = idx + 1
-                        if mesh_coords[idx] - single_coordinate < nearest_coordinate - single_coordinate:
-                            nearest_coordinate = mesh_coords[idx]
-                    coords[dim] = np.array([nearest_coordinate])
-            all_coords[orientation_int] = coords
+                    if len(coords[dim]) == 0:
+                        bounding_box_index = 0 if orientation_int < 0 else 1
+                        single_coordinate = self.bounding_box[dim][bounding_box_index]
+                        nearest_coordinate = np.inf
+                        for mesh in self._subobstructions.keys():
+                            mesh_coords = mesh.coordinates[dim]
+                            idx = np.searchsorted(mesh_coords, single_coordinate, side="left")
+                            if idx > 0 and (idx == mesh_coords.size or np.math.fabs(
+                                    single_coordinate - mesh_coords[idx - 1]) < np.math.fabs(
+                                single_coordinate - mesh_coords[idx])):
+                                idx = idx + 1
+                            if mesh_coords[idx] - single_coordinate < nearest_coordinate - single_coordinate:
+                                nearest_coordinate = mesh_coords[idx]
+                        coords[dim] = np.array([nearest_coordinate])
+                all_coords[orientation_int] = coords
 
-        return all_coords
+            return all_coords
+        return dict()
 
     def get_nearest_index(self, dimension: Literal['x', 'y', 'z'], orientation: int, value: float) -> int:
         """Get the nearest mesh coordinate index in a specific dimension for a specific orientation.
         """
-        coords = self.get_coordinates()[orientation][dimension]
-        idx = np.searchsorted(coords, value, side="left")
-        if idx > 0 and (idx == coords.size or np.math.fabs(value - coords[idx - 1]) < np.math.fabs(
-                value - coords[idx])):
-            return idx - 1
-        else:
-            return idx
+        if self.has_boundary_data:
+            coords = self.get_coordinates()[orientation][dimension]
+            idx = np.searchsorted(coords, value, side="left")
+            if idx > 0 and (idx == coords.size or np.math.fabs(value - coords[idx - 1]) < np.math.fabs(
+                    value - coords[idx])):
+                return idx - 1
+            else:
+                return idx
+        return np.nan
 
     @property
     def quantities(self) -> List[Quantity]:
         """Get a list of all quantities for which boundary data exists.
         """
-        qs = set()
-        for subobst in self._subobstructions.values():
-            for b in subobst._boundary_data.values():
-                qs.add(b.quantity)
-        return list(qs)
+        if self.has_boundary_data:
+            qs = set()
+            for subobst in self._subobstructions.values():
+                for b in subobst._boundary_data.values():
+                    qs.add(b.quantity)
+            return list(qs)
+        return []
 
     @property
     def meshes(self) -> List['Mesh']:
@@ -479,8 +505,10 @@ class Obstruction:
         """Filter all SubObstructions by a specific orientation. All returned SubObstructions will contain boundary data
             in the specified orientation.
         """
-        return [subobst for subobst in self._subobstructions.values() if
-                orientation in next(iter(subobst._boundary_data.values())).data.keys()]
+        if self.has_boundary_data:
+            return [subobst for subobst in self._subobstructions.values() if
+                    orientation in subobst.orientations]
+        return []
 
     def get_boundary_data(self, quantity: Union[Quantity, str],
                           orientation: Literal[-3, -2, -1, 0, 1, 2, 3] = 0) -> Dict[str, Boundary]:
@@ -502,40 +530,43 @@ class Obstruction:
     def get_nearest_timestep(self, time: float, visible_only: bool = False) -> int:
         """Calculates the nearest timestep for which data has been output for this obstruction.
         """
-        times = self.get_visible_times(self.times) if visible_only else self.times
-        idx = np.searchsorted(times, time, side="left")
-        if time > 0 and (idx == len(times) or np.math.fabs(
-                time - times[idx - 1]) < np.math.fabs(time - times[idx])):
-            return idx - 1
-        else:
-            return idx
+        if self.has_boundary_data:
+            times = self.get_visible_times(self.times) if visible_only else self.times
+            idx = np.searchsorted(times, time, side="left")
+            if time > 0 and (idx == len(times) or np.math.fabs(
+                    time - times[idx - 1]) < np.math.fabs(time - times[idx])):
+                return idx - 1
+            else:
+                return idx
+        return np.nan
 
     def get_nearest_patch(self, x: float = None, y: float = None, z: float = None):
         """Gets the patch of the :class:`SubObstruction` that has the least distance to the given point.
             If there are multiple patches with the same distance, a random one will be selected.
         """
-        d_min = np.finfo(float).max
-        patches_min = list()
+        if self.has_boundary_data:
+            d_min = np.finfo(float).max
+            patches_min = list()
 
-        for subobst in self._subobstructions.values():
-            for patch in subobst.get_data(self.quantities[0])._patches:
-                dx = max(patch.extent.x_start - x, 0, x - patch.extent.x_end) if x is not None else 0
-                dy = max(patch.extent.y_start - y, 0, y - patch.extent.y_end) if y is not None else 0
-                dz = max(patch.extent.z_start - z, 0, z - patch.extent.z_end) if z is not None else 0
-                d = np.sqrt(dx * dx + dy * dy + dz * dz)
-                if d <= d_min:
-                    d_min = d
-                    patches_min.append(patch)
+            for subobst in self._subobstructions.values():
+                for patch in subobst.get_data(self.quantities[0])._patches:
+                    dx = max(patch.extent.x_start - x, 0, x - patch.extent.x_end) if x is not None else 0
+                    dy = max(patch.extent.y_start - y, 0, y - patch.extent.y_end) if y is not None else 0
+                    dz = max(patch.extent.z_start - z, 0, z - patch.extent.z_end) if z is not None else 0
+                    d = np.sqrt(dx * dx + dy * dy + dz * dz)
+                    if d <= d_min:
+                        d_min = d
+                        patches_min.append(patch)
 
-        if x is not None:
-            patches_min.sort(key=lambda patch: (patch.extent.x_end - patch.extent.x_start))
-        if y is not None:
-            patches_min.sort(key=lambda patch: (patch.extent.y_end - patch.extent.y_start))
-        if z is not None:
-            patches_min.sort(key=lambda patch: (patch.extent.z_end - patch.extent.z_start))
+            if x is not None:
+                patches_min.sort(key=lambda patch: (patch.extent.x_end - patch.extent.x_start))
+            if y is not None:
+                patches_min.sort(key=lambda patch: (patch.extent.y_end - patch.extent.y_start))
+            if z is not None:
+                patches_min.sort(key=lambda patch: (patch.extent.z_end - patch.extent.z_start))
 
-        if len(patches_min) > 0:
-            return patches_min[0]
+            if len(patches_min) > 0:
+                return patches_min[0]
         return None
 
     @property
@@ -544,21 +575,29 @@ class Obstruction:
         """
         return any(subobst.has_boundary_data for subobst in self._subobstructions.values())
 
-    def get_global_boundary_data_arrays(self, quantity: Union[str, Quantity]) -> Dict[int, Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]]:
+    def get_global_boundary_data_arrays(self, quantity: Union[str, Quantity]) -> Dict[
+        int, Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]]:
         """Creates a global numpy ndarray from all subobstruction's boundary data for each orientation.
 
             :param quantity: The quantity's name or short name for which to load the global arrays.
         """
-        cell_centered = next(iter(next(iter(self._subobstructions.values()))._boundary_data.values())).cell_centered
+        if not self.has_boundary_data:
+            return dict()
+        for subobst in self._subobstructions.values():
+            if subobst.has_boundary_data:
+                cell_centered = next(iter(subobst._boundary_data.values())).cell_centered
 
         result = dict()
         for orientation_int in self.orientations:
             subobst_sets = [list(), list()]
-            dim = ['x', 'y', 'z'][orientation_int - 1]
-            random_subobst = next(subobst for subobst in self._subobstructions.values() if orientation_int in subobst.get_coordinates())
+            dim = ['x', 'y', 'z'][abs(orientation_int) - 1]
+            random_subobst = next(
+                subobst for subobst in self._subobstructions.values() if orientation_int in subobst.get_coordinates())
             base_coord = random_subobst.get_coordinates(ignore_cell_centered=False)[orientation_int][dim][0]
 
             for subobst in self._subobstructions.values():
+                if not subobst.has_boundary_data:
+                    continue
                 coords = subobst.get_coordinates(ignore_cell_centered=False)
                 if orientation_int not in coords:
                     continue
@@ -584,8 +623,8 @@ class Obstruction:
                 # The global grid will use the finest mesh as base and duplicate values of the coarser meshes
                 # Therefore we first find the finest mesh and calculate the step size in each dimension
                 step_sizes_min = {'x': coord_max['x'] - coord_min['x'],
-                              'y': coord_max['y'] - coord_min['y'],
-                              'z': coord_max['z'] - coord_min['z']}
+                                  'y': coord_max['y'] - coord_min['y'],
+                                  'z': coord_max['z'] - coord_min['z']}
                 step_sizes_max = {'x': 0, 'y': 0, 'z': 0}
                 steps = dict()
                 global_max = {'x': -math.inf, 'y': -math.inf, 'z': -math.inf}
@@ -606,7 +645,8 @@ class Obstruction:
                         step_sizes_min[dim] = math.inf
                         steps[dim] = 1
                     else:
-                        steps[dim] = max(int(round((coord_max[dim] - coord_min[dim]) / step_sizes_min[dim])), 1) + (0 if cell_centered else 1)
+                        steps[dim] = max(int(round((coord_max[dim] - coord_min[dim]) / step_sizes_min[dim])), 1) + (
+                            0 if cell_centered else 1)
 
                 grid = np.full((self.n_t, steps['x'], steps['y'], steps['z']), np.nan)
 
@@ -614,7 +654,8 @@ class Obstruction:
                 start_idx = dict()
                 end_idx = dict()
                 for subobst in subobsts:
-                    patch_data = np.expand_dims(subobst.get_data(quantity).data[orientation_int].data, axis=abs(orientation_int))
+                    patch_data = np.expand_dims(subobst.get_data(quantity).data[orientation_int].data,
+                                                axis=abs(orientation_int))
                     subobst_coords = subobst.get_coordinates(ignore_cell_centered=True)[orientation_int]
                     for axis in (0, 1, 2):
                         dim = ('x', 'y', 'z')[axis]
@@ -622,10 +663,13 @@ class Obstruction:
                             start_idx[dim] = 0
                             end_idx[dim] = 1
                             continue
-                        n_repeat = max(int(round((subobst_coords[dim][1] - subobst_coords[dim][0]) / step_sizes_min[dim])), 1)
+                        n_repeat = max(
+                            int(round((subobst_coords[dim][1] - subobst_coords[dim][0]) / step_sizes_min[dim])), 1)
 
-                        start_idx[dim] = int(round((subobst_coords[dim][0] - start_coordinates[dim]) / step_sizes_min[dim]))
-                        end_idx[dim] = int(round((subobst_coords[dim][-1] - start_coordinates[dim]) / step_sizes_min[dim]))
+                        start_idx[dim] = int(
+                            round((subobst_coords[dim][0] - start_coordinates[dim]) / step_sizes_min[dim]))
+                        end_idx[dim] = int(
+                            round((subobst_coords[dim][-1] - start_coordinates[dim]) / step_sizes_min[dim]))
 
                         # We ignore border points unless they are actually on the border of the simulation space as all
                         # other border points actually appear twice, as the subobstructions overlap. This only
@@ -653,7 +697,8 @@ class Obstruction:
 
                     grid[:, start_idx['x']: end_idx['x'], start_idx['y']: end_idx['y'],
                     start_idx['z']: end_idx['z']] = patch_data.reshape(
-                        (self.n_t, end_idx['x'] - start_idx['x'], end_idx['y'] - start_idx['y'], end_idx['z'] - start_idx['z']))
+                        (self.n_t, end_idx['x'] - start_idx['x'], end_idx['y'] - start_idx['y'],
+                         end_idx['z'] - start_idx['z']))
 
                 # Remove empty dimensions, but make sure to note remove the time dimension if there is only a single timestep
                 grid = np.squeeze(grid)
@@ -676,14 +721,19 @@ class Obstruction:
 
         :param orientation: Optionally filter by patches with a specific orientation.
         """
-        return min(s.vmin(quantity, orientation) for s in self._subobstructions.values())
+        if self.has_boundary_data:
+            return min(s.vmin(quantity, orientation) for s in self._subobstructions.values())
+        else:
+            return np.nan
 
     def vmax(self, quantity: Union[str, Quantity], orientation: Literal[-3, -2, -1, 0, 1, 2, 3] = 0) -> float:
         """Maximum value of all patches at any time for a specific quantity.
 
         :param orientation: Optionally filter by patches with a specific orientation.
         """
-        return max(s.vmax(quantity, orientation) for s in self._subobstructions.values())
+        if self.has_boundary_data:
+            return max(s.vmax(quantity, orientation) for s in self._subobstructions.values())
+        return np.nan
 
     def __getitem__(self, key: Union[int, str, 'Mesh']):
         """Gets either the nth :class:`SubObstruction` or the one with the given mesh-id.

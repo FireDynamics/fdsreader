@@ -54,23 +54,24 @@ class Dimension:
             s.append(self.z + c)
         return tuple(s)
 
-    def as_tuple(self, reduced=True) -> Tuple:
+    def as_tuple(self, cell_centered=False, reduced=True) -> Tuple:
         """Gives the dimensions in tuple notation (optionally without empty dimensions).
 
         :param reduced: Whether to leave out empty dimensions (size of 1) or not.
         """
+        c = -1 if cell_centered else 0
         if reduced:
             if self.x == 1:
-                return self.y, self.z
+                return self.y + c, self.z + c
             elif self.y == 1:
-                return self.x, self.z
+                return self.x + c, self.z + c
             elif self.z == 1:
-                return self.x, self.y
-        return self.x, self.y, self.z
+                return self.x + c, self.y + c
+        return self.x + c, self.y + c, self.z + c
 
-    def as_list(self, reduced=True) -> List:
+    def as_list(self, cell_centered=False, reduced=True) -> List:
         """Gives the dimension in list notation (without empty extents).
 
         :param reduced: Whether to leave out empty dimensions (size of 1) or not.
         """
-        return list(self.as_tuple(reduced))
+        return list(self.as_tuple(cell_centered, reduced))

@@ -1,4 +1,6 @@
 ## Release History
+* 1.8.3
+    * Fixed obst exporter and added safe guards to obstructions for when there is no boundary data 
 * 1.8.2
     * Added option to mask global slice and fixed csv and slice mask bugs
 * 1.8.1

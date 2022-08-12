@@ -1,11 +1,10 @@
 import os
 from pathlib import Path
-from typing import Sequence
+from typing import Dict, Union, Tuple
 
 import numpy as np
 from typing_extensions import Literal
-from ..bndf import Obstruction, Boundary
-from ..bndf.utils import sort_patches_cartesian
+from ..bndf import Obstruction
 
 
 def export_obst_raw(obst: Obstruction, output_dir: str, ordering: Literal['C', 'F'] = 'C'):
@@ -29,7 +28,7 @@ def export_obst_raw(obst: Obstruction, output_dir: str, ordering: Literal['C', '
     lock = m.Lock()
     meta["Quantities"] = m.list()
 
-    random_bndf = obst.get_boundary_data(obst.quantities[0])[0]
+    random_bndf = next(iter(obst.get_boundary_data(obst.quantities[0]).values()))
     meta["TimeSteps"] = len(random_bndf.times)
     meta["NumOrientations"] = len(random_bndf.data)
     for orientation, face in random_bndf.data.items():
@@ -50,55 +49,26 @@ def export_obst_raw(obst: Obstruction, output_dir: str, ordering: Literal['C', '
             "DimSize": f"{face.shape[0]} {face.shape[1]}"
         })
 
-    def worker(quantity: str, bndf_data: Sequence[Boundary]):
+    def worker(quantity: str, faces: Dict[int, Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]], vmin: float,
+               vmax: float):
         quantity_name = quantity.replace(" ", "_").replace(".", "-")
         filename = obst_filename_base + "_quantity-" + quantity_name + ".dat"
 
-        out = {"BoundaryQuantity": quantity.replace(" ", "_").replace(".", "-"), "DataValMax": -100000.,
-               "DataValMin": 100000., "ScaleFactor": 1, "DataFile": os.path.join(quantity_name, filename)}
-        for bndf in bndf_data:
-            out["DataValMax"] = max(out.get("DataValMax"), np.max(bndf.upper_bounds))
-            out["DataValMin"] = min(out.get("DataValMin"), np.min(bndf.lower_bounds))
-        out["DataValMax"] = float(out.get("DataValMax"))
-        out["DataValMin"] = float(out.get("DataValMin"))
-        out["ScaleFactor"] = 255.0 / out.get("DataValMax")
+        out = {
+            "BoundaryQuantity": quantity.replace(" ", "_").replace(".", "-"),
+            "DataFile": os.path.join(quantity_name, filename),
+            "DataValMax": vmax,
+            "DataValMin": vmin,
+            "ScaleFactor": 255.0 / vmax
+        }
 
         # Abort if no useful data is available
         if out["DataValMax"] <= 0:
             return
 
         with open(os.path.join(output_dir, quantity_name, filename), 'wb') as rawfile:
-            for orientation in (-3, -2, -1, 1, 2, 3):
-                patches = list()
-                for bndf in bndf_data:
-                    if orientation in bndf.data:
-                        patches.append(bndf.data[orientation])
-
-                if len(patches) == 0:
-                    continue
-
-                # Combine patches to a single face for plotting
-                patches = sort_patches_cartesian(patches)
-
-                shape_dim1 = sum([patch_row[0].shape[0] for patch_row in patches])
-                shape_dim2 = sum([patch.shape[1] for patch in patches[0]])
-                n_t = patches[0][0].n_t  # Number of time steps
-
-                face = np.empty(shape=(n_t, shape_dim1, shape_dim2))
-                dim1_pos = 0
-                dim2_pos = 0
-                for patch_row in patches:
-                    d1 = patch_row[0].shape[0]
-                    for patch in patch_row:
-                        d2 = patch.shape[1]
-                        face[:, dim1_pos:dim1_pos + d1, dim2_pos:dim2_pos + d2] = patch.data
-                        dim2_pos += d2
-                    dim1_pos += d1
-                    dim2_pos = 0
-
-                face = (face * out["ScaleFactor"]).astype(np.uint8)
-
-                for d in face:
+            for face in faces.values():  # face for each orientation
+                for d in (face * out["ScaleFactor"]).astype(np.uint8):
                     if ordering == 'F':
                         d = d.T
                     d.tofile(rawfile)
@@ -108,10 +78,14 @@ def export_obst_raw(obst: Obstruction, output_dir: str, ordering: Literal['C', '
 
     worker_args = list()
     for i, bndf_quantity in enumerate(obst.quantities):
-        worker_args.append((bndf_quantity.name, obst.get_boundary_data(bndf_quantity)))
+        worker_args.append((bndf_quantity.name, obst.get_global_boundary_data_arrays(bndf_quantity),
+                            obst.vmin(bndf_quantity, 0), obst.vmax(bndf_quantity, 0)))
         # Create all requested directories if they don't exist yet
         Path(os.path.join(output_dir, bndf_quantity.name.replace(" ", "_").replace(".", "-"))).mkdir(parents=True,
                                                                                                      exist_ok=True)
+
+    # for args in worker_args:
+    #     worker(*args)
     with Pool(len(obst.quantities)) as pool:
         pool.map(lambda args: worker(*args), worker_args)
 
