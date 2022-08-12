@@ -4,4 +4,4 @@ _______
 .. autoclass:: fdsreader.devc.Device
    :members:
    :undoc-members:
-   :noindex:g
+   :noindex:
