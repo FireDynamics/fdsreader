@@ -1,4 +1,6 @@
 ## Release History
+* 1.8.4
+    * Obst vmax and vmin now correctly return floats instead of numpy scalars
 * 1.8.3
     * Fixed obst exporter and added safe guards to obstructions for when there is no boundary data 
 * 1.8.2

@@ -163,10 +163,10 @@ class Boundary:
         if orientation == 0:
             curr_min = np.min(self.lower_bounds)
             if curr_min == 0.0:
-                return min(np.min(p.data) for p in self._patches)
-            return curr_min
+                return float(min(np.min(p.data) for p in self._patches))
+            return float(curr_min)
         else:
-            return np.min(self.data[orientation].data)
+            return float(np.min(self.data[orientation].data))
 
     def vmax(self, orientation: Literal[-3, -2, -1, 0, 1, 2, 3] = 0) -> float:
         """Maximum value of all patches at any time.
@@ -176,10 +176,10 @@ class Boundary:
         if orientation == 0:
             curr_max = np.max(self.upper_bounds)
             if curr_max == np.float32(-1e33):
-                return max(np.max(p.data) for p in self._patches)
-            return curr_max
+                return float(max(np.max(p.data) for p in self._patches))
+            return float(curr_max)
         else:
-            return np.max(self.data[orientation].data)
+            return float(np.max(self.data[orientation].data))
 
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory.
