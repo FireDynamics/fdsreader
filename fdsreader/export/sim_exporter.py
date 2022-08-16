@@ -6,6 +6,9 @@ from .. import Simulation
 
 def export_sim(sim: Simulation, output_dir: str, ordering: Literal['C', 'F'] = 'C'):
     """Exports the 3d arrays to raw binary files with corresponding .yaml meta files.
+        Warning: This method does not work for large simulations as some internal multiprocess buffers overflow after
+        a few GB of data. Please export the simulation manually using the functions used in this method in separate
+        python instances.
 
     :param sim: The :class:`Simulation` to export.
     :param output_dir: The directory in which to save all files.
