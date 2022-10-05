@@ -593,11 +593,11 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             return '3D'
         return '2D'
 
-    @implements(np.min)
+    @implements(np.amin)
     def _min(self):
         return min(subsclice.vmin for subsclice in self._subslices.values())
 
-    @implements(np.max)
+    @implements(np.amax)
     def _max(self):
         return max(subsclice.vmax for subsclice in self._subslices.values())
 

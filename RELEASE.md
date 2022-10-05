@@ -1,4 +1,6 @@
 ## Release History
+* 1.8.5
+    * Fixed particle reader
 * 1.8.4
     * Obst vmax and vmin now correctly return floats instead of numpy scalars
 * 1.8.3

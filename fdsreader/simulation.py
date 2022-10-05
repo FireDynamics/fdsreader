@@ -200,6 +200,7 @@ class Simulation:
             if type(self._particles) == list:
                 self.particles = ParticleCollection((), ())
             else:
+                self.particles = self._particles
                 self.particles._post_init()
             # If no evacs are simulates, initialize empty data container for consistency
             if len(self._evacs) == 0:
