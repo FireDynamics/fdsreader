@@ -1,4 +1,6 @@
 ## Release History
+* 1.8.6
+    * Fixed __repr__ of Simulation
 * 1.8.5
     * Fixed particle reader
 * 1.8.4

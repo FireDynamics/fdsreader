@@ -100,17 +100,17 @@ class Simulation:
 
     def __repr__(self):
         r = f"Simulation(chid={self.chid},\n" + \
-            f"           meshes={len(self._meshes)},\n" + \
-            (f"           obstructions={len(self._obstructions)},\n" if len(self._obstructions) > 0 else "") + \
+            f"           meshes={len(self.meshes)},\n" + \
+            (f"           obstructions={len(self.obstructions)},\n" if len(self.obstructions) > 0 else "") + \
             (f"           geoms={len(self.geoms)},\n" if len(self.geoms) > 0 else "") + \
-            (f"           slices={len(self._slices)},\n" if len(self._slices) > 0 else "") + \
-            (f"           geomslices={len(self._geomslices)},\n" if len(self._geomslices) > 0 else "") + \
-            (f"           data_3d={len(self._data_3d)},\n" if len(self._data_3d) > 0 else "") + \
-            (f"           smoke_3d={len(self._smoke_3d)},\n" if len(self._smoke_3d) > 0 else "") + \
-            (f"           isosurfaces={len(self._isosurfaces)},\n" if len(self._isosurfaces) > 0 else "") + \
-            (f"           particles={len(self._particles)},\n" if len(self._particles) > 0 else "") + \
-            (f"           evacs={len(self._evacs)},\n" if len(self._evacs) > 0 else "") + \
-            (f"           devices={len(self._devices)},\n" if len(self._devices) > 0 else "")
+            (f"           slices={len(self.slices)},\n" if len(self.slices) > 0 else "") + \
+            (f"           geomslices={len(self.geomslices)},\n" if len(self.geomslices) > 0 else "") + \
+            (f"           data_3d={len(self.data_3d)},\n" if len(self.data_3d) > 0 else "") + \
+            (f"           smoke_3d={len(self.smoke_3d)},\n" if len(self.smoke_3d) > 0 else "") + \
+            (f"           isosurfaces={len(self.isosurfaces)},\n" if len(self.isosurfaces) > 0 else "") + \
+            (f"           particles={len(self.particles)},\n" if len(self.particles) > 0 else "") + \
+            (f"           evacs={len(self.evacs)},\n" if len(self.evacs) > 0 else "") + \
+            (f"           devices={len(self.devices)},\n" if len(self.devices) > 0 else "")
         return r[:-2] + ')'
 
     def __init__(self, path: str):
