@@ -1,4 +1,6 @@
 ## Release History
+* 1.8.7
+    * Fixed devices and improved global slcf example
 * 1.8.6
     * Fixed __repr__ of Simulation
 * 1.8.5

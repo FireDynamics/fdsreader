@@ -26,13 +26,13 @@ class DeviceCollection(FDSDataCollection):
         """Returns a pandas DataFrame with device-IDs as column names and device data as column values.
         """
         import pandas as pd
-        df = pd.DataFrame()
+        data = dict()
         for devc in self:
             if type(devc) == Device:
-                df[devc.id] = devc.data
+                data[devc.id] = devc.data
             elif type(devc) == list:
                 # It might be the case that there are multiple devices with the same name
                 for i, list_devc in enumerate(devc):
-                    df[list_devc.id + "_" + str(i)] = list_devc.data
-        return df
+                    data[list_devc.id + "_" + str(i)] = list_devc.data
+        return pd.DataFrame(data)
 

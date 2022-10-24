@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Union
 
 from fdsreader.utils import Quantity
 
@@ -55,6 +55,8 @@ class Device:
             del self._data
 
     def __eq__(self, other):
+        if type(other) == str:
+            return self.id == other
         return self.id == other.id
 
     def __repr__(self):

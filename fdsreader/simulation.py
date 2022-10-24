@@ -939,13 +939,13 @@ class Simulation:
             names = [name.replace('"', '').replace('\n', '').strip() for name in infile.readline().split(',"')]
             values = np.genfromtxt(infile, delimiter=',', dtype=np.float32, autostrip=True)
             for k in range(len(names)):
-                if type(self._devices[names[k]]) == list:
-                    for devc in self._devices[names[k]]:
+                if type(self.devices[names[k]]) == list:
+                    for devc in self.devices[names[k]]:
                         if not hasattr(devc, "_data"):
                             # Find the first device in the list that does not yet have any data associated with it
                             break
                 else:
-                    devc = self._devices[names[k]]
+                    devc = self.devices[names[k]]
 
                 devc.quantity.unit = units[k]
                 size = values.shape[0]
@@ -957,11 +957,11 @@ class Simulation:
         if os.path.exists(line_path):
             with open(line_path, 'r') as infile:
                 units = infile.readline()
-                names = [name.replace('"', '').replace('\n', '').strip() for name in infile.readline().split(',"')]
+                names = [name.replace('"', '').replace('\n', '').strip() for name in infile.readline().split(',')]
                 data = np.genfromtxt(infile, delimiter=',', dtype=np.float32, autostrip=True)
                 for k, key in enumerate(names):
-                    if key in self._devices:
-                        devc = self._devices[key]
+                    if key in self.devices:
+                        devc = self.devices[key]
                         for i in range(len(devc)):
                             devc[i].quantity.unit = units[k]
                             devc[i]._data = data[i, k]
@@ -1034,7 +1034,6 @@ class Simulation:
         self.data_3d.clear_cache()
         self.smoke_3d.clear_cache()
         self.isosurfaces.clear_cache()
-        self.particles.clear_cache()
         self.obstructions.clear_cache()
         self.devices.clear_cache()
         self.evacs.clear_cache()
