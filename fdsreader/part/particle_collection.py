@@ -16,7 +16,7 @@ class ParticleCollection(FDSDataCollection):
     def __init__(self, times: Iterable[float], particles: Iterable[Particle]):
         super().__init__(particles)
         self.times = list(times)
-        self._file_paths: Dict[Mesh, str] = dict()
+        self._file_paths: Dict[str, str] = dict()
         for particle in particles:
             particle.times = times
 

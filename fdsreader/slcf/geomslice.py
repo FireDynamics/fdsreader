@@ -181,17 +181,17 @@ class GeomSlice(np.lib.mixins.NDArrayOperatorsMixin):
         self.id = geomslice_id
 
         # List of all subgeomslices this geomslice consists of (one per mesh).
-        self._subgeomslices: Dict[Mesh, SubGeomSlice] = dict()
+        self._subgeomslices: Dict[str, SubGeomSlice] = dict()
 
         vector_temp = dict()
         for mesh_data in multimesh_data:
             if "-VELOCITY" in mesh_data["quantity"]:
-                vector_temp[mesh_data["mesh"]] = dict()
+                vector_temp[mesh_data["mesh"].id] = dict()
 
         for mesh_data in multimesh_data:
-            if mesh_data["mesh"] not in self._subgeomslices:
+            if mesh_data["mesh"].id not in self._subgeomslices:
                 self.quantity = Quantity(mesh_data["quantity"], mesh_data["short_name"], mesh_data["unit"])
-                self._subgeomslices[mesh_data["mesh"]] = SubGeomSlice(self, mesh_data["filename"], mesh_data["geomfilename"], mesh_data["extent"], mesh_data["mesh"])
+                self._subgeomslices[mesh_data["mesh"].id] = SubGeomSlice(self, mesh_data["filename"], mesh_data["geomfilename"], mesh_data["extent"], mesh_data["mesh"])
 
             # if "-VELOCITY" in mesh_data["quantity"]:
             #     vector_temp[mesh_data["mesh"]][mesh_data["quantity"]] = mesh_data["filename"]
@@ -239,19 +239,21 @@ class GeomSlice(np.lib.mixins.NDArrayOperatorsMixin):
             for _, subgeomslice in self._subgeomslices.items():
                 _ = subgeomslice.data
 
-    def get_subgeomslice(self, key: Union[int, Mesh]) -> SubGeomSlice:
-        """Returns the :class:`SubGeomSlice` that cuts through the given mesh. When an int is provided
-            the nth SubGeomSlice will be returned.
+    def get_subgeomslice(self, key: Union[int, str, Mesh]) -> SubGeomSlice:
+        """Returns the :class:`SubGeomSlice` that cuts through the given mesh. When an int is
+            provided the nth SubGeomSlice will be returned.
         """
         return self[key]
 
-    def __getitem__(self, key: Union[int, Mesh]) -> SubGeomSlice:
-        """Returns the :class:`SubGeomSlice` that cuts through the given mesh. When an int is provided
-            the nth SubGeomSlice will be returned.
+    def __getitem__(self, key: Union[int, str, Mesh]) -> SubGeomSlice:
+        """Returns the :class:`SubGeomSlice` that cuts through the given mesh. When an int is
+            provided the nth SubGeomSlice will be returned.
         """
         if type(key) == int:
             return tuple(self._subgeomslices.values())[key]
-        return self._subgeomslices[key]
+        if type(key) == str:
+            return self._subgeomslices[key]
+        return self._subgeomslices[key.id]
 
     def __len__(self):
         return len(self._subgeomslices)
@@ -301,7 +303,7 @@ class GeomSlice(np.lib.mixins.NDArrayOperatorsMixin):
     def meshes(self) -> List[Mesh]:
         """Returns a list of all meshes this geomslice cuts through.
         """
-        return list(self._subgeomslices.keys())
+        return [subgeomslc.mesh for subgeomslc in self._subgeomslices]
 
     # @property
     # def coordinates(self) -> Dict[Literal['x', 'y', 'z'], np.ndarray]:

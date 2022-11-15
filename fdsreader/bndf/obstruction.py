@@ -287,7 +287,7 @@ class SubObstruction:
         """
         if self.has_boundary_data:
             return next(iter(self._boundary_data.values())).n_t
-        return np.nan
+        return 0
 
     @property
     def times(self):
@@ -298,18 +298,17 @@ class SubObstruction:
         return np.array([])
 
     def get_visible_times(self, times: Sequence[float]) -> np.ndarray:
-        """Returns an ndarray filtering all time steps when theSubObstruction is visible/not hidden.
+        """Returns a ndarray filtering all time steps when the SubObstruction is visible/not hidden.
         """
         ret = list()
-        if self.has_boundary_data:
-            hidden = False
-            for time in times:
-                if time in self.show_times:
-                    hidden = False
-                if time in self.hide_times:
-                    hidden = True
-                if not hidden:
-                    ret.append(time)
+        hidden = False
+        for time in times:
+            if time in self.show_times:
+                hidden = False
+            if time in self.hide_times:
+                hidden = True
+            if not hidden:
+                ret.append(time)
         return np.array(ret)
 
     def vmin(self, quantity: Union[str, Quantity], orientation: Literal[-3, -2, -1, 0, 1, 2, 3] = 0) -> float:
@@ -369,7 +368,7 @@ class Obstruction:
         if len(rgba) != 0:
             self.rgba = rgba
 
-        self._subobstructions: Dict['Mesh', SubObstruction] = dict()
+        self._subobstructions: Dict[str, SubObstruction] = dict()
 
     @property
     def bounding_box(self) -> Extent:
@@ -399,7 +398,7 @@ class Obstruction:
         for subobst in self._subobstructions.values():
             if subobst.has_boundary_data:
                 return subobst.n_t
-        return np.nan
+        return 0
 
     @property
     def times(self):
@@ -414,8 +413,7 @@ class Obstruction:
         """Returns an ndarray filtering all time steps when theSubObstruction is visible/not hidden.
         """
         for subobst in self._subobstructions.values():
-            if subobst.has_boundary_data:
-                return subobst.get_visible_times(times)
+            return subobst.get_visible_times(times)
         return np.array([])
 
     def get_coordinates(self, ignore_cell_centered: bool = False) -> Dict[
@@ -455,7 +453,8 @@ class Obstruction:
                         bounding_box_index = 0 if orientation_int < 0 else 1
                         single_coordinate = self.bounding_box[dim][bounding_box_index]
                         nearest_coordinate = np.inf
-                        for mesh in self._subobstructions.keys():
+                        for subobst in self._subobstructions.values():
+                            mesh = subobst.mesh
                             mesh_coords = mesh.coordinates[dim]
                             idx = np.searchsorted(mesh_coords, single_coordinate, side="left")
                             if idx > 0 and (idx == mesh_coords.size or np.math.fabs(
@@ -499,7 +498,7 @@ class Obstruction:
     def meshes(self) -> List['Mesh']:
         """Returns a list of all meshes this slice cuts through.
         """
-        return list(self._subobstructions.keys())
+        return [subobst.mesh for subobst in self._subobstructions.values()]
 
     def filter_by_orientation(self, orientation: Literal[-3, -2, -1, 0, 1, 2, 3] = 0) -> List[SubObstruction]:
         """Filter all SubObstructions by a specific orientation. All returned SubObstructions will contain boundary data
@@ -742,8 +741,8 @@ class Obstruction:
         if type(key) == int:
             return tuple(self._subobstructions.values())[key]
         elif type(key) == str:
-            key = tuple(mesh for mesh in self.meshes if mesh.id == key)[0]
-        return self._subobstructions[key]
+            return self._subobstructions[key]
+        return self._subobstructions[key.id]
 
     def __eq__(self, other):
         return self.id == other.id

@@ -21,7 +21,7 @@ class Particle:
         self.class_name = class_name
         self.quantities = quantities
         self.color = color
-        self.n_particles: Dict[Mesh, List[int]] = dict()
+        self.n_particles: Dict[str, List[int]] = dict()
 
         self._positions: List[np.ndarray] = list()
         self._tags: List[np.ndarray] = list()

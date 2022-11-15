@@ -71,11 +71,11 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
         self.quantities = quantities
 
         # List of all subplots this Plot3D consists of (one per mesh).
-        self._subplots: Dict[Mesh, SubPlot3D] = dict()
+        self._subplots: Dict[str, SubPlot3D] = dict()
 
     def _add_subplot(self, filename: str, mesh: Mesh) -> SubPlot3D:
         subplot = SubPlot3D(os.path.join(self._root_path, filename), mesh)
-        self._subplots[mesh] = subplot
+        self._subplots[mesh.id] = subplot
 
         # If lazy loading has been disabled by the user, load the data instantaneously instead
         if not settings.LAZY_LOAD:
@@ -86,7 +86,7 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
     def __getitem__(self, mesh: Mesh):
         """Returns the :class:`SubPlot` that contains data for the given mesh.
         """
-        return self._subplots[mesh]
+        return self._subplots[mesh.id]
 
     def get_quantity_index(self, quantity: str):
         """Returns the index of the quantity for the fourth dimension of the data array.

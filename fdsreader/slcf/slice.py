@@ -199,21 +199,21 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         self.id = slice_id
 
         # List of all subslices this slice consists of (one per mesh).
-        self._subslices: Dict[Mesh, SubSlice] = dict()
+        self._subslices: Dict[str, SubSlice] = dict()
 
         vector_temp = dict()
         for mesh_data in multimesh_data:
             if "-VELOCITY" in mesh_data["quantity"]:
-                vector_temp[mesh_data["mesh"]] = dict()
+                vector_temp[mesh_data["mesh"].id] = dict()
 
         for mesh_data in multimesh_data:
-            if mesh_data["mesh"] not in self._subslices:
+            if mesh_data["mesh"].id not in self._subslices:
                 self.quantity = Quantity(mesh_data["quantity"], mesh_data["short_name"], mesh_data["unit"])
-                self._subslices[mesh_data["mesh"]] = SubSlice(self, mesh_data["filename"], mesh_data["dimension"],
+                self._subslices[mesh_data["mesh"].id] = SubSlice(self, mesh_data["filename"], mesh_data["dimension"],
                                                               mesh_data["extent"], mesh_data["mesh"])
 
             if "-VELOCITY" in mesh_data["quantity"]:
-                vector_temp[mesh_data["mesh"]][mesh_data["quantity"]] = mesh_data["filename"]
+                vector_temp[mesh_data["mesh"].id][mesh_data["quantity"]] = mesh_data["filename"]
 
         for mesh, vector_filenames in vector_temp.items():
             if "U-VELOCITY" in vector_filenames:
@@ -267,7 +267,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             return tuple(self._subslices.values())[key]
         elif type(key) == str:
             key = tuple(mesh for mesh in self.meshes if mesh.id == key)[0]
-        return self._subslices[key]
+        return self._subslices[key.id]
 
     def __len__(self):
         return len(self._subslices)
@@ -317,7 +317,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
     def meshes(self) -> List[Mesh]:
         """Returns a list of all meshes this slice cuts through.
         """
-        return list(self._subslices.keys())
+        return [subslc.mesh for subslc in self._subslices.values()]
 
     def get_coordinates(self, ignore_cell_centered: bool = False) -> Dict[Literal['x', 'y', 'z'], np.ndarray]:
         """Returns a dictionary containing a numpy ndarray with coordinates for each dimension.
@@ -499,8 +499,8 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             coord_min = {'x': math.inf, 'y': math.inf, 'z': math.inf}
             coord_max = {'x': -math.inf, 'y': -math.inf, 'z': -math.inf}
             for dim in ('x', 'y', 'z'):
-                for mesh, slc in subslices.items():
-                    co = mesh.coordinates[dim]
+                for slc in subslices.values():
+                    co = slc.mesh.coordinates[dim]
                     co = co[np.where(np.logical_and(co >= slc.extent[dim][0], co <= slc.extent[dim][1]))]
                     coord_min[dim] = min(co[0], coord_min[dim])
                     coord_max[dim] = max(co[-1], coord_max[dim])
@@ -515,11 +515,11 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             global_max = {'x': -math.inf, 'y': -math.inf, 'z': -math.inf}
 
             for dim in ('x', 'y', 'z'):
-                for mesh in subslices.keys():
-                    step_size = mesh.coordinates[dim][1] - mesh.coordinates[dim][0]
+                for sslc in subslices.values():
+                    step_size = sslc.mesh.coordinates[dim][1] - sslc.mesh.coordinates[dim][0]
                     step_sizes_min[dim] = min(step_size, step_sizes_min[dim])
                     step_sizes_max[dim] = max(step_size, step_sizes_max[dim])
-                    global_max[dim] = max(mesh.coordinates[dim][-1], global_max[dim])
+                    global_max[dim] = max(sslc.mesh.coordinates[dim][-1], global_max[dim])
 
             for dim in ('x', 'y', 'z'):
                 if step_sizes_min[dim] == 0:
@@ -532,7 +532,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
 
             start_idx = dict()
             end_idx = dict()
-            for mesh, slc in subslices.items():
+            for slc in subslices.values():
                 slc_data = slc.data if slc.orientation == 0 else np.expand_dims(slc.data, axis=slc.orientation)
                 for axis in (0, 1, 2):
                     dim = ('x', 'y', 'z')[axis]
@@ -540,10 +540,10 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                         start_idx[dim] = 0
                         end_idx[dim] = 1
                         continue
-                    n_repeat = max(int(round((mesh.coordinates[dim][1] - mesh.coordinates[dim][0]) / step_sizes_min[dim])), 1)
+                    n_repeat = max(int(round((slc.mesh.coordinates[dim][1] - slc.mesh.coordinates[dim][0]) / step_sizes_min[dim])), 1)
 
-                    start_idx[dim] = int(round((mesh.coordinates[dim][0] - coord_min[dim]) / step_sizes_min[dim]))
-                    end_idx[dim] = int(round((mesh.coordinates[dim][-1] - coord_min[dim]) / step_sizes_min[dim]))
+                    start_idx[dim] = int(round((slc.mesh.coordinates[dim][0] - coord_min[dim]) / step_sizes_min[dim]))
+                    end_idx[dim] = int(round((slc.mesh.coordinates[dim][-1] - coord_min[dim]) / step_sizes_min[dim]))
 
                     # We ignore border points unless they are actually on the border of the simulation space as all
                     # other border points actually appear twice, as the subslices overlap. This only
@@ -556,7 +556,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                             slc_data = slc_data[reduced_data_slices]
 
                         # Temporarily save border points to add them back to the array again later
-                        if mesh.coordinates[dim][-1] == global_max[dim]:
+                        if slc.mesh.coordinates[dim][-1] == global_max[dim]:
                             end_idx[dim] += 1
                             temp_data_slices = [slice(s) for s in slc_data.shape]
                             temp_data_slices[axis + 1] = slice(slc_data.shape[axis + 1] - 1, None)
@@ -566,11 +566,11 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                         slc_data = np.repeat(slc_data, n_repeat, axis=axis + 1)
 
                     # Add border points back again if needed
-                    if not self.cell_centered and mesh.coordinates[dim][-1] == global_max[dim]:
+                    if not self.cell_centered and slc.mesh.coordinates[dim][-1] == global_max[dim]:
                         slc_data = np.concatenate((slc_data, temp_data), axis=axis + 1)
 
                 if masked:
-                    mask = mesh.get_obstruction_mask_slice(slc)
+                    mask = slc.mesh.get_obstruction_mask_slice(slc)
                     slc_data = np.where(mask, slc_data, fill)
 
                 grid[:, start_idx['x']: end_idx['x'], start_idx['y']: end_idx['y'],

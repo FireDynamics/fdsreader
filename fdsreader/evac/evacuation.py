@@ -52,7 +52,7 @@ class Evacuation:
         self.class_name = class_name
         self.quantities = quantities
         self.color = color
-        self.n_humans: Dict[Mesh, List[int]] = dict()
+        self.n_humans: Dict[str, List[int]] = dict()
 
         self._positions: List[np.ndarray] = list()
         self._body_angles: List[np.ndarray] = list()

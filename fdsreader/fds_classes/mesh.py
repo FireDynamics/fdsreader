@@ -17,7 +17,6 @@ class Mesh:
     :ivar n_size: Total number of blocks in this mesh.
     :var id: Mesh id/short_name assigned to this mesh.
     """
-    id = None  # Needed for hash to work
 
     def __init__(self, coordinates: Dict[Literal['x', 'y', 'z'], np.ndarray],
                  extents: Dict[Literal['x', 'y', 'z'], Tuple[float, float]], mesh_id: str):
@@ -45,27 +44,30 @@ class Mesh:
         """Marks all cells which are blocked by an obstruction.
 
         :param times: All timesteps of the simulation.
-        :returns: A 4-dimensional array with time as first and x,y,z as last dimensions. The array depends on time as
-            as obstructions may be hidden as specific points in time.
+        :returns: A 4-dimensional array with time as first and x,y,z as last dimensions. The array
+            depends on time as obstructions may be hidden as specific points in time.
         """
         shape = self.dimension.shape(cell_centered=cell_centered)
         mask = np.ones((len(times), shape[0], shape[1], shape[2]), dtype=bool)
         c = 1 if cell_centered else 0
 
         for obst in self.obstructions:
-            for subobst in obst:
-                x1, x2 = subobst.bound_indices['x']
-                y1, y2 = subobst.bound_indices['y']
-                z1, z2 = subobst.bound_indices['z']
-                for t, _ in enumerate(subobst.get_visible_times(times)):
-                    mask[t, x1:max(x2 + c, x1 + 1), y1:max(y2 + c, y1 + 1), z1:max(z2 + c, z1 + 1)] = False
+            subobst = obst[self]
+            x1, x2 = subobst.bound_indices['x']
+            y1, y2 = subobst.bound_indices['y']
+            z1, z2 = subobst.bound_indices['z']
+            t_idx = 0
+            for t in subobst.get_visible_times(times):
+                while not np.isclose(t, times[t_idx]):
+                    t_idx += 1
+                mask[t_idx, x1:max(x2 + c, x1 + 1), y1:max(y2 + c, y1 + 1), z1:max(z2 + c, z1 + 1)] = False
         return mask
 
     def get_obstruction_mask_slice(self, subslice):
         """Marks all cells of a single subslice which are blocked by an obstruction.
 
-        :returns: A 4-dimensional array with time as first and x,y,z as last dimensions. The array depends on time as
-            obstructions may be hidden as specific points in time.
+        :returns: A 4-dimensional array with time as first and x,y,z as last dimensions.
+            The array depends on time as obstructions may be hidden at specific points in time.
         """
         orientation = subslice.orientation
         value = subslice.extent[orientation][0]
@@ -141,7 +143,6 @@ class Mesh:
         return next(b for b in self._boundary_data.values() if
                     b.quantity.name.lower() == quantity.lower() or b.quantity.short_name.lower() == quantity.lower())
 
-
     def __getitem__(self, dimension: Literal[0, 1, 2, 'x', 'y', 'z']) -> np.ndarray:
         """Get all values in given dimension.
 
@@ -151,9 +152,6 @@ class Mesh:
         if type(dimension) == int:
             dimension = ('x', 'y', 'z')[dimension]
         return self.coordinates[dimension]
-
-    def __hash__(self):
-        return hash(self.id)
 
     def __eq__(self, other):
         return self.id == other.id

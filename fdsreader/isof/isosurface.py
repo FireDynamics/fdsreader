@@ -190,7 +190,7 @@ class Isosurface:
 
         self._times = list()
 
-        self._subsurfaces: Dict[Mesh, SubSurface] = dict()
+        self._subsurfaces: Dict[str, SubSurface] = dict()
 
         if self._double_quantity:
             self.v_quantity = Quantity(v_quantity, v_short_name, v_unit)
@@ -201,29 +201,29 @@ class Isosurface:
             subsurface = SubSurface(mesh, iso_file_path, self._times, viso_file_path)
         else:
             subsurface = SubSurface(mesh, iso_file_path, self._times)
-        self._subsurfaces[mesh] = subsurface
+        self._subsurfaces[mesh.id] = subsurface
 
         return subsurface
 
-    def __getitem__(self, mesh: Mesh) -> SubSurface:
-        """Returns the :class:`SubSurface` that contains data for the given mesh.
+    def __getitem__(self, mesh: str) -> SubSurface:
+        """Returns the :class:`SubSurface` that contains data for the given mesh id.
         """
         return self._subsurfaces[mesh]
 
     @property
-    def vertices(self) -> Dict[Mesh, List[np.ndarray]]:
+    def vertices(self) -> Dict[str, List[np.ndarray]]:
         """Gets all vertices per mesh.
         """
         return {mesh: subsurface.vertices for mesh, subsurface in self._subsurfaces.items()}
 
     @property
-    def triangles(self) -> Dict[Mesh, List[np.ndarray]]:
+    def triangles(self) -> Dict[str, List[np.ndarray]]:
         """Gets all triangles per mesh.
         """
         return {mesh: subsurface.triangles for mesh, subsurface in self._subsurfaces.items()}
 
     @property
-    def surfaces(self) -> Dict[Mesh, List[np.ndarray]]:
+    def surfaces(self) -> Dict[str, List[np.ndarray]]:
         """Gets all surfaces per mesh.
         """
         return {mesh: subsurface.surfaces for mesh, subsurface in self._subsurfaces.items()}
@@ -261,11 +261,11 @@ class Isosurface:
         triangles = list()
         num_levels = max(
             max(np.max(t) if t.shape[0] != 0 else 0 for t in s) for s in self.surfaces.values()) + 1
-        verts_counter = 0
         for surf in range(num_levels):
             n_triangles = sum(np.count_nonzero(s[time] == surf) for s in self.surfaces.values())
             triangles.append(np.empty((n_triangles, 3), dtype=int))
             tris_counter = 0
+            verts_counter = 0
             if n_triangles > 0:
                 for mesh in self._subsurfaces.keys():
                     tmp = tris_counter

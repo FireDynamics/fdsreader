@@ -66,10 +66,10 @@ class Ventilation:
         if radius != -1:
             self.radius = radius
 
-        self._subventilations: Dict[Mesh, SubVentilation] = dict()
+        self._subventilations: Dict[str, SubVentilation] = dict()
 
     def _add_subventilation(self, mesh: Mesh, extent: Extent):
-        self._subventilations[mesh] = SubVentilation(mesh, extent)
+        self._subventilations[mesh.id] = SubVentilation(mesh, extent)
 
     def __repr__(self, *args, **kwargs):
         return f"Ventilation()"

@@ -134,11 +134,13 @@ class Simulation:
             self.surfaces: List[Surface] = list()
             self.ventilations = dict()
 
-            # Will only be used during the loading process to map boundary data to the correct obstruction
-            self._subobstructions: Dict[Mesh, List[SubObstruction]] = dict()
+            # Will only be used during the loading process to map boundary data to the correct
+            # obstruction
+            self._subobstructions: Dict[str, List[SubObstruction]] = dict()
 
             # First collect all meta-information for any FDS data to later combine the gathered
-            # information into data collections. While collecting the meta-data simple python containers are used.
+            # information into data collections. While collecting the meta-data simple python
+            # containers are used.
             self._obstructions = list()
             self._slices = dict()
             self._geomslices = dict()
@@ -164,20 +166,6 @@ class Simulation:
 
             for device_id, device in self._devices.items():
                 if type(device) == list:
-                    # Combine devices with coordinate ranges
-                    # combined_x = {d.position[0] for d in device}
-                    # combined_y = {d.position[1] for d in device}
-                    # combined_z = {d.position[2] for d in device}
-                    # combined_positions = (
-                    #     sorted(list(combined_x)) if len(combined_x) > 1 else combined_x.pop(),
-                    #     sorted(list(combined_y)) if len(combined_y) > 1 else combined_y.pop(),
-                    #     sorted(list(combined_z)) if len(combined_z) > 1 else combined_z.pop()
-                    # )
-                    # new_device = Device(device_id, device[0].quantity, position=combined_positions,
-                    #                     orientation=device[0].orientation)
-                    # new_device.data = np.array([d.data for d in device])
-                    #
-                    # self.devices[device_id] = new_device
                     for devc in device:
                         devc._data_callback = self._load_DEVC_data
                 else:
@@ -334,7 +322,7 @@ class Simulation:
         n = int(smv_file.readline().strip())
 
         if n > 0:
-            self._subobstructions[mesh] = list()
+            self._subobstructions[mesh.id] = list()
 
         for _ in range(n):
             line = smv_file.readline().strip().split()
@@ -354,8 +342,8 @@ class Simulation:
 
             line = smv_file.readline().strip().split()
             bound_indices = (
-                int(float(line[0])) - 1, int(float(line[1])) - 1, int(float(line[2])) - 1,
-                int(float(line[3])) - 1, int(float(line[4])) - 1, int(float(line[5])) - 1)
+                int(float(line[0])), int(float(line[1])), int(float(line[2])),
+                int(float(line[3])), int(float(line[4])), int(float(line[5])))
             color_index = int(line[6])
             block_type = int(line[7])
             rgba = tuple(float(line[i]) for i in range(8, 12)) if color_index == -3 else ()
@@ -370,8 +358,8 @@ class Simulation:
 
             subobst = SubObstruction(side_surfaces, bound_indices, extent, mesh)
 
-            self._subobstructions[mesh].append(subobst)
-            obst._subobstructions[mesh] = subobst
+            self._subobstructions[mesh.id].append(subobst)
+            obst._subobstructions[mesh.id] = subobst
 
     def _toggle_obst(self, smv_file: TextIO, line: str):
         line = line.split()
@@ -655,9 +643,9 @@ class Simulation:
                         patches[obst_index] = list()
                     patches[obst_index].append(p)
                 else:
-                    if mesh not in mesh_patches:
-                        mesh_patches[mesh] = list()
-                    mesh_patches[mesh].append(p)
+                    if mesh.id not in mesh_patches:
+                        mesh_patches[mesh.id] = list()
+                    mesh_patches[mesh.id].append(p)
 
                 patch_offset += fdtype.new((('f', str(p.dimension.shape(cell_centered=False))),)).itemsize
 
@@ -665,13 +653,13 @@ class Simulation:
             for patch in p:
                 patch._post_init(patch_offset)
 
-            self._subobstructions[mesh][obst_index]._add_patches(bid, cell_centered, quantity, short_name, unit, p,
+            self._subobstructions[mesh.id][obst_index]._add_patches(bid, cell_centered, quantity, short_name, unit, p,
                                                                  times, n_t, lower_bounds, upper_bounds)
 
-        for mesh, p in mesh_patches.items():
+        for p in mesh_patches.values():
             for patch in p:
                 patch._post_init(patch_offset)
-            mesh._add_patches(bid, cell_centered, quantity, short_name, unit, p, times, n_t, lower_bounds, upper_bounds)
+            patch.mesh._add_patches(bid, cell_centered, quantity, short_name, unit, p, times, n_t, lower_bounds, upper_bounds)
 
     @log_error("geom")
     def _load_boundary_data_geom(self, smv_file: TextIO, line: str):
@@ -832,9 +820,9 @@ class Simulation:
                 for _ in range(n_quantities[-1]):
                     bnd_file.readline()
                 if is_evac:
-                    prts[i].n_humans[mesh] = list()
+                    prts[i].n_humans[mesh.id] = list()
                 else:
-                    prts[i].n_particles[mesh] = list()
+                    prts[i].n_particles[mesh.id] = list()
             bnd_file.seek(0)
 
             for line in bnd_file:
@@ -843,9 +831,9 @@ class Simulation:
                     prt = prts[i]
                     n = int(bnd_file.readline().strip().split()[1].strip())
                     if is_evac:
-                        prt.n_humans[mesh].append(n)
+                        prt.n_humans[mesh.id].append(n)
                     else:
-                        prt.n_particles[mesh].append(n)
+                        prt.n_particles[mesh.id].append(n)
                     for q in range(n_quantities[i]):
                         line = bnd_file.readline().strip().split()
                         quantity = prt.quantities[q].name
@@ -864,7 +852,7 @@ class Simulation:
         if type(self._particles) == list:
             self._particles = ParticleCollection(times, self._particles)
 
-        self._particles._file_paths[mesh] = file_path
+        self._particles._file_paths[mesh.id] = file_path
 
         n_classes = int(smv_file.readline().strip())
         for i in range(n_classes):
@@ -895,8 +883,8 @@ class Simulation:
         if type(self._evacs) == list:
             self.evacs = EvacCollection(self._evacs, os.path.join(self.root_path, self.chid + "_evac"), times)
 
-        self.evacs.z_offsets[mesh] = float(z_offset)
-        self.evacs._file_paths[mesh] = file_path
+        self.evacs.z_offsets[mesh.id] = float(z_offset)
+        self.evacs._file_paths[mesh.id] = file_path
 
         n_evacs = int(smv_file.readline().strip())
         for i in range(n_evacs):

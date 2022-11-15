@@ -105,11 +105,11 @@ class Smoke3D(np.lib.mixins.NDArrayOperatorsMixin):
         self.quantity = quantity
 
         # List of all subsmokes this Smoke3D consists of (one per mesh).
-        self._subsmokes: Dict[Mesh, SubSmoke3D] = dict()
+        self._subsmokes: Dict[str, SubSmoke3D] = dict()
 
     def _add_subsmoke(self, filename: str, mesh: Mesh, upper_bounds: np.ndarray) -> SubSmoke3D:
         subsmoke = SubSmoke3D(os.path.join(self._root_path, filename), mesh, upper_bounds, self.times)
-        self._subsmokes[mesh] = subsmoke
+        self._subsmokes[mesh.id] = subsmoke
 
         # If lazy loading has been disabled by the user, load the data instantaneously instead
         if not settings.LAZY_LOAD:
@@ -125,7 +125,7 @@ class Smoke3D(np.lib.mixins.NDArrayOperatorsMixin):
     def get_subsmoke(self, mesh: Mesh):
         """Returns the :class:`SubSmoke` that contains data for the given mesh.
         """
-        return self._subsmokes[mesh]
+        return self._subsmokes[mesh.id]
 
     @property
     def subsmokes(self):

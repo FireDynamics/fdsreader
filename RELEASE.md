@@ -1,4 +1,6 @@
 ## Release History
+* 1.9.0
+    * Several bugfixes
 * 1.8.7
     * Fixed devices and improved global slcf example
 * 1.8.6
@@ -275,7 +277,7 @@
     * Bugfixes (python import issues) 
 * 0.4.0
     * Added bndf support (boundaries)
-* 0.3.0
+* 0.3.1
     * Added multimesh pl3d support
 * 0.3.0
     * Added basic pl3d support

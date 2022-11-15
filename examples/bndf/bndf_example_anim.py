@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import numpy as np
 
+import fdsreader.settings
 from fdsreader import Simulation
 from fdsreader.bndf.utils import sort_patches_cartesian
 

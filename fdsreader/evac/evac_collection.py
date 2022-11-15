@@ -30,8 +30,8 @@ class EvacCollection(FDSDataCollection):
     def __init__(self, evacs: Iterable[Evacuation], base_path: str, times: Iterable[float]):
         super().__init__(evacs)
 
-        self._file_paths: Dict[Mesh, str] = dict()
-        self.z_offsets: Dict[Mesh, float] = dict()
+        self._file_paths: Dict[str, str] = dict()
+        self.z_offsets: Dict[str, float] = dict()
         self._base_path = base_path
 
         self._load_csv_data()
