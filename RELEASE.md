@@ -1,4 +1,6 @@
 ## Release History
+* 1.9.1
+    * Improved slcf get_coordinates and added option to return coordinates for to_global method
 * 1.9.0
     * Several bugfixes
 * 1.8.7

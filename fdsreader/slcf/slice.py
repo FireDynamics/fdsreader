@@ -326,25 +326,22 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             :param ignore_cell_centered: Whether to shift the coordinates when the slice is cell_centered or not.
         """
         orientation = ('x', 'y', 'z')[self.orientation-1] if self.orientation != 0 else ''
-        coords = {'x': set(), 'y': set(), 'z': set()}
+        coords = {'x': list(), 'y': list(), 'z': list()}
         for dim in ('x', 'y', 'z'):
             if orientation == dim:
                 coords[dim] = np.array([self.extent[dim][0]])
                 continue
-            min_delta = 0
             for slc in self._subslices.values():
                 co = slc.get_coordinates(ignore_cell_centered)[dim]
-                min_delta = min(min_delta, co[1] - co[0])
-                coords[dim].update(co)
+                coords[dim].extend(co)
 
-            coords[dim] = np.array(sorted(list(coords[dim])))
-            to_remove = list()
-            for i in range(len(coords[dim])-1):
-                if coords[dim][i] - coords[dim][i+1] < min_delta/2:
-                    to_remove.append(coords[dim][i+1])
-            for val in to_remove:
-                coords[dim].remove(val)
-            del to_remove
+            coords[dim] = np.sort(np.array(coords[dim]))
+            # Remove duplicates, caused by either same coordinate values in a specific dimensions or
+            # floating point inaccuraciesas floats get written out with limited precision from FDS
+            # (sometimes only 6 decimal places, e.g. 1.0 and 1.000001)
+            diff = coords[dim][1:] - coords[dim][:-1]
+            print(coords[dim][:1], coords[dim][1:][diff > 0.000002])
+            coords[dim] = np.concatenate((coords[dim][:1], coords[dim][1:][diff > 0.000002]), axis=0)
 
             if len(coords[dim]) == 0:
                 slice_coordinate = self.extent[dim][0]
@@ -471,7 +468,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                     slices_cart.append([slc])
         return slices_cart
 
-    def to_global(self, masked: bool = False, fill: float = 0) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
+    def to_global(self, masked: bool = False, fill: float = 0, return_coordinates: bool = False) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, Dict[Literal['x', 'y', 'z'], np.ndarray]], Tuple[np.ndarray, np.ndarray, Dict[Literal['x', 'y', 'z'], np.ndarray], Dict[Literal['x', 'y', 'z'], np.ndarray]]]:
         """Creates a global numpy ndarray from all subslices (only tested for 2D-slices).
             Note: This method might create a sparse np-array that consumes lots of memory.
             Will create two global slices in cases where face-centered slices cut right through one
@@ -479,6 +476,8 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
 
             :param masked: Whether to apply the obstruction mask to the slice or not.
             :param fill: The fill value to use for masked slice entries. Only used when masked=True.
+            :param return_coordinates: If true, return the matching coordinate for each value on the
+                generated grid.
         """
         subslice_sets = [dict(), dict()]
 
@@ -577,15 +576,30 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                 start_idx['z']: end_idx['z']] = slc_data.reshape(
                     (self.n_t, end_idx['x'] - start_idx['x'], end_idx['y'] - start_idx['y'], end_idx['z'] - start_idx['z']))
 
+            if return_coordinates:
+                coordinates = dict()
+                for dim_index, dim in enumerate(('x', 'y', 'z')):
+                    coordinates[dim] = np.linspace(coord_min[dim], coord_max[dim], grid.shape[dim_index+1])
+
             # Remove empty dimensions, but make sure to note remove the time dimension if there is only a single timestep
             grid = np.squeeze(grid)
             if len(grid.shape) == 2:
                 grid = grid[np.newaxis, :, :]
+
             if first_result_grid is not None:
-                return first_result_grid, grid
+                if return_coordinates:
+                    return first_result_grid, grid, first_result_coordinates, coordinates
+                else:
+                    return first_result_grid, grid
             else:
                 first_result_grid = grid
-        return first_result_grid
+                if return_coordinates:
+                    first_result_coordinates = coordinates
+
+        if return_coordinates:
+            return first_result_grid, first_result_coordinates
+        else:
+            return first_result_grid
 
     @property
     def type(self) -> Literal['2D', '3D']:
