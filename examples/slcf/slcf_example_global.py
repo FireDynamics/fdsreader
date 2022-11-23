@@ -11,7 +11,6 @@ def main():
     slc = sim.slices[1]
     data, coordinates = slc.to_global(masked=True, fill=np.nan, return_coordinates=True)
 
-    print(slc.get_coordinates())
     # Set colormap
     cmap = cm.get_cmap('coolwarm').copy()
     # Set obsts color

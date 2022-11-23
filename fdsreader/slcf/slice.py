@@ -340,7 +340,6 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             # floating point inaccuraciesas floats get written out with limited precision from FDS
             # (sometimes only 6 decimal places, e.g. 1.0 and 1.000001)
             diff = coords[dim][1:] - coords[dim][:-1]
-            print(coords[dim][:1], coords[dim][1:][diff > 0.000002])
             coords[dim] = np.concatenate((coords[dim][:1], coords[dim][1:][diff > 0.000002]), axis=0)
 
             if len(coords[dim]) == 0:
