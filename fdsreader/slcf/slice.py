@@ -390,13 +390,14 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         to_remove = list()
         for mesh in new_slice._subslices.keys():
             subslc = new_slice._subslices[mesh]
+            slcmesh=subslc.mesh
             # Check if the new slice cuts through the subslice
-            cut_index = mesh.coordinate_to_index((value,), (slice_direction,),
+            cut_index = slcmesh.coordinate_to_index((value,), (slice_direction,),
                                                  cell_centered=self.cell_centered)
-            cut_value = mesh.get_nearest_coordinate((value,), (slice_direction,),
+            cut_value = slcmesh.get_nearest_coordinate((value,), (slice_direction,),
                                                     cell_centered=self.cell_centered)[0]
-            if mesh.coordinates[slice_direction][0] <= value <= mesh.coordinates[slice_direction][-1] and \
-                    subslc.extent[slice_dim - 1][0] <= cut_value <= subslc.extent[slice_dim - 1][1]:
+            if slcmesh.coordinates[slice_direction][0] <= value <= slcmesh.coordinates[slice_direction][-1] and \
+                    subslc.extent[slice_dim][0] <= cut_value <= subslc.extent[slice_dim][1]:
                 shape = subslc.dimension.shape(cell_centered=self.cell_centered)
                 indices = [slice(subslc.n_t)]
 
@@ -404,12 +405,12 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                     indices.extend((slice(shape[0]), slice(shape[1])))
                 else:
                     indices.extend((slice(shape[0]), slice(shape[1]), slice(shape[2])))
-                    indices[slice_dim - 1] = slice(cut_index[0], cut_index[0] + 1, 1)
+                    indices[slice_dim] = slice(cut_index[0], cut_index[0] + 1, 1)
 
                 subslc._data = subslc.data[tuple(indices)]
                 for direction in subslc.vector_filenames.keys():
                     subslc._vector_data[direction] = subslc.vector_data[direction][tuple(indices)]
-                subslc.extent._extents[slice_dim - 1] = (0, 0)
+                subslc.extent._extents[slice_dim - 1] = (cut_value, cut_value)
             else:
                 to_remove.append(mesh)
 
@@ -531,7 +532,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             start_idx = dict()
             end_idx = dict()
             for slc in subslices.values():
-                slc_data = slc.data if slc.orientation == 0 else np.expand_dims(slc.data, axis=slc.orientation)
+                slc_data=slc.data
                 for axis in (0, 1, 2):
                     dim = ('x', 'y', 'z')[axis]
                     if axis == slc.orientation - 1:
@@ -547,7 +548,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                     # other border points actually appear twice, as the subslices overlap. This only
                     # applies for face_centered slices, as cell_centered slices will not overlap.
                     if not self.cell_centered:
-                        if axis != slc.orientation - 1:
+                        if axis != slc.orientation - 1:#Has to be True because of continue in previous if condition?
                             reduced_shape = list(slc_data.shape)
                             reduced_shape[axis + 1] -= 1
                             reduced_data_slices = tuple(slice(s) for s in reduced_shape)
@@ -569,6 +570,9 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
 
                 if masked:
                     mask = slc.mesh.get_obstruction_mask_slice(slc)
+                    reduced_shape = list(slc_data.shape)
+                    reduced_data_slices = tuple(slice(s) for s in reduced_shape)
+                    mask = mask[reduced_data_slices]
                     slc_data = np.where(mask, slc_data, fill)
 
                 grid[:, start_idx['x']: end_idx['x'], start_idx['y']: end_idx['y'],
