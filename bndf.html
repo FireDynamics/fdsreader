@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Boundary files &mdash; fdsreader [fdsreader, version 1.8.3] documentation</title>
+  <title>Boundary files &mdash; fdsreader [fdsreader, version 1.9.2] documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -16,6 +15,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -104,7 +104,7 @@
     text-align: unset;
 }
 </style>
-<section id="boundary-files">
+<div class="section" id="boundary-files">
 <h1>Boundary files<a class="headerlink" href="#boundary-files" title="Permalink to this heading"></a></h1>
 <p>Collection of <code class="xref py py-class docutils literal notranslate"><span class="pre">Obstruction</span></code> objects. Offers extensive functionality for filtering and
 using obstructions as well as dependent such as <code class="xref py py-class docutils literal notranslate"><span class="pre">Boundary</span></code>.</p>
@@ -593,7 +593,7 @@ For cell-centered boundary data, the coordinates can be adjusted to represent ce
 <td><p>Get the nearest mesh coordinate index in a specific dimension for a specific orientation.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_visible_times</span></code>(times)</p></td>
-<td><p>Returns an ndarray filtering all time steps when theSubObstruction is visible/not hidden.</p></td>
+<td><p>Returns a ndarray filtering all time steps when the SubObstruction is visible/not hidden.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">vmax</span></code>(quantity[, orientation])</p></td>
 <td><p>Maximum value of all patches at any time for a specific quantity.</p></td>
@@ -656,7 +656,7 @@ For cell-centered boundary data, the coordinates can be adjusted to represent ce
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">get_visible_times</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/fdsreader/bndf/obstruction.html#SubObstruction.get_visible_times"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Returns an ndarray filtering all time steps when theSubObstruction is visible/not hidden.</p>
+<dd><p>Returns a ndarray filtering all time steps when the SubObstruction is visible/not hidden.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -724,7 +724,7 @@ For cell-centered boundary data, the coordinates can be adjusted to represent ce
 <dd><p>Returns all patches (of same orientation!) sorted in cartesian coordinates.</p>
 </dd></dl>
 
-</section>
+</div>
 
 
            </div>

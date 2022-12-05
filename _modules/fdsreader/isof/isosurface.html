@@ -3,15 +3,19 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>fdsreader.isof.isosurface &mdash; fdsreader [fdsreader, version 1.8.2] documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <title>fdsreader.isof.isosurface &mdash; fdsreader [fdsreader, version 1.9.2] documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -33,7 +37,7 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption"><span class="caption-text">FDSReader</span></p>
+              <p class="caption" role="heading"><span class="caption-text">FDSReader</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../simulation.html">Simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../slcf.html">Slice files</a></li>
@@ -268,7 +272,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_times</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_subsurfaces</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Mesh</span><span class="p">,</span> <span class="n">SubSurface</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_subsurfaces</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SubSurface</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_double_quantity</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">v_quantity</span> <span class="o">=</span> <span class="n">Quantity</span><span class="p">(</span><span class="n">v_quantity</span><span class="p">,</span> <span class="n">v_short_name</span><span class="p">,</span> <span class="n">v_unit</span><span class="p">)</span>
@@ -279,29 +283,29 @@
             <span class="n">subsurface</span> <span class="o">=</span> <span class="n">SubSurface</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">iso_file_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_times</span><span class="p">,</span> <span class="n">viso_file_path</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">subsurface</span> <span class="o">=</span> <span class="n">SubSurface</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">iso_file_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_times</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_subsurfaces</span><span class="p">[</span><span class="n">mesh</span><span class="p">]</span> <span class="o">=</span> <span class="n">subsurface</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_subsurfaces</span><span class="p">[</span><span class="n">mesh</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">subsurface</span>
 
         <span class="k">return</span> <span class="n">subsurface</span>
 
-    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SubSurface</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns the :class:`SubSurface` that contains data for the given mesh.</span>
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SubSurface</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns the :class:`SubSurface` that contains data for the given mesh id.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subsurfaces</span><span class="p">[</span><span class="n">mesh</span><span class="p">]</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Mesh</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+    <span class="k">def</span> <span class="nf">vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
         <span class="sd">&quot;&quot;&quot;Gets all vertices per mesh.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">{</span><span class="n">mesh</span><span class="p">:</span> <span class="n">subsurface</span><span class="o">.</span><span class="n">vertices</span> <span class="k">for</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">subsurface</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subsurfaces</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">triangles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Mesh</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+    <span class="k">def</span> <span class="nf">triangles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
         <span class="sd">&quot;&quot;&quot;Gets all triangles per mesh.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">{</span><span class="n">mesh</span><span class="p">:</span> <span class="n">subsurface</span><span class="o">.</span><span class="n">triangles</span> <span class="k">for</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">subsurface</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subsurfaces</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">surfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Mesh</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+    <span class="k">def</span> <span class="nf">surfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
         <span class="sd">&quot;&quot;&quot;Gets all surfaces per mesh.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">{</span><span class="n">mesh</span><span class="p">:</span> <span class="n">subsurface</span><span class="o">.</span><span class="n">surfaces</span> <span class="k">for</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">subsurface</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subsurfaces</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
@@ -339,11 +343,11 @@
         <span class="n">triangles</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="n">num_levels</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
             <span class="nb">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">+</span> <span class="mi">1</span>
-        <span class="n">verts_counter</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">surf</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_levels</span><span class="p">):</span>
             <span class="n">n_triangles</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">count_nonzero</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">time</span><span class="p">]</span> <span class="o">==</span> <span class="n">surf</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
             <span class="n">triangles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n_triangles</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">))</span>
             <span class="n">tris_counter</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">verts_counter</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">if</span> <span class="n">n_triangles</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">mesh</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subsurfaces</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                     <span class="n">tmp</span> <span class="o">=</span> <span class="n">tris_counter</span>

@@ -3,15 +3,19 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>fdsreader.fds_classes.ventilation &mdash; fdsreader [fdsreader, version 1.8.2] documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <title>fdsreader.fds_classes.ventilation &mdash; fdsreader [fdsreader, version 1.9.2] documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -33,7 +37,7 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption"><span class="caption-text">FDSReader</span></p>
+              <p class="caption" role="heading"><span class="caption-text">FDSReader</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../simulation.html">Simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../slcf.html">Slice files</a></li>
@@ -144,10 +148,10 @@
         <span class="k">if</span> <span class="n">radius</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="n">radius</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_subventilations</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Mesh</span><span class="p">,</span> <span class="n">SubVentilation</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_subventilations</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SubVentilation</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_add_subventilation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">,</span> <span class="n">extent</span><span class="p">:</span> <span class="n">Extent</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_subventilations</span><span class="p">[</span><span class="n">mesh</span><span class="p">]</span> <span class="o">=</span> <span class="n">SubVentilation</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">extent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_subventilations</span><span class="p">[</span><span class="n">mesh</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">SubVentilation</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">extent</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Ventilation()&quot;</span></div>

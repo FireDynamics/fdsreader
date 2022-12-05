@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Slice files &mdash; fdsreader [fdsreader, version 1.8.3] documentation</title>
+  <title>Slice files &mdash; fdsreader [fdsreader, version 1.9.2] documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -16,6 +15,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -104,7 +104,7 @@
     text-align: unset;
 }
 </style>
-<section id="slice-files">
+<div class="section" id="slice-files">
 <h1>Slice files<a class="headerlink" href="#slice-files" title="Permalink to this heading"></a></h1>
 <p>Collection of <code class="xref py py-class docutils literal notranslate"><span class="pre">Slice</span></code> objects. Offers additional functionality for filtering and
 using slices as well as its subclasses such as <code class="xref py py-class docutils literal notranslate"><span class="pre">SubSlice</span></code>.</p>
@@ -193,7 +193,7 @@ slice with the corresponding short_name and unit.</p></li>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">std</span></code>()</p></td>
 <td><p>Calculates the standard deviation over the whole slice.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_global</span></code>([masked, fill])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_global</span></code>([masked, fill, return_coordinates])</p></td>
 <td><p>Creates a global numpy ndarray from all subslices (only tested for 2D-slices).</p></td>
 </tr>
 </tbody>
@@ -318,16 +318,25 @@ the nth SubSlice will be returned.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">to_global</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">masked</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice.to_global"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<span class="sig-name descname"><span class="pre">to_global</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">masked</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_coordinates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'x'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'y'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'z'</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'x'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'y'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'z'</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'x'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'y'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'z'</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/fdsreader/slcf/slice.html#Slice.to_global"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Creates a global numpy ndarray from all subslices (only tested for 2D-slices).
 Note: This method might create a sparse np-array that consumes lots of memory.
-Will create two global slices in cases where face-centered slices cut right through one
-or more mesh borders.</p>
+Attention: Two global slices are returned in cases where cell-centered slices cut right
+through one or more mesh borders. If there is a cell-centered slice that cuts right
+through the border of two meshes (mesh1 and mesh2), there will actually be two slices
+that could be equally relevant for the user. The one will cells on mesh1 and the one
+with cells on mesh2. As there are no cells in between (i.e. where the slice “should” be)
+and cell-centered slices output values at the centers of each cell, FDS simply outputs
+two slices, one on each side of the mesh borders. The fdsreader will not discard any
+data, both slices that are output by FDS are sent to the user for him to decide which
+one to use.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>masked</strong> – Whether to apply the obstruction mask to the slice or not.</p></li>
 <li><p><strong>fill</strong> – The fill value to use for masked slice entries. Only used when masked=True.</p></li>
+<li><p><strong>return_coordinates</strong> – If true, return the matching coordinate for each value on the
+generated grid.</p></li>
 </ul>
 </dd>
 </dl>
@@ -617,9 +626,9 @@ geomslice with the corresponding short_name and unit.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">get_subgeomslice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Mesh</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">SubGeomSlice</span></span></span><a class="reference internal" href="_modules/fdsreader/slcf/geomslice.html#GeomSlice.get_subgeomslice"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Returns the <code class="xref py py-class docutils literal notranslate"><span class="pre">SubGeomSlice</span></code> that cuts through the given mesh. When an int is provided
-the nth SubGeomSlice will be returned.</p>
+<span class="sig-name descname"><span class="pre">get_subgeomslice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Mesh</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">SubGeomSlice</span></span></span><a class="reference internal" href="_modules/fdsreader/slcf/geomslice.html#GeomSlice.get_subgeomslice"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Returns the <code class="xref py py-class docutils literal notranslate"><span class="pre">SubGeomSlice</span></code> that cuts through the given mesh. When an int is
+provided the nth SubGeomSlice will be returned.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -785,7 +794,7 @@ the nth SubGeomSlice will be returned.</p>
 <dd><p>Decorator to register an __array_function__ implementation for GeomSlices.</p>
 </dd></dl>
 
-</section>
+</div>
 
 
            </div>
