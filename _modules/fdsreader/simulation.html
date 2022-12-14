@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>fdsreader.simulation &mdash; fdsreader [fdsreader, version 1.9.2] documentation</title>
+  <title>fdsreader.simulation &mdash; fdsreader [fdsreader, version 1.9.3] documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -68,9 +68,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-      <li>fdsreader.simulation</li>
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">fdsreader.simulation</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -289,6 +289,8 @@
             <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">smv_file</span><span class="p">:</span>
                 <span class="n">keyword</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
                 <span class="k">if</span> <span class="n">keyword</span> <span class="o">==</span> <span class="s2">&quot;VERSION&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">fds_version</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="k">elif</span> <span class="n">keyword</span> <span class="o">==</span> <span class="s2">&quot;FDSVERSION&quot;</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">fds_version</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
                 <span class="k">elif</span> <span class="n">keyword</span> <span class="o">==</span> <span class="s2">&quot;CHID&quot;</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">chid</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
