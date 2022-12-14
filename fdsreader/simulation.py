@@ -208,6 +208,8 @@ class Simulation:
                 keyword = line.strip()
                 if keyword == "VERSION":
                     self.fds_version = smv_file.readline().strip()
+                elif keyword == "FDSVERSION":
+                    self.fds_version = smv_file.readline().strip()
                 elif keyword == "CHID":
                     self.chid = smv_file.readline().strip()
                 elif keyword == "CSVF":
