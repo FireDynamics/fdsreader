@@ -206,9 +206,7 @@ class Simulation:
         with open(self.smv_file_path, 'r') as smv_file:
             for line in smv_file:
                 keyword = line.strip()
-                if keyword == "VERSION":
-                    self.fds_version = smv_file.readline().strip()
-                elif keyword == "FDSVERSION":
+                if keyword == "VERSION" or keyword == "FDSVERSION":
                     self.fds_version = smv_file.readline().strip()
                 elif keyword == "CHID":
                     self.chid = smv_file.readline().strip()
