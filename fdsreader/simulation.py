@@ -325,20 +325,23 @@ class Simulation:
             self._subobstructions[mesh.id] = list()
 
         for _ in range(n):
-            line = smv_file.readline().strip().split()
-            ext = [float(line[i]) for i in range(6)]
-            # The ordinal is negative if the obstruction was created due to a hole. We will ignore that for now
-            obst_ordinal = abs(int(line[6]))
+            line = smv_file.readline().strip().split('!')
+            line_floats = line[0].strip().split()
+            ext = [float(line_floats[i]) for i in range(6)]
+            # The ordinal is negative if the obstruction was created due to a hole, the negative
+            # sign is ignored here and obstructions created by FDS due to holes are handled later
+            # when there are multiple obstructions with the same ID
+            obst_id = line[1].strip() if len(line) > 1 else str(abs(int(line_floats[6])))
 
-            side_surfaces = tuple(self.surfaces[int(line[i]) - 1] for i in range(7, 13))
-            if len(line) > 13:
-                texture_origin = (float(line[13]), float(line[14]), float(line[15]))
+            side_surfaces = tuple(self.surfaces[int(line_floats[i]) - 1] for i in range(7, 13))
+            if len(line_floats) > 13:
+                texture_origin = (float(line_floats[13]), float(line_floats[14]), float(line_floats[15]))
             else:
                 texture_origin = self.default_texture_origin
-            temp_data.append((obst_ordinal, Extent(*ext), side_surfaces, texture_origin))
+            temp_data.append((Extent(*ext), side_surfaces, texture_origin, obst_id))
 
         for tmp in temp_data:
-            obst_ordinal, extent, side_surfaces, texture_origin = tmp
+            extent, side_surfaces, texture_origin, obst_id = tmp
 
             line = smv_file.readline().strip().split()
             bound_indices = (
@@ -348,12 +351,12 @@ class Simulation:
             block_type = int(line[7])
             rgba = tuple(float(line[i]) for i in range(8, 12)) if color_index == -3 else ()
 
-            obst = next((o for o in self._obstructions if obst_ordinal == o.id), None)
+            obst = next((o for o in self._obstructions if obst_id == o.id), None)
             if obst is None:
-                obst = Obstruction(obst_ordinal, color_index, block_type, texture_origin, rgba)
+                obst = Obstruction(obst_id, color_index, block_type, texture_origin, rgba)
                 self._obstructions.append(obst)
 
-            if not any(obst_ordinal == o.id for o in mesh.obstructions):
+            if not any(obst_id == o.id for o in mesh.obstructions):
                 mesh.obstructions.append(obst)
 
             subobst = SubObstruction(side_surfaces, bound_indices, extent, mesh)

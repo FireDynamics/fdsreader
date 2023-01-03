@@ -1,6 +1,10 @@
 ## Release History
-* 1.9.3
+* 1.9.5
+    * Added option to read the actual obstruction id set in the fds-file for FDS 6.7.10+
+* 1.9.4
     * Fixed bug when reading in SHOW/HIDE OBST lines
+* 1.9.3
+    * Reading FDS version from .smv file is now backwards compatible
 * 1.9.2
     * Removed prints
 * 1.9.1
