@@ -150,7 +150,7 @@ class Simulation:
             self._particles = list()
             self._evacs = list()
             self._geom_data = list()
-            self._meshes = list()
+            self._meshes: List[Mesh] = list()
             self._devices = dict()
 
             self.profiles: Dict[str, Profile] = dict()
@@ -367,7 +367,7 @@ class Simulation:
 
         obst_index, time = smv_file.readline().split()
         time = float(time)
-        subobst = self._subobstructions[mesh][int(obst_index) - 1]
+        subobst = self._subobstructions[mesh.id][int(obst_index) - 1]
 
         if "HIDE_OBST" in line[0]:
             subobst._hide(time)

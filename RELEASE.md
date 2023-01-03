@@ -1,4 +1,6 @@
 ## Release History
+* 1.9.3
+    * Fixed bug when reading in SHOW/HIDE OBST lines
 * 1.9.2
     * Removed prints
 * 1.9.1

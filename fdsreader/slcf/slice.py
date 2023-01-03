@@ -470,8 +470,15 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
     def to_global(self, masked: bool = False, fill: float = 0, return_coordinates: bool = False) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, Dict[Literal['x', 'y', 'z'], np.ndarray]], Tuple[np.ndarray, np.ndarray, Dict[Literal['x', 'y', 'z'], np.ndarray], Dict[Literal['x', 'y', 'z'], np.ndarray]]]:
         """Creates a global numpy ndarray from all subslices (only tested for 2D-slices).
             Note: This method might create a sparse np-array that consumes lots of memory.
-            Will create two global slices in cases where face-centered slices cut right through one
-            or more mesh borders.
+            Attention: Two global slices are returned in cases where cell-centered slices cut right
+            through one or more mesh borders. If there is a cell-centered slice that cuts right
+            through the border of two meshes (mesh1 and mesh2), there will actually be two slices
+            that could be equally relevant for the user. The one will cells on mesh1 and the one
+            with cells on mesh2. As there are no cells in between (i.e. where the slice "should" be)
+            and cell-centered slices output values at the centers of each cell, FDS simply outputs
+            two slices, one on each side of the mesh borders. The fdsreader will not discard any
+            data, both slices that are output by FDS are sent to the user for him to decide which
+            one to use.
 
             :param masked: Whether to apply the obstruction mask to the slice or not.
             :param fill: The fill value to use for masked slice entries. Only used when masked=True.
