@@ -310,7 +310,7 @@ class Simulation:
         assert smv_file.readline().strip() == "OBST"
         self._load_obstructions(smv_file, mesh)
 
-        smv_file.readline()  # Blank line
+        a = smv_file.readline()  # Blank line
         assert smv_file.readline().strip() == "VENT"
         self._load_vents(smv_file, mesh)
 
@@ -318,7 +318,7 @@ class Simulation:
 
     @log_error("obst")
     def _load_obstructions(self, smv_file: TextIO, mesh: Mesh):
-        temp_data = list()
+        temp_data = dict()
         n = int(smv_file.readline().strip())
 
         if n > 0:
@@ -338,10 +338,36 @@ class Simulation:
                 texture_origin = (float(line_floats[13]), float(line_floats[14]), float(line_floats[15]))
             else:
                 texture_origin = self.default_texture_origin
-            temp_data.append((Extent(*ext), side_surfaces, texture_origin, obst_id))
 
-        for tmp in temp_data:
-            extent, side_surfaces, texture_origin, obst_id = tmp
+            # Check if there is already an obst in this mesh with the same ID (due to holes).
+            # This will only be the case the first time we notice that there are multiple
+            # obstructions with the same name, as their IDs will now change...
+            if obst_id in temp_data:
+                # The obstruction that was already added to the temp_data has to receive an
+                # updated ID as well, so the user can recognize it as special obstruction
+                temp_data[obst_id + '_from-hole-1'] = temp_data[obst_id]
+                del temp_data[obst_id]
+
+                # Now set the next obst_id to '_from-hole-2'
+                obst_id = obst_id + '_from-hole-2'
+
+            # ...For subsequent cases (i.e., when the third or fourth obstruction with the same id
+            # is found), we need to catch the case differently
+            if obst_id + '_from-hole-1' in temp_data:
+                # Find the counter of the last added obstruction with the same id and set the id of
+                # the current obstruction to the next following number.
+                # Starting at 3, as 1 and 2 are guaranteed to be in the dictionary already, due to
+                # the if-branch above.
+                counter = 3
+                obst_id = obst_id + '_from-hole-' + str(counter)
+                while obst_id in temp_data:
+                    counter += 1
+                    obst_id = obst_id[:-1] + str(counter)
+
+            temp_data[obst_id] = (Extent(*ext), side_surfaces, texture_origin)
+
+        for obst_id, tmp in temp_data.items():
+            extent, side_surfaces, texture_origin = tmp
 
             line = smv_file.readline().strip().split()
             bound_indices = (

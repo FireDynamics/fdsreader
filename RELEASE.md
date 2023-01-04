@@ -1,4 +1,6 @@
 ## Release History
+* 1.9.6
+    * Supporting obstructions with holes
 * 1.9.5
     * Added option to read the actual obstruction id set in the fds-file for FDS 6.7.10+
 * 1.9.4
