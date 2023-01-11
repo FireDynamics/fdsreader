@@ -23,7 +23,7 @@ class Patch:
     :ivar extent: :class:`Extent` object containing 3-dimensional extent information.
     :ivar orientation: The direction the patch is facing (x={-1;1}, y={-2;2}, z={-3;3}).
     :ivar cell_centered: Indicates whether centered positioning for data is used.
-    :ivar n_t: Total number of time steps for which output data has been written.
+    :ivar _n_t: Total number of time steps for which output data has been written.
     """
 
     def __init__(self, file_path: str, dimension: Dimension, extent: Extent, orientation: int, cell_centered: bool,
@@ -36,8 +36,19 @@ class Patch:
         self._patch_offset = patch_offset
         self._initial_offset = initial_offset
         self._time_offset = -1
-        self.n_t = n_t
+        self._n_t = n_t
         self.mesh = mesh
+        self._boundary_parent: 'Boundary' = None
+
+    def n_t(self, count_duplicates=True):
+        """Get the number of timesteps for which data was output.
+        :param count_duplicates: If true, return the total number of data points, even if there is
+            duplicate data for a timestep. Duplicate data might be output when restarting the
+            simulation in between the simulation run.
+        """
+        if count_duplicates:
+            return self._n_t
+        return np.unique(self._boundary_parent.times).size
 
     @property
     def shape(self) -> Tuple:
@@ -86,12 +97,12 @@ class Patch:
         if not hasattr(self, "_data"):
             dtype_data = fdtype.new((('f', self.dimension.size(cell_centered=False)),))
 
-            if self.n_t == -1:
-                self.n_t = (os.stat(self.file_path).st_size - self._initial_offset) // self._time_offset
+            if self._n_t == -1:
+                self._n_t = (os.stat(self.file_path).st_size - self._initial_offset) // self._time_offset
 
-            self._data = np.empty((self.n_t,) + self.shape)
+            self._data = np.empty((self.n_t(count_duplicates=True),) + self.shape)
             with open(self.file_path, 'rb') as infile:
-                for t in range(self.n_t):
+                for t in range(self.n_t(count_duplicates=True)):
                     infile.seek(self._initial_offset + self._patch_offset + t * self._time_offset)
                     data = np.fromfile(infile, dtype_data, 1)[0][1].reshape(
                         self.dimension.shape(cell_centered=False), order='F')
@@ -99,6 +110,8 @@ class Patch:
                         self._data[t, :] = data[:-1, :-1]
                     else:
                         self._data[t, :] = data
+            unique_times_indices = np.unique(self._boundary_parent.times, return_index=True)[1]
+            self._data = self._data[unique_times_indices]
         return self._data
 
     def clear_cache(self):
@@ -123,15 +136,23 @@ class Boundary:
     :ivar n_t: Total number of time steps for which output data has been written.
     """
 
-    def __init__(self, quantity: Quantity, cell_centered: bool, times: Sequence[float], n_t: int, patches: List[Patch],
+    def __init__(self, quantity: Quantity, cell_centered: bool, times: Sequence[float], patches: List[Patch],
                  lower_bounds: np.ndarray, upper_bounds: np.ndarray):
         self.quantity = quantity
         self.cell_centered = cell_centered
         self._patches = patches
         self.times = times
-        self.n_t = n_t
         self.lower_bounds = lower_bounds
         self.upper_bounds = upper_bounds
+
+
+    def n_t(self, count_duplicates=True):
+        """Get the number of timesteps for which data was output.
+        :param count_duplicates: If true, return the total number of data points, even if there is
+            duplicate data for a timestep. Duplicate data might be output when restarting the
+            simulation in between the simulation run.
+        """
+        return self._patches[0].n_t(count_duplicates=count_duplicates)
 
     @property
     def orientations(self):
@@ -216,11 +237,14 @@ class SubObstruction:
         self.show_times = list()
 
     def _add_patches(self, bid: int, cell_centered: bool, quantity: str, short_name: str, unit: str,
-                     patches: List[Patch], times: Sequence[float], n_t: int, lower_bounds: np.ndarray,
+                     patches: List[Patch], times: Sequence[float], lower_bounds: np.ndarray,
                      upper_bounds: np.ndarray):
         if bid not in self._boundary_data:
-            self._boundary_data[bid] = Boundary(Quantity(quantity, short_name, unit), cell_centered, times, n_t,
+            self._boundary_data[bid] = Boundary(Quantity(quantity, short_name, unit), cell_centered, times,
                                                 patches, lower_bounds, upper_bounds)
+            # Add reference to parent boundary class in patches
+            for patch in patches:
+                patch._boundary_parent = self._boundary_data[bid]
 
         if not settings.LAZY_LOAD:
             _ = self._boundary_data[bid].data
@@ -281,12 +305,14 @@ class SubObstruction:
         self.show_times.append(time)
         self.show_times.sort()
 
-    @property
-    def n_t(self):
+    def n_t(self, count_duplicates=True):
         """Returns the number of timesteps for which boundary data is available.
+        :param count_duplicates: If true, return the total number of data points, even if there is
+            duplicate data for a timestep. Duplicate data might be output when restarting the
+            simulation in between the simulation run.
         """
         if self.has_boundary_data:
-            return next(iter(self._boundary_data.values())).n_t
+            return next(iter(self._boundary_data.values())).n_t(count_duplicates=count_duplicates)
         return 0
 
     @property
@@ -391,13 +417,15 @@ class Obstruction:
             return sorted(list(orientations))
         return []
 
-    @property
-    def n_t(self):
+    def n_t(self, count_duplicates=True):
         """Returns the number of timesteps for which boundary data is available.
+        :param count_duplicates: If true, return the total number of data points, even if there is
+            duplicate data for a timestep. Duplicate data might be output when restarting the
+            simulation in between the simulation run.
         """
         for subobst in self._subobstructions.values():
             if subobst.has_boundary_data:
-                return subobst.n_t
+                return subobst.n_t(count_duplicates=count_duplicates)
         return 0
 
     @property
@@ -647,7 +675,7 @@ class Obstruction:
                         steps[dim] = max(int(round((coord_max[dim] - coord_min[dim]) / step_sizes_min[dim])), 1) + (
                             0 if cell_centered else 1)
 
-                grid = np.full((self.n_t, steps['x'], steps['y'], steps['z']), np.nan)
+                grid = np.full((self.n_t(count_duplicates=False), steps['x'], steps['y'], steps['z']), np.nan)
 
                 start_coordinates = {'x': coord_min['x'], 'y': coord_min['y'], 'z': coord_min['z']}
                 start_idx = dict()
@@ -696,7 +724,7 @@ class Obstruction:
 
                     grid[:, start_idx['x']: end_idx['x'], start_idx['y']: end_idx['y'],
                     start_idx['z']: end_idx['z']] = patch_data.reshape(
-                        (self.n_t, end_idx['x'] - start_idx['x'], end_idx['y'] - start_idx['y'],
+                        (self.n_t(count_duplicates=False), end_idx['x'] - start_idx['x'], end_idx['y'] - start_idx['y'],
                          end_idx['z'] - start_idx['z']))
 
                 # Remove empty dimensions, but make sure to note remove the time dimension if there is only a single timestep

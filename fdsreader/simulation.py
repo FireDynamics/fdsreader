@@ -654,12 +654,12 @@ class Simulation:
                 patch._post_init(patch_offset)
 
             self._subobstructions[mesh.id][obst_index]._add_patches(bid, cell_centered, quantity, short_name, unit, p,
-                                                                 times, n_t, lower_bounds, upper_bounds)
+                                                                 times, lower_bounds, upper_bounds)
 
         for p in mesh_patches.values():
             for patch in p:
                 patch._post_init(patch_offset)
-            patch.mesh._add_patches(bid, cell_centered, quantity, short_name, unit, p, times, n_t, lower_bounds, upper_bounds)
+            patch.mesh._add_patches(bid, cell_centered, quantity, short_name, unit, p, times, lower_bounds, upper_bounds)
 
     @log_error("geom")
     def _load_boundary_data_geom(self, smv_file: TextIO, line: str):

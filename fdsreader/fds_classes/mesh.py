@@ -128,11 +128,14 @@ class Mesh:
         return tuple(ret)
 
     def _add_patches(self, bid: int, cell_centered: bool, quantity: str, short_name: str, unit: str,
-                     patches: List[Patch], times: np.ndarray, n_t: int, lower_bounds: np.ndarray,
+                     patches: List[Patch], times: np.ndarray, lower_bounds: np.ndarray,
                      upper_bounds: np.ndarray):
         if bid not in self._boundary_data:
-            self._boundary_data[bid] = Boundary(Quantity(quantity, short_name, unit), cell_centered, times, n_t,
+            self._boundary_data[bid] = Boundary(Quantity(quantity, short_name, unit), cell_centered, times,
                                                 patches, lower_bounds, upper_bounds)
+            # Add reference to parent boundary class in patches
+            for patch in patches:
+                patch._boundary_parent = self._boundary_data[bid]
 
         if not settings.LAZY_LOAD:
             _ = self._boundary_data[bid].data

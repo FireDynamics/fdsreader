@@ -1,4 +1,6 @@
 ## Release History
+* 1.9.1
+    * Fixed obstructions for simulations with restart in between
 * 1.9.0
     * Several bugfixes
 * 1.8.7
