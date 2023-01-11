@@ -9,10 +9,10 @@ def main():
 
     # Get the first slice
     slc = sim.slices[1]
-    data = slc.to_global(masked=True, fill=np.nan)
+    data, coordinates = slc.to_global(masked=True, fill=np.nan, return_coordinates=True)
 
     # Set colormap
-    cmap = cm.get_cmap('coolwarm')
+    cmap = cm.get_cmap('coolwarm').copy()
     # Set obsts color
     cmap.set_bad('white')
 

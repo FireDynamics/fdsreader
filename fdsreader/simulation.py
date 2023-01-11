@@ -150,7 +150,7 @@ class Simulation:
             self._particles = list()
             self._evacs = list()
             self._geom_data = list()
-            self._meshes = list()
+            self._meshes: List[Mesh] = list()
             self._devices = dict()
 
             self.profiles: Dict[str, Profile] = dict()
@@ -206,7 +206,7 @@ class Simulation:
         with open(self.smv_file_path, 'r') as smv_file:
             for line in smv_file:
                 keyword = line.strip()
-                if keyword == "VERSION":
+                if keyword == "VERSION" or keyword == "FDSVERSION":
                     self.fds_version = smv_file.readline().strip()
                 elif keyword == "CHID":
                     self.chid = smv_file.readline().strip()
@@ -310,7 +310,7 @@ class Simulation:
         assert smv_file.readline().strip() == "OBST"
         self._load_obstructions(smv_file, mesh)
 
-        smv_file.readline()  # Blank line
+        a = smv_file.readline()  # Blank line
         assert smv_file.readline().strip() == "VENT"
         self._load_vents(smv_file, mesh)
 
@@ -318,27 +318,56 @@ class Simulation:
 
     @log_error("obst")
     def _load_obstructions(self, smv_file: TextIO, mesh: Mesh):
-        temp_data = list()
+        temp_data = dict()
         n = int(smv_file.readline().strip())
 
         if n > 0:
             self._subobstructions[mesh.id] = list()
 
         for _ in range(n):
-            line = smv_file.readline().strip().split()
-            ext = [float(line[i]) for i in range(6)]
-            # The ordinal is negative if the obstruction was created due to a hole. We will ignore that for now
-            obst_ordinal = abs(int(line[6]))
+            line = smv_file.readline().strip().split('!')
+            line_floats = line[0].strip().split()
+            ext = [float(line_floats[i]) for i in range(6)]
+            # The ordinal is negative if the obstruction was created due to a hole, the negative
+            # sign is ignored here and obstructions created by FDS due to holes are handled later
+            # when there are multiple obstructions with the same ID
+            obst_id = line[1].strip() if len(line) > 1 else str(abs(int(line_floats[6])))
 
-            side_surfaces = tuple(self.surfaces[int(line[i]) - 1] for i in range(7, 13))
-            if len(line) > 13:
-                texture_origin = (float(line[13]), float(line[14]), float(line[15]))
+            side_surfaces = tuple(self.surfaces[int(line_floats[i]) - 1] for i in range(7, 13))
+            if len(line_floats) > 13:
+                texture_origin = (float(line_floats[13]), float(line_floats[14]), float(line_floats[15]))
             else:
                 texture_origin = self.default_texture_origin
-            temp_data.append((obst_ordinal, Extent(*ext), side_surfaces, texture_origin))
 
-        for tmp in temp_data:
-            obst_ordinal, extent, side_surfaces, texture_origin = tmp
+            # Check if there is already an obst in this mesh with the same ID (due to holes).
+            # This will only be the case the first time we notice that there are multiple
+            # obstructions with the same name, as their IDs will now change...
+            if obst_id in temp_data:
+                # The obstruction that was already added to the temp_data has to receive an
+                # updated ID as well, so the user can recognize it as special obstruction
+                temp_data[obst_id + '_from-hole-1'] = temp_data[obst_id]
+                del temp_data[obst_id]
+
+                # Now set the next obst_id to '_from-hole-2'
+                obst_id = obst_id + '_from-hole-2'
+
+            # ...For subsequent cases (i.e., when the third or fourth obstruction with the same id
+            # is found), we need to catch the case differently
+            if obst_id + '_from-hole-1' in temp_data:
+                # Find the counter of the last added obstruction with the same id and set the id of
+                # the current obstruction to the next following number.
+                # Starting at 3, as 1 and 2 are guaranteed to be in the dictionary already, due to
+                # the if-branch above.
+                counter = 3
+                obst_id = obst_id + '_from-hole-' + str(counter)
+                while obst_id in temp_data:
+                    counter += 1
+                    obst_id = obst_id[:-1] + str(counter)
+
+            temp_data[obst_id] = (Extent(*ext), side_surfaces, texture_origin)
+
+        for obst_id, tmp in temp_data.items():
+            extent, side_surfaces, texture_origin = tmp
 
             line = smv_file.readline().strip().split()
             bound_indices = (
@@ -348,12 +377,12 @@ class Simulation:
             block_type = int(line[7])
             rgba = tuple(float(line[i]) for i in range(8, 12)) if color_index == -3 else ()
 
-            obst = next((o for o in self._obstructions if obst_ordinal == o.id), None)
+            obst = next((o for o in self._obstructions if obst_id == o.id), None)
             if obst is None:
-                obst = Obstruction(obst_ordinal, color_index, block_type, texture_origin, rgba)
+                obst = Obstruction(obst_id, color_index, block_type, texture_origin, rgba)
                 self._obstructions.append(obst)
 
-            if not any(obst_ordinal == o.id for o in mesh.obstructions):
+            if not any(obst_id == o.id for o in mesh.obstructions):
                 mesh.obstructions.append(obst)
 
             subobst = SubObstruction(side_surfaces, bound_indices, extent, mesh)
@@ -367,7 +396,7 @@ class Simulation:
 
         obst_index, time = smv_file.readline().split()
         time = float(time)
-        subobst = self._subobstructions[mesh][int(obst_index) - 1]
+        subobst = self._subobstructions[mesh.id][int(obst_index) - 1]
 
         if "HIDE_OBST" in line[0]:
             subobst._hide(time)

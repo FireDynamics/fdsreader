@@ -385,7 +385,7 @@ class Obstruction:
         (ranging from 0.0 to 1.0).
     """
 
-    def __init__(self, oid: int, color_index: int, block_type: int, texture_origin: Tuple[float, float, float],
+    def __init__(self, oid: str, color_index: int, block_type: int, texture_origin: Tuple[float, float, float],
                  rgba: Union[Tuple[()], Tuple[float, float, float, float]] = ()):
         self.id = oid
         self.color_index = color_index
