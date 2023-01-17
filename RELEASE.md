@@ -1,4 +1,6 @@
 ## Release History
+* 1.9.8
+    * Fixed to_global for 3D slices
 * 1.9.7
     * Fixed obstructions for simulations with restart in between
 * 1.9.6

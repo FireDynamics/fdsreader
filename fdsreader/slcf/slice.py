@@ -414,7 +414,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                 -1] and \
                     subslc.extent[slice_dim][0] <= cut_value <= subslc.extent[slice_dim][1]:
                 shape = subslc.dimension.shape(cell_centered=self.cell_centered)
-                indices = [slice(subslc.n_t)]
+                indices = [slice(None)]
 
                 if subslc.dimension.x == 1 or subslc.dimension.y == 1 or subslc.dimension.z == 1:
                     indices.extend((slice(shape[0]), slice(shape[1])))
@@ -422,13 +422,13 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                     indices.extend((slice(shape[0]), slice(shape[1]), slice(shape[2])))
                     indices[slice_dim] = slice(cut_index[0], cut_index[0] + 1, 1)
 
-                subslc._data = subslc.data[tuple(indices)]
+                subslc._data = np.squeeze(subslc.data[tuple(indices)], axis=slice_dim)
                 for direction in subslc.vector_filenames.keys():
-                    subslc._vector_data[direction] = subslc.vector_data[direction][tuple(indices)]
+                    subslc._vector_data[direction] = np.squeeze(subslc.vector_data[direction][tuple(indices)], axis=slice_dim)
 
                 # Change 3D extent to 2D one
                 new_extent = subslc.extent.as_list()
-                new_extent[(slice_dim - 1) * 2:(slice_dim - 1) * 2 + 1] = (cut_value, cut_value)
+                new_extent[(slice_dim - 1) * 2:slice_dim * 2] = (cut_value, cut_value)
                 subslc.extent = Extent(*new_extent)
             else:
                 to_remove.append(mesh_id)
@@ -438,18 +438,13 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
 
         new_slice.orientation = slice_dim
         subslices = new_slice._subslices.values()
-        x_start, x_end, y_start, y_end, z_start, z_end = min(subslices, key=lambda
-            e: e.extent.x_start).extent.x_start, \
-                                                         max(subslices, key=lambda
-                                                             e: e.extent.x_end).extent.x_end, \
-                                                         min(subslices, key=lambda
-                                                             e: e.extent.y_start).extent.y_start, \
-                                                         max(subslices, key=lambda
-                                                             e: e.extent.y_end).extent.y_end, \
-                                                         min(subslices, key=lambda
-                                                             e: e.extent.z_start).extent.z_start, \
-                                                         max(subslices, key=lambda
-                                                             e: e.extent.z_end).extent.z_end
+        x_start, x_end, y_start, y_end, z_start, z_end = \
+            min(subslices, key=lambda e: e.extent.x_start).extent.x_start, \
+            max(subslices, key=lambda e: e.extent.x_end).extent.x_end, \
+            min(subslices, key=lambda e: e.extent.y_start).extent.y_start, \
+            max(subslices, key=lambda e: e.extent.y_end).extent.y_end, \
+            min(subslices, key=lambda e: e.extent.z_start).extent.z_start, \
+            max(subslices, key=lambda e: e.extent.z_end).extent.z_end
         new_slice.extent = Extent(x_start, x_start if new_slice.orientation == 1 else x_end,
                                   y_start, y_start if new_slice.orientation == 2 else y_end,
                                   z_start, z_start if new_slice.orientation == 3 else z_end)
@@ -496,9 +491,9 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
     def to_global(self, masked: bool = False, fill: float = 0, return_coordinates: bool = False) -> \
     Union[np.ndarray, Tuple[np.ndarray, np.ndarray], Tuple[
         np.ndarray, Dict[Literal['x', 'y', 'z'], np.ndarray]], Tuple[
-              np.ndarray, np.ndarray, Dict[Literal['x', 'y', 'z'], np.ndarray], Dict[
-                  Literal['x', 'y', 'z'], np.ndarray]]]:
-        """Creates a global numpy ndarray from all subslices (only tested for 2D-slices).
+              Tuple[np.ndarray, np.ndarray], Tuple[Dict[Literal['x', 'y', 'z'], np.ndarray], Dict[
+                  Literal['x', 'y', 'z'], np.ndarray]]]]:
+        """Creates a global numpy ndarray from all subslices (works for 2D- and 3D-slices).
             Note: This method might create a sparse np-array that consumes lots of memory.
             Attention: Two global slices are returned in cases where cell-centered slices cut right
             through one or more mesh borders. If there is a cell-centered slice that cuts right
@@ -543,8 +538,9 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                     coord_min[dim] = min(co[0], coord_min[dim])
                     coord_max[dim] = max(co[-1], coord_max[dim])
 
-            # The global grid will use the finest mesh as base and duplicate values of the coarser meshes
-            # Therefore we first find the finest mesh and calculate the step size in each dimension
+            # The global grid will use the finest mesh as base and duplicate values of the coarser
+            # meshes. Therefore, we first find the finest mesh and calculate the step size in each
+            # dimension.
             step_sizes_min = {'x': coord_max['x'] - coord_min['x'],
                               'y': coord_max['y'] - coord_min['y'],
                               'z': coord_max['z'] - coord_min['z']}
@@ -613,9 +609,16 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                     if not self.cell_centered and slc.mesh.coordinates[dim][-1] == global_max[dim]:
                         slc_data = np.concatenate((slc_data, temp_data), axis=axis + 1)
 
+                # If the slice should be masked, we set all cells at which an obstruction is in the
+                # simulation space to the fill value set by the user
                 if masked:
-                    mask = slc.mesh.get_obstruction_mask_slice(slc)
-                    slc_data = np.where(mask, slc_data, fill)
+                    obstruction_mask = slc.mesh.get_obstruction_mask_slice(slc)
+
+                    # If we had to reduce the size of the slice data array due to overlapping border
+                    # points (see above), we adjust the size of the obstruction mask as well
+                    reduced_data_slices = tuple(slice(s) for s in slc_data.shape)
+
+                    slc_data = np.where(obstruction_mask[reduced_data_slices], slc_data, fill)
 
                 grid[:, start_idx['x']: end_idx['x'], start_idx['y']: end_idx['y'],
                 start_idx['z']: end_idx['z']] = slc_data.reshape(
@@ -628,14 +631,15 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                     coordinates[dim] = np.linspace(coord_min[dim], coord_max[dim],
                                                    grid.shape[dim_index + 1])
 
-            # Remove empty dimensions, but make sure to note remove the time dimension if there is only a single timestep
-            grid = np.squeeze(grid)
-            if len(grid.shape) == 2:
-                grid = grid[np.newaxis, :, :]
+            # Remove dimension corresponding to orientation for 2D slices
+            if self.orientation != 0:
+                grid = np.squeeze(grid, axis=self.orientation)
 
+            # If we are returning two slices and the first of the two has been calculated, save that
+            # data into intermediate variables and calculate the second array first before returning
             if first_result_grid is not None:
                 if return_coordinates:
-                    return first_result_grid, grid, first_result_coordinates, coordinates
+                    return (first_result_grid, grid), (first_result_coordinates, coordinates)
                 else:
                     return first_result_grid, grid
             else:
