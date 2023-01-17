@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>fdsreader.bndf.obstruction &mdash; fdsreader [fdsreader, version 1.9.3] documentation</title>
+  <title>fdsreader.bndf.obstruction &mdash; fdsreader [fdsreader, version 1.9.8] documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -68,9 +68,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a></li>
-          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
-      <li class="breadcrumb-item active">fdsreader.bndf.obstruction</li>
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>fdsreader.bndf.obstruction</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -105,7 +105,7 @@
 <span class="sd">    :ivar extent: :class:`Extent` object containing 3-dimensional extent information.</span>
 <span class="sd">    :ivar orientation: The direction the patch is facing (x={-1;1}, y={-2;2}, z={-3;3}).</span>
 <span class="sd">    :ivar cell_centered: Indicates whether centered positioning for data is used.</span>
-<span class="sd">    :ivar n_t: Total number of time steps for which output data has been written.</span>
+<span class="sd">    :ivar _n_t: Total number of time steps for which output data has been written.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dimension</span><span class="p">:</span> <span class="n">Dimension</span><span class="p">,</span> <span class="n">extent</span><span class="p">:</span> <span class="n">Extent</span><span class="p">,</span> <span class="n">orientation</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">cell_centered</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
@@ -118,8 +118,19 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_patch_offset</span> <span class="o">=</span> <span class="n">patch_offset</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initial_offset</span> <span class="o">=</span> <span class="n">initial_offset</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_time_offset</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_t</span> <span class="o">=</span> <span class="n">n_t</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_t</span> <span class="o">=</span> <span class="n">n_t</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="n">mesh</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_boundary_parent</span><span class="p">:</span> <span class="s1">&#39;Boundary&#39;</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Patch.n_t"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Patch.n_t">[docs]</a>    <span class="k">def</span> <span class="nf">n_t</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">count_duplicates</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the number of timesteps for which data was output.</span>
+<span class="sd">        :param count_duplicates: If true, return the total number of data points, even if there is</span>
+<span class="sd">            duplicate data for a timestep. Duplicate data might be output when restarting the</span>
+<span class="sd">            simulation in between the simulation run.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">count_duplicates</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_t</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_boundary_parent</span><span class="o">.</span><span class="n">times</span><span class="p">)</span><span class="o">.</span><span class="n">size</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">:</span>
@@ -168,12 +179,12 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_data&quot;</span><span class="p">):</span>
             <span class="n">dtype_data</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">cell_centered</span><span class="o">=</span><span class="kc">False</span><span class="p">)),))</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_t</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">n_t</span> <span class="o">=</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_path</span><span class="p">)</span><span class="o">.</span><span class="n">st_size</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initial_offset</span><span class="p">)</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_offset</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_t</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_n_t</span> <span class="o">=</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_path</span><span class="p">)</span><span class="o">.</span><span class="n">st_size</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initial_offset</span><span class="p">)</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_offset</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_t</span><span class="p">,)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_t</span><span class="p">(</span><span class="n">count_duplicates</span><span class="o">=</span><span class="kc">True</span><span class="p">),)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_t</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_t</span><span class="p">(</span><span class="n">count_duplicates</span><span class="o">=</span><span class="kc">True</span><span class="p">)):</span>
                     <span class="n">infile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_initial_offset</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_patch_offset</span> <span class="o">+</span> <span class="n">t</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_offset</span><span class="p">)</span>
                     <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_data</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">cell_centered</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
@@ -181,6 +192,8 @@
                         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">t</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">t</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">data</span>
+            <span class="n">unique_times_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_boundary_parent</span><span class="o">.</span><span class="n">times</span><span class="p">,</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">unique_times_indices</span><span class="p">]</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
 
 <div class="viewcode-block" id="Patch.clear_cache"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Patch.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -205,15 +218,23 @@
 <span class="sd">    :ivar n_t: Total number of time steps for which output data has been written.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">cell_centered</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">times</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">n_t</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">patches</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Patch</span><span class="p">],</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">cell_centered</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">times</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">patches</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Patch</span><span class="p">],</span>
                  <span class="n">lower_bounds</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">quantity</span> <span class="o">=</span> <span class="n">quantity</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cell_centered</span> <span class="o">=</span> <span class="n">cell_centered</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_patches</span> <span class="o">=</span> <span class="n">patches</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">times</span> <span class="o">=</span> <span class="n">times</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n_t</span> <span class="o">=</span> <span class="n">n_t</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lower_bounds</span> <span class="o">=</span> <span class="n">lower_bounds</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">upper_bounds</span> <span class="o">=</span> <span class="n">upper_bounds</span>
+
+
+<div class="viewcode-block" id="Boundary.n_t"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Boundary.n_t">[docs]</a>    <span class="k">def</span> <span class="nf">n_t</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">count_duplicates</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the number of timesteps for which data was output.</span>
+<span class="sd">        :param count_duplicates: If true, return the total number of data points, even if there is</span>
+<span class="sd">            duplicate data for a timestep. Duplicate data might be output when restarting the</span>
+<span class="sd">            simulation in between the simulation run.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_patches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">n_t</span><span class="p">(</span><span class="n">count_duplicates</span><span class="o">=</span><span class="n">count_duplicates</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">orientations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -298,11 +319,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">show_times</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_add_patches</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bid</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">cell_centered</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">short_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                     <span class="n">patches</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Patch</span><span class="p">],</span> <span class="n">times</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">n_t</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">lower_bounds</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                     <span class="n">patches</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Patch</span><span class="p">],</span> <span class="n">times</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">lower_bounds</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
                      <span class="n">upper_bounds</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">bid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="p">[</span><span class="n">bid</span><span class="p">]</span> <span class="o">=</span> <span class="n">Boundary</span><span class="p">(</span><span class="n">Quantity</span><span class="p">(</span><span class="n">quantity</span><span class="p">,</span> <span class="n">short_name</span><span class="p">,</span> <span class="n">unit</span><span class="p">),</span> <span class="n">cell_centered</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span> <span class="n">n_t</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="p">[</span><span class="n">bid</span><span class="p">]</span> <span class="o">=</span> <span class="n">Boundary</span><span class="p">(</span><span class="n">Quantity</span><span class="p">(</span><span class="n">quantity</span><span class="p">,</span> <span class="n">short_name</span><span class="p">,</span> <span class="n">unit</span><span class="p">),</span> <span class="n">cell_centered</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span>
                                                 <span class="n">patches</span><span class="p">,</span> <span class="n">lower_bounds</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="p">)</span>
+            <span class="c1"># Add reference to parent boundary class in patches</span>
+            <span class="k">for</span> <span class="n">patch</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">:</span>
+                <span class="n">patch</span><span class="o">.</span><span class="n">_boundary_parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="p">[</span><span class="n">bid</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">LAZY_LOAD</span><span class="p">:</span>
             <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="p">[</span><span class="n">bid</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
@@ -363,13 +387,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">show_times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">show_times</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">n_t</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="SubObstruction.n_t"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.SubObstruction.n_t">[docs]</a>    <span class="k">def</span> <span class="nf">n_t</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">count_duplicates</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Returns the number of timesteps for which boundary data is available.</span>
+<span class="sd">        :param count_duplicates: If true, return the total number of data points, even if there is</span>
+<span class="sd">            duplicate data for a timestep. Duplicate data might be output when restarting the</span>
+<span class="sd">            simulation in between the simulation run.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_boundary_data</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span><span class="o">.</span><span class="n">n_t</span>
-        <span class="k">return</span> <span class="mi">0</span>
+            <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span><span class="o">.</span><span class="n">n_t</span><span class="p">(</span><span class="n">count_duplicates</span><span class="o">=</span><span class="n">count_duplicates</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">0</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">times</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -441,7 +467,7 @@
 <span class="sd">        (ranging from 0.0 to 1.0).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oid</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">color_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">block_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">texture_origin</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oid</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">color_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">block_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">texture_origin</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
                  <span class="n">rgba</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[()],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">()):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">oid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">color_index</span> <span class="o">=</span> <span class="n">color_index</span>
@@ -473,14 +499,16 @@
             <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">orientations</span><span class="p">))</span>
         <span class="k">return</span> <span class="p">[]</span>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">n_t</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Obstruction.n_t"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Obstruction.n_t">[docs]</a>    <span class="k">def</span> <span class="nf">n_t</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">count_duplicates</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Returns the number of timesteps for which boundary data is available.</span>
+<span class="sd">        :param count_duplicates: If true, return the total number of data points, even if there is</span>
+<span class="sd">            duplicate data for a timestep. Duplicate data might be output when restarting the</span>
+<span class="sd">            simulation in between the simulation run.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">subobst</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subobstructions</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">subobst</span><span class="o">.</span><span class="n">has_boundary_data</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">subobst</span><span class="o">.</span><span class="n">n_t</span>
-        <span class="k">return</span> <span class="mi">0</span>
+                <span class="k">return</span> <span class="n">subobst</span><span class="o">.</span><span class="n">n_t</span><span class="p">(</span><span class="n">count_duplicates</span><span class="o">=</span><span class="n">count_duplicates</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">0</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">times</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -729,7 +757,7 @@
                         <span class="n">steps</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">((</span><span class="n">coord_max</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">-</span> <span class="n">coord_min</span><span class="p">[</span><span class="n">dim</span><span class="p">])</span> <span class="o">/</span> <span class="n">step_sizes_min</span><span class="p">[</span><span class="n">dim</span><span class="p">])),</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span>
                             <span class="mi">0</span> <span class="k">if</span> <span class="n">cell_centered</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span>
 
-                <span class="n">grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_t</span><span class="p">,</span> <span class="n">steps</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">steps</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span> <span class="n">steps</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+                <span class="n">grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_t</span><span class="p">(</span><span class="n">count_duplicates</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="n">steps</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">steps</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span> <span class="n">steps</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
 
                 <span class="n">start_coordinates</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">coord_min</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="n">coord_min</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span> <span class="s1">&#39;z&#39;</span><span class="p">:</span> <span class="n">coord_min</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">]}</span>
                 <span class="n">start_idx</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
@@ -778,7 +806,7 @@
 
                     <span class="n">grid</span><span class="p">[:,</span> <span class="n">start_idx</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]:</span> <span class="n">end_idx</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">start_idx</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]:</span> <span class="n">end_idx</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span>
                     <span class="n">start_idx</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">]:</span> <span class="n">end_idx</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">patch_data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
-                        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_t</span><span class="p">,</span> <span class="n">end_idx</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">start_idx</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">end_idx</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">start_idx</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span>
+                        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_t</span><span class="p">(</span><span class="n">count_duplicates</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="n">end_idx</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">start_idx</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">end_idx</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">start_idx</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span>
                          <span class="n">end_idx</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">start_idx</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">]))</span>
 
                 <span class="c1"># Remove empty dimensions, but make sure to note remove the time dimension if there is only a single timestep</span>

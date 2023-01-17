@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>fdsreader.simulation &mdash; fdsreader [fdsreader, version 1.9.3] documentation</title>
+  <title>fdsreader.simulation &mdash; fdsreader [fdsreader, version 1.9.8] documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -68,9 +68,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a></li>
-          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
-      <li class="breadcrumb-item active">fdsreader.simulation</li>
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>fdsreader.simulation</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -232,7 +232,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_particles</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_evacs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_geom_data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_meshes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_meshes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Mesh</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_devices</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">profiles</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Profile</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
@@ -288,9 +288,7 @@
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">smv_file_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">smv_file</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">smv_file</span><span class="p">:</span>
                 <span class="n">keyword</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-                <span class="k">if</span> <span class="n">keyword</span> <span class="o">==</span> <span class="s2">&quot;VERSION&quot;</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">fds_version</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-                <span class="k">elif</span> <span class="n">keyword</span> <span class="o">==</span> <span class="s2">&quot;FDSVERSION&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">keyword</span> <span class="o">==</span> <span class="s2">&quot;VERSION&quot;</span> <span class="ow">or</span> <span class="n">keyword</span> <span class="o">==</span> <span class="s2">&quot;FDSVERSION&quot;</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">fds_version</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
                 <span class="k">elif</span> <span class="n">keyword</span> <span class="o">==</span> <span class="s2">&quot;CHID&quot;</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">chid</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
@@ -394,7 +392,7 @@
         <span class="k">assert</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;OBST&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_load_obstructions</span><span class="p">(</span><span class="n">smv_file</span><span class="p">,</span> <span class="n">mesh</span><span class="p">)</span>
 
-        <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>  <span class="c1"># Blank line</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>  <span class="c1"># Blank line</span>
         <span class="k">assert</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;VENT&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_load_vents</span><span class="p">(</span><span class="n">smv_file</span><span class="p">,</span> <span class="n">mesh</span><span class="p">)</span>
 
@@ -402,27 +400,56 @@
 
     <span class="nd">@log_error</span><span class="p">(</span><span class="s2">&quot;obst&quot;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">_load_obstructions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">:</span> <span class="n">TextIO</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">):</span>
-        <span class="n">temp_data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">temp_data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
 
         <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_subobstructions</span><span class="p">[</span><span class="n">mesh</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
 
         <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
-            <span class="n">line</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
-            <span class="n">ext</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">)]</span>
-            <span class="c1"># The ordinal is negative if the obstruction was created due to a hole. We will ignore that for now</span>
-            <span class="n">obst_ordinal</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">6</span><span class="p">]))</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;!&#39;</span><span class="p">)</span>
+            <span class="n">line_floats</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="n">ext</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">line_floats</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">)]</span>
+            <span class="c1"># The ordinal is negative if the obstruction was created due to a hole, the negative</span>
+            <span class="c1"># sign is ignored here and obstructions created by FDS due to holes are handled later</span>
+            <span class="c1"># when there are multiple obstructions with the same ID</span>
+            <span class="n">obst_id</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">line_floats</span><span class="p">[</span><span class="mi">6</span><span class="p">])))</span>
 
-            <span class="n">side_surfaces</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">surfaces</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">13</span><span class="p">))</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">13</span><span class="p">:</span>
-                <span class="n">texture_origin</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">13</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">14</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">15</span><span class="p">]))</span>
+            <span class="n">side_surfaces</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">surfaces</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">line_floats</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">13</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line_floats</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">13</span><span class="p">:</span>
+                <span class="n">texture_origin</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line_floats</span><span class="p">[</span><span class="mi">13</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">line_floats</span><span class="p">[</span><span class="mi">14</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">line_floats</span><span class="p">[</span><span class="mi">15</span><span class="p">]))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">texture_origin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_texture_origin</span>
-            <span class="n">temp_data</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">obst_ordinal</span><span class="p">,</span> <span class="n">Extent</span><span class="p">(</span><span class="o">*</span><span class="n">ext</span><span class="p">),</span> <span class="n">side_surfaces</span><span class="p">,</span> <span class="n">texture_origin</span><span class="p">))</span>
 
-        <span class="k">for</span> <span class="n">tmp</span> <span class="ow">in</span> <span class="n">temp_data</span><span class="p">:</span>
-            <span class="n">obst_ordinal</span><span class="p">,</span> <span class="n">extent</span><span class="p">,</span> <span class="n">side_surfaces</span><span class="p">,</span> <span class="n">texture_origin</span> <span class="o">=</span> <span class="n">tmp</span>
+            <span class="c1"># Check if there is already an obst in this mesh with the same ID (due to holes).</span>
+            <span class="c1"># This will only be the case the first time we notice that there are multiple</span>
+            <span class="c1"># obstructions with the same name, as their IDs will now change...</span>
+            <span class="k">if</span> <span class="n">obst_id</span> <span class="ow">in</span> <span class="n">temp_data</span><span class="p">:</span>
+                <span class="c1"># The obstruction that was already added to the temp_data has to receive an</span>
+                <span class="c1"># updated ID as well, so the user can recognize it as special obstruction</span>
+                <span class="n">temp_data</span><span class="p">[</span><span class="n">obst_id</span> <span class="o">+</span> <span class="s1">&#39;_from-hole-1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp_data</span><span class="p">[</span><span class="n">obst_id</span><span class="p">]</span>
+                <span class="k">del</span> <span class="n">temp_data</span><span class="p">[</span><span class="n">obst_id</span><span class="p">]</span>
+
+                <span class="c1"># Now set the next obst_id to &#39;_from-hole-2&#39;</span>
+                <span class="n">obst_id</span> <span class="o">=</span> <span class="n">obst_id</span> <span class="o">+</span> <span class="s1">&#39;_from-hole-2&#39;</span>
+
+            <span class="c1"># ...For subsequent cases (i.e., when the third or fourth obstruction with the same id</span>
+            <span class="c1"># is found), we need to catch the case differently</span>
+            <span class="k">if</span> <span class="n">obst_id</span> <span class="o">+</span> <span class="s1">&#39;_from-hole-1&#39;</span> <span class="ow">in</span> <span class="n">temp_data</span><span class="p">:</span>
+                <span class="c1"># Find the counter of the last added obstruction with the same id and set the id of</span>
+                <span class="c1"># the current obstruction to the next following number.</span>
+                <span class="c1"># Starting at 3, as 1 and 2 are guaranteed to be in the dictionary already, due to</span>
+                <span class="c1"># the if-branch above.</span>
+                <span class="n">counter</span> <span class="o">=</span> <span class="mi">3</span>
+                <span class="n">obst_id</span> <span class="o">=</span> <span class="n">obst_id</span> <span class="o">+</span> <span class="s1">&#39;_from-hole-&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">counter</span><span class="p">)</span>
+                <span class="k">while</span> <span class="n">obst_id</span> <span class="ow">in</span> <span class="n">temp_data</span><span class="p">:</span>
+                    <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">obst_id</span> <span class="o">=</span> <span class="n">obst_id</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">counter</span><span class="p">)</span>
+
+            <span class="n">temp_data</span><span class="p">[</span><span class="n">obst_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">Extent</span><span class="p">(</span><span class="o">*</span><span class="n">ext</span><span class="p">),</span> <span class="n">side_surfaces</span><span class="p">,</span> <span class="n">texture_origin</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">obst_id</span><span class="p">,</span> <span class="n">tmp</span> <span class="ow">in</span> <span class="n">temp_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">extent</span><span class="p">,</span> <span class="n">side_surfaces</span><span class="p">,</span> <span class="n">texture_origin</span> <span class="o">=</span> <span class="n">tmp</span>
 
             <span class="n">line</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
             <span class="n">bound_indices</span> <span class="o">=</span> <span class="p">(</span>
@@ -432,12 +459,12 @@
             <span class="n">block_type</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">7</span><span class="p">])</span>
             <span class="n">rgba</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">12</span><span class="p">))</span> <span class="k">if</span> <span class="n">color_index</span> <span class="o">==</span> <span class="o">-</span><span class="mi">3</span> <span class="k">else</span> <span class="p">()</span>
 
-            <span class="n">obst</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">o</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obstructions</span> <span class="k">if</span> <span class="n">obst_ordinal</span> <span class="o">==</span> <span class="n">o</span><span class="o">.</span><span class="n">id</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">obst</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">o</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obstructions</span> <span class="k">if</span> <span class="n">obst_id</span> <span class="o">==</span> <span class="n">o</span><span class="o">.</span><span class="n">id</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">obst</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">obst</span> <span class="o">=</span> <span class="n">Obstruction</span><span class="p">(</span><span class="n">obst_ordinal</span><span class="p">,</span> <span class="n">color_index</span><span class="p">,</span> <span class="n">block_type</span><span class="p">,</span> <span class="n">texture_origin</span><span class="p">,</span> <span class="n">rgba</span><span class="p">)</span>
+                <span class="n">obst</span> <span class="o">=</span> <span class="n">Obstruction</span><span class="p">(</span><span class="n">obst_id</span><span class="p">,</span> <span class="n">color_index</span><span class="p">,</span> <span class="n">block_type</span><span class="p">,</span> <span class="n">texture_origin</span><span class="p">,</span> <span class="n">rgba</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_obstructions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obst</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">obst_ordinal</span> <span class="o">==</span> <span class="n">o</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">mesh</span><span class="o">.</span><span class="n">obstructions</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">obst_id</span> <span class="o">==</span> <span class="n">o</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">mesh</span><span class="o">.</span><span class="n">obstructions</span><span class="p">):</span>
                 <span class="n">mesh</span><span class="o">.</span><span class="n">obstructions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obst</span><span class="p">)</span>
 
             <span class="n">subobst</span> <span class="o">=</span> <span class="n">SubObstruction</span><span class="p">(</span><span class="n">side_surfaces</span><span class="p">,</span> <span class="n">bound_indices</span><span class="p">,</span> <span class="n">extent</span><span class="p">,</span> <span class="n">mesh</span><span class="p">)</span>
@@ -451,7 +478,7 @@
 
         <span class="n">obst_index</span><span class="p">,</span> <span class="n">time</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
         <span class="n">time</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
-        <span class="n">subobst</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subobstructions</span><span class="p">[</span><span class="n">mesh</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span><span class="n">obst_index</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">subobst</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subobstructions</span><span class="p">[</span><span class="n">mesh</span><span class="o">.</span><span class="n">id</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span><span class="n">obst_index</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="s2">&quot;HIDE_OBST&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
             <span class="n">subobst</span><span class="o">.</span><span class="n">_hide</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
@@ -738,12 +765,12 @@
                 <span class="n">patch</span><span class="o">.</span><span class="n">_post_init</span><span class="p">(</span><span class="n">patch_offset</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_subobstructions</span><span class="p">[</span><span class="n">mesh</span><span class="o">.</span><span class="n">id</span><span class="p">][</span><span class="n">obst_index</span><span class="p">]</span><span class="o">.</span><span class="n">_add_patches</span><span class="p">(</span><span class="n">bid</span><span class="p">,</span> <span class="n">cell_centered</span><span class="p">,</span> <span class="n">quantity</span><span class="p">,</span> <span class="n">short_name</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span>
-                                                                 <span class="n">times</span><span class="p">,</span> <span class="n">n_t</span><span class="p">,</span> <span class="n">lower_bounds</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="p">)</span>
+                                                                 <span class="n">times</span><span class="p">,</span> <span class="n">lower_bounds</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">mesh_patches</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">patch</span> <span class="ow">in</span> <span class="n">p</span><span class="p">:</span>
                 <span class="n">patch</span><span class="o">.</span><span class="n">_post_init</span><span class="p">(</span><span class="n">patch_offset</span><span class="p">)</span>
-            <span class="n">patch</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">_add_patches</span><span class="p">(</span><span class="n">bid</span><span class="p">,</span> <span class="n">cell_centered</span><span class="p">,</span> <span class="n">quantity</span><span class="p">,</span> <span class="n">short_name</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span> <span class="n">n_t</span><span class="p">,</span> <span class="n">lower_bounds</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="p">)</span>
+            <span class="n">patch</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">_add_patches</span><span class="p">(</span><span class="n">bid</span><span class="p">,</span> <span class="n">cell_centered</span><span class="p">,</span> <span class="n">quantity</span><span class="p">,</span> <span class="n">short_name</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span> <span class="n">lower_bounds</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="p">)</span>
 
     <span class="nd">@log_error</span><span class="p">(</span><span class="s2">&quot;geom&quot;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">_load_boundary_data_geom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">:</span> <span class="n">TextIO</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
