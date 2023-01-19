@@ -1,4 +1,6 @@
 ## Release History
+* 1.9.9
+    * Fixed obst side_surfaces
 * 1.9.8
     * Fixed to_global for 3D slices
 * 1.9.7

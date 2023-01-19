@@ -333,7 +333,7 @@ class Simulation:
             # when there are multiple obstructions with the same ID
             obst_id = line[1].strip() if len(line) > 1 else str(abs(int(line_floats[6])))
 
-            side_surfaces = tuple(self.surfaces[int(line_floats[i]) - 1] for i in range(7, 13))
+            side_surfaces = tuple(self.surfaces[int(line_floats[i])] for i in range(7, 13))
             if len(line_floats) > 13:
                 texture_origin = (float(line_floats[13]), float(line_floats[14]), float(line_floats[15]))
             else:
