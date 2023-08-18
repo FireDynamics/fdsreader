@@ -575,6 +575,9 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             for slc in subslices.values():
                 slc_data = slc.data if slc.orientation == 0 else np.expand_dims(slc.data,
                                                                                 axis=slc.orientation)
+                if masked:
+                    mask = slc.mesh.get_obstruction_mask_slice(slc)
+
                 for axis in (0, 1, 2):
                     dim = ('x', 'y', 'z')[axis]
                     if axis == slc.orientation - 1:
@@ -598,6 +601,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                         reduced_shape[axis + 1] -= 1
                         reduced_data_slices = tuple(slice(s) for s in reduced_shape)
                         slc_data = slc_data[reduced_data_slices]
+                        mask = mask[reduced_data_slices]
 
                         # Temporarily save border points to add them back to the array again later
                         if slc.mesh.coordinates[dim][-1] == global_max[dim]:
@@ -605,16 +609,18 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                             temp_data_slices = [slice(s) for s in slc_data.shape]
                             temp_data_slices[axis + 1] = slice(slc_data.shape[axis + 1] - 1, None)
                             temp_data = slc_data[tuple(temp_data_slices)]
+                            temp_mask = mask[tuple(temp_data_slices)]
 
                     if n_repeat > 1:
                         slc_data = np.repeat(slc_data, n_repeat, axis=axis + 1)
+                        mask = np.repeat(mask, n_repeat, axis=axis + 1)
 
                     # Add border points back again if needed
                     if not self.cell_centered and slc.mesh.coordinates[dim][-1] == global_max[dim]:
                         slc_data = np.concatenate((slc_data, temp_data), axis=axis + 1)
+                        mask = np.concatenate((mask, temp_mask), axis=axis + 1)
 
                 if masked:
-                    mask = slc.mesh.get_obstruction_mask_slice(slc)
                     slc_data = np.where(mask, slc_data, fill)
 
                 grid[:, start_idx['x']: end_idx['x'], start_idx['y']: end_idx['y'],

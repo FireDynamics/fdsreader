@@ -210,6 +210,10 @@ class Simulation:
                     self.fds_version = smv_file.readline().strip()
                 elif keyword == "CHID":
                     self.chid = smv_file.readline().strip()
+                elif keyword == "TITLE":
+                    self.title = smv_file.readline().strip()
+                elif keyword == "TIMES":
+                    self.times = [float(t.strip()) for t in smv_file.readline().strip().split()]
                 elif keyword == "CSVF":
                     csv_type = smv_file.readline().strip()
                     filename = smv_file.readline().strip()
@@ -303,6 +307,16 @@ class Simulation:
             coordinates[dim] = np.empty(grid_dimensions[dim], dtype=np.float32)
             for i in range(grid_dimensions[dim]):
                 coordinates[dim][i] = float(smv_file.readline().split()[1])
+
+        # Mesh ids might not be unique if using MULT in combination with a MESH with its ID set
+        for other_mesh in reversed(self._meshes):
+            if other_mesh.id.startswith(mesh_id):
+                if mesh_id == other_mesh.id:  # first mesh with same id
+                    mesh_id = mesh_id + "_1"
+                else:  # n-th mesh with same id
+                    other_mesh_id, last_num = other_mesh.id.split("_")
+                    if other_mesh_id == mesh_id and last_num.isdigit():
+                        mesh_id = mesh_id + "_" + str(int(last_num) + 1)
 
         mesh = Mesh(coordinates, extents, mesh_id)
 
