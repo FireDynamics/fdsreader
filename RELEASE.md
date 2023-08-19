@@ -1,4 +1,9 @@
 ## Release History
+* 1.9.11
+    * Fixed issues with boundary data
+* 1.9.10
+    * Reading out TITLE and TIMES from smv-file
+    * Fixed obstruction mask for slices with multiple mesh resolutions
 * 1.9.9
     * Fixed obst side_surfaces
 * 1.9.8

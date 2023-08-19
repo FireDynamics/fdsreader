@@ -332,7 +332,7 @@ class Simulation:
 
     @log_error("obst")
     def _load_obstructions(self, smv_file: TextIO, mesh: Mesh):
-        temp_data = dict()
+        temp_data = list()
         n = int(smv_file.readline().strip())
 
         if n > 0:
@@ -356,32 +356,27 @@ class Simulation:
             # Check if there is already an obst in this mesh with the same ID (due to holes).
             # This will only be the case the first time we notice that there are multiple
             # obstructions with the same name, as their IDs will now change...
-            if obst_id in temp_data:
-                # The obstruction that was already added to the temp_data has to receive an
-                # updated ID as well, so the user can recognize it as special obstruction
-                temp_data[obst_id + '_from-hole-1'] = temp_data[obst_id]
-                del temp_data[obst_id]
+            for obst_data in temp_data:
+                if obst_data[0] == obst_id:
+                    # The obstruction that was already added to the temp_data has to receive an
+                    # updated ID as well, so the user can recognize it as special obstruction
+                    obst_data[0] = obst_data[0] + '_from-hole-1'
 
-                # Now set the next obst_id to '_from-hole-2'
-                obst_id = obst_id + '_from-hole-2'
+                    # Now set the next obst_id to '_from-hole-2'
+                    obst_id += '_from-hole-2'
 
             # ...For subsequent cases (i.e., when the third or fourth obstruction with the same id
             # is found), we need to catch the case differently
-            if obst_id + '_from-hole-1' in temp_data:
-                # Find the counter of the last added obstruction with the same id and set the id of
-                # the current obstruction to the next following number.
-                # Starting at 3, as 1 and 2 are guaranteed to be in the dictionary already, due to
-                # the if-branch above.
-                counter = 3
-                obst_id = obst_id + '_from-hole-' + str(counter)
-                while obst_id in temp_data:
-                    counter += 1
-                    obst_id = obst_id[:-1] + str(counter)
+            for obst_data in reversed(temp_data):
+                if obst_data[0][:-1] == obst_id + '_from-hole-':
+                    # Find the last obstruction with the same id and set the number of the current
+                    # one accordingly
+                    obst_id += '_from-hole-' + str(int(obst_data[0][-1]) + 1)
 
-            temp_data[obst_id] = (Extent(*ext), side_surfaces, texture_origin)
+            temp_data.append([obst_id, Extent(*ext), side_surfaces, texture_origin])
 
-        for obst_id, tmp in temp_data.items():
-            extent, side_surfaces, texture_origin = tmp
+        for obst_data in temp_data:
+            obst_id, extent, side_surfaces, texture_origin = obst_data
 
             line = smv_file.readline().strip().split()
             bound_indices = (
@@ -673,15 +668,14 @@ class Simulation:
 
                 extent, dimension = self._indices_to_extent(patch_info[:6], mesh)
                 orientation = patch_info[6]
-                obst_index = patch_info[7]
+                obst_index = patch_info[7] - 1
 
                 p = Patch(file_path, dimension, extent, orientation, cell_centered,
                           patch_offset, offset, n_t, mesh)
 
-                # "Obstacles" with index 0 give the extent of the (whole) mesh faces and refer to
+                # "Obstacles" with index -1 give the extent of the (whole) mesh faces and refer to
                 # "closed" mesh faces, therefore that data will be added to the corresponding mesh instead
-                if obst_index != 0:
-                    obst_index -= 1  # Account for fortran indexing
+                if obst_index != -1:
                     if obst_index not in patches:
                         patches[obst_index] = list()
                     patches[obst_index].append(p)
@@ -696,13 +690,15 @@ class Simulation:
             for patch in p:
                 patch._post_init(patch_offset)
 
-            self._subobstructions[mesh.id][obst_index]._add_patches(bid, cell_centered, quantity, short_name, unit, p,
-                                                                 times, lower_bounds, upper_bounds)
+            self._subobstructions[mesh.id][obst_index]._add_patches(bid, cell_centered, quantity,
+                                                                    short_name, unit, p, times,
+                                                                    lower_bounds, upper_bounds)
 
         for p in mesh_patches.values():
             for patch in p:
                 patch._post_init(patch_offset)
-            patch.mesh._add_patches(bid, cell_centered, quantity, short_name, unit, p, times, lower_bounds, upper_bounds)
+            patch.mesh._add_patches(bid, cell_centered, quantity, short_name, unit, p, times,
+                                    lower_bounds, upper_bounds)
 
     @log_error("geom")
     def _load_boundary_data_geom(self, smv_file: TextIO, line: str):
