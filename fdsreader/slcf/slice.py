@@ -597,7 +597,8 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                         reduced_shape[axis + 1] -= 1
                         reduced_data_slices = tuple(slice(s) for s in reduced_shape)
                         slc_data = slc_data[reduced_data_slices]
-                        mask = mask[reduced_data_slices]
+                        if masked:
+                            mask = mask[reduced_data_slices]
 
                         # Temporarily save border points to add them back to the array again later
                         if slc.mesh.coordinates[dim][-1] == global_max[dim]:
@@ -605,16 +606,19 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                             temp_data_slices = [slice(s) for s in slc_data.shape]
                             temp_data_slices[axis + 1] = slice(slc_data.shape[axis + 1] - 1, None)
                             temp_data = slc_data[tuple(temp_data_slices)]
-                            temp_mask = mask[tuple(temp_data_slices)]
+                            if masked:
+                                temp_mask = mask[tuple(temp_data_slices)]
 
                     if n_repeat > 1:
                         slc_data = np.repeat(slc_data, n_repeat, axis=axis + 1)
-                        mask = np.repeat(mask, n_repeat, axis=axis + 1)
+                        if masked:
+                            mask = np.repeat(mask, n_repeat, axis=axis + 1)
 
                     # Add border points back again if needed
                     if not self.cell_centered and slc.mesh.coordinates[dim][-1] == global_max[dim]:
                         slc_data = np.concatenate((slc_data, temp_data), axis=axis + 1)
-                        mask = np.concatenate((mask, temp_mask), axis=axis + 1)
+                        if masked:
+                            mask = np.concatenate((mask, temp_mask), axis=axis + 1)
 
                 # If the slice should be masked, we set all cells at which an obstruction is in the
                 # simulation space to the fill value set by the user
