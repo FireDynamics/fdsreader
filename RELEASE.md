@@ -1,4 +1,6 @@
 ## Release History
+* 1.9.12
+    * Fixed bug in slice.to_global caused by improper floating point comparison
 * 1.9.11
     * Fixed issues with boundary data
 * 1.9.10

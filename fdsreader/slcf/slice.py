@@ -513,13 +513,11 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         subslice_sets = [dict(), dict()]
 
         dimension = ['x', 'y', 'z'][self.orientation - 1]
-        base_coord = \
-        next(iter(self._subslices.values())).get_coordinates(ignore_cell_centered=False)[dimension][
-            0]
+        base_coord = next(iter(self._subslices.values())).get_coordinates(ignore_cell_centered=False)[dimension][0]
 
         for mesh, slc in self._subslices.items():
             coords = slc.get_coordinates(ignore_cell_centered=False)
-            if coords[dimension][0] == base_coord:
+            if np.isclose(coords[dimension][0], base_coord):
                 subslice_sets[0][mesh] = slc
             else:
                 subslice_sets[1][mesh] = slc
