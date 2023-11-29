@@ -40,7 +40,7 @@ class Patch:
         self.mesh = mesh
         self._boundary_parent: 'Boundary' = None
 
-    def n_t(self, count_duplicates=True):
+    def n_t(self, count_duplicates=True) -> int:
         """Get the number of timesteps for which data was output.
         :param count_duplicates: If true, return the total number of data points, even if there is
             duplicate data for a timestep. Duplicate data might be output when restarting the
@@ -146,7 +146,7 @@ class Boundary:
         self.upper_bounds = upper_bounds
 
 
-    def n_t(self, count_duplicates=True):
+    def n_t(self, count_duplicates=True) -> int:
         """Get the number of timesteps for which data was output.
         :param count_duplicates: If true, return the total number of data points, even if there is
             duplicate data for a timestep. Duplicate data might be output when restarting the
@@ -305,7 +305,7 @@ class SubObstruction:
         self.show_times.append(time)
         self.show_times.sort()
 
-    def n_t(self, count_duplicates=True):
+    def n_t(self, count_duplicates=True) -> int:
         """Returns the number of timesteps for which boundary data is available.
         :param count_duplicates: If true, return the total number of data points, even if there is
             duplicate data for a timestep. Duplicate data might be output when restarting the
@@ -417,7 +417,7 @@ class Obstruction:
             return sorted(list(orientations))
         return []
 
-    def n_t(self, count_duplicates=True):
+    def n_t(self, count_duplicates=True) -> int:
         """Returns the number of timesteps for which boundary data is available.
         :param count_duplicates: If true, return the total number of data points, even if there is
             duplicate data for a timestep. Duplicate data might be output when restarting the

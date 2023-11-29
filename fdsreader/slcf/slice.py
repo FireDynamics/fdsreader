@@ -100,7 +100,9 @@ class SubSlice:
         return self._parent_slice.times
 
     @property
-    def n_t(self):
+    def n_t(self) -> int:
+        """Get the number of timesteps for which data was output.
+        """
         return self._parent_slice.n_t
 
     def _load_data(self, file_path: str, data_out: np.ndarray):
@@ -507,8 +509,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
 
             :param masked: Whether to apply the obstruction mask to the slice or not.
             :param fill: The fill value to use for masked slice entries. Only used when masked=True.
-            :param return_coordinates: If true, return the matching coordinate for each value on the
-                generated grid.
+            :param return_coordinates: If true, return the matching coordinate for each value on the generated grid.
         """
         subslice_sets = [dict(), dict()]
 
@@ -517,7 +518,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
 
         for mesh, slc in self._subslices.items():
             coords = slc.get_coordinates(ignore_cell_centered=False)
-            if np.isclose(coords[dimension][0], base_coord):
+            if self.orientation == 0 or np.isclose(coords[dimension][0], base_coord):
                 subslice_sets[0][mesh] = slc
             else:
                 subslice_sets[1][mesh] = slc
@@ -567,7 +568,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             start_idx = dict()
             end_idx = dict()
             for slc in subslices.values():
-                slc_data = slc.data if slc.orientation == 0 else np.expand_dims(slc.data,
+                slc_data = slc.data.copy() if slc.orientation == 0 else np.expand_dims(slc.data.copy(),
                                                                                 axis=slc.orientation)
                 if masked:
                     mask = slc.mesh.get_obstruction_mask_slice(slc)
@@ -694,7 +695,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         """
         raise UserWarning(
             "Slices can not be converted to numpy arrays, but they support all typical numpy"
-            " operations such as np.multiply. If a 'global' array containg all subslices is"
+            " operations such as np.multiply. If a 'global' array containing all subslices is"
             " required, use the 'to_global' method and use the returned numpy-array explicitly.")
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):

@@ -52,8 +52,11 @@ class SubGeomSlice:
     def times(self):
         return self._parent_slice.times
 
+
     @property
-    def n_t(self):
+    def n_t(self) -> int:
+        """Get the number of timesteps for which data was output.
+        """
         return self._parent_slice.n_t
 
     def _load_geom_data(self):
@@ -409,7 +412,7 @@ class GeomSlice(np.lib.mixins.NDArrayOperatorsMixin):
         """
         raise UserWarning(
             "Slices can not be converted to numpy arrays, but they support all typical numpy"
-            " operations such as np.multiply. If a 'global' array containg all subgeomslices is"
+            " operations such as np.multiply. If a 'global' array containing all subgeomslices is"
             " required, use the 'to_global' method and use the returned numpy-array explicitly.")
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):

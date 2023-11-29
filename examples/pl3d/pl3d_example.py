@@ -6,36 +6,30 @@ import fdsreader as fds
 def main():
     sim = fds.Simulation("./fds_data")
 
-    # Select the seconds mesh (index counting starts at 0)
-    mesh = sim.meshes[1]
-    extent = mesh.extent
+    # Load temperature 3D data
+    quantity = "Temperature"
+    pl_t1 = sim.data_3d.get_by_quantity(quantity)
+    data, coordinates = pl_t1.to_global(masked=True, return_coordinates=True, fill=np.nan)
 
     # Select the last available timestep
     t = -1
-    # Load 3D data for that timestep
-    pl_t1 = sim.data_3d[t]
 
     # Create 3D grid
-    x_ = np.linspace(extent.x_start, extent.x_end, mesh.dimension['x'])
-    y_ = np.linspace(extent.y_start, extent.y_end, mesh.dimension['y'])  # y_ = np.array([29])
-    z_ = np.linspace(extent.z_start, extent.z_end, mesh.dimension['z'])
+    x_ = np.linspace(coordinates['x'][0], coordinates['x'][-1], len(coordinates['x']))
+    y_ = np.linspace(coordinates['y'][0], coordinates['y'][-1], len(coordinates['y']))  # y_ = np.array([29])  # when using a slice
+    z_ = np.linspace(coordinates['z'][0], coordinates['z'][-1], len(coordinates['z']))
     x, y, z = np.meshgrid(x_, y_, z_, indexing='ij')
     points = np.stack((x.flatten(), y.flatten(), z.flatten()), axis=1)
 
-    # Select a quantity
-    quantity_idx = pl_t1.get_quantity_index("Temperature")
-    quantity = pl_t1.quantities[quantity_idx]
-
-    # Get 3D data for a specific quantity in one of the meshes
-    color_data = pl_t1[mesh].data[:, :, :, quantity_idx]
+    color_data = data[t, :, :, :]
     # It is also possible to just plot a slice
-    # color_data = pl_t1[mesh].data[:, 29:30, :, quantity_idx]
+    # color_data = pl_t1[mesh].data[t, :, 29:30, :]
 
     # Plot 3D data
     plotter = pv.Plotter()
     plotter.add_mesh(pv.PolyData(points), scalars=color_data.flatten(),
                      opacity=0.3, render_points_as_spheres=False, point_size=25)
-    plotter.add_scalar_bar(title=quantity.name)
+    plotter.add_scalar_bar(title=quantity)
     plotter.show()
 
 

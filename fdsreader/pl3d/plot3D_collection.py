@@ -1,4 +1,5 @@
 from typing import Iterable, Union, List
+import numpy as np
 
 from fdsreader.pl3d import Plot3D
 from fdsreader.utils.data import FDSDataCollection, Quantity
@@ -9,26 +10,24 @@ class Plot3DCollection(FDSDataCollection):
         using plot3Ds as well as its subclasses such as :class:`SubPlot3D`.
     """
 
-    def __init__(self, times: Iterable[float], *plot3ds: Iterable[Plot3D]):
+    def __init__(self, *plot3ds: Iterable[Plot3D]):
         super().__init__(*plot3ds)
-        self.times = list(times)
+
+    @property
+    def times(self) -> np.ndarray:
+        return np.array(self._elements[0].times)
 
     @property
     def quantities(self) -> List[Quantity]:
-        qs = set()
-        for pl3d in self._elements:
-            for q in pl3d.quantities:
-                qs.add(q)
-        return list(qs)
+        return [pl.quantity for pl in self._elements]
 
-    def filter_by_quantity(self, quantity: Union[str, Quantity]):
+    def get_by_quantity(self, quantity: Union[str, Quantity]):
         """Filters all plot3d data by a specific quantity.
         """
         if type(quantity) == Quantity:
             quantity = quantity.name
-        return Plot3DCollection(x for x in self._elements if any(
-            q.name.lower() == quantity.lower() or q.short_name.lower() == quantity.lower() for q in
-            x.quantities))
+        return next(x for x in self._elements if
+                    x.quantity.name.lower() == quantity.lower() or x.quantity.short_name.lower() == quantity.lower())
 
     def __repr__(self):
         return "Plot3DCollection(" + super(Plot3DCollection, self).__repr__() + ")"

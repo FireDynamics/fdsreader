@@ -144,7 +144,7 @@ class Simulation:
             self._obstructions = list()
             self._slices = dict()
             self._geomslices = dict()
-            self._data_3d = dict()
+            self.data_3d = Plot3DCollection([Plot3D(self.root_path) for _ in range(5)])
             self._smoke_3d = dict()
             self._isosurfaces = dict()
             self._particles = list()
@@ -179,7 +179,6 @@ class Simulation:
             self.geomslices = GeomSliceCollection(
                 GeomSlice(self.root_path, slice_data[0]["id"],
                           slice_data[0]["times"], slice_data[1:]) for slice_data in self._geomslices.values())
-            self.data_3d = Plot3DCollection(self._data_3d.keys(), self._data_3d.values())
             self.smoke_3d = Smoke3DCollection(self._smoke_3d.values())
             self.isosurfaces = IsosurfaceCollection(self._isosurfaces.values())
             self.devices = DeviceCollection(self._devices.values())
@@ -194,7 +193,7 @@ class Simulation:
             if len(self._evacs) == 0:
                 self.evacs = EvacCollection((), "", ())
             self.meshes = MeshCollection(self._meshes)
-            del self._geom_data, self._geomslices, self._slices, self._obstructions, self._data_3d, self._smoke_3d, self._isosurfaces, self._devices, self._particles, self._evacs, self._meshes, self._subobstructions
+            del self._geom_data, self._geomslices, self._slices, self._obstructions, self._smoke_3d, self._isosurfaces, self._devices, self._particles, self._evacs, self._meshes, self._subobstructions
 
             if settings.ENABLE_CACHING:
                 # Hash will be saved to simulation pickle file and compared to new hash when loading
@@ -748,16 +747,12 @@ class Simulation:
         mesh_index = int(line[2]) - 1
 
         filename = smv_file.readline().strip()
-        quantities = list()
-        for _ in range(5):
+        for i in range(5):
             quantity = smv_file.readline().strip()
             short_name = smv_file.readline().strip()
             unit = smv_file.readline().strip()
-            quantities.append(Quantity(quantity, short_name, unit))
 
-        if time not in self._data_3d:
-            self._data_3d[time] = Plot3D(self.root_path, time, quantities)
-        self._data_3d[time]._add_subplot(filename, self._meshes[mesh_index])
+            self.data_3d[i]._add_subplot(filename, time, Quantity(quantity, short_name, unit), i, self._meshes[mesh_index])
 
     @log_error("smoke3d")
     def _load_smoke_3d(self, smv_file: TextIO, line: str):

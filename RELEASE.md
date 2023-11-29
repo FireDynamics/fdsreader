@@ -1,4 +1,11 @@
 ## Release History
+* 1.10.0
+    * Restructured Plot3D data to now be represented by a single Plot3D instance for all timesteps instead of one individual object per timestep
+    * Added a to_global function for Plot3D data
+    * Added a to_global function for Smoke3D data
+    * Fixed bugs and typos in documentation
+* 1.9.13
+    * Fixed slice.to_global for 3D slices
 * 1.9.12
     * Fixed bug in slice.to_global caused by improper floating point comparison
 * 1.9.11
