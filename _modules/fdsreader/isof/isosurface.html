@@ -1,21 +1,22 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>fdsreader.isof.isosurface &mdash; fdsreader [fdsreader, version 1.9.8] documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <title>fdsreader.isof.isosurface &mdash; fdsreader [fdsreader, version 1.10.0] documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=e9a9f32e"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -27,11 +28,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html" class="icon icon-home"> fdsreader
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            fdsreader
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -68,9 +73,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../index.html">Module code</a> &raquo;</li>
-      <li>fdsreader.isof.isosurface</li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">fdsreader.isof.isosurface</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -92,8 +97,10 @@
 <span class="kn">import</span> <span class="nn">fdsreader.utils.fortran_data</span> <span class="k">as</span> <span class="nn">fdtype</span>
 
 
-<div class="viewcode-block" id="SubSurface"><a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.SubSurface">[docs]</a><span class="k">class</span> <span class="nc">SubSurface</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Part of an isosurface with data for a specific mesh.</span>
+<div class="viewcode-block" id="SubSurface">
+<a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.SubSurface">[docs]</a>
+<span class="k">class</span> <span class="nc">SubSurface</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Part of an isosurface with data for a specific mesh.</span>
 
 <span class="sd">    :ivar mesh: The mesh containing all data for this :class:`SubSurface`.</span>
 <span class="sd">    :ivar file_path: Path to the binary data file.</span>
@@ -131,7 +138,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Property to lazy load all vertices for all triangles of any level.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Property to lazy load all vertices for all triangles of any level.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_vertices&quot;</span><span class="p">):</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
@@ -140,7 +147,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">triangles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Property to lazy load all triangles of any level.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Property to lazy load all triangles of any level.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_triangles&quot;</span><span class="p">):</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
@@ -149,7 +156,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">surfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Property to lazy load a list that maps triangles to an isosurface for a specific level.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Property to lazy load a list that maps triangles to an isosurface for a specific level.</span>
 <span class="sd">        The list has the size n_triangles, while the indices correspond to indices of the triangles.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_surfaces&quot;</span><span class="p">):</span>
@@ -159,13 +166,13 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">has_color_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Defines whether there is color data for this subsurface or not.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Defines whether there is color data for this subsurface or not.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;v_file_path&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">colors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Property to lazy load the color data that might be associated with the isosurfaces.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Property to lazy load the color data that might be associated with the isosurfaces.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_color_data</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_colors&quot;</span><span class="p">):</span>
@@ -178,7 +185,7 @@
                               <span class="s2">&quot; color-data.&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">:</span> <span class="n">BinaryIO</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Loads data for the subsurface which is given in an iso file.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Loads data for the subsurface which is given in an iso file.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">dtype_time</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
         <span class="n">dtype_dims</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),))</span>
@@ -221,7 +228,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">n_t</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_load_vdata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">:</span> <span class="n">BinaryIO</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Loads all color data for all isosurfaces in a given viso file.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Loads all color data for all isosurfaces in a given viso file.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_colors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_t</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
         <span class="n">dtype_nverts</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),))</span>
@@ -235,8 +242,10 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_colors</span><span class="p">[</span><span class="n">time_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="n">n_vertices</span><span class="p">),)),</span> <span class="mi">1</span><span class="p">)</span>
             <span class="n">t</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SubSurface.clear_cache"><a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.SubSurface.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
+<div class="viewcode-block" id="SubSurface.clear_cache">
+<a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.SubSurface.clear_cache">[docs]</a>
+    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_vertices&quot;</span><span class="p">):</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vertices</span>
@@ -247,12 +256,16 @@
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_colors&quot;</span><span class="p">):</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_colors</span></div>
 
+
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;SubSurface(mesh=&quot;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="p">)</span><span class="si">}</span><span class="s1">&quot;)&#39;</span></div>
 
 
-<div class="viewcode-block" id="Isosurface"><a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.Isosurface">[docs]</a><span class="k">class</span> <span class="nc">Isosurface</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Isosurface file data container including metadata. Consists of a list of vertices forming a</span>
+
+<div class="viewcode-block" id="Isosurface">
+<a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.Isosurface">[docs]</a>
+<span class="k">class</span> <span class="nc">Isosurface</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Isosurface file data container including metadata. Consists of a list of vertices forming a</span>
 <span class="sd">        list of triangles. Can optionally have additional color data for the surfaces.</span>
 
 <span class="sd">    :ivar id: The ID of this isosurface.</span>
@@ -288,31 +301,33 @@
         <span class="k">return</span> <span class="n">subsurface</span>
 
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SubSurface</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns the :class:`SubSurface` that contains data for the given mesh id.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the :class:`SubSurface` that contains data for the given mesh id.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subsurfaces</span><span class="p">[</span><span class="n">mesh</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
-        <span class="sd">&quot;&quot;&quot;Gets all vertices per mesh.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets all vertices per mesh.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">{</span><span class="n">mesh</span><span class="p">:</span> <span class="n">subsurface</span><span class="o">.</span><span class="n">vertices</span> <span class="k">for</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">subsurface</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subsurfaces</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">triangles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
-        <span class="sd">&quot;&quot;&quot;Gets all triangles per mesh.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets all triangles per mesh.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">{</span><span class="n">mesh</span><span class="p">:</span> <span class="n">subsurface</span><span class="o">.</span><span class="n">triangles</span> <span class="k">for</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">subsurface</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subsurfaces</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">surfaces</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
-        <span class="sd">&quot;&quot;&quot;Gets all surfaces per mesh.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets all surfaces per mesh.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">{</span><span class="n">mesh</span><span class="p">:</span> <span class="n">subsurface</span><span class="o">.</span><span class="n">surfaces</span> <span class="k">for</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">subsurface</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subsurfaces</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
-<div class="viewcode-block" id="Isosurface.to_global"><a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.Isosurface.to_global">[docs]</a>    <span class="k">def</span> <span class="nf">to_global</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span>
+<div class="viewcode-block" id="Isosurface.to_global">
+<a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.Isosurface.to_global">[docs]</a>
+    <span class="k">def</span> <span class="nf">to_global</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span>
         <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
-        <span class="sd">&quot;&quot;&quot;Creates an array containing all global vertices and a list containing numpy arrays with</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates an array containing all global vertices and a list containing numpy arrays with</span>
 <span class="sd">            triangles for each surface level.</span>
 
 <span class="sd">        :param time: Either the index of the timestep or an actual time value. In the latter case</span>
@@ -358,8 +373,11 @@
 
         <span class="k">return</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">triangles</span><span class="p">,</span> <span class="n">colors</span></div>
 
-<div class="viewcode-block" id="Isosurface.get_pyvista_mesh"><a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.Isosurface.get_pyvista_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">get_pyvista_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vertices</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">triangles</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Creates a PyVista mesh from the data.</span>
+
+<div class="viewcode-block" id="Isosurface.get_pyvista_mesh">
+<a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.Isosurface.get_pyvista_mesh">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_pyvista_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vertices</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">triangles</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a PyVista mesh from the data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="kn">from</span> <span class="nn">pyvista</span> <span class="kn">import</span> <span class="n">PolyData</span>
@@ -370,8 +388,11 @@
             <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;The &#39;get_pyvista_mesh&#39; method requires the PyVista python-package to&quot;</span>
                               <span class="s2">&quot; be installed. Consider installing it via &#39;pip install pyvista&#39;.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Isosurface.join_pyvista_meshes"><a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.Isosurface.join_pyvista_meshes">[docs]</a>    <span class="k">def</span> <span class="nf">join_pyvista_meshes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meshes</span><span class="p">:</span> <span class="n">List</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Combines multiple PyVista meshes.</span>
+
+<div class="viewcode-block" id="Isosurface.join_pyvista_meshes">
+<a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.Isosurface.join_pyvista_meshes">[docs]</a>
+    <span class="k">def</span> <span class="nf">join_pyvista_meshes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meshes</span><span class="p">:</span> <span class="n">List</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Combines multiple PyVista meshes.</span>
 
 <span class="sd">        :returns: The combined mesh of class PolyData.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -386,8 +407,11 @@
             <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;The &#39;join_pyvista_meshes&#39; method requires the PyVista python-package&quot;</span>
                               <span class="s2">&quot; to be installed. Consider installing it via &#39;pip install pyvista&#39;.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Isosurface.export"><a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.Isosurface.export">[docs]</a>    <span class="k">def</span> <span class="nf">export</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Export the isosurface for a single timestep into one of many formats.</span>
+
+<div class="viewcode-block" id="Isosurface.export">
+<a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.Isosurface.export">[docs]</a>
+    <span class="k">def</span> <span class="nf">export</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mesh</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Export the isosurface for a single timestep into one of many formats.</span>
 
 <span class="sd">        :param file_path: Absolute path to the the file which should we written. The file ending</span>
 <span class="sd">            denotes the file format to export to (supports pretty much every common format).</span>
@@ -415,8 +439,11 @@
             <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;The &#39;export&#39; method requires the PyVista python-package to be&quot;</span>
                               <span class="s2">&quot; installed. Consider installing it via &#39;pip install pyvista&#39;.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Isosurface.get_nearest_timestep"><a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.Isosurface.get_nearest_timestep">[docs]</a>    <span class="k">def</span> <span class="nf">get_nearest_timestep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Calculates the nearest timestep for which data has been output for this isosurface.</span>
+
+<div class="viewcode-block" id="Isosurface.get_nearest_timestep">
+<a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.Isosurface.get_nearest_timestep">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_nearest_timestep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the nearest timestep for which data has been output for this isosurface.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">time</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="p">(</span><span class="n">idx</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="p">)</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span>
@@ -425,29 +452,34 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">idx</span></div>
 
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">has_color_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Defines whether there is color data for this isosurface or not.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Defines whether there is color data for this isosurface or not.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_double_quantity</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">times</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;List containing all times for which data has been recorded.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;List containing all times for which data has been recorded.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_times</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># Implicitly load the data for one subsurface and read times</span>
             <span class="n">_</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_subsurfaces</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span><span class="o">.</span><span class="n">vertices</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_times</span>
 
-<div class="viewcode-block" id="Isosurface.clear_cache"><a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.Isosurface.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
+<div class="viewcode-block" id="Isosurface.clear_cache">
+<a class="viewcode-back" href="../../../isof.html#fdsreader.isof.isosurface.Isosurface.clear_cache">[docs]</a>
+    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">subsurface</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subsurfaces</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="n">subsurface</span><span class="o">.</span><span class="n">clear_cache</span><span class="p">()</span></div>
 
+
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Isosurface(id=&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s1">&quot;, quantity=</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">quantity</span><span class="p">)</span><span class="si">}</span><span class="s1">, levels=</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">levels</span><span class="p">)</span><span class="si">}</span><span class="s1">)&#39;</span></div>
+
 </pre></div>
 
            </div>

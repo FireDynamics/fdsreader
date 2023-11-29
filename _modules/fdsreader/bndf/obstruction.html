@@ -1,21 +1,22 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>fdsreader.bndf.obstruction &mdash; fdsreader [fdsreader, version 1.9.8] documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <title>fdsreader.bndf.obstruction &mdash; fdsreader [fdsreader, version 1.10.0] documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=e9a9f32e"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -27,11 +28,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html" class="icon icon-home"> fdsreader
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            fdsreader
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -68,9 +73,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../index.html">Module code</a> &raquo;</li>
-      <li>fdsreader.bndf.obstruction</li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">fdsreader.bndf.obstruction</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -97,8 +102,10 @@
     <span class="kn">from</span> <span class="nn">fdsreader.fds_classes</span> <span class="kn">import</span> <span class="n">Mesh</span>
 
 
-<div class="viewcode-block" id="Patch"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Patch">[docs]</a><span class="k">class</span> <span class="nc">Patch</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Container for the actual data which is stored as rectangular plane with specific orientation</span>
+<div class="viewcode-block" id="Patch">
+<a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Patch">[docs]</a>
+<span class="k">class</span> <span class="nc">Patch</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Container for the actual data which is stored as rectangular plane with specific orientation</span>
 <span class="sd">        and extent.</span>
 
 <span class="sd">    :ivar dimension: :class:`Dimension` object containing information about steps in each dimension.</span>
@@ -122,8 +129,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="n">mesh</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_boundary_parent</span><span class="p">:</span> <span class="s1">&#39;Boundary&#39;</span> <span class="o">=</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="Patch.n_t"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Patch.n_t">[docs]</a>    <span class="k">def</span> <span class="nf">n_t</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">count_duplicates</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get the number of timesteps for which data was output.</span>
+<div class="viewcode-block" id="Patch.n_t">
+<a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Patch.n_t">[docs]</a>
+    <span class="k">def</span> <span class="nf">n_t</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">count_duplicates</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the number of timesteps for which data was output.</span>
 <span class="sd">        :param count_duplicates: If true, return the total number of data points, even if there is</span>
 <span class="sd">            duplicate data for a timestep. Duplicate data might be output when restarting the</span>
 <span class="sd">            simulation in between the simulation run.</span>
@@ -132,25 +141,28 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_t</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_boundary_parent</span><span class="o">.</span><span class="n">times</span><span class="p">)</span><span class="o">.</span><span class="n">size</span></div>
 
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Convenience function to calculate the shape of the array containing data for this patch.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convenience function to calculate the shape of the array containing data for this patch.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cell_centered</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Convenience function to calculate the number of data points in the array for this patch.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convenience function to calculate the number of data points in the array for this patch.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cell_centered</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_post_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_offset</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Fully initialize the patch as soon as the number of timesteps is known.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fully initialize the patch as soon as the number of timesteps is known.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_time_offset</span> <span class="o">=</span> <span class="n">time_offset</span>
 
-<div class="viewcode-block" id="Patch.get_coordinates"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Patch.get_coordinates">[docs]</a>    <span class="k">def</span> <span class="nf">get_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ignore_cell_centered</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Returns a dictionary containing a numpy ndarray with coordinates for each dimension.</span>
+<div class="viewcode-block" id="Patch.get_coordinates">
+<a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Patch.get_coordinates">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ignore_cell_centered</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a dictionary containing a numpy ndarray with coordinates for each dimension.</span>
 <span class="sd">            For cell-centered boundary data, the coordinates can be adjusted to represent cell-centered coordinates.</span>
 
 <span class="sd">            :param ignore_cell_centered: Whether to shift the coordinates when the bndf is cell_centered or not.</span>
@@ -172,9 +184,10 @@
 
         <span class="k">return</span> <span class="n">coords</span></div>
 
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Method to load the quantity data for a single patch.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to load the quantity data for a single patch.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_data&quot;</span><span class="p">):</span>
             <span class="n">dtype_data</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">cell_centered</span><span class="o">=</span><span class="kc">False</span><span class="p">)),))</span>
@@ -196,18 +209,24 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">unique_times_indices</span><span class="p">]</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
 
-<div class="viewcode-block" id="Patch.clear_cache"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Patch.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
+<div class="viewcode-block" id="Patch.clear_cache">
+<a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Patch.clear_cache">[docs]</a>
+    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_data&quot;</span><span class="p">):</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span></div>
+
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Patch(shape=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">, orientation=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">orientation</span><span class="si">}</span><span class="s2">, extent=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="si">}</span><span class="s2">)&quot;</span></div>
 
 
-<div class="viewcode-block" id="Boundary"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Boundary">[docs]</a><span class="k">class</span> <span class="nc">Boundary</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Container for boundary data specific to one quantity.</span>
+
+<div class="viewcode-block" id="Boundary">
+<a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Boundary">[docs]</a>
+<span class="k">class</span> <span class="nc">Boundary</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Container for boundary data specific to one quantity.</span>
 
 <span class="sd">    :ivar quantity: Quantity object containing information about the quantity calculated for this</span>
 <span class="sd">        :class:`Obstruction` with the corresponding short_name and unit.</span>
@@ -228,22 +247,27 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">upper_bounds</span> <span class="o">=</span> <span class="n">upper_bounds</span>
 
 
-<div class="viewcode-block" id="Boundary.n_t"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Boundary.n_t">[docs]</a>    <span class="k">def</span> <span class="nf">n_t</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">count_duplicates</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get the number of timesteps for which data was output.</span>
+<div class="viewcode-block" id="Boundary.n_t">
+<a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Boundary.n_t">[docs]</a>
+    <span class="k">def</span> <span class="nf">n_t</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">count_duplicates</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the number of timesteps for which data was output.</span>
 <span class="sd">        :param count_duplicates: If true, return the total number of data points, even if there is</span>
 <span class="sd">            duplicate data for a timestep. Duplicate data might be output when restarting the</span>
 <span class="sd">            simulation in between the simulation run.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_patches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">n_t</span><span class="p">(</span><span class="n">count_duplicates</span><span class="o">=</span><span class="n">count_duplicates</span><span class="p">)</span></div>
 
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">orientations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return all orientations for which there is data available.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return all orientations for which there is data available.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">orientation</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_patches</span><span class="p">]</span>
 
-<div class="viewcode-block" id="Boundary.get_nearest_timestep"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Boundary.get_nearest_timestep">[docs]</a>    <span class="k">def</span> <span class="nf">get_nearest_timestep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Calculates the nearest timestep for which data has been output for this obstruction.</span>
+<div class="viewcode-block" id="Boundary.get_nearest_timestep">
+<a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Boundary.get_nearest_timestep">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_nearest_timestep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the nearest timestep for which data has been output for this obstruction.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">time</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="p">(</span><span class="n">idx</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="p">)</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span>
@@ -252,14 +276,17 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">idx</span></div>
 
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Patch</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;The :class:`Patch` in each direction (-3=-z, -2=-y, -1=-x, 1=x, 2=y, 3=y).</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The :class:`Patch` in each direction (-3=-z, -2=-y, -1=-x, 1=x, 2=y, 3=y).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">orientation</span><span class="p">:</span> <span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_patches</span><span class="p">}</span>
 
-<div class="viewcode-block" id="Boundary.vmin"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Boundary.vmin">[docs]</a>    <span class="k">def</span> <span class="nf">vmin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orientation</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Minimum value of all patches at any time.</span>
+<div class="viewcode-block" id="Boundary.vmin">
+<a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Boundary.vmin">[docs]</a>
+    <span class="k">def</span> <span class="nf">vmin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orientation</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Minimum value of all patches at any time.</span>
 
 <span class="sd">        :param orientation: Optionally filter by patches with a specific orientation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -271,8 +298,11 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">orientation</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Boundary.vmax"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Boundary.vmax">[docs]</a>    <span class="k">def</span> <span class="nf">vmax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orientation</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Maximum value of all patches at any time.</span>
+
+<div class="viewcode-block" id="Boundary.vmax">
+<a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Boundary.vmax">[docs]</a>
+    <span class="k">def</span> <span class="nf">vmax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orientation</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Maximum value of all patches at any time.</span>
 
 <span class="sd">        :param orientation: Optionally filter by patches with a specific orientation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -284,18 +314,25 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">orientation</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Boundary.clear_cache"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Boundary.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
+
+<div class="viewcode-block" id="Boundary.clear_cache">
+<a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Boundary.clear_cache">[docs]</a>
+    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_patches</span><span class="p">:</span>
             <span class="n">p</span><span class="o">.</span><span class="n">clear_cache</span><span class="p">()</span></div>
+
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Boundary(Quantity=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">quantity</span><span class="si">}</span><span class="s2">, Patches=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_patches</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span></div>
 
 
-<div class="viewcode-block" id="SubObstruction"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.SubObstruction">[docs]</a><span class="k">class</span> <span class="nc">SubObstruction</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;An :class:`Obstruction` consists of 1 or more SubObstructions which can be hidden at specific points in time.</span>
+
+<div class="viewcode-block" id="SubObstruction">
+<a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.SubObstruction">[docs]</a>
+<span class="k">class</span> <span class="nc">SubObstruction</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An :class:`Obstruction` consists of 1 or more SubObstructions which can be hidden at specific points in time.</span>
 
 <span class="sd">    :ivar extent: :class:`Extent` object containing 3-dimensional extent information.</span>
 <span class="sd">    :ivar bound_indices: Indices used to define obstruction bounds in terms of mesh locations.</span>
@@ -333,15 +370,17 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">orientations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return all orientations for which there is data available.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return all orientations for which there is data available.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_boundary_data</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span><span class="o">.</span><span class="n">orientations</span>
         <span class="k">return</span> <span class="p">[]</span>
 
-<div class="viewcode-block" id="SubObstruction.get_coordinates"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.SubObstruction.get_coordinates">[docs]</a>    <span class="k">def</span> <span class="nf">get_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ignore_cell_centered</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span>
+<div class="viewcode-block" id="SubObstruction.get_coordinates">
+<a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.SubObstruction.get_coordinates">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ignore_cell_centered</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span>
         <span class="nb">int</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
-        <span class="sd">&quot;&quot;&quot;Returns a dictionary containing a numpy ndarray with coordinates for each dimension.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a dictionary containing a numpy ndarray with coordinates for each dimension.</span>
 <span class="sd">            For cell-centered boundary data, the coordinates can be adjusted to represent cell-centered coordinates.</span>
 
 <span class="sd">            :param ignore_cell_centered: Whether to shift the coordinates when the bndf is cell_centered or not.</span>
@@ -351,8 +390,11 @@
                     <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
         <span class="k">return</span> <span class="p">{}</span></div>
 
-<div class="viewcode-block" id="SubObstruction.get_nearest_index"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.SubObstruction.get_nearest_index">[docs]</a>    <span class="k">def</span> <span class="nf">get_nearest_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">],</span> <span class="n">orientation</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Get the nearest mesh coordinate index in a specific dimension for a specific orientation.</span>
+
+<div class="viewcode-block" id="SubObstruction.get_nearest_index">
+<a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.SubObstruction.get_nearest_index">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_nearest_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">],</span> <span class="n">orientation</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the nearest mesh coordinate index in a specific dimension for a specific orientation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_boundary_data</span><span class="p">:</span>
             <span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_coordinates</span><span class="p">()[</span><span class="n">orientation</span><span class="p">][</span><span class="n">dimension</span><span class="p">]</span>
@@ -364,15 +406,19 @@
                 <span class="k">return</span> <span class="n">idx</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span></div>
 
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">has_boundary_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span>
 
-<div class="viewcode-block" id="SubObstruction.get_data"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.SubObstruction.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">]):</span>
+<div class="viewcode-block" id="SubObstruction.get_data">
+<a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.SubObstruction.get_data">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">]):</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">quantity</span><span class="p">)</span> <span class="o">==</span> <span class="n">Quantity</span><span class="p">:</span>
             <span class="n">quantity</span> <span class="o">=</span> <span class="n">quantity</span><span class="o">.</span><span class="n">name</span>
         <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="n">b</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span>
                     <span class="n">b</span><span class="o">.</span><span class="n">quantity</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">quantity</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="n">b</span><span class="o">.</span><span class="n">quantity</span><span class="o">.</span><span class="n">short_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">quantity</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span></div>
+
 
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
@@ -387,8 +433,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">show_times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">show_times</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
 
-<div class="viewcode-block" id="SubObstruction.n_t"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.SubObstruction.n_t">[docs]</a>    <span class="k">def</span> <span class="nf">n_t</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">count_duplicates</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Returns the number of timesteps for which boundary data is available.</span>
+<div class="viewcode-block" id="SubObstruction.n_t">
+<a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.SubObstruction.n_t">[docs]</a>
+    <span class="k">def</span> <span class="nf">n_t</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">count_duplicates</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the number of timesteps for which boundary data is available.</span>
 <span class="sd">        :param count_duplicates: If true, return the total number of data points, even if there is</span>
 <span class="sd">            duplicate data for a timestep. Duplicate data might be output when restarting the</span>
 <span class="sd">            simulation in between the simulation run.</span>
@@ -397,16 +445,19 @@
             <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span><span class="o">.</span><span class="n">n_t</span><span class="p">(</span><span class="n">count_duplicates</span><span class="o">=</span><span class="n">count_duplicates</span><span class="p">)</span>
         <span class="k">return</span> <span class="mi">0</span></div>
 
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">times</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return all timesteps for which boundary data is available, if any.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return all timesteps for which boundary data is available, if any.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_boundary_data</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span><span class="o">.</span><span class="n">times</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
 
-<div class="viewcode-block" id="SubObstruction.get_visible_times"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.SubObstruction.get_visible_times">[docs]</a>    <span class="k">def</span> <span class="nf">get_visible_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">times</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns a ndarray filtering all time steps when the SubObstruction is visible/not hidden.</span>
+<div class="viewcode-block" id="SubObstruction.get_visible_times">
+<a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.SubObstruction.get_visible_times">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_visible_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">times</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a ndarray filtering all time steps when the SubObstruction is visible/not hidden.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="n">hidden</span> <span class="o">=</span> <span class="kc">False</span>
@@ -419,8 +470,11 @@
                 <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SubObstruction.vmin"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.SubObstruction.vmin">[docs]</a>    <span class="k">def</span> <span class="nf">vmin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">],</span> <span class="n">orientation</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Minimum value of all patches at any time for a specific quantity.</span>
+
+<div class="viewcode-block" id="SubObstruction.vmin">
+<a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.SubObstruction.vmin">[docs]</a>
+    <span class="k">def</span> <span class="nf">vmin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">],</span> <span class="n">orientation</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Minimum value of all patches at any time for a specific quantity.</span>
 
 <span class="sd">        :param orientation: Optionally filter by patches with a specific orientation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -428,8 +482,11 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">quantity</span><span class="p">)</span><span class="o">.</span><span class="n">vmin</span><span class="p">(</span><span class="n">orientation</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span></div>
 
-<div class="viewcode-block" id="SubObstruction.vmax"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.SubObstruction.vmax">[docs]</a>    <span class="k">def</span> <span class="nf">vmax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">],</span> <span class="n">orientation</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Maximum value of all patches at any time for a specific quantity.</span>
+
+<div class="viewcode-block" id="SubObstruction.vmax">
+<a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.SubObstruction.vmax">[docs]</a>
+    <span class="k">def</span> <span class="nf">vmax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">],</span> <span class="n">orientation</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Maximum value of all patches at any time for a specific quantity.</span>
 
 <span class="sd">        :param orientation: Optionally filter by patches with a specific orientation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -437,18 +494,25 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">quantity</span><span class="p">)</span><span class="o">.</span><span class="n">vmax</span><span class="p">(</span><span class="n">orientation</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span></div>
 
-<div class="viewcode-block" id="SubObstruction.clear_cache"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.SubObstruction.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
+
+<div class="viewcode-block" id="SubObstruction.clear_cache">
+<a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.SubObstruction.clear_cache">[docs]</a>
+    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">bndf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_boundary_data</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="n">bndf</span><span class="o">.</span><span class="n">clear_cache</span><span class="p">()</span></div>
+
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;SubObstruction(Extent=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="si">}</span><span class="s2">)&quot;</span></div>
 
 
-<div class="viewcode-block" id="Obstruction"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Obstruction">[docs]</a><span class="k">class</span> <span class="nc">Obstruction</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;A box-shaped obstruction with specific surfaces (materials) on each side.</span>
+
+<div class="viewcode-block" id="Obstruction">
+<a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Obstruction">[docs]</a>
+<span class="k">class</span> <span class="nc">Obstruction</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A box-shaped obstruction with specific surfaces (materials) on each side.</span>
 
 <span class="sd">    :ivar id: ID of the obstruction.</span>
 <span class="sd">    :ivar color_index: Type of coloring used to color obstruction.</span>
@@ -480,7 +544,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">bounding_box</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Extent</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;:class:`Extent` object representing the bounding box around the Obstruction.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;:class:`Extent` object representing the bounding box around the Obstruction.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">extents</span> <span class="o">=</span> <span class="p">[</span><span class="n">sub</span><span class="o">.</span><span class="n">extent</span> <span class="k">for</span> <span class="n">sub</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subobstructions</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
 
@@ -490,7 +554,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">orientations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return all orientations for which there is data available.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return all orientations for which there is data available.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_boundary_data</span><span class="p">:</span>
             <span class="n">orientations</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
@@ -499,8 +563,10 @@
             <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">orientations</span><span class="p">))</span>
         <span class="k">return</span> <span class="p">[]</span>
 
-<div class="viewcode-block" id="Obstruction.n_t"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Obstruction.n_t">[docs]</a>    <span class="k">def</span> <span class="nf">n_t</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">count_duplicates</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Returns the number of timesteps for which boundary data is available.</span>
+<div class="viewcode-block" id="Obstruction.n_t">
+<a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Obstruction.n_t">[docs]</a>
+    <span class="k">def</span> <span class="nf">n_t</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">count_duplicates</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the number of timesteps for which boundary data is available.</span>
 <span class="sd">        :param count_duplicates: If true, return the total number of data points, even if there is</span>
 <span class="sd">            duplicate data for a timestep. Duplicate data might be output when restarting the</span>
 <span class="sd">            simulation in between the simulation run.</span>
@@ -510,25 +576,31 @@
                 <span class="k">return</span> <span class="n">subobst</span><span class="o">.</span><span class="n">n_t</span><span class="p">(</span><span class="n">count_duplicates</span><span class="o">=</span><span class="n">count_duplicates</span><span class="p">)</span>
         <span class="k">return</span> <span class="mi">0</span></div>
 
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">times</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return all timesteps for which boundary data is available, if any.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return all timesteps for which boundary data is available, if any.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">subobst</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subobstructions</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">subobst</span><span class="o">.</span><span class="n">has_boundary_data</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">subobst</span><span class="o">.</span><span class="n">times</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
 
-<div class="viewcode-block" id="Obstruction.get_visible_times"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Obstruction.get_visible_times">[docs]</a>    <span class="k">def</span> <span class="nf">get_visible_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">times</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
-        <span class="sd">&quot;&quot;&quot;Returns an ndarray filtering all time steps when theSubObstruction is visible/not hidden.</span>
+<div class="viewcode-block" id="Obstruction.get_visible_times">
+<a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Obstruction.get_visible_times">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_visible_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">times</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns an ndarray filtering all time steps when theSubObstruction is visible/not hidden.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">subobst</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subobstructions</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="k">return</span> <span class="n">subobst</span><span class="o">.</span><span class="n">get_visible_times</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span></div>
 
-<div class="viewcode-block" id="Obstruction.get_coordinates"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Obstruction.get_coordinates">[docs]</a>    <span class="k">def</span> <span class="nf">get_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ignore_cell_centered</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span>
+
+<div class="viewcode-block" id="Obstruction.get_coordinates">
+<a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Obstruction.get_coordinates">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ignore_cell_centered</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span>
         <span class="nb">int</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
-        <span class="sd">&quot;&quot;&quot;Returns a dictionary containing a numpy ndarray with coordinates for each dimension.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a dictionary containing a numpy ndarray with coordinates for each dimension.</span>
 <span class="sd">            For cell-centered boundary data, the coordinates can be adjusted to represent cell-centered coordinates.</span>
 
 <span class="sd">            :param ignore_cell_centered: Whether to shift the coordinates when the bndf is cell_centered or not.</span>
@@ -579,8 +651,11 @@
             <span class="k">return</span> <span class="n">all_coords</span>
         <span class="k">return</span> <span class="nb">dict</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Obstruction.get_nearest_index"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Obstruction.get_nearest_index">[docs]</a>    <span class="k">def</span> <span class="nf">get_nearest_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">],</span> <span class="n">orientation</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Get the nearest mesh coordinate index in a specific dimension for a specific orientation.</span>
+
+<div class="viewcode-block" id="Obstruction.get_nearest_index">
+<a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Obstruction.get_nearest_index">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_nearest_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">],</span> <span class="n">orientation</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the nearest mesh coordinate index in a specific dimension for a specific orientation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_boundary_data</span><span class="p">:</span>
             <span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_coordinates</span><span class="p">()[</span><span class="n">orientation</span><span class="p">][</span><span class="n">dimension</span><span class="p">]</span>
@@ -592,9 +667,10 @@
                 <span class="k">return</span> <span class="n">idx</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span></div>
 
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">quantities</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Quantity</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Get a list of all quantities for which boundary data exists.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a list of all quantities for which boundary data exists.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_boundary_data</span><span class="p">:</span>
             <span class="n">qs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
@@ -606,12 +682,14 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">meshes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="s1">&#39;Mesh&#39;</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Returns a list of all meshes this slice cuts through.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a list of all meshes this slice cuts through.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">subobst</span><span class="o">.</span><span class="n">mesh</span> <span class="k">for</span> <span class="n">subobst</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subobstructions</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
 
-<div class="viewcode-block" id="Obstruction.filter_by_orientation"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Obstruction.filter_by_orientation">[docs]</a>    <span class="k">def</span> <span class="nf">filter_by_orientation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orientation</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">SubObstruction</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Filter all SubObstructions by a specific orientation. All returned SubObstructions will contain boundary data</span>
+<div class="viewcode-block" id="Obstruction.filter_by_orientation">
+<a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Obstruction.filter_by_orientation">[docs]</a>
+    <span class="k">def</span> <span class="nf">filter_by_orientation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orientation</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">SubObstruction</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Filter all SubObstructions by a specific orientation. All returned SubObstructions will contain boundary data</span>
 <span class="sd">            in the specified orientation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_boundary_data</span><span class="p">:</span>
@@ -619,9 +697,12 @@
                     <span class="n">orientation</span> <span class="ow">in</span> <span class="n">subobst</span><span class="o">.</span><span class="n">orientations</span><span class="p">]</span>
         <span class="k">return</span> <span class="p">[]</span></div>
 
-<div class="viewcode-block" id="Obstruction.get_boundary_data"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Obstruction.get_boundary_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_boundary_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Quantity</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+
+<div class="viewcode-block" id="Obstruction.get_boundary_data">
+<a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Obstruction.get_boundary_data">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_boundary_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Quantity</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
                           <span class="n">orientation</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Boundary</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Gets the boundary data for a specific quantity of all SubObstructions.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the boundary data for a specific quantity of all SubObstructions.</span>
 
 <span class="sd">        :param quantity: The quantity to filter by.</span>
 <span class="sd">        :param orientation: Optionally filter by a specific orientation as well (-3=-z, -2=-y, -1=-x, 1=x, 2=y, 3=z).</span>
@@ -636,8 +717,11 @@
             <span class="k">return</span> <span class="n">ret</span>
         <span class="k">return</span> <span class="p">{</span><span class="n">mesh</span><span class="p">:</span> <span class="n">bndf</span> <span class="k">for</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">bndf</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">orientation</span> <span class="ow">in</span> <span class="n">bndf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span></div>
 
-<div class="viewcode-block" id="Obstruction.get_nearest_timestep"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Obstruction.get_nearest_timestep">[docs]</a>    <span class="k">def</span> <span class="nf">get_nearest_timestep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">visible_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Calculates the nearest timestep for which data has been output for this obstruction.</span>
+
+<div class="viewcode-block" id="Obstruction.get_nearest_timestep">
+<a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Obstruction.get_nearest_timestep">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_nearest_timestep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">visible_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the nearest timestep for which data has been output for this obstruction.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_boundary_data</span><span class="p">:</span>
             <span class="n">times</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_visible_times</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="p">)</span> <span class="k">if</span> <span class="n">visible_only</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">times</span>
@@ -649,8 +733,11 @@
                 <span class="k">return</span> <span class="n">idx</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span></div>
 
-<div class="viewcode-block" id="Obstruction.get_nearest_patch"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Obstruction.get_nearest_patch">[docs]</a>    <span class="k">def</span> <span class="nf">get_nearest_patch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">z</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Gets the patch of the :class:`SubObstruction` that has the least distance to the given point.</span>
+
+<div class="viewcode-block" id="Obstruction.get_nearest_patch">
+<a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Obstruction.get_nearest_patch">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_nearest_patch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">z</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the patch of the :class:`SubObstruction` that has the least distance to the given point.</span>
 <span class="sd">            If there are multiple patches with the same distance, a random one will be selected.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_boundary_data</span><span class="p">:</span>
@@ -678,15 +765,18 @@
                 <span class="k">return</span> <span class="n">patches_min</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="kc">None</span></div>
 
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">has_boundary_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Whether boundary data has been output in the simulation.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether boundary data has been output in the simulation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">subobst</span><span class="o">.</span><span class="n">has_boundary_data</span> <span class="k">for</span> <span class="n">subobst</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subobstructions</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
-<div class="viewcode-block" id="Obstruction.get_global_boundary_data_arrays"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Obstruction.get_global_boundary_data_arrays">[docs]</a>    <span class="k">def</span> <span class="nf">get_global_boundary_data_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span>
+<div class="viewcode-block" id="Obstruction.get_global_boundary_data_arrays">
+<a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Obstruction.get_global_boundary_data_arrays">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_global_boundary_data_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span>
         <span class="nb">int</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]]:</span>
-        <span class="sd">&quot;&quot;&quot;Creates a global numpy ndarray from all subobstruction&#39;s boundary data for each orientation.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a global numpy ndarray from all subobstruction&#39;s boundary data for each orientation.</span>
 
 <span class="sd">            :param quantity: The quantity&#39;s name or short name for which to load the global arrays.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -819,14 +909,20 @@
                     <span class="n">result</span><span class="p">[</span><span class="n">orientation_int</span><span class="p">]</span> <span class="o">=</span> <span class="n">grid</span>
         <span class="k">return</span> <span class="n">result</span></div>
 
-<div class="viewcode-block" id="Obstruction.clear_cache"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Obstruction.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
+
+<div class="viewcode-block" id="Obstruction.clear_cache">
+<a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Obstruction.clear_cache">[docs]</a>
+    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subobstructions</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="n">s</span><span class="o">.</span><span class="n">clear_cache</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Obstruction.vmin"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Obstruction.vmin">[docs]</a>    <span class="k">def</span> <span class="nf">vmin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">],</span> <span class="n">orientation</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Minimum value of all patches at any time for a specific quantity.</span>
+
+<div class="viewcode-block" id="Obstruction.vmin">
+<a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Obstruction.vmin">[docs]</a>
+    <span class="k">def</span> <span class="nf">vmin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">],</span> <span class="n">orientation</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Minimum value of all patches at any time for a specific quantity.</span>
 
 <span class="sd">        :param orientation: Optionally filter by patches with a specific orientation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -835,8 +931,11 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span></div>
 
-<div class="viewcode-block" id="Obstruction.vmax"><a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Obstruction.vmax">[docs]</a>    <span class="k">def</span> <span class="nf">vmax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">],</span> <span class="n">orientation</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Maximum value of all patches at any time for a specific quantity.</span>
+
+<div class="viewcode-block" id="Obstruction.vmax">
+<a class="viewcode-back" href="../../../index.html#fdsreader.bndf.obstruction.Obstruction.vmax">[docs]</a>
+    <span class="k">def</span> <span class="nf">vmax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">],</span> <span class="n">orientation</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Maximum value of all patches at any time for a specific quantity.</span>
 
 <span class="sd">        :param orientation: Optionally filter by patches with a specific orientation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -844,8 +943,9 @@
             <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">vmax</span><span class="p">(</span><span class="n">quantity</span><span class="p">,</span> <span class="n">orientation</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subobstructions</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span></div>
 
+
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="s1">&#39;Mesh&#39;</span><span class="p">]):</span>
-        <span class="sd">&quot;&quot;&quot;Gets either the nth :class:`SubObstruction` or the one with the given mesh-id.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets either the nth :class:`SubObstruction` or the one with the given mesh-id.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
@@ -859,7 +959,8 @@
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Obstruction(id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">, Bounding-Box=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">bounding_box</span><span class="si">}</span><span class="s2">, SubObstructions=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_subobstructions</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;, Quantities=</span><span class="si">{</span><span class="p">[</span><span class="n">q</span><span class="o">.</span><span class="n">short_name</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">quantities</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_boundary_data</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span></div>
+            <span class="sa">f</span><span class="s2">&quot;, Quantities=</span><span class="si">{</span><span class="p">[</span><span class="n">q</span><span class="o">.</span><span class="n">short_name</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">q</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">quantities</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_boundary_data</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span></div>
+
 </pre></div>
 
            </div>

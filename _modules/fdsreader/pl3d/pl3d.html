@@ -1,21 +1,22 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>fdsreader.pl3d.pl3d &mdash; fdsreader [fdsreader, version 1.9.8] documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <title>fdsreader.pl3d.pl3d &mdash; fdsreader [fdsreader, version 1.10.0] documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=e9a9f32e"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -27,11 +28,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html" class="icon icon-home"> fdsreader
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            fdsreader
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -68,9 +73,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../index.html">Module code</a> &raquo;</li>
-      <li>fdsreader.pl3d.pl3d</li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">fdsreader.pl3d.pl3d</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -83,8 +88,10 @@
 <span></span><span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Sequence</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">bisect</span>
 
 <span class="kn">from</span> <span class="nn">fdsreader.fds_classes</span> <span class="kn">import</span> <span class="n">Mesh</span>
 <span class="kn">from</span> <span class="nn">fdsreader.utils</span> <span class="kn">import</span> <span class="n">Quantity</span>
@@ -94,8 +101,10 @@
 <span class="n">_HANDLED_FUNCTIONS</span> <span class="o">=</span> <span class="p">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">:</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">pl</span><span class="p">:</span> <span class="n">pl</span><span class="o">.</span><span class="n">mean</span><span class="p">)}</span>
 
 
-<div class="viewcode-block" id="implements"><a class="viewcode-back" href="../../../pl3d.html#fdsreader.pl3d.pl3d.implements">[docs]</a><span class="k">def</span> <span class="nf">implements</span><span class="p">(</span><span class="n">np_function</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Decorator to register an __array_function__ implementation for Slices.</span>
+<div class="viewcode-block" id="implements">
+<a class="viewcode-back" href="../../../pl3d.html#fdsreader.pl3d.pl3d.implements">[docs]</a>
+<span class="k">def</span> <span class="nf">implements</span><span class="p">(</span><span class="n">np_function</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Decorator to register an __array_function__ implementation for Plot3Ds.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
@@ -105,119 +114,263 @@
     <span class="k">return</span> <span class="n">decorator</span></div>
 
 
-<div class="viewcode-block" id="SubPlot3D"><a class="viewcode-back" href="../../../pl3d.html#fdsreader.pl3d.pl3d.SubPlot3D">[docs]</a><span class="k">class</span> <span class="nc">SubPlot3D</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Subplot of a pl3d output for a single mesh.</span>
+
+<div class="viewcode-block" id="SubPlot3D">
+<a class="viewcode-back" href="../../../pl3d.html#fdsreader.pl3d.pl3d.SubPlot3D">[docs]</a>
+<span class="k">class</span> <span class="nc">SubPlot3D</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Subplot of a pl3d output for a single mesh.</span>
 
 <span class="sd">    :ivar mesh: The mesh containing the data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Offset of the binary file to the end of the file header.</span>
     <span class="n">_offset</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),))</span><span class="o">.</span><span class="n">itemsize</span> <span class="o">+</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;i&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),))</span><span class="o">.</span><span class="n">itemsize</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">file_path</span> <span class="o">=</span> <span class="n">file_path</span>  <span class="c1"># Path to the binary data file</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">,</span> <span class="n">quantity_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_paths</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>  <span class="c1"># Path to the binary data file for each time step</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="n">mesh</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_quantity_idx</span> <span class="o">=</span> <span class="n">quantity_idx</span>
+
+    <span class="k">def</span> <span class="nf">_add_timestep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_paths</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">time_idx</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Method to lazy load the 3D data for each quantity of a single mesh.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to lazy load the 3D data for each quantity of a single mesh.</span>
 
-<span class="sd">        :returns: 4D numpy array with (x,y,z,q) as dimensions, while q represents the 5 quantities.</span>
+<span class="sd">        :returns: 4D numpy array with (t,x,y,z) as dimensions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_data&quot;</span><span class="p">):</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
-                <span class="n">dtype_data</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">size</span><span class="p">()</span> <span class="o">*</span> <span class="mi">5</span><span class="p">),))</span>
-                <span class="n">infile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_offset</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_data</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">shape</span><span class="p">()</span> <span class="o">+</span> <span class="p">(</span><span class="mi">5</span><span class="p">,),</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_paths</span><span class="p">),)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">shape</span><span class="p">())</span>
+            <span class="n">dtype_data</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">new</span><span class="p">(((</span><span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">size</span><span class="p">()</span> <span class="o">*</span> <span class="mi">5</span><span class="p">),))</span>
+            <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">file_path</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_paths</span><span class="p">):</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
+                    <span class="n">infile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_offset</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">t</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">fdtype</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">dtype_data</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">dimension</span><span class="o">.</span><span class="n">shape</span><span class="p">()</span> <span class="o">+</span> <span class="p">(</span><span class="mi">5</span><span class="p">,),</span> <span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_quantity_idx</span><span class="p">]</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
 
-<div class="viewcode-block" id="SubPlot3D.clear_cache"><a class="viewcode-back" href="../../../pl3d.html#fdsreader.pl3d.pl3d.SubPlot3D.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
+<div class="viewcode-block" id="SubPlot3D.clear_cache">
+<a class="viewcode-back" href="../../../pl3d.html#fdsreader.pl3d.pl3d.SubPlot3D.clear_cache">[docs]</a>
+    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_data&quot;</span><span class="p">):</span>
-            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span></div></div>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span></div>
+</div>
 
 
-<div class="viewcode-block" id="Plot3D"><a class="viewcode-back" href="../../../pl3d.html#fdsreader.pl3d.pl3d.Plot3D">[docs]</a><span class="k">class</span> <span class="nc">Plot3D</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">lib</span><span class="o">.</span><span class="n">mixins</span><span class="o">.</span><span class="n">NDArrayOperatorsMixin</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Plot3d file data container including metadata. Consists of multiple subplots, one for each</span>
+
+<div class="viewcode-block" id="Plot3D">
+<a class="viewcode-back" href="../../../pl3d.html#fdsreader.pl3d.pl3d.Plot3D">[docs]</a>
+<span class="k">class</span> <span class="nc">Plot3D</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">lib</span><span class="o">.</span><span class="n">mixins</span><span class="o">.</span><span class="n">NDArrayOperatorsMixin</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot3d file data container including metadata. Consists of multiple subplots, one for each</span>
 <span class="sd">        mesh.</span>
 
-<span class="sd">    :ivar time: The point in time when this data has been recorded.</span>
+<span class="sd">    :ivar times: All times for which data has been recorded.</span>
 <span class="sd">    :ivar quantities: List with quantity objects containing information about recorded quantities</span>
 <span class="sd">     calculated for this Plot3D with the corresponding short_name and unit.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">quantities</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Quantity</span><span class="p">]):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_root_path</span> <span class="o">=</span> <span class="n">root_path</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">time</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">quantities</span> <span class="o">=</span> <span class="n">quantities</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
 
         <span class="c1"># List of all subplots this Plot3D consists of (one per mesh).</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SubPlot3D</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">_add_subplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SubPlot3D</span><span class="p">:</span>
-        <span class="n">subplot</span> <span class="o">=</span> <span class="n">SubPlot3D</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_root_path</span><span class="p">,</span> <span class="n">filename</span><span class="p">),</span> <span class="n">mesh</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="p">[</span><span class="n">mesh</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">subplot</span>
+    <span class="k">def</span> <span class="nf">_add_subplot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="n">Quantity</span><span class="p">,</span> <span class="n">quantity_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quantity</span><span class="p">:</span> <span class="n">Quantity</span> <span class="o">=</span> <span class="n">quantity</span>
+        <span class="k">if</span> <span class="n">mesh</span><span class="o">.</span><span class="n">id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="p">[</span><span class="n">mesh</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">SubPlot3D</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">quantity_idx</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="p">):</span>
+            <span class="n">time_idx</span> <span class="o">=</span> <span class="n">bisect</span><span class="o">.</span><span class="n">bisect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">time_idx</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">time_idx</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="p">)</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">t</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="p">[</span><span class="n">mesh</span><span class="o">.</span><span class="n">id</span><span class="p">]</span><span class="o">.</span><span class="n">_add_timestep</span><span class="p">(</span><span class="n">time_idx</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_root_path</span><span class="p">,</span> <span class="n">filename</span><span class="p">))</span>
 
         <span class="c1"># If lazy loading has been disabled by the user, load the data instantaneously instead</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">LAZY_LOAD</span><span class="p">:</span>
-            <span class="n">_</span> <span class="o">=</span> <span class="n">subplot</span><span class="o">.</span><span class="n">data</span>
-
-        <span class="k">return</span> <span class="n">subplot</span>
+            <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="p">[</span><span class="n">mesh</span><span class="o">.</span><span class="n">id</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
 
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Returns the :class:`SubPlot` that contains data for the given mesh.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the :class:`SubPlot` that contains data for the given mesh.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="p">[</span><span class="n">mesh</span><span class="o">.</span><span class="n">id</span><span class="p">]</span>
 
-<div class="viewcode-block" id="Plot3D.get_quantity_index"><a class="viewcode-back" href="../../../pl3d.html#fdsreader.pl3d.pl3d.Plot3D.get_quantity_index">[docs]</a>    <span class="k">def</span> <span class="nf">get_quantity_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">quantity</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Returns the index of the quantity for the fourth dimension of the data array.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">quantities</span><span class="p">)</span> <span class="k">if</span>
-                    <span class="n">q</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">quantity</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="n">q</span><span class="o">.</span><span class="n">short_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">quantity</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span></div>
+<div class="viewcode-block" id="Plot3D.mean">
+<a class="viewcode-back" href="../../../pl3d.html#fdsreader.pl3d.pl3d.Plot3D.mean">[docs]</a>
+    <span class="nd">@implements</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the mean value of the whole Plot3D.</span>
 
-<div class="viewcode-block" id="Plot3D.mean"><a class="viewcode-back" href="../../../pl3d.html#fdsreader.pl3d.pl3d.Plot3D.mean">[docs]</a>    <span class="nd">@implements</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Calculates the mean for each quantity individually of the whole Plot3D.</span>
-
-<span class="sd">        :returns: The calculated mean values.</span>
+<span class="sd">        :returns: The calculated mean value.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">mean_sums</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">5</span><span class="p">,))</span>
+        <span class="n">mean_sum</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">subplot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="n">mean_sums</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">subplot</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">mean_sums</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="p">)</span></div>
+            <span class="n">mean_sum</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">subplot</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">mean_sum</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Plot3D.std"><a class="viewcode-back" href="../../../pl3d.html#fdsreader.pl3d.pl3d.Plot3D.std">[docs]</a>    <span class="nd">@implements</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">std</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Calculates the standard deviation for each quantity individually of the whole Plot3D.</span>
 
-<span class="sd">        :returns: The calculated standard deviations.</span>
+<div class="viewcode-block" id="Plot3D.std">
+<a class="viewcode-back" href="../../../pl3d.html#fdsreader.pl3d.pl3d.Plot3D.std">[docs]</a>
+    <span class="nd">@implements</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">std</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the standard deviation for each quantity individually of the whole Plot3D.</span>
+
+<span class="sd">        :returns: The calculated standard deviation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">stds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">5</span><span class="p">,))</span>
-        <span class="n">n_q</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">quantities</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_q</span><span class="p">):</span>
-            <span class="n">mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span>
-            <span class="nb">sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">subplot</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">q</span><span class="p">]</span> <span class="o">-</span> <span class="n">mean</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="k">for</span> <span class="n">subplot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
-            <span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="n">subplot</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">size</span> <span class="o">/</span> <span class="n">n_q</span> <span class="k">for</span> <span class="n">subplot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
-            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">sum</span> <span class="o">/</span> <span class="n">N</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">stds</span></div>
+        <span class="n">mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span>
+        <span class="nb">sum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">subplot</span><span class="o">.</span><span class="n">data</span> <span class="o">-</span> <span class="n">mean</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="k">for</span> <span class="n">subplot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="n">subplot</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">size</span> <span class="k">for</span> <span class="n">subplot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">sum</span> <span class="o">/</span> <span class="n">N</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Plot3D.clear_cache"><a class="viewcode-back" href="../../../pl3d.html#fdsreader.pl3d.pl3d.Plot3D.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
+
+<div class="viewcode-block" id="Plot3D.clear_cache">
+<a class="viewcode-back" href="../../../pl3d.html#fdsreader.pl3d.pl3d.Plot3D.clear_cache">[docs]</a>
+    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">subplot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="n">subplot</span><span class="o">.</span><span class="n">clear_cache</span><span class="p">()</span></div>
 
+
+<div class="viewcode-block" id="Plot3D.to_global">
+<a class="viewcode-back" href="../../../pl3d.html#fdsreader.pl3d.pl3d.Plot3D.to_global">[docs]</a>
+    <span class="k">def</span> <span class="nf">to_global</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">masked</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fill</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">return_coordinates</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> \
+            <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a global numpy ndarray from all subplots.</span>
+
+<span class="sd">            :param masked: Whether to apply the obstruction mask to the data or not.</span>
+<span class="sd">            :param fill: The fill value to use for masked entries. Only used when masked=True.</span>
+<span class="sd">            :param return_coordinates: If true, return the matching coordinate for each value on the generated grid.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">coord_min</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">math</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="n">math</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">:</span> <span class="n">math</span><span class="o">.</span><span class="n">inf</span><span class="p">}</span>
+        <span class="n">coord_max</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">:</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">inf</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">subplot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">co</span> <span class="o">=</span> <span class="n">subplot</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
+                <span class="n">coord_min</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">co</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">coord_min</span><span class="p">[</span><span class="n">dim</span><span class="p">])</span>
+                <span class="n">coord_max</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">co</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">coord_max</span><span class="p">[</span><span class="n">dim</span><span class="p">])</span>
+
+        <span class="c1"># The global grid will use the finest mesh as base and duplicate values of the coarser</span>
+        <span class="c1"># meshes. Therefore, we first find the finest mesh and calculate the step size in each</span>
+        <span class="c1"># dimension.</span>
+        <span class="n">step_sizes_min</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">coord_max</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">coord_min</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span>
+                          <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="n">coord_max</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">coord_min</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span>
+                          <span class="s1">&#39;z&#39;</span><span class="p">:</span> <span class="n">coord_max</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">coord_min</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">]}</span>
+        <span class="n">step_sizes_max</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+        <span class="n">steps</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">global_max</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">:</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">inf</span><span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">subplot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">step_size</span> <span class="o">=</span> <span class="n">subplot</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">subplot</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">step_sizes_min</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">step_size</span><span class="p">,</span> <span class="n">step_sizes_min</span><span class="p">[</span><span class="n">dim</span><span class="p">])</span>
+                <span class="n">step_sizes_max</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">step_size</span><span class="p">,</span> <span class="n">step_sizes_max</span><span class="p">[</span><span class="n">dim</span><span class="p">])</span>
+                <span class="n">global_max</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">subplot</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">global_max</span><span class="p">[</span><span class="n">dim</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">step_sizes_min</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">step_sizes_min</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">inf</span>
+                <span class="n">steps</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">steps</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">((</span><span class="n">coord_max</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">-</span> <span class="n">coord_min</span><span class="p">[</span><span class="n">dim</span><span class="p">])</span> <span class="o">/</span> <span class="n">step_sizes_min</span><span class="p">[</span><span class="n">dim</span><span class="p">])),</span>
+                                 <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>  <span class="c1"># + step_sizes_max[dim] / step_sizes_min[dim]</span>
+
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_t</span><span class="p">,</span> <span class="n">steps</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">steps</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span> <span class="n">steps</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+
+        <span class="n">start_idx</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">end_idx</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">subplot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">subplot_data</span> <span class="o">=</span> <span class="n">subplot</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">masked</span><span class="p">:</span>
+                <span class="n">mask</span> <span class="o">=</span> <span class="n">subplot</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">get_obstruction_mask</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+                <span class="n">dim</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">)[</span><span class="n">axis</span><span class="p">]</span>
+                <span class="n">n_repeat</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">subplot</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">subplot</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span>
+                    <span class="n">step_sizes_min</span><span class="p">[</span><span class="n">dim</span><span class="p">])),</span> <span class="mi">1</span><span class="p">)</span>
+
+                <span class="n">start_idx</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">subplot</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">coord_min</span><span class="p">[</span><span class="n">dim</span><span class="p">])</span> <span class="o">/</span> <span class="n">step_sizes_min</span><span class="p">[</span><span class="n">dim</span><span class="p">]))</span>
+                <span class="n">end_idx</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">subplot</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">coord_min</span><span class="p">[</span><span class="n">dim</span><span class="p">])</span> <span class="o">/</span> <span class="n">step_sizes_min</span><span class="p">[</span><span class="n">dim</span><span class="p">]))</span>
+
+            <span class="c1"># We ignore border points unless they are actually on the border of the simulation space as all</span>
+            <span class="c1"># other border points actually appear twice, as the subslices overlap. This only</span>
+            <span class="c1"># applies for face_centered slices, as cell_centered slices will not overlap.</span>
+            <span class="n">reduced_shape_slices</span> <span class="o">=</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="n">subplot</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="n">s</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">subplot</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+            <span class="n">subplot_data</span> <span class="o">=</span> <span class="n">subplot_data</span><span class="p">[</span><span class="n">reduced_shape_slices</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">masked</span><span class="p">:</span>
+                <span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span><span class="p">[</span><span class="n">reduced_shape_slices</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+                <span class="n">dim</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">)[</span><span class="n">axis</span><span class="p">]</span>
+                <span class="c1"># Temporarily save border points to add them back to the array again later</span>
+                <span class="k">if</span> <span class="n">subplot</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">global_max</span><span class="p">[</span><span class="n">dim</span><span class="p">]:</span>
+                    <span class="n">end_idx</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">temp_data_slices</span> <span class="o">=</span> <span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">subplot_data</span><span class="o">.</span><span class="n">shape</span><span class="p">]</span>
+                    <span class="n">temp_data_slices</span><span class="p">[</span><span class="n">axis</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">subplot_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">axis</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                    <span class="n">temp_data</span> <span class="o">=</span> <span class="n">subplot_data</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">temp_data_slices</span><span class="p">)]</span>
+                    <span class="k">if</span> <span class="n">masked</span><span class="p">:</span>
+                        <span class="n">temp_mask</span> <span class="o">=</span> <span class="n">mask</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">temp_data_slices</span><span class="p">)]</span>
+
+                <span class="k">if</span> <span class="n">n_repeat</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">subplot_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">subplot_data</span><span class="p">,</span> <span class="n">n_repeat</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">masked</span><span class="p">:</span>
+                        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">n_repeat</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+                <span class="c1"># Add border points back again if needed</span>
+                <span class="k">if</span> <span class="n">subplot</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">global_max</span><span class="p">[</span><span class="n">dim</span><span class="p">]:</span>
+                    <span class="n">subplot_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">subplot_data</span><span class="p">,</span> <span class="n">temp_data</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">masked</span><span class="p">:</span>
+                        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">mask</span><span class="p">,</span> <span class="n">temp_mask</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># If the slice should be masked, we set all cells at which an obstruction is in the</span>
+            <span class="c1"># simulation space to the fill value set by the user</span>
+            <span class="k">if</span> <span class="n">masked</span><span class="p">:</span>
+                <span class="n">subplot_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">subplot_data</span><span class="p">,</span> <span class="n">fill</span><span class="p">)</span>
+
+            <span class="n">grid</span><span class="p">[:,</span> <span class="n">start_idx</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]:</span> <span class="n">end_idx</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">start_idx</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]:</span> <span class="n">end_idx</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span>
+            <span class="n">start_idx</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">]:</span> <span class="n">end_idx</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">subplot_data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_t</span><span class="p">,</span> <span class="n">end_idx</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">start_idx</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="n">end_idx</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">start_idx</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">],</span>
+                 <span class="n">end_idx</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">start_idx</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">]))</span>
+
+        <span class="k">if</span> <span class="n">return_coordinates</span><span class="p">:</span>
+            <span class="n">coordinates</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">dim_index</span><span class="p">,</span> <span class="n">dim</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">((</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;z&#39;</span><span class="p">)):</span>
+                <span class="n">coordinates</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">coord_min</span><span class="p">[</span><span class="n">dim</span><span class="p">],</span> <span class="n">coord_max</span><span class="p">[</span><span class="n">dim</span><span class="p">],</span> <span class="n">grid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">dim_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">return_coordinates</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">grid</span><span class="p">,</span> <span class="n">coordinates</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">grid</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_t</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the number of timesteps for which data was output.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">subplots</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a list with one SubPlot3D object per mesh.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_subplots</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
     <span class="k">def</span> <span class="nf">__array__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Method that will be called by numpy when trying to convert the object to a numpy ndarray.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method that will be called by numpy when trying to convert the object to a numpy ndarray.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">UserWarning</span><span class="p">(</span>
             <span class="s2">&quot;Plot3Ds can not be converted to numpy arrays, but they support all typical numpy&quot;</span>
-            <span class="s2">&quot; operations such as np.multiply. If a &#39;global&#39; array containg all subplots is&quot;</span>
-            <span class="s2">&quot; required, please request this functionality by submitting an issue on Github.&quot;</span><span class="p">)</span>
+            <span class="s2">&quot; operations such as np.multiply. If a &#39;global&#39; array containing all subplots is&quot;</span>
+            <span class="s2">&quot; required, please use the &#39;to_global&#39; method and use the returned numpy-array explicitly.&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__array_ufunc__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ufunc</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="o">*</span><span class="n">inputs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Method that will be called by numpy when using a ufunction with a Plot3D as input.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method that will be called by numpy when using a ufunction with a Plot3D as input.</span>
 
 <span class="sd">        :returns: A new pl3d on which the ufunc has been applied.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -237,7 +390,7 @@
         <span class="k">return</span> <span class="n">new_pl3d</span>
 
     <span class="k">def</span> <span class="nf">__array_function__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">types</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Method that will be called by numpy when using an array function with a Slice as input.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method that will be called by numpy when using an array function with a Slice as input.</span>
 
 <span class="sd">        :returns: The output of the array function.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -247,6 +400,7 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">issubclass</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">types</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">NotImplemented</span>
         <span class="k">return</span> <span class="n">_HANDLED_FUNCTIONS</span><span class="p">[</span><span class="n">func</span><span class="p">](</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
 
 <span class="c1"># __array_function__ implementations</span>
 <span class="c1"># ...</span>

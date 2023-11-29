@@ -1,21 +1,22 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>fdsreader.simulation &mdash; fdsreader [fdsreader, version 1.9.8] documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <title>fdsreader.simulation &mdash; fdsreader [fdsreader, version 1.10.0] documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=e9a9f32e"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -27,11 +28,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> fdsreader
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            fdsreader
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -68,9 +73,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-      <li>fdsreader.simulation</li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">fdsreader.simulation</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -106,8 +111,10 @@
 <span class="kn">from</span> <span class="nn">fdsreader._version</span> <span class="kn">import</span> <span class="n">__version__</span>
 
 
-<div class="viewcode-block" id="Simulation"><a class="viewcode-back" href="../../simulation.html#fdsreader.simulation.Simulation">[docs]</a><span class="k">class</span> <span class="nc">Simulation</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Master class managing all data for a given simulation.</span>
+<div class="viewcode-block" id="Simulation">
+<a class="viewcode-back" href="../../simulation.html#fdsreader.simulation.Simulation">[docs]</a>
+<span class="k">class</span> <span class="nc">Simulation</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Master class managing all data for a given simulation.</span>
 
 <span class="sd">    :ivar reader_version: The version of the fdsreader used to load the Simulation.</span>
 <span class="sd">    :ivar smv_file_path: Path to the .smv file of the simulation.</span>
@@ -196,7 +203,7 @@
         <span class="k">return</span> <span class="n">r</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param path: Either the path to the directory containing the simulation data or direct path</span>
 <span class="sd">            to the .smv file for the simulation in case that multiple simulation output was written to</span>
 <span class="sd">            the same directory.</span>
@@ -226,7 +233,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_obstructions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_slices</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_geomslices</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_data_3d</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_3d</span> <span class="o">=</span> <span class="n">Plot3DCollection</span><span class="p">([</span><span class="n">Plot3D</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_path</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">)])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_smoke_3d</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_isosurfaces</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_particles</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
@@ -261,7 +268,6 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">geomslices</span> <span class="o">=</span> <span class="n">GeomSliceCollection</span><span class="p">(</span>
                 <span class="n">GeomSlice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="n">slice_data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
                           <span class="n">slice_data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;times&quot;</span><span class="p">],</span> <span class="n">slice_data</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="k">for</span> <span class="n">slice_data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geomslices</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data_3d</span> <span class="o">=</span> <span class="n">Plot3DCollection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_3d</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_3d</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">smoke_3d</span> <span class="o">=</span> <span class="n">Smoke3DCollection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_smoke_3d</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">isosurfaces</span> <span class="o">=</span> <span class="n">IsosurfaceCollection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_isosurfaces</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">devices</span> <span class="o">=</span> <span class="n">DeviceCollection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_devices</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
@@ -276,7 +282,7 @@
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_evacs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">evacs</span> <span class="o">=</span> <span class="n">EvacCollection</span><span class="p">((),</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="p">())</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">meshes</span> <span class="o">=</span> <span class="n">MeshCollection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_meshes</span><span class="p">)</span>
-            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geom_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geomslices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_slices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obstructions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_3d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_smoke_3d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isosurfaces</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_devices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_particles</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evacs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meshes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subobstructions</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geom_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geomslices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_slices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obstructions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_smoke_3d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isosurfaces</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_devices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_particles</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_evacs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meshes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subobstructions</span>
 
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CACHING</span><span class="p">:</span>
                 <span class="c1"># Hash will be saved to simulation pickle file and compared to new hash when loading</span>
@@ -284,7 +290,9 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_hash</span> <span class="o">=</span> <span class="n">create_hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">smv_file_path</span><span class="p">)</span>
                 <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">Simulation</span><span class="o">.</span><span class="n">_get_pickle_filename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chid</span><span class="p">),</span> <span class="s1">&#39;wb&#39;</span><span class="p">),</span> <span class="n">protocol</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Simulation.parse_smv_file"><a class="viewcode-back" href="../../simulation.html#fdsreader.simulation.Simulation.parse_smv_file">[docs]</a>    <span class="k">def</span> <span class="nf">parse_smv_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Simulation.parse_smv_file">
+<a class="viewcode-back" href="../../simulation.html#fdsreader.simulation.Simulation.parse_smv_file">[docs]</a>
+    <span class="k">def</span> <span class="nf">parse_smv_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">smv_file_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">smv_file</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">smv_file</span><span class="p">:</span>
                 <span class="n">keyword</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
@@ -292,6 +300,10 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">fds_version</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
                 <span class="k">elif</span> <span class="n">keyword</span> <span class="o">==</span> <span class="s2">&quot;CHID&quot;</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">chid</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="k">elif</span> <span class="n">keyword</span> <span class="o">==</span> <span class="s2">&quot;TITLE&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="k">elif</span> <span class="n">keyword</span> <span class="o">==</span> <span class="s2">&quot;TIMES&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">times</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()]</span>
                 <span class="k">elif</span> <span class="n">keyword</span> <span class="o">==</span> <span class="s2">&quot;CSVF&quot;</span><span class="p">:</span>
                     <span class="n">csv_type</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
                     <span class="n">filename</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
@@ -353,14 +365,15 @@
                 <span class="k">elif</span> <span class="n">keyword</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;HIDE_OBST&quot;</span><span class="p">):</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_toggle_obst</span><span class="p">(</span><span class="n">smv_file</span><span class="p">,</span> <span class="n">keyword</span><span class="p">)</span></div>
 
+
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_get_pickle_filename</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">root_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">chid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AnyStr</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Get the filename used to save the pickled simulation.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the filename used to save the pickled simulation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span> <span class="n">chid</span> <span class="o">+</span> <span class="s2">&quot;.pickle&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_load_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">:</span> <span class="n">TextIO</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mesh</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Load information for a single mesh from the smv file at current pointer position.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load information for a single mesh from the smv file at current pointer position.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">mesh_id</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">:])</span>
 
@@ -386,6 +399,16 @@
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">grid_dimensions</span><span class="p">[</span><span class="n">dim</span><span class="p">]):</span>
                 <span class="n">coordinates</span><span class="p">[</span><span class="n">dim</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
 
+        <span class="c1"># Mesh ids might not be unique if using MULT in combination with a MESH with its ID set</span>
+        <span class="k">for</span> <span class="n">other_mesh</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_meshes</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">other_mesh</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">mesh_id</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">mesh_id</span> <span class="o">==</span> <span class="n">other_mesh</span><span class="o">.</span><span class="n">id</span><span class="p">:</span>  <span class="c1"># first mesh with same id</span>
+                    <span class="n">mesh_id</span> <span class="o">=</span> <span class="n">mesh_id</span> <span class="o">+</span> <span class="s2">&quot;_1&quot;</span>
+                <span class="k">else</span><span class="p">:</span>  <span class="c1"># n-th mesh with same id</span>
+                    <span class="n">other_mesh_id</span><span class="p">,</span> <span class="n">last_num</span> <span class="o">=</span> <span class="n">other_mesh</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">other_mesh_id</span> <span class="o">==</span> <span class="n">mesh_id</span> <span class="ow">and</span> <span class="n">last_num</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+                        <span class="n">mesh_id</span> <span class="o">=</span> <span class="n">mesh_id</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">last_num</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
         <span class="n">mesh</span> <span class="o">=</span> <span class="n">Mesh</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">extents</span><span class="p">,</span> <span class="n">mesh_id</span><span class="p">)</span>
 
         <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>  <span class="c1"># Blank line</span>
@@ -400,7 +423,7 @@
 
     <span class="nd">@log_error</span><span class="p">(</span><span class="s2">&quot;obst&quot;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">_load_obstructions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">:</span> <span class="n">TextIO</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">):</span>
-        <span class="n">temp_data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">temp_data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
         <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
 
         <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -415,7 +438,7 @@
             <span class="c1"># when there are multiple obstructions with the same ID</span>
             <span class="n">obst_id</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">line_floats</span><span class="p">[</span><span class="mi">6</span><span class="p">])))</span>
 
-            <span class="n">side_surfaces</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">surfaces</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">line_floats</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">13</span><span class="p">))</span>
+            <span class="n">side_surfaces</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">surfaces</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">line_floats</span><span class="p">[</span><span class="n">i</span><span class="p">])]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">13</span><span class="p">))</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line_floats</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">13</span><span class="p">:</span>
                 <span class="n">texture_origin</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">line_floats</span><span class="p">[</span><span class="mi">13</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">line_floats</span><span class="p">[</span><span class="mi">14</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">line_floats</span><span class="p">[</span><span class="mi">15</span><span class="p">]))</span>
             <span class="k">else</span><span class="p">:</span>
@@ -424,32 +447,27 @@
             <span class="c1"># Check if there is already an obst in this mesh with the same ID (due to holes).</span>
             <span class="c1"># This will only be the case the first time we notice that there are multiple</span>
             <span class="c1"># obstructions with the same name, as their IDs will now change...</span>
-            <span class="k">if</span> <span class="n">obst_id</span> <span class="ow">in</span> <span class="n">temp_data</span><span class="p">:</span>
-                <span class="c1"># The obstruction that was already added to the temp_data has to receive an</span>
-                <span class="c1"># updated ID as well, so the user can recognize it as special obstruction</span>
-                <span class="n">temp_data</span><span class="p">[</span><span class="n">obst_id</span> <span class="o">+</span> <span class="s1">&#39;_from-hole-1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp_data</span><span class="p">[</span><span class="n">obst_id</span><span class="p">]</span>
-                <span class="k">del</span> <span class="n">temp_data</span><span class="p">[</span><span class="n">obst_id</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">obst_data</span> <span class="ow">in</span> <span class="n">temp_data</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">obst_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">obst_id</span><span class="p">:</span>
+                    <span class="c1"># The obstruction that was already added to the temp_data has to receive an</span>
+                    <span class="c1"># updated ID as well, so the user can recognize it as special obstruction</span>
+                    <span class="n">obst_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">obst_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;_from-hole-1&#39;</span>
 
-                <span class="c1"># Now set the next obst_id to &#39;_from-hole-2&#39;</span>
-                <span class="n">obst_id</span> <span class="o">=</span> <span class="n">obst_id</span> <span class="o">+</span> <span class="s1">&#39;_from-hole-2&#39;</span>
+                    <span class="c1"># Now set the next obst_id to &#39;_from-hole-2&#39;</span>
+                    <span class="n">obst_id</span> <span class="o">+=</span> <span class="s1">&#39;_from-hole-2&#39;</span>
 
             <span class="c1"># ...For subsequent cases (i.e., when the third or fourth obstruction with the same id</span>
             <span class="c1"># is found), we need to catch the case differently</span>
-            <span class="k">if</span> <span class="n">obst_id</span> <span class="o">+</span> <span class="s1">&#39;_from-hole-1&#39;</span> <span class="ow">in</span> <span class="n">temp_data</span><span class="p">:</span>
-                <span class="c1"># Find the counter of the last added obstruction with the same id and set the id of</span>
-                <span class="c1"># the current obstruction to the next following number.</span>
-                <span class="c1"># Starting at 3, as 1 and 2 are guaranteed to be in the dictionary already, due to</span>
-                <span class="c1"># the if-branch above.</span>
-                <span class="n">counter</span> <span class="o">=</span> <span class="mi">3</span>
-                <span class="n">obst_id</span> <span class="o">=</span> <span class="n">obst_id</span> <span class="o">+</span> <span class="s1">&#39;_from-hole-&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">counter</span><span class="p">)</span>
-                <span class="k">while</span> <span class="n">obst_id</span> <span class="ow">in</span> <span class="n">temp_data</span><span class="p">:</span>
-                    <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
-                    <span class="n">obst_id</span> <span class="o">=</span> <span class="n">obst_id</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">counter</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">obst_data</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">temp_data</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">obst_data</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">obst_id</span> <span class="o">+</span> <span class="s1">&#39;_from-hole-&#39;</span><span class="p">:</span>
+                    <span class="c1"># Find the last obstruction with the same id and set the number of the current</span>
+                    <span class="c1"># one accordingly</span>
+                    <span class="n">obst_id</span> <span class="o">+=</span> <span class="s1">&#39;_from-hole-&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">obst_data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 
-            <span class="n">temp_data</span><span class="p">[</span><span class="n">obst_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">Extent</span><span class="p">(</span><span class="o">*</span><span class="n">ext</span><span class="p">),</span> <span class="n">side_surfaces</span><span class="p">,</span> <span class="n">texture_origin</span><span class="p">)</span>
+            <span class="n">temp_data</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">obst_id</span><span class="p">,</span> <span class="n">Extent</span><span class="p">(</span><span class="o">*</span><span class="n">ext</span><span class="p">),</span> <span class="n">side_surfaces</span><span class="p">,</span> <span class="n">texture_origin</span><span class="p">])</span>
 
-        <span class="k">for</span> <span class="n">obst_id</span><span class="p">,</span> <span class="n">tmp</span> <span class="ow">in</span> <span class="n">temp_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">extent</span><span class="p">,</span> <span class="n">side_surfaces</span><span class="p">,</span> <span class="n">texture_origin</span> <span class="o">=</span> <span class="n">tmp</span>
+        <span class="k">for</span> <span class="n">obst_data</span> <span class="ow">in</span> <span class="n">temp_data</span><span class="p">:</span>
+            <span class="n">obst_id</span><span class="p">,</span> <span class="n">extent</span><span class="p">,</span> <span class="n">side_surfaces</span><span class="p">,</span> <span class="n">texture_origin</span> <span class="o">=</span> <span class="n">obst_data</span>
 
             <span class="n">line</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
             <span class="n">bound_indices</span> <span class="o">=</span> <span class="p">(</span>
@@ -581,7 +599,7 @@
 
     <span class="nd">@log_error</span><span class="p">(</span><span class="s2">&quot;surface&quot;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">_load_surface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">:</span> <span class="n">TextIO</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Surface</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Load the information for a single surface from the smv file at current pointer position.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load the information for a single surface from the smv file at current pointer position.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">surface_id</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
@@ -604,7 +622,7 @@
 
     <span class="nd">@log_error</span><span class="p">(</span><span class="s2">&quot;slcf&quot;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">_load_slice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">:</span> <span class="n">TextIO</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Loads the slice at current pointer position.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Loads the slice at current pointer position.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="s2">&quot;SLCC&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
             <span class="n">cell_centered</span> <span class="o">=</span> <span class="kc">True</span>
@@ -647,7 +665,7 @@
 
     <span class="nd">@log_error</span><span class="p">(</span><span class="s2">&quot;slcf&quot;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">_load_geomslice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">:</span> <span class="n">TextIO</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Loads the geomslice at current pointer position.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Loads the geomslice at current pointer position.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">slice_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;!&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
 
@@ -686,7 +704,7 @@
 
     <span class="nd">@log_error</span><span class="p">(</span><span class="s2">&quot;bndf&quot;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">_load_boundary_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">:</span> <span class="n">TextIO</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">cell_centered</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Loads the boundary data at current pointer position.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Loads the boundary data at current pointer position.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
         <span class="n">mesh_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span>
@@ -741,15 +759,14 @@
 
                 <span class="n">extent</span><span class="p">,</span> <span class="n">dimension</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_indices_to_extent</span><span class="p">(</span><span class="n">patch_info</span><span class="p">[:</span><span class="mi">6</span><span class="p">],</span> <span class="n">mesh</span><span class="p">)</span>
                 <span class="n">orientation</span> <span class="o">=</span> <span class="n">patch_info</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
-                <span class="n">obst_index</span> <span class="o">=</span> <span class="n">patch_info</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
+                <span class="n">obst_index</span> <span class="o">=</span> <span class="n">patch_info</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
 
                 <span class="n">p</span> <span class="o">=</span> <span class="n">Patch</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">extent</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">cell_centered</span><span class="p">,</span>
                           <span class="n">patch_offset</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">n_t</span><span class="p">,</span> <span class="n">mesh</span><span class="p">)</span>
 
-                <span class="c1"># &quot;Obstacles&quot; with index 0 give the extent of the (whole) mesh faces and refer to</span>
+                <span class="c1"># &quot;Obstacles&quot; with index -1 give the extent of the (whole) mesh faces and refer to</span>
                 <span class="c1"># &quot;closed&quot; mesh faces, therefore that data will be added to the corresponding mesh instead</span>
-                <span class="k">if</span> <span class="n">obst_index</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">obst_index</span> <span class="o">-=</span> <span class="mi">1</span>  <span class="c1"># Account for fortran indexing</span>
+                <span class="k">if</span> <span class="n">obst_index</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">obst_index</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">:</span>
                         <span class="n">patches</span><span class="p">[</span><span class="n">obst_index</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
                     <span class="n">patches</span><span class="p">[</span><span class="n">obst_index</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
@@ -764,13 +781,15 @@
             <span class="k">for</span> <span class="n">patch</span> <span class="ow">in</span> <span class="n">p</span><span class="p">:</span>
                 <span class="n">patch</span><span class="o">.</span><span class="n">_post_init</span><span class="p">(</span><span class="n">patch_offset</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">_subobstructions</span><span class="p">[</span><span class="n">mesh</span><span class="o">.</span><span class="n">id</span><span class="p">][</span><span class="n">obst_index</span><span class="p">]</span><span class="o">.</span><span class="n">_add_patches</span><span class="p">(</span><span class="n">bid</span><span class="p">,</span> <span class="n">cell_centered</span><span class="p">,</span> <span class="n">quantity</span><span class="p">,</span> <span class="n">short_name</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span>
-                                                                 <span class="n">times</span><span class="p">,</span> <span class="n">lower_bounds</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_subobstructions</span><span class="p">[</span><span class="n">mesh</span><span class="o">.</span><span class="n">id</span><span class="p">][</span><span class="n">obst_index</span><span class="p">]</span><span class="o">.</span><span class="n">_add_patches</span><span class="p">(</span><span class="n">bid</span><span class="p">,</span> <span class="n">cell_centered</span><span class="p">,</span> <span class="n">quantity</span><span class="p">,</span>
+                                                                    <span class="n">short_name</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span>
+                                                                    <span class="n">lower_bounds</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">mesh_patches</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">patch</span> <span class="ow">in</span> <span class="n">p</span><span class="p">:</span>
                 <span class="n">patch</span><span class="o">.</span><span class="n">_post_init</span><span class="p">(</span><span class="n">patch_offset</span><span class="p">)</span>
-            <span class="n">patch</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">_add_patches</span><span class="p">(</span><span class="n">bid</span><span class="p">,</span> <span class="n">cell_centered</span><span class="p">,</span> <span class="n">quantity</span><span class="p">,</span> <span class="n">short_name</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span> <span class="n">lower_bounds</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="p">)</span>
+            <span class="n">patch</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">_add_patches</span><span class="p">(</span><span class="n">bid</span><span class="p">,</span> <span class="n">cell_centered</span><span class="p">,</span> <span class="n">quantity</span><span class="p">,</span> <span class="n">short_name</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span>
+                                    <span class="n">lower_bounds</span><span class="p">,</span> <span class="n">upper_bounds</span><span class="p">)</span>
 
     <span class="nd">@log_error</span><span class="p">(</span><span class="s2">&quot;geom&quot;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">_load_boundary_data_geom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">:</span> <span class="n">TextIO</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
@@ -811,7 +830,7 @@
 
     <span class="nd">@log_error</span><span class="p">(</span><span class="s2">&quot;pl3d&quot;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">_load_plot_3d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">:</span> <span class="n">TextIO</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Loads the pl3d at current pointer position.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Loads the pl3d at current pointer position.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
 
@@ -820,20 +839,16 @@
         <span class="n">mesh_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span>
 
         <span class="n">filename</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-        <span class="n">quantities</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
             <span class="n">quantity</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
             <span class="n">short_name</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
             <span class="n">unit</span> <span class="o">=</span> <span class="n">smv_file</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="n">quantities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Quantity</span><span class="p">(</span><span class="n">quantity</span><span class="p">,</span> <span class="n">short_name</span><span class="p">,</span> <span class="n">unit</span><span class="p">))</span>
 
-        <span class="k">if</span> <span class="n">time</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_3d</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_data_3d</span><span class="p">[</span><span class="n">time</span><span class="p">]</span> <span class="o">=</span> <span class="n">Plot3D</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">quantities</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_data_3d</span><span class="p">[</span><span class="n">time</span><span class="p">]</span><span class="o">.</span><span class="n">_add_subplot</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meshes</span><span class="p">[</span><span class="n">mesh_index</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_3d</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">_add_subplot</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">Quantity</span><span class="p">(</span><span class="n">quantity</span><span class="p">,</span> <span class="n">short_name</span><span class="p">,</span> <span class="n">unit</span><span class="p">),</span> <span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_meshes</span><span class="p">[</span><span class="n">mesh_index</span><span class="p">])</span>
 
     <span class="nd">@log_error</span><span class="p">(</span><span class="s2">&quot;smoke3d&quot;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">_load_smoke_3d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">:</span> <span class="n">TextIO</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Loads the smoke3d at current pointer position.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Loads the smoke3d at current pointer position.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
 
@@ -865,7 +880,7 @@
 
     <span class="nd">@log_error</span><span class="p">(</span><span class="s2">&quot;isof&quot;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">_load_isosurface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smv_file</span><span class="p">:</span> <span class="n">TextIO</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Loads the isosurface at current pointer position.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Loads the isosurface at current pointer position.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">double_quantity</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;T&#39;</span>
         <span class="n">mesh_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span>
@@ -1124,8 +1139,10 @@
         <span class="n">extent</span> <span class="o">=</span> <span class="n">Extent</span><span class="p">(</span><span class="n">co_x_min</span><span class="p">,</span> <span class="n">co_x_max</span><span class="p">,</span> <span class="n">co_y_min</span><span class="p">,</span> <span class="n">co_y_max</span><span class="p">,</span> <span class="n">co_z_min</span><span class="p">,</span> <span class="n">co_z_max</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">extent</span><span class="p">,</span> <span class="n">dimension</span>
 
-<div class="viewcode-block" id="Simulation.clear_cache"><a class="viewcode-back" href="../../simulation.html#fdsreader.simulation.Simulation.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clear_persistent_cache</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
+<div class="viewcode-block" id="Simulation.clear_cache">
+<a class="viewcode-back" href="../../simulation.html#fdsreader.simulation.Simulation.clear_cache">[docs]</a>
+    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clear_persistent_cache</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
 
 <span class="sd">        :param clear_persistent_cache: Whether to clear the persistent simulation cache as well.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1139,7 +1156,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">particles</span><span class="o">.</span><span class="n">clear_cache</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">clear_persistent_cache</span><span class="p">:</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">Simulation</span><span class="o">.</span><span class="n">_get_pickle_filename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chid</span><span class="p">))</span></div></div>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">Simulation</span><span class="o">.</span><span class="n">_get_pickle_filename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chid</span><span class="p">))</span></div>
+</div>
+
 </pre></div>
 
            </div>

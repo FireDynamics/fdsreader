@@ -1,6 +1,5 @@
-var DOCUMENTATION_OPTIONS = {
-    URL_ROOT: document.getElementById("documentation_options").getAttribute('data-url_root'),
-    VERSION: '[fdsreader, version 1.9.8]',
+const DOCUMENTATION_OPTIONS = {
+    VERSION: '[fdsreader, version 1.10.0]',
     LANGUAGE: 'en',
     COLLAPSE_INDEX: false,
     BUILDER: 'html',

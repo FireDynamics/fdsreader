@@ -1,21 +1,22 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>fdsreader.slcf.geomslice &mdash; fdsreader [fdsreader, version 1.9.8] documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <title>fdsreader.slcf.geomslice &mdash; fdsreader [fdsreader, version 1.10.0] documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=e9a9f32e"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -27,11 +28,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html" class="icon icon-home"> fdsreader
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            fdsreader
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -68,9 +73,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../index.html">Module code</a> &raquo;</li>
-      <li>fdsreader.slcf.geomslice</li>
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">fdsreader.slcf.geomslice</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -96,8 +101,10 @@
 <span class="n">_HANDLED_FUNCTIONS</span> <span class="o">=</span> <span class="p">{}</span>
 
 
-<div class="viewcode-block" id="implements"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.geomslice.implements">[docs]</a><span class="k">def</span> <span class="nf">implements</span><span class="p">(</span><span class="n">np_function</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Decorator to register an __array_function__ implementation for GeomSlices.</span>
+<div class="viewcode-block" id="implements">
+<a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.geomslice.implements">[docs]</a>
+<span class="k">def</span> <span class="nf">implements</span><span class="p">(</span><span class="n">np_function</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Decorator to register an __array_function__ implementation for GeomSlices.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
@@ -107,8 +114,11 @@
     <span class="k">return</span> <span class="n">decorator</span></div>
 
 
-<div class="viewcode-block" id="SubGeomSlice"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.geomslice.SubGeomSlice">[docs]</a><span class="k">class</span> <span class="nc">SubGeomSlice</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Part of a geomslice that cuts through a single mesh.</span>
+
+<div class="viewcode-block" id="SubGeomSlice">
+<a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.geomslice.SubGeomSlice">[docs]</a>
+<span class="k">class</span> <span class="nc">SubGeomSlice</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Part of a geomslice that cuts through a single mesh.</span>
 
 <span class="sd">    :ivar mesh: The mesh the subgeomslice cuts through.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -126,7 +136,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">orientation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Orientation [1,2,3] of the geomslice in case it is 2D, 0 otherwise.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Orientation [1,2,3] of the geomslice in case it is 2D, 0 otherwise.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent_slice</span><span class="o">.</span><span class="n">orientation</span>
 
@@ -134,8 +144,11 @@
     <span class="k">def</span> <span class="nf">times</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent_slice</span><span class="o">.</span><span class="n">times</span>
 
+
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">n_t</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">n_t</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the number of timesteps for which data was output.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent_slice</span><span class="o">.</span><span class="n">n_t</span>
 
     <span class="k">def</span> <span class="nf">_load_geom_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -179,7 +192,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Method to lazy load the geomslice&#39;s data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to lazy load the geomslice&#39;s data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_data&quot;</span><span class="p">):</span>
             <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertices</span>  <span class="c1"># Make sure geom data has been loaded already</span>
@@ -188,7 +201,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Method to lazy load the geomslice&#39;s data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to lazy load the geomslice&#39;s data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_vertices&quot;</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_load_geom_data</span><span class="p">()</span>
@@ -196,7 +209,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">faces</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Method to lazy load the geomslice&#39;s data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to lazy load the geomslice&#39;s data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_faces&quot;</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_load_geom_data</span><span class="p">()</span>
@@ -225,11 +238,14 @@
     <span class="k">def</span> <span class="nf">vmax</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
 
-<div class="viewcode-block" id="SubGeomSlice.clear_cache"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.geomslice.SubGeomSlice.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
+<div class="viewcode-block" id="SubGeomSlice.clear_cache">
+<a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.geomslice.SubGeomSlice.clear_cache">[docs]</a>
+    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_data&quot;</span><span class="p">):</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span></div>
+
             <span class="c1"># del self._vector_data</span>
             <span class="c1"># self._vector_data = dict()</span>
 
@@ -237,8 +253,11 @@
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;SubGeomSlice(mesh=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">)&quot;</span></div>
 
 
-<div class="viewcode-block" id="GeomSlice"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.geomslice.GeomSlice">[docs]</a><span class="k">class</span> <span class="nc">GeomSlice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">lib</span><span class="o">.</span><span class="n">mixins</span><span class="o">.</span><span class="n">NDArrayOperatorsMixin</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Slice file data container including metadata. Consists of multiple subgeomslices, one for each</span>
+
+<div class="viewcode-block" id="GeomSlice">
+<a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.geomslice.GeomSlice">[docs]</a>
+<span class="k">class</span> <span class="nc">GeomSlice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">lib</span><span class="o">.</span><span class="n">mixins</span><span class="o">.</span><span class="n">NDArrayOperatorsMixin</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Slice file data container including metadata. Consists of multiple subgeomslices, one for each</span>
 <span class="sd">        mesh the geomslice cuts through.</span>
 
 <span class="sd">    :ivar cell_centered: Indicates whether centered positioning for data is used.</span>
@@ -321,14 +340,17 @@
             <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">subgeomslice</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subgeomslices</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="n">_</span> <span class="o">=</span> <span class="n">subgeomslice</span><span class="o">.</span><span class="n">data</span>
 
-<div class="viewcode-block" id="GeomSlice.get_subgeomslice"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.geomslice.GeomSlice.get_subgeomslice">[docs]</a>    <span class="k">def</span> <span class="nf">get_subgeomslice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Mesh</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SubGeomSlice</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns the :class:`SubGeomSlice` that cuts through the given mesh. When an int is</span>
+<div class="viewcode-block" id="GeomSlice.get_subgeomslice">
+<a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.geomslice.GeomSlice.get_subgeomslice">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_subgeomslice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Mesh</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SubGeomSlice</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the :class:`SubGeomSlice` that cuts through the given mesh. When an int is</span>
 <span class="sd">            provided the nth SubGeomSlice will be returned.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
 
+
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Mesh</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SubGeomSlice</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns the :class:`SubGeomSlice` that cuts through the given mesh. When an int is</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the :class:`SubGeomSlice` that cuts through the given mesh. When an int is</span>
 <span class="sd">            provided the nth SubGeomSlice will be returned.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
@@ -342,7 +364,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">subgeomslices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">SubGeomSlice</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Get a list with all SubGeomSlices.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a list with all SubGeomSlices.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_subgeomslices</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
@@ -360,8 +382,10 @@
     <span class="c1">#     else:</span>
     <span class="c1">#         return &#39;x&#39;, &#39;y&#39;</span>
 
-<div class="viewcode-block" id="GeomSlice.get_nearest_timestep"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.geomslice.GeomSlice.get_nearest_timestep">[docs]</a>    <span class="k">def</span> <span class="nf">get_nearest_timestep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Calculates the nearest timestep for which data has been output for this geomslice.</span>
+<div class="viewcode-block" id="GeomSlice.get_nearest_timestep">
+<a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.geomslice.GeomSlice.get_nearest_timestep">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_nearest_timestep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the nearest timestep for which data has been output for this geomslice.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">time</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="p">(</span><span class="n">idx</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">times</span><span class="p">)</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span>
@@ -369,6 +393,7 @@
             <span class="k">return</span> <span class="n">idx</span> <span class="o">-</span> <span class="mi">1</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">idx</span></div>
+
 
     <span class="c1"># def get_nearest_index(self, dimension: Literal[&#39;x&#39;, &#39;y&#39;, &#39;z&#39;], value: float) -&gt; int:</span>
     <span class="c1">#     &quot;&quot;&quot;Get the nearest mesh coordinate index in a specific dimension.</span>
@@ -383,7 +408,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">meshes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Mesh</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Returns a list of all meshes this geomslice cuts through.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a list of all meshes this geomslice cuts through.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">subgeomslc</span><span class="o">.</span><span class="n">mesh</span> <span class="k">for</span> <span class="n">subgeomslc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subgeomslices</span><span class="p">]</span>
 
@@ -414,11 +439,14 @@
     <span class="k">def</span> <span class="nf">vmax</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-<div class="viewcode-block" id="GeomSlice.clear_cache"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.geomslice.GeomSlice.clear_cache">[docs]</a>    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
+<div class="viewcode-block" id="GeomSlice.clear_cache">
+<a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.geomslice.GeomSlice.clear_cache">[docs]</a>
+    <span class="k">def</span> <span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove all data from the internal cache that has been loaded so far to free memory.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">subgeomslice</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subgeomslices</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="n">subgeomslice</span><span class="o">.</span><span class="n">clear_cache</span><span class="p">()</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">vertices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -467,17 +495,22 @@
     <span class="k">def</span> <span class="nf">_max</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">subgeomsclice</span><span class="o">.</span><span class="n">vmax</span> <span class="k">for</span> <span class="n">subgeomsclice</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subgeomslices</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 
-<div class="viewcode-block" id="GeomSlice.mean"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.geomslice.GeomSlice.mean">[docs]</a>    <span class="nd">@implements</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+<div class="viewcode-block" id="GeomSlice.mean">
+<a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.geomslice.GeomSlice.mean">[docs]</a>
+    <span class="nd">@implements</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Calculates the mean over the whole geomslice.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the mean over the whole geomslice.</span>
 
 <span class="sd">        :returns: The calculated mean value.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">subgeomsclice</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="k">for</span> <span class="n">subgeomsclice</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subgeomslices</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span></div>
 
-<div class="viewcode-block" id="GeomSlice.std"><a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.geomslice.GeomSlice.std">[docs]</a>    <span class="nd">@implements</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">)</span>
+
+<div class="viewcode-block" id="GeomSlice.std">
+<a class="viewcode-back" href="../../../slcf.html#fdsreader.slcf.geomslice.GeomSlice.std">[docs]</a>
+    <span class="nd">@implements</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">std</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Calculates the standard deviation over the whole geomslice.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the standard deviation over the whole geomslice.</span>
 
 <span class="sd">        :returns: The calculated standard deviation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -486,16 +519,17 @@
         <span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="n">subgeomsclice</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">size</span> <span class="k">for</span> <span class="n">subgeomsclice</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subgeomslices</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">sum</span> <span class="o">/</span> <span class="n">N</span><span class="p">)</span></div>
 
+
     <span class="k">def</span> <span class="nf">__array__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Method that will be called by numpy when trying to convert the object to a numpy ndarray.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method that will be called by numpy when trying to convert the object to a numpy ndarray.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">UserWarning</span><span class="p">(</span>
             <span class="s2">&quot;Slices can not be converted to numpy arrays, but they support all typical numpy&quot;</span>
-            <span class="s2">&quot; operations such as np.multiply. If a &#39;global&#39; array containg all subgeomslices is&quot;</span>
+            <span class="s2">&quot; operations such as np.multiply. If a &#39;global&#39; array containing all subgeomslices is&quot;</span>
             <span class="s2">&quot; required, use the &#39;to_global&#39; method and use the returned numpy-array explicitly.&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__array_ufunc__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ufunc</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="o">*</span><span class="n">inputs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Method that will be called by numpy when using a ufunction with a GeomSlice as input.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method that will be called by numpy when using a ufunction with a GeomSlice as input.</span>
 
 <span class="sd">        :returns: A new geomslice on which the ufunc has been applied.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -520,7 +554,7 @@
         <span class="k">return</span> <span class="n">new_slice</span>
 
     <span class="k">def</span> <span class="nf">__array_function__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">types</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Method that will be called by numpy when using an array function with a GeomSlice as input.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method that will be called by numpy when using an array function with a GeomSlice as input.</span>
 
 <span class="sd">        :returns: The output of the array function.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -538,6 +572,7 @@
         <span class="c1">#     return f&quot;GeomSlice([2D] quantity={self.quantity}, cell_centered={self.cell_centered}, extent={self.extent}, &quot; \</span>
         <span class="c1">#            f&quot;extent_dirs={self.extent_dirs}, orientation={self.orientation})&quot;</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;GeomSlice(quantity=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">quantity</span><span class="si">}</span><span class="s2">)&quot;</span></div>
+
 
 <span class="c1"># __array_function__ implementations</span>
 </pre></div>
