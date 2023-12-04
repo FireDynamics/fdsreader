@@ -511,6 +511,12 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             :param fill: The fill value to use for masked slice entries. Only used when masked=True.
             :param return_coordinates: If true, return the matching coordinate for each value on the generated grid.
         """
+        if len(self._subslices) == 0:
+            if return_coordinates:
+                return np.array([]), {d: np.array([]) for d in ('x', 'y', 'z')}
+            else:
+                return np.array([])
+
         subslice_sets = [dict(), dict()]
 
         dimension = ['x', 'y', 'z'][self.orientation - 1]
@@ -600,7 +606,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                             mask = mask[reduced_data_slices]
 
                         # Temporarily save border points to add them back to the array again later
-                        if slc.mesh.coordinates[dim][-1] == global_max[dim]:
+                        if np.isclose(slc.mesh.coordinates[dim][-1], global_max[dim]):
                             end_idx[dim] += 1
                             temp_data_slices = [slice(s) for s in slc_data.shape]
                             temp_data_slices[axis + 1] = slice(slc_data.shape[axis + 1] - 1, None)
@@ -614,7 +620,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                             mask = np.repeat(mask, n_repeat, axis=axis + 1)
 
                     # Add border points back again if needed
-                    if not self.cell_centered and slc.mesh.coordinates[dim][-1] == global_max[dim]:
+                    if not self.cell_centered and np.isclose(slc.mesh.coordinates[dim][-1], global_max[dim]):
                         slc_data = np.concatenate((slc_data, temp_data), axis=axis + 1)
                         if masked:
                             mask = np.concatenate((mask, temp_mask), axis=axis + 1)

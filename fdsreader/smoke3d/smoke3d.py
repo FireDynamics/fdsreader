@@ -125,6 +125,12 @@ class Smoke3D(np.lib.mixins.NDArrayOperatorsMixin):
             :param fill: The fill value to use for masked entries. Only used when masked=True.
             :param return_coordinates: If true, return the matching coordinate for each value on the generated grid.
         """
+        if len(self._subsmokes) == 0:
+            if return_coordinates:
+                return np.array([]), {d: np.array([]) for d in ('x', 'y', 'z')}
+            else:
+                return np.array([])
+
         coord_min = {'x': math.inf, 'y': math.inf, 'z': math.inf}
         coord_max = {'x': -math.inf, 'y': -math.inf, 'z': -math.inf}
         for dim in ('x', 'y', 'z'):
@@ -160,53 +166,54 @@ class Smoke3D(np.lib.mixins.NDArrayOperatorsMixin):
 
         grid = np.full((self.n_t, steps['x'], steps['y'], steps['z']), np.nan)
 
-        start_idx = dict()
-        end_idx = dict()
         for subsmoke in self._subsmokes.values():
             subsmoke_data = subsmoke.data.copy()
             if masked:
                 mask = subsmoke.mesh.get_obstruction_mask(self.times)
 
+            start_idx = {dim: int(round(
+                (subsmoke.mesh.coordinates[dim][0] - coord_min[dim]) / step_sizes_min[dim])) for dim in ('x', 'y', 'z')}
+            end_idx = {dim: int(round(
+                (subsmoke.mesh.coordinates[dim][-1] - coord_min[dim]) / step_sizes_min[dim])) for dim in ('x', 'y', 'z')}
+
+            temp_data = dict()
+            temp_mask = dict()
             for axis in range(3):
                 dim = ('x', 'y', 'z')[axis]
-                n_repeat = max(int(round(
-                    (subsmoke.mesh.coordinates[dim][1] - subsmoke.mesh.coordinates[dim][0]) /
-                    step_sizes_min[dim])), 1)
-
-                start_idx[dim] = int(round(
-                    (subsmoke.mesh.coordinates[dim][0] - coord_min[dim]) / step_sizes_min[dim]))
-                end_idx[dim] = int(round(
-                    (subsmoke.mesh.coordinates[dim][-1] - coord_min[dim]) / step_sizes_min[dim]))
+                # Temporarily save border points to add them back to the array again later
+                if np.isclose(subsmoke.mesh.coordinates[dim][-1], global_max[dim]):
+                    temp_data_slices = [slice(s) for s in subsmoke_data.shape]
+                    end_idx[dim] += 1
+                    temp_data_slices[axis + 1] = slice(subsmoke_data.shape[axis + 1] - 1, None)
+                    temp_data[dim] = subsmoke_data[tuple(temp_data_slices)]
+                    if masked:
+                        temp_mask[dim] = mask[tuple(temp_data_slices)]
 
             # We ignore border points unless they are actually on the border of the simulation space as all
             # other border points actually appear twice, as the subslices overlap. This only
             # applies for face_centered slices, as cell_centered slices will not overlap.
-            reduced_shape_slices = (slice(subsmoke.data.shape[0]),) + tuple(slice(s - 1) for s in subsmoke.data.shape[1:])
+            reduced_shape_slices = (slice(subsmoke.data.shape[0]),) + tuple(slice(1, None) for s in subsmoke.data.shape[1:])
             subsmoke_data = subsmoke_data[reduced_shape_slices]
             if masked:
                 mask = mask[reduced_shape_slices]
 
-            for axis in range(3):
-                dim = ('x', 'y', 'z')[axis]
-                # Temporarily save border points to add them back to the array again later
-                if subsmoke.mesh.coordinates[dim][-1] == global_max[dim]:
-                    end_idx[dim] += 1
-                    temp_data_slices = [slice(s) for s in subsmoke_data.shape]
-                    temp_data_slices[axis + 1] = slice(subsmoke_data.shape[axis + 1] - 1, None)
-                    temp_data = subsmoke_data[tuple(temp_data_slices)]
-                    if masked:
-                        temp_mask = mask[tuple(temp_data_slices)]
-
+                n_repeat = max(int(round(
+                    (subsmoke.mesh.coordinates[dim][1] - subsmoke.mesh.coordinates[dim][0]) /
+                    step_sizes_min[dim])), 1)
                 if n_repeat > 1:
                     subsmoke_data = np.repeat(subsmoke_data, n_repeat, axis=axis + 1)
                     if masked:
                         mask = np.repeat(mask, n_repeat, axis=axis + 1)
 
+            for axis in range(3):
+                dim = ('x', 'y', 'z')[axis]
                 # Add border points back again if needed
-                if subsmoke.mesh.coordinates[dim][-1] == global_max[dim]:
-                    subsmoke_data = np.concatenate((subsmoke_data, temp_data), axis=axis + 1)
+                if np.isclose(subsmoke.mesh.coordinates[dim][-1], global_max[dim]):
+                    temp_data_slices = [slice(s) for s in subsmoke_data.shape]
+                    temp_data_slices[axis + 1] = slice(None)
+                    subsmoke_data = np.concatenate((subsmoke_data, temp_data[dim][tuple(temp_data_slices)]), axis=axis + 1)
                     if masked:
-                        mask = np.concatenate((mask, temp_mask), axis=axis + 1)
+                        mask = np.concatenate((mask, temp_mask[dim][tuple(temp_data_slices)]), axis=axis + 1)
 
             # If the slice should be masked, we set all cells at which an obstruction is in the
             # simulation space to the fill value set by the user

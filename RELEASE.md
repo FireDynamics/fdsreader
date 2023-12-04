@@ -1,4 +1,10 @@
 ## Release History
+* 1.10.2
+    * Fixed to_global function for Plot3D data with obstruction masks
+    * Fixed to_global function for Smoke3D data with obstruction masks
+* 1.10.1
+    * Fixed to_global function for Plot3D data
+    * Fixed to_global function for Smoke3D data
 * 1.10.0
     * Restructured Plot3D data to now be represented by a single Plot3D instance for all timesteps instead of one individual object per timestep
     * Added a to_global function for Plot3D data
