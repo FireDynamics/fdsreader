@@ -9,8 +9,7 @@ from fdsreader import settings
 
 
 class ParticleCollection(FDSDataCollection):
-    """Collection of :class:`Plot3D` objects. Offers extensive functionality for filtering and
-        using plot3Ds as well as its subclasses such as :class:`SubPlot3D`.
+    """Collection of :class:`Particle` objects.
     """
 
     def __init__(self, times: Iterable[float], particles: Iterable[Particle]):
