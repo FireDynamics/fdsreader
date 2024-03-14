@@ -1,5 +1,5 @@
 const DOCUMENTATION_OPTIONS = {
-    VERSION: '[fdsreader, version 1.10.0]',
+    VERSION: '[fdsreader, version 1.10.2]',
     LANGUAGE: 'en',
     COLLAPSE_INDEX: false,
     BUILDER: 'html',
