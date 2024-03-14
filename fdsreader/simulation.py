@@ -3,9 +3,9 @@ import logging
 import os
 import warnings
 from typing import List, TextIO, Dict, AnyStr, Sequence, Tuple, Union
+import pickle
 
 import numpy as np
-import pickle
 
 from fdsreader.fds_classes import Mesh, MeshCollection, Surface, Ventilation
 from fdsreader.bndf import Obstruction, Patch, ObstructionCollection, SubObstruction
