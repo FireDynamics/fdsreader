@@ -2,7 +2,7 @@ from fdsreader import Simulation
 
 
 def test_pl3d():
-    sim = Simulation("./bndf_data")
+    sim = Simulation("./pl3d_data")
     pl_t1 = sim.data_3d.get_by_quantity("Temperature")
     data, coordinates = pl_t1.to_global(masked=True, return_coordinates=True)
 
