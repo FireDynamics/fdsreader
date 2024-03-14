@@ -30,12 +30,12 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pytest numpy 
+        pip install pytest numpy
+        pip install ${{ github.workspace }}/fdsreader
     - name: Prepare test cases
       run: |
         cd ${{ github.workspace }}/tests/cases/
         for f in *.tgz; do tar -xzvf "$f"; done
     - name: Test with pytest
       run: |
-        cd ${{ github.workspace }}
-        pytest tests/acceptance_tests/
+        pytest ${{ github.workspace }}/tests/acceptance_tests/
