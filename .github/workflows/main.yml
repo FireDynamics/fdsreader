@@ -1,0 +1,24 @@
+name: FDSreader JOSS submission paper
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - master
+    paths:
+      - 'paper.md'
+      - 'paper.bib'
+  pull_request:
+    paths:
+      - 'paper.md'
+      - 'paper.bib'
+
+permissions:
+  contents: read
+
+jobs:
+  run-tests:
+    runs-on: python:3-alpine
+    steps:
+    - name: Open Journals PDF Generator
+    - uses: openjournals/openjournals-draft-action@v.1.0
