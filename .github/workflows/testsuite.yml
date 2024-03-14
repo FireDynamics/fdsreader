@@ -33,9 +33,9 @@ jobs:
         pip install pytest numpy 
     - name: Prepare test cases
       run: |
-        cd tests/cases/
+        cd ${{ github.workspace }}/tests/cases/
         for f in *.tgz; do tar -xzvf "$f"; done
     - name: Test with pytest
       run: |
-        cd tests/acceptance_tests/
-        pytest .
+        cd ${{ github.workspace }}
+        pytest tests/acceptance_tests/
