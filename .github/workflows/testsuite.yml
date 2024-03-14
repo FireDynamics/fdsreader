@@ -1,0 +1,35 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: Python application
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'fdsreader'
+  pull_request:
+    paths:
+      - 'fdsreader'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: python:3-alpine
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest
+    - name: Prepare test cases
+      run: |
+        cd tests/cases/
+        for f in *.tar.gz; do tar -xvf "$f"; done
+    - name: Test with pytest
+      run: |
+        pytest tests/acceptance_tests
