@@ -32,7 +32,8 @@ jobs:
     - name: Prepare test cases
       run: |
         cd tests/cases/
-        for f in *.tar.gz; do tar -xvf "$f"; done
+        for f in *.tgz; do tar -xzvf "$f"; done
     - name: Test with pytest
       run: |
-        pytest tests/acceptance_tests
+        cd tests/acceptance_tests/
+        pytest .
