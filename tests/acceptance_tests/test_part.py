@@ -2,7 +2,7 @@ from fdsreader import Simulation
 
 
 def test_part():
-    sim = Simulation(".part_data")
+    sim = Simulation("./part_data")
     particles = sim.particles["WATER PARTICLES"]
     position = particles.positions[-1]
     color_data = particles.data["PARTICLE DIAMETER"]
