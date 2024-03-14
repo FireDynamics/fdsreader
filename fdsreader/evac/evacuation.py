@@ -39,6 +39,7 @@ from fdsreader.utils import Quantity
 
 class Evacuation:
     """Container to store evac data from evac simulations with FDS.
+        Note: Evac support was removed from FDS in all versions after 6.7.7!
 
     :ivar class_name: Name of the evac class defined in the FDS input-file.
     :ivar quantities: List of all quantities for which data has been written out.
