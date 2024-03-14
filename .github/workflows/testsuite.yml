@@ -38,4 +38,5 @@ jobs:
         for f in *.tgz; do tar -xzvf "$f"; done
     - name: Test with pytest
       run: |
-        pytest ${{ github.workspace }}/tests/acceptance_tests/
+        cd ${{ github.workspace }}/tests/cases
+        pytest ../acceptance_tests/
