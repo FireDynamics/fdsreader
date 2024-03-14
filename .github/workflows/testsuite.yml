@@ -9,10 +9,10 @@ on:
     branches:
       - master
     paths:
-      - 'fdsreader/'
+      - 'fdsreader/**'
   pull_request:
     paths:
-      - 'fdsreader/'
+      - 'fdsreader/**'
 
 permissions:
   contents: read
