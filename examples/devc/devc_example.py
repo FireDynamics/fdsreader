@@ -4,7 +4,7 @@ import fdsreader as fds
 def main():
     sim = fds.Simulation("./fds_steckler")
 
-    print(sim.devices["TC_Door_Single"].data)
+    print(sim.devices["TC_Door"][0].data)
 
     try:
         df = sim.devices.to_pandas_dataframe()

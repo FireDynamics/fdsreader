@@ -9,6 +9,8 @@ def main():
 
     vertices, triangles, _ = isosurface.to_global(len(isosurface.times) - 1)
 
+    print(triangles[-1][-1])
+    exit()
     # We ignore level 1 as it does not contain any vertices
     # level1 = isosurface.get_pyvista_mesh(vertices, triangles[0])
     level2 = isosurface.get_pyvista_mesh(vertices, triangles[1])

@@ -1,4 +1,6 @@
 ## Release History
+* 1.10.3
+    * Fixed particle documentation
 * 1.10.2
     * Fixed to_global function for Plot3D data with obstruction masks
     * Fixed to_global function for Smoke3D data with obstruction masks

@@ -1,6 +1,6 @@
-&HEAD CHID='wall_test'
-      /
-&TIME T_END=20.0
+&HEAD CHID='wall_test' /
+
+&TIME T_END=20.0, TIME_SHRINK_FACTOR=10./
 
 &MULT ID='mesh', DX=1, DY=0.8, I_UPPER=3, J_UPPER=5,/
 
@@ -86,7 +86,7 @@
 
 
 &VENT XB=-0.3,1.1,0.4,1.7,0.45,0.45 SURF_ID='Brandfläche'/
-&REAC ID='Brandfläche', FUEL='PUR', SPEC_ID_NU = 'PUR','AIR','PRODUCTS', NU= -1,-4.043567,1./
+&REAC ID='Brandfläche', FUEL='PUR', SPEC_ID_NU = 'PUR','AIR','PRODUCTS', NU= -1,-4.043567,1., HEAT_OF_COMBUSTION=40000  /
 &SURF ID='Brandfläche',SPEC_ID='PUR', HRRPUA=2823.129, COLOR='RED', RAMP_Q='fire_ramp'/
 
 /Vorgabe der Brandkurve
