@@ -8,7 +8,7 @@ authors:
     orcid: 0000-0003-2336-6630
     affiliation: 1
   - name: Prof. Dr. Lukas Arnold
-    orcid: TODO
+    orcid: 0000-0002-5939-8995
     affiliation: 2
 affiliations:
   - name: PGI-15, Forschungszentrum Jülich, Germany
