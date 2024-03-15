@@ -82,8 +82,7 @@ class ParticleCollection(FDSDataCollection):
 
                         # Read tags
                         dtype_tags = fdtype.new((('i', n_particles),))
-                        particle._tags[t][offset: offset + n_particles] = \
-                            fdtype.read(infile, dtype_tags, 1)[0][0]
+                        particle._tags[t][offset: offset + n_particles] = fdtype.read(infile, dtype_tags, 1)[0][0]
 
                         # Read actual quantity values
                         if len(particle.quantities) > 0:
