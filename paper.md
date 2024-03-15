@@ -46,15 +46,15 @@ new versions of FDS.
 When first loading a simulation, all metadata is collected and cached to reduce subsequent load times. The actual
 data produced during the simulation such as the slice data for each time step, is not loaded until the data is accessed by the
 user via Python, which then triggers loading the data into memory in the background and converting it to equivalent
-Python datastructures. This method minimizes initial loading time without sacrificing the ability to easily filter and
+Python data structures. This method minimizes initial loading time without sacrificing the ability to easily filter and
 select the desired data. The fdsreader collects all data of the same type into one collection and offers its own set
 functions for each type to easily select the data which should be further processed. These functions can even be called
-in an automated fashion, to run some predefined postprocessing routines on simulation data without having to manually
+in an automated fashion, to run some predefined post-processing routines on simulation data without having to manually
 interact with the data, as one would have to do when using SmokeView or Fds2Ascii.
 The fdsreader is able to read all data types available in FDS including most of the additional metadata. To be concrete,
 the package contains modules for slices (slcf), boundary data (bndf), volumes (plot3d, smoke3d) particles (part),
 isosurfaces (isof), evacuations (evac), complex geometry boundary data (geom), devices (devc) and meshes. Slices,
-boundary data, isosurfaces and volumes are each respectively seperated into multiple parts, one for each mesh. While FDS
+boundary data, isosurfaces and volumes are each respectively separated into multiple parts, one for each mesh. While FDS
 outputs the data separately for each mesh, the fdsreader provides methods to combine all these parts automatically and
 operate on data across meshes.
 
