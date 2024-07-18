@@ -1,3 +1,4 @@
+import math
 import os
 from copy import deepcopy
 
@@ -285,8 +286,8 @@ class GeomSlice(np.lib.mixins.NDArrayOperatorsMixin):
         """Calculates the nearest timestep for which data has been output for this geomslice.
         """
         idx = np.searchsorted(self.times, time, side="left")
-        if time > 0 and (idx == len(self.times) or np.math.fabs(
-                time - self.times[idx - 1]) < np.math.fabs(time - self.times[idx])):
+        if time > 0 and (idx == len(self.times) or math.fabs(
+                time - self.times[idx - 1]) < math.fabs(time - self.times[idx])):
             return idx - 1
         else:
             return idx
