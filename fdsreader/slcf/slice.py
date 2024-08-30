@@ -311,8 +311,8 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         """Calculates the nearest timestep for which data has been output for this slice.
         """
         idx = np.searchsorted(self.times, time, side="left")
-        if time > 0 and (idx == len(self.times) or np.math.fabs(
-                time - self.times[idx - 1]) < np.math.fabs(time - self.times[idx])):
+        if time > 0 and (idx == len(self.times) or math.fabs(
+                time - self.times[idx - 1]) < math.fabs(time - self.times[idx])):
             return idx - 1
         else:
             return idx
@@ -322,7 +322,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         """
         coords = self.get_coordinates()[dimension]
         idx = np.searchsorted(coords, value, side="left")
-        if idx > 0 and (idx == coords.size or np.math.fabs(value - coords[idx - 1]) < np.math.fabs(
+        if idx > 0 and (idx == coords.size or math.fabs(value - coords[idx - 1]) < math.fabs(
                 value - coords[idx])):
             return idx - 1
         else:
@@ -365,8 +365,8 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                 for mesh in self._subslices.keys():
                     mesh_coords = mesh.coordinates[dim]
                     idx = np.searchsorted(mesh_coords, slice_coordinate, side="left")
-                    if idx > 0 and (idx == mesh_coords.size or np.math.fabs(
-                            slice_coordinate - mesh_coords[idx - 1]) < np.math.fabs(
+                    if idx > 0 and (idx == mesh_coords.size or math.fabs(
+                            slice_coordinate - mesh_coords[idx - 1]) < math.fabs(
                         slice_coordinate - mesh_coords[idx])):
                         idx = idx + 1
                     if mesh_coords[idx] - slice_coordinate < nearest_coordinate - slice_coordinate:

@@ -4,6 +4,7 @@ from typing import List, Dict, Tuple, Union, Sequence
 from typing_extensions import Literal
 import numpy as np
 
+
 from fdsreader.utils import Extent, Quantity, Dimension
 import fdsreader.utils.fortran_data as fdtype
 from fdsreader import settings
@@ -164,8 +165,8 @@ class Boundary:
         """Calculates the nearest timestep for which data has been output for this obstruction.
         """
         idx = np.searchsorted(self.times, time, side="left")
-        if time > 0 and (idx == len(self.times) or np.math.fabs(
-                time - self.times[idx - 1]) < np.math.fabs(time - self.times[idx])):
+        if time > 0 and (idx == len(self.times) or math.fabs(
+                time - self.times[idx - 1]) < math.fabs(time - self.times[idx])):
             return idx - 1
         else:
             return idx
@@ -275,7 +276,7 @@ class SubObstruction:
         if self.has_boundary_data:
             coords = self.get_coordinates()[orientation][dimension]
             idx = np.searchsorted(coords, value, side="left")
-            if idx > 0 and (idx == coords.size or np.math.fabs(value - coords[idx - 1]) < np.math.fabs(
+            if idx > 0 and (idx == coords.size or math.fabs(value - coords[idx - 1]) < math.fabs(
                     value - coords[idx])):
                 return idx - 1
             else:
@@ -485,8 +486,8 @@ class Obstruction:
                             mesh = subobst.mesh
                             mesh_coords = mesh.coordinates[dim]
                             idx = np.searchsorted(mesh_coords, single_coordinate, side="left")
-                            if idx > 0 and (idx == mesh_coords.size or np.math.fabs(
-                                    single_coordinate - mesh_coords[idx - 1]) < np.math.fabs(
+                            if idx > 0 and (idx == mesh_coords.size or math.fabs(
+                                    single_coordinate - mesh_coords[idx - 1]) < math.fabs(
                                 single_coordinate - mesh_coords[idx])):
                                 idx = idx + 1
                             if mesh_coords[idx] - single_coordinate < nearest_coordinate - single_coordinate:
@@ -503,7 +504,7 @@ class Obstruction:
         if self.has_boundary_data:
             coords = self.get_coordinates()[orientation][dimension]
             idx = np.searchsorted(coords, value, side="left")
-            if idx > 0 and (idx == coords.size or np.math.fabs(value - coords[idx - 1]) < np.math.fabs(
+            if idx > 0 and (idx == coords.size or math.fabs(value - coords[idx - 1]) < math.fabs(
                     value - coords[idx])):
                 return idx - 1
             else:
@@ -560,8 +561,8 @@ class Obstruction:
         if self.has_boundary_data:
             times = self.get_visible_times(self.times) if visible_only else self.times
             idx = np.searchsorted(times, time, side="left")
-            if time > 0 and (idx == len(times) or np.math.fabs(
-                    time - times[idx - 1]) < np.math.fabs(time - times[idx])):
+            if time > 0 and (idx == len(times) or math.fabs(
+                    time - times[idx - 1]) < math.fabs(time - times[idx])):
                 return idx - 1
             else:
                 return idx

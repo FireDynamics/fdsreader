@@ -3,6 +3,7 @@ from functools import reduce
 from typing import BinaryIO, Dict, Union, List, Tuple, Optional
 
 import numpy as np
+import math
 
 from fdsreader.fds_classes import Mesh
 from fdsreader.utils import Quantity
@@ -337,8 +338,8 @@ class Isosurface:
         """Calculates the nearest timestep for which data has been output for this isosurface.
         """
         idx = np.searchsorted(self.times, time, side="left")
-        if time > 0 and (idx == len(self.times) or np.math.fabs(
-                time - self.times[idx - 1]) < np.math.fabs(time - self.times[idx])):
+        if time > 0 and (idx == len(self.times) or math.fabs(
+                time - self.times[idx - 1]) < math.fabs(time - self.times[idx])):
             return idx - 1
         else:
             return idx

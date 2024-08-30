@@ -1,6 +1,7 @@
 from typing import Dict, Tuple, Sequence, List, Union
 from typing_extensions import Literal
 import numpy as np
+import math
 
 from fdsreader import settings
 from fdsreader.utils import Dimension, Extent, Quantity
@@ -101,7 +102,7 @@ class Mesh:
             if cell_centered:
                 coords = coords[:-1] + (coords[1] - coords[0]) / 2
             idx = np.searchsorted(coords, co, side="left")
-            if co > 0 and (idx == len(coords) or np.math.fabs(co - coords[idx - 1]) < np.math.fabs(
+            if co > 0 and (idx == len(coords) or math.fabs(co - coords[idx - 1]) < math.fabs(
                     co - coords[idx])):
                 ret.append(idx - 1)
             else:
