@@ -127,6 +127,23 @@ class SubSlice:
                 else:
                     data_out[t, :] = data
 
+    def _load_times(self) -> np.ndarray:
+        # Read in (only) the times for which SLCF data is available
+        n = self.dimension.size(cell_centered=False)
+        dtype_data = fdtype.combine(fdtype.FLOAT, fdtype.new((('f', n),)))
+
+        file_path = os.path.join(self._parent_slice._root_path, self.filename)
+
+        n_t = (os.stat(file_path).st_size - self._offset) // dtype_data.itemsize
+        times = np.empty(n_t)
+
+        with open(file_path, 'rb') as infile:
+            infile.seek(self._offset)
+            for t, data in enumerate(fdtype.read(infile, dtype_data, n_t)):
+                times[t] = data[0][0]
+
+        return times
+
     @property
     def data(self) -> np.ndarray:
         """Method to lazy load the slice's data.
@@ -189,17 +206,10 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
     :ivar extent: :class:`Extent` object containing 3-dimensional extent information.
     """
 
-    def __init__(self, root_path: str, slice_id: str, cell_centered: bool, times: np.ndarray,
+    def __init__(self, root_path: str, slice_id: str, cell_centered: bool,
                  multimesh_data: Collection[Dict]):
         self._root_path = root_path
         self.cell_centered = cell_centered
-
-        self.times = times
-
-        if times is not None:
-            self.n_t = times.size
-        else:
-            self.n_t = -1
 
         self.id = slice_id
 
@@ -261,6 +271,10 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         self.extent = Extent(x_start, x_start if self.orientation == 1 else x_end,
                              y_start, y_start if self.orientation == 2 else y_end,
                              z_start, z_start if self.orientation == 3 else z_end)
+
+        # Read in the available time steps, using arbitrary the first sub-slice
+        self.times = self.subslices[0]._load_times()
+        self.n_t = len(self.times)
 
         # If lazy loading has been disabled by the user, load the data instantaneously instead
         if not settings.LAZY_LOAD:

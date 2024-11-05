@@ -175,7 +175,7 @@ class Simulation:
             self.geom_data = GeometryCollection(self._geom_data)
             self.slices = SliceCollection(
                 Slice(self.root_path, slice_data[0]["id"], slice_data[0]["cell_centered"],
-                      slice_data[0]["times"], slice_data[1:]) for slice_data in self._slices.values())
+                      slice_data[1:]) for slice_data in self._slices.values())
             self.geomslices = GeomSliceCollection(
                 GeomSlice(self.root_path, slice_data[0]["id"],
                           slice_data[0]["times"], slice_data[1:]) for slice_data in self._geomslices.values())
@@ -553,20 +553,9 @@ class Simulation:
         short_name = smv_file.readline().strip()
         unit = smv_file.readline().strip()
 
-        file_path = os.path.join(self.root_path, filename)
-
-        if os.path.exists(file_path + ".bnd"):
-            times = list()
-            with open(file_path + ".bnd", 'r') as bnd_file:
-                for line in bnd_file:
-                    times.append(float(line.split()[0]))
-            times = np.array(times)
-        else:
-            times = None
-
         if slice_index not in self._slices:
             self._slices[slice_index] = [
-                {"cell_centered": cell_centered, "times": times, "id": slice_id}]
+                {"cell_centered": cell_centered, "id": slice_id}]
         self._slices[slice_index].append(
             {"dimension": dimension, "extent": extent, "mesh": mesh, "filename": filename,
              "quantity": quantity, "short_name": short_name, "unit": unit})
