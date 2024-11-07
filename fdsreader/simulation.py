@@ -619,27 +619,12 @@ class Simulation:
         patches = dict()
         mesh_patches = dict()
 
-        if os.path.exists(file_path + ".bnd"):
-            times = list()
-            lower_bounds = list()
-            upper_bounds = list()
-            with open(file_path + ".bnd", 'r') as bnd_file:
-                for line in bnd_file:
-                    splits = line.split()
-                    times.append(float(splits[0]))
-                    lower_bounds.append(float(splits[1]))
-                    upper_bounds.append(float(splits[2]))
-            times = np.array(times)
-            lower_bounds = np.array(lower_bounds, dtype=np.float32)
-            upper_bounds = np.array(upper_bounds, dtype=np.float32)
-            n_t = times.shape[0]
-        else:
-            times = None
-            n_t = -1
-            lower_bounds = np.array([0.0], dtype=np.float32)
-            upper_bounds = np.array([np.float32(-1e33)], dtype=np.float32)
+        lower_bounds = np.array([np.float32(1e32)], dtype=np.float32)
+        upper_bounds = np.array([np.float32(-1e33)], dtype=np.float32)
 
+        file_size_bytes = os.stat(file_path).st_size
         with open(file_path, 'rb') as infile:
+
             # Offset of the binary file to the end of the file header.
             offset = 3 * fdtype.new((('c', 30),)).itemsize
             infile.seek(offset)
@@ -650,6 +635,22 @@ class Simulation:
             patch_infos = fdtype.read(infile, dtype_patches, n_patches)
             offset += fdtype.INT.itemsize + dtype_patches.itemsize * n_patches
             patch_offset = fdtype.FLOAT.itemsize
+
+            time_bytes = fdtype.FLOAT.itemsize
+            patch_data_bytes = 0
+            for patch_info in patch_infos:
+                patch_info = patch_info[0]
+                extent, dimension = self._indices_to_extent(patch_info[:6], mesh)
+                patch_data_bytes += fdtype.new((('f', str(dimension.shape(cell_centered=False))),)).itemsize
+
+            n_t = (file_size_bytes - offset) // (time_bytes + n_patches * patch_data_bytes)
+
+            times = []
+            for _ in range(n_t):
+                time = fdtype.read(infile, fdtype.FLOAT, 1)[0][0][0]
+                times.append(time)
+                offset += time_bytes + patch_data_bytes
+                infile.seek(offset)
 
             for patch_info in patch_infos:
                 patch_info = patch_info[0]
