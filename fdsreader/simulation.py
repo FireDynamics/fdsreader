@@ -624,14 +624,14 @@ class Simulation:
 
         with open(file_path, 'rb') as infile:
             # Offset of the binary file to the end of the file header.
-            offset = 3 * fdtype.new((('c', 30),)).itemsize
-            infile.seek(offset)
+            initial_offset = 3 * fdtype.new((('c', 30),)).itemsize
+            infile.seek(initial_offset)
 
             n_patches = fdtype.read(infile, fdtype.INT, 1)[0][0][0]
 
             dtype_patches = fdtype.new((('i', 9),))
             patch_infos = fdtype.read(infile, dtype_patches, n_patches)
-            offset += fdtype.INT.itemsize + dtype_patches.itemsize * n_patches
+            initial_offset += fdtype.INT.itemsize + dtype_patches.itemsize * n_patches
             patch_offset = fdtype.FLOAT.itemsize
 
             # Determine the size of the data block for all patches
@@ -643,9 +643,10 @@ class Simulation:
 
             # Time info 
             time_bytes = fdtype.FLOAT.itemsize
-            n_t = (os.stat(file_path).st_size - offset) // (time_bytes + patches_data_bytes)
+            n_t = (os.stat(file_path).st_size - initial_offset) // (time_bytes + patches_data_bytes)
 
             times = list()
+            offset = initial_offset
             for _ in range(n_t):
                 time = fdtype.read(infile, fdtype.FLOAT, 1)[0][0][0]
                 times.append(time)
@@ -660,7 +661,7 @@ class Simulation:
                 obst_index = patch_info[7] - 1
 
                 p = Patch(file_path, dimension, extent, orientation, cell_centered,
-                          patch_offset, offset, n_t, mesh)
+                          patch_offset, initial_offset, n_t, mesh)
 
                 # "Obstacles" with index -1 give the extent of the (whole) mesh faces and refer to
                 # "closed" mesh faces, therefore that data will be added to the corresponding mesh instead
