@@ -52,18 +52,21 @@ documentation of all classes check the API Documentation below.
 ## API Documentation
 [https://firedynamics.github.io/fdsreader/](https://firedynamics.github.io/fdsreader/)
 
-## Deployment
-As the fdsreader has come a long way and the free capabilities of Travis CI have been used up, we now moved to manual CI/CD using a local docker container.  
-First, the Dockerfile has to be modified to make authentication to GitHub and PyPI possible from within the container.
-To do so generate these two tokens:  
-PyPI: https://pypi.org/manage/account/token/  
-GitHub: https://github.com/settings/tokens/new (set the repo_deployment and public_repo scopes)  
-Now add these Tokens in the Dockerfile. To now deploy the fdsreader to PyPI and update the Github Pages (Documentation), run the following commands after pushing your changes to the FDSReader to GitHub (apart from the Dockerfile).
-```bash
-cd $REPO_ROOT_DIR
-docker build . -t fdsreader-ci  # Only needed the very first time
-docker run --rm fdsreader-ci
-```
+Deployment now follows the [Python Packaging User Guide's recommendation](https://packaging.python.org/en/latest/guides/publishing-package-distribution-releases-using-github-actions-ci-cd-workflows/).
+
+With this setup, deployments to both TestPyPI and PyPI are automated. Every push to GitHub triggers a deployment to TestPyPI, simplifying the testing of new changes and validating the CI pipeline. Therefore, it is necessary to set the package version to `.dev` to avoid blocking version numbers.
+
+### Deploying an Untested/Unstable Version:
+1. Execute: `python3 -m incremental.update fdsreader --dev`
+2. Push changes to GitHub.
+
+If you are sure your changes are stable push a GitHub Tag to perform deployment 
+to PyPI and to pack a GitHub Release
+Deploying a tested/stable version:
+1. set the new version with `python3 -m incremental.update fdsreader --newversion=<version>`
+2. Push changes to GitHub
+3. Push Tag to GitHub with git push origin tag <version>
+
 
 ### Manual deployment
 It is also possible to deploy to PyPI and Github pages manually using the following steps:
