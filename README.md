@@ -65,7 +65,8 @@ to PyPI and to pack a GitHub Release
 Deploying a tested/stable version:
 1. set the new version with `python3 -m incremental.update fdsreader --newversion=<version>`
 2. Push changes to GitHub
-3. Push Tag to GitHub with git push origin tag <version>
+3. Create tag `git tag -a v<version> -m "Version <version>"`
+4. Push Tag to GitHub with `git push origin tag <version>`
 
 
 ### Manual deployment
