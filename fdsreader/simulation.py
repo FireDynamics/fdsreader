@@ -313,9 +313,11 @@ class Simulation:
                 if mesh_id == other_mesh.id:  # first mesh with same id
                     mesh_id = mesh_id + "_1"
                 else:  # n-th mesh with same id
-                    other_mesh_id, last_num = other_mesh.id.split("_")
-                    if other_mesh_id == mesh_id and last_num.isdigit():
-                        mesh_id = mesh_id + "_" + str(int(last_num) + 1)
+                    # apply increment, only if the naming of the mesh id allows for it
+                    if len(other_mesh.id.split("_")) == 2:
+                        other_mesh_id, last_num = other_mesh.id.split("_")
+                        if other_mesh_id == mesh_id and last_num.isdigit():
+                            mesh_id = mesh_id + "_" + str(int(last_num) + 1)
 
         mesh = Mesh(coordinates, extents, mesh_id)
 
