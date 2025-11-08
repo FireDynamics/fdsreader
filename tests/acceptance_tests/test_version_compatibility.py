@@ -1,15 +1,8 @@
 """Basic tests to ensure version compatibility."""
 
-import unittest
-
 from fdsreader import Simulation
 
 
-class SimTest(unittest.TestCase):
-    def test_sim(self):
-        sim = Simulation("test")
-        self.assertEqual(sim.chid, "test")
-
-
-if __name__ == "__main__":
-    unittest.main()
+def test_sim():
+    sim = Simulation("cases/test.smv")
+    assert sim.chid == "test"
