@@ -7,10 +7,12 @@ on:
   workflow_dispatch: {}
   push:
     branches:
-      - master
+      - '**'
     paths:
       - 'fdsreader/**'
   pull_request:
+    branches:
+      - '**'
     paths:
       - 'fdsreader/**'
 
