@@ -71,7 +71,6 @@ echo ""
 echo -e "Running acceptance tests..."
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-cd "$TESTS_DIR/cases"
 
 # Run the tests
 if command_exists uv; then

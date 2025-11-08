@@ -4,5 +4,5 @@ from fdsreader import Simulation
 
 
 def test_sim():
-    sim = Simulation("cases/test.smv")
+    sim = Simulation("test.smv")
     assert sim.chid == "test"
