@@ -56,6 +56,11 @@ class Device:
         return self._activation_times
     
     def add_activation_time(self, activation: Tuple[float, bool]):
+        """Adds an activation time to the list of activation times
+
+        Args:
+            activation (Tuple[float, bool]): The activation time to track. Tuple should contain the time of activation (float) and the activation state (bool)
+        """
         if self._activation_times == None:
             self._activation_times = []
         self._activation_times.append(activation)
