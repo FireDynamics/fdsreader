@@ -19,7 +19,7 @@ class Device:
         self.position = position
         self.orientation = orientation
         self._data_callback = lambda: None
-        self._activation_times: List[Tuple[float, bool]] | None = None
+        self._activation_times: List[Tuple[float, bool]]= []
 
     @property
     def data(self):
@@ -61,8 +61,6 @@ class Device:
         Args:
             activation (Tuple[float, bool]): The activation time to track. Tuple should contain the time of activation (float) and the activation state (bool)
         """
-        if self._activation_times == None:
-            self._activation_times = []
         self._activation_times.append(activation)
         self._activation_times.sort(key=lambda activation: activation[0]) # Sort the list of times by time
 
