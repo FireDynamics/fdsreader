@@ -23,7 +23,6 @@ import fdsreader.utils.fortran_data as fdtype
 from fdsreader import settings
 from fdsreader._version import __version__
 
-
 class Simulation:
     """Master class managing all data for a given simulation.
 
@@ -249,6 +248,17 @@ class Simulation:
                             self._devices[device_id] = [self._devices[device_id], device]
                     else:
                         self._devices[device_id] = device
+                elif keyword.startswith("DEVICE_ACT"):
+                    device_id = line.replace("DEVICE_ACT", "").strip()
+                    # Device should always be defined, as DEVICE_ACT appears after all DEVICE lines in smv
+                    device = self._devices[device_id]  
+                    
+                    data_line = smv_file.readline().strip()
+                    data = list(filter(None, data_line.split(" ")))
+                    
+                    _, time, value = data
+                    value = bool(int(value))
+                    device.add_activation_time((time, value))
                 elif keyword.startswith("SLC"):
                     self._load_slice(smv_file, keyword)
                 elif keyword.startswith("BNDS"):

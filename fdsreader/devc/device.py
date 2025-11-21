@@ -1,4 +1,4 @@
-from typing import Tuple, Union
+from typing import Tuple, Union, List
 
 from fdsreader.utils import Quantity
 
@@ -19,6 +19,7 @@ class Device:
         self.position = position
         self.orientation = orientation
         self._data_callback = lambda: None
+        self._activation_times: List[Tuple[float, bool]] | None = None
 
     @property
     def data(self):
@@ -47,6 +48,18 @@ class Device:
         """Alias for :class:`Device`.position.
         """
         return self.position
+    
+    @property
+    def activation_times(self):
+        """Alias for :class:`Device`._activation_times.
+        """
+        return self._activation_times
+    
+    def add_activation_time(self, activation: Tuple[float, bool]):
+        if self._activation_times == None:
+            self._activation_times = []
+        self._activation_times.append(activation)
+        self._activation_times.sort(key=lambda activation: activation[0]) # Sort the list of times by time
 
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory.
