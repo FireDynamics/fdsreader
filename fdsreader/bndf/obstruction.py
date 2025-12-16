@@ -184,7 +184,7 @@ class Boundary:
         """
         if orientation == 0:
             curr_min = np.min(self.lower_bounds)
-            if curr_min == 0.0:
+            if curr_min == np.float32(+1e33):
                 return float(min(np.min(p.data) for p in self._patches))
             return float(curr_min)
         else:
