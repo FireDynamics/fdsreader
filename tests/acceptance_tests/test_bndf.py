@@ -19,10 +19,11 @@ def test_get_nearest_patch():
 
     # Get patches for different points around the obstruction
     # Bounding box: x=[-1, 2], y=[-1.2, 2.4], z=[-0.1, 0]
-    patch_x_plus = obst.get_nearest_patch(3, 0.5, 0)
-    patch_x_minus = obst.get_nearest_patch(-2, 0.5, 0)
-    patch_y_plus = obst.get_nearest_patch(0.5, 3, 0)
-    patch_y_minus = obst.get_nearest_patch(0.5, -2, 0)
+    # Use z slightly inside the obstruction for side faces to avoid edge/face ties.
+    patch_x_plus = obst.get_nearest_patch(3, 0.5, -0.05)
+    patch_x_minus = obst.get_nearest_patch(-2, 0.5, -0.05)
+    patch_y_plus = obst.get_nearest_patch(0.5, 3, -0.05)
+    patch_y_minus = obst.get_nearest_patch(0.5, -2, -0.05)
     patch_z_plus = obst.get_nearest_patch(0.5, 0.5, 1)
 
     # Orientations: 1=X+, 2=Y+, 3=Z+, -1=X-, -2=Y-, -3=Z-
