@@ -24,6 +24,15 @@ class DeviceCollection(FDSDataCollection):
         )
         return value in self._elements or id_matching
 
+    def clear_cache(self):
+        """Remove all data from the internal cache that has been loaded so far to free memory."""
+        for devc in self._elements:
+            if isinstance(devc, Device):
+                devc.clear_cache()
+            elif isinstance(devc, list):
+                for list_devc in devc:
+                    list_devc.clear_cache()
+
     def to_pandas_dataframe(self):
         """Returns a pandas DataFrame with device-IDs as column names and device data as column values."""
         import pandas as pd
