@@ -360,7 +360,11 @@ class SubObstruction:
                 ret.append(time)
         return np.array(ret)
 
-    def vmin(self, quantity: Union[str, Quantity], orientation: Literal[-3, -2, -1, 0, 1, 2, 3] = 0) -> float:
+    def vmin(
+        self,
+        quantity: Union[str, Quantity],
+        orientation: Literal[-3, -2, -1, 0, 1, 2, 3] = 0,
+    ) -> float:
         """Minimum value of all patches at any time for a specific quantity.
 
         :param orientation: Optionally filter by patches with a specific orientation.
@@ -369,7 +373,11 @@ class SubObstruction:
             return self.get_data(quantity).vmin(orientation)
         return np.nan
 
-    def vmax(self, quantity: Union[str, Quantity], orientation: Literal[-3, -2, -1, 0, 1, 2, 3] = 0) -> float:
+    def vmax(
+        self,
+        quantity: Union[str, Quantity],
+        orientation: Literal[-3, -2, -1, 0, 1, 2, 3] = 0,
+    ) -> float:
         """Maximum value of all patches at any time for a specific quantity.
 
         :param orientation: Optionally filter by patches with a specific orientation.
@@ -602,7 +610,7 @@ class Obstruction:
         """
         if self.has_boundary_data:
             d_min = np.finfo(float).max
-            patches_min = list()
+            patches_with_dist = list()
 
             for subobst in self._subobstructions.values():
                 for patch in subobst.get_data(self.quantities[0])._patches:
@@ -610,16 +618,23 @@ class Obstruction:
                     dy = max(patch.extent.y_start - y, 0, y - patch.extent.y_end) if y is not None else 0
                     dz = max(patch.extent.z_start - z, 0, z - patch.extent.z_end) if z is not None else 0
                     d = np.sqrt(dx * dx + dy * dy + dz * dz)
-                    if d <= d_min:
+                    if d < d_min:
                         d_min = d
-                        patches_min.append(patch)
+                        patches_with_dist = [(patch, dx, dy, dz)]
+                    elif math.isclose(d, d_min, rel_tol=1e-9, abs_tol=0.0):
+                        patches_with_dist.append((patch, dx, dy, dz))
 
-            if x is not None:
-                patches_min.sort(key=lambda patch: patch.extent.x_end - patch.extent.x_start)
-            if y is not None:
-                patches_min.sort(key=lambda patch: patch.extent.y_end - patch.extent.y_start)
-            if z is not None:
-                patches_min.sort(key=lambda patch: patch.extent.z_end - patch.extent.z_start)
+            patches_min = [p[0] for p in patches_with_dist]
+
+            if x is not None and len(patches_with_dist) > 1:
+                patches_with_dist.sort(key=lambda p: p[1])
+                patches_min = [p[0] for p in patches_with_dist]
+            elif y is not None and len(patches_with_dist) > 1:
+                patches_with_dist.sort(key=lambda p: p[2])
+                patches_min = [p[0] for p in patches_with_dist]
+            elif z is not None and len(patches_with_dist) > 1:
+                patches_with_dist.sort(key=lambda p: p[3])
+                patches_min = [p[0] for p in patches_with_dist]
 
             if len(patches_min) > 0:
                 return patches_min[0]
@@ -673,7 +688,14 @@ class Obstruction:
                     for subobst in subobsts:
                         patch_extent = subobst.get_data(quantity).data[orientation_int].extent
                         co = subobst.get_coordinates(ignore_cell_centered=True)[orientation_int][dim]
-                        co = co[np.where(np.logical_and(co >= patch_extent[dim][0], co <= patch_extent[dim][1]))]
+                        co = co[
+                            np.where(
+                                np.logical_and(
+                                    co >= patch_extent[dim][0],
+                                    co <= patch_extent[dim][1],
+                                )
+                            )
+                        ]
                         coord_min[dim] = min(co[0], coord_min[dim])
                         coord_max[dim] = max(co[-1], coord_max[dim])
 
@@ -786,7 +808,11 @@ class Obstruction:
         for s in self._subobstructions.values():
             s.clear_cache()
 
-    def vmin(self, quantity: Union[str, Quantity], orientation: Literal[-3, -2, -1, 0, 1, 2, 3] = 0) -> float:
+    def vmin(
+        self,
+        quantity: Union[str, Quantity],
+        orientation: Literal[-3, -2, -1, 0, 1, 2, 3] = 0,
+    ) -> float:
         """Minimum value of all patches at any time for a specific quantity.
 
         :param orientation: Optionally filter by patches with a specific orientation.
@@ -796,7 +822,11 @@ class Obstruction:
         else:
             return np.nan
 
-    def vmax(self, quantity: Union[str, Quantity], orientation: Literal[-3, -2, -1, 0, 1, 2, 3] = 0) -> float:
+    def vmax(
+        self,
+        quantity: Union[str, Quantity],
+        orientation: Literal[-3, -2, -1, 0, 1, 2, 3] = 0,
+    ) -> float:
         """Maximum value of all patches at any time for a specific quantity.
 
         :param orientation: Optionally filter by patches with a specific orientation.

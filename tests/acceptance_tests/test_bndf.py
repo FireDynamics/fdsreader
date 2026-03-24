@@ -1,7 +1,11 @@
+import os
+
 import numpy as np
 import pytest
 
 from fdsreader import Simulation
+
+TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 @pytest.fixture(scope="module")
