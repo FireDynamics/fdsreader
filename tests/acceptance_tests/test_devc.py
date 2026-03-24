@@ -1,7 +1,11 @@
+import os
+
 import numpy as np
 import pytest
 
 from fdsreader import Simulation
+
+TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 @pytest.fixture(scope="module")
@@ -30,3 +34,10 @@ def test_devc_time_channel_monotonic(devc_sim):
 
 def test_devc_quantity_has_name(devc_sim):
     assert devc_sim.devices["TC_Door"][0].quantity_name != ""
+
+
+def test_clear_cache_with_line_devices():
+    """Test that clear_cache works with line DEVC devices (issue #104)."""
+    sim = Simulation(os.path.join(TEST_DIR, "../cases/devc_data"))
+    assert any(isinstance(d, list) for d in sim.devices), "Test data should contain line devices"
+    sim.clear_cache()
