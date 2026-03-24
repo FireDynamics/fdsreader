@@ -31,3 +31,5 @@ def test_get_nearest_patch():
     assert patch_y_plus.orientation == 2
     assert patch_y_minus.orientation == -2
     assert patch_z_plus.orientation == 3
+
+    # Note: no -3 (z-minus) patch exists in this test data, so -z is not tested
