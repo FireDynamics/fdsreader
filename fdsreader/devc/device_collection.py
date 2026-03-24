@@ -1,4 +1,3 @@
-
 from typing import Iterable, Union, List
 
 from fdsreader.devc import Device
@@ -6,8 +5,7 @@ from fdsreader.utils.data import FDSDataCollection
 
 
 class DeviceCollection(FDSDataCollection):
-    """Collection of :class:`Device` objects. Offers additional functionality for working on devices using pandas.
-    """
+    """Collection of :class:`Device` objects. Offers additional functionality for working on devices using pandas."""
 
     def __init__(self, *devices: Iterable[Device]):
         super().__init__(*devices)
@@ -16,16 +14,32 @@ class DeviceCollection(FDSDataCollection):
         if type(key) == int:
             return self._elements[key]
         else:
-            return next(devc for devc in self._elements if (devc.id == key if type(devc) == Device else devc[0].id == key))
+            return next(
+                devc
+                for devc in self._elements
+                if (devc.id == key if type(devc) == Device else devc[0].id == key)
+            )
 
     def __contains__(self, value: Union[Device, str]):
-        id_matching = any((devc.id == value if type(devc) == Device else devc[0].id == value) for devc in self._elements)
+        id_matching = any(
+            (devc.id == value if type(devc) == Device else devc[0].id == value)
+            for devc in self._elements
+        )
         return value in self._elements or id_matching
 
+    def clear_cache(self):
+        """Remove all data from the internal cache that has been loaded so far to free memory."""
+        for devc in self._elements:
+            if type(devc) == Device:
+                devc.clear_cache()
+            elif type(devc) == list:
+                for list_devc in devc:
+                    list_devc.clear_cache()
+
     def to_pandas_dataframe(self):
-        """Returns a pandas DataFrame with device-IDs as column names and device data as column values.
-        """
+        """Returns a pandas DataFrame with device-IDs as column names and device data as column values."""
         import pandas as pd
+
         data = dict()
         for devc in self:
             if type(devc) == Device:
@@ -35,4 +49,3 @@ class DeviceCollection(FDSDataCollection):
                 for i, list_devc in enumerate(devc):
                     data[list_devc.id + "_" + str(i)] = list_devc.data
         return pd.DataFrame(data)
-
