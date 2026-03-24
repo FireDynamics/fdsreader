@@ -585,7 +585,7 @@ class Obstruction:
                     if d < d_min:
                         d_min = d
                         patches_with_dist = [(patch, dx, dy, dz)]
-                    elif d == d_min:
+                    elif math.isclose(d, d_min, rel_tol=1e-9, abs_tol=0.0):
                         patches_with_dist.append((patch, dx, dy, dz))
 
             patches_min = [p[0] for p in patches_with_dist]
