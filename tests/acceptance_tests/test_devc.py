@@ -12,4 +12,8 @@ def test_devc():
 def test_clear_cache_with_line_devices():
     """Test that clear_cache works with line DEVC devices (issue #104)."""
     sim = Simulation(os.path.join(TEST_DIR, "../cases/devc_data"))
+    assert any(isinstance(d, list) for d in sim.devices), (
+        "Test data should contain line devices"
+    )
+
     sim.clear_cache()
