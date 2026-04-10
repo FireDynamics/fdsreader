@@ -1018,12 +1018,7 @@ class Simulation:
         return data
 
     def _transform_csv_data(self, keys, values):
-        size = values.shape[0]
-        data = {keys[i]: np.empty((size,), dtype=float) for i in range(len(keys))}
-        for k, arr in enumerate(data.values()):
-            for i in range(size):
-                arr[i] = values[i][k]
-        return data
+        return {key: values[:, i] for i, key in enumerate(keys)}
 
     def _indices_to_extent(self, indices: Sequence[Union[int, str]], mesh: Mesh) -> Tuple[
         Extent, Dimension]:
