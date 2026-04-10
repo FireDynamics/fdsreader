@@ -963,10 +963,7 @@ class Simulation:
                     devc = self.devices[names[k]]
 
                 devc.quantity.unit = units[k]
-                size = values.shape[0]
-                devc._data = np.empty((size,), dtype=np.float32)
-                for i in range(size):
-                    devc._data[i] = values[i][k]
+                devc._data = values[:, k].copy()
 
         line_path = self.devc_path.replace("devc", "line")
         if os.path.exists(line_path):
