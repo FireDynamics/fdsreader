@@ -138,9 +138,10 @@ class EvacCollection(FDSDataCollection):
 
             for g in range(n_grids):
                 infile.seek(dtype_grid_meta.itemsize, 1)
-                for i in range(n_i[g]):
-                    for j in range(n_j[g]):
-                        self._xyz[g][i, j] = fdtype.read(infile, dtype_grid_data, 1)[0][0]
+                grid_data = fdtype.read(infile, dtype_grid_data, n_i[g] * n_j[g])
+                self._xyz[g] = np.array(
+                    [row[0] for row in grid_data], dtype=np.float64
+                ).reshape((n_i[g], n_j[g], 3))
 
         if os.path.exists(self._base_path + ".fed"):
             self._load_fed_data(n_corrs)
