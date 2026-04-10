@@ -72,11 +72,7 @@ class EvacCollection(FDSDataCollection):
             dtypes[0] = float
             dtypes[-2:] = (float, float)
 
-            size = values.shape[0]
-            data = {names[i]: np.empty((size,), dtype=dtypes[i]) for i in range(len(names))}
-            for k, arr in enumerate(data.values()):
-                for i in range(size):
-                    arr[i] = values[i][k]
+            data = {names[i]: values[:, i].astype(dtypes[i]) for i in range(len(names))}
 
             self.times = data["EVAC_Time"]
             self.all_agents = data["AllAgents"]
