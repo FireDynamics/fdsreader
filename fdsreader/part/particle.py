@@ -1,8 +1,7 @@
-from typing import List, Tuple, Dict, Sequence
+from typing import Dict, List, Sequence, Tuple
 
 import numpy as np
 
-from fdsreader.fds_classes import Mesh
 from fdsreader.utils import Quantity
 
 
@@ -38,8 +37,7 @@ class Particle:
         return self.class_name
 
     def filter_by_tag(self, tag: int):
-        """Filter all particles by a single one with the specified tag.
-        """
+        """Filter all particles by a single one with the specified tag."""
         data = self.data
         tags = self.tags
         positions = self.positions
@@ -74,7 +72,7 @@ class Particle:
     @property
     def data(self) -> Dict[str, List[np.ndarray]]:
         """Dictionary with quantities as keys and a list with a numpy array for each timestep which
-            contains data for each particle in that timestep.
+        contains data for each particle in that timestep.
         """
         if len(self._positions) == 0 and len(self._tags) == 0:
             self._init_callback()
@@ -83,7 +81,7 @@ class Particle:
     @property
     def tags(self) -> List[np.ndarray]:
         """List with a numpy array for each timestep which contains a tag for each particle in that
-            timestep.
+        timestep.
         """
         if len(self._positions) == 0 and len(self._tags) == 0:
             self._init_callback()
@@ -92,15 +90,14 @@ class Particle:
     @property
     def positions(self) -> List[np.ndarray]:
         """List with a numpy array for each timestep which contains the position of each particle in
-            that timestep.
+        that timestep.
         """
         if len(self._positions) == 0 and len(self._tags) == 0:
             self._init_callback()
         return self._positions
 
     def clear_cache(self):
-        """Remove all data from the internal cache that has been loaded so far to free memory.
-        """
+        """Remove all data from the internal cache that has been loaded so far to free memory."""
         if len(self._positions) != 0:
             del self._positions
             self._positions = list()

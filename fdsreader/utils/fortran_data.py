@@ -1,22 +1,31 @@
-from typing import Sequence, BinaryIO, Union, Tuple
+from typing import BinaryIO, Sequence, Tuple, Union
+
 import numpy as np
 
-from fdsreader.settings import FORTRAN_DATA_TYPE_CHAR, FORTRAN_DATA_TYPE_FLOAT, FORTRAN_DATA_TYPE_INTEGER, \
-    FORTRAN_DATA_TYPE_UINT8, FORTRAN_BACKWARD
+from fdsreader.settings import (
+    FORTRAN_BACKWARD,
+    FORTRAN_DATA_TYPE_CHAR,
+    FORTRAN_DATA_TYPE_FLOAT,
+    FORTRAN_DATA_TYPE_INTEGER,
+    FORTRAN_DATA_TYPE_UINT8,
+)
 
-_BASE_FORMAT = f"{FORTRAN_DATA_TYPE_INTEGER}, {{}}" + (
-    f", {FORTRAN_DATA_TYPE_INTEGER}" if FORTRAN_BACKWARD else "")
+_BASE_FORMAT = f"{FORTRAN_DATA_TYPE_INTEGER}, {{}}" + (f", {FORTRAN_DATA_TYPE_INTEGER}" if FORTRAN_BACKWARD else "")
 
-_DATA_TYPES = {'i': FORTRAN_DATA_TYPE_INTEGER, 'f': FORTRAN_DATA_TYPE_FLOAT, 'c': FORTRAN_DATA_TYPE_CHAR,
-               'u': FORTRAN_DATA_TYPE_UINT8, '{}': "{}"}
+_DATA_TYPES = {
+    "i": FORTRAN_DATA_TYPE_INTEGER,
+    "f": FORTRAN_DATA_TYPE_FLOAT,
+    "c": FORTRAN_DATA_TYPE_CHAR,
+    "u": FORTRAN_DATA_TYPE_UINT8,
+    "{}": "{}",
+}
 
 
 def _get_dtype_output_format(d, n):
-    """Returns the correct output format needed to create a numpy dtype depending on input.
-    """
-    if d == 'c':
+    """Returns the correct output format needed to create a numpy dtype depending on input."""
+    if d == "c":
         return str(n)
-    if type(n) == int or type(n) == np.int32:
+    if isinstance(n, (int, np.int32)):
         return f"({n},)"
     return str(n)
 
@@ -54,15 +63,15 @@ def combine(*dtypes: np.dtype):
     type_combination = list()
     for types in dtypes:
         for dtype in types.descr:
-            type_combination.append(tuple(['f' + str(count)] + list(dtype[1:])))
+            type_combination.append(tuple(["f" + str(count)] + list(dtype[1:])))
             count += 1
     return np.dtype(type_combination)
 
 
 # Commonly used datatypes
-CHAR = new((('c', 1),))
-INT = new((('i', 1),))
-FLOAT = new((('f', 1),))
+CHAR = new((("c", 1),))
+INT = new((("i", 1),))
+FLOAT = new((("f", 1),))
 # Border datatype to get the border of a fortran write
 PRE_BORDER = np.dtype(FORTRAN_DATA_TYPE_INTEGER)
 HAS_POST_BORDER = FORTRAN_BACKWARD
@@ -77,5 +86,5 @@ def read(infile: BinaryIO, dtype: np.dtype, n: int):
     :returns: Read in data.
     """
     return np.array(
-        [[t[i] for i in range(1, len(t), 3)] for t in np.fromfile(infile, dtype=dtype, count=n)],
-        dtype=object)
+        [[t[i] for i in range(1, len(t), 3)] for t in np.fromfile(infile, dtype=dtype, count=n)], dtype=object
+    )

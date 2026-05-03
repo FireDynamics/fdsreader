@@ -1,3 +1,2 @@
-from .isosurface import Isosurface
-
-from .isosurface_collection import IsosurfaceCollection
+from .isosurface import Isosurface as Isosurface
+from .isosurface_collection import IsosurfaceCollection as IsosurfaceCollection

@@ -1,0 +1,81 @@
+name: FDS Compatibility Check
+
+on:
+  workflow_dispatch:
+    inputs:
+      fds_version:
+        description: "FDS version tag (e.g. FDS-6.10.1) — leave empty for latest"
+        required: false
+  schedule:
+    - cron: "0 6 * * 1"  # Every Monday 06:00 UTC
+
+jobs:
+  detect-version:
+    runs-on: ubuntu-latest
+    outputs:
+      run_compat: ${{ steps.check.outputs.run_compat }}
+      fds_version: ${{ steps.check.outputs.fds_version }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: check
+        run: |
+          if [ -n "${{ inputs.fds_version }}" ]; then
+            echo "fds_version=${{ inputs.fds_version }}" >> $GITHUB_OUTPUT
+            echo "run_compat=true" >> $GITHUB_OUTPUT
+          else
+            LATEST=$(gh api repos/firemodels/fds/releases/latest --jq '.tag_name')
+            LAST=$(cat .github/last_tested_fds_version.txt 2>/dev/null || echo "none")
+            echo "fds_version=$LATEST" >> $GITHUB_OUTPUT
+            if [ "$LATEST" != "$LAST" ]; then
+              echo "run_compat=true" >> $GITHUB_OUTPUT
+            else
+              echo "run_compat=false" >> $GITHUB_OUTPUT
+            fi
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  check-compat:
+    needs: detect-version
+    if: needs.detect-version.outputs.run_compat == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Download FDS
+        run: |
+          VERSION=${{ needs.detect-version.outputs.fds_version }}
+          wget -q https://github.com/firemodels/fds/releases/download/${VERSION}/FDS-${VERSION#FDS-}_SMV-${VERSION#FDS-}_lnx.sh \
+            -O fds_install.sh || \
+          wget -q https://github.com/firemodels/fds/releases/download/${VERSION}/FDS-6.10.1_SMV-6.10.1_lnx.sh \
+            -O fds_install.sh
+          echo "" | bash fds_install.sh --prefix=$HOME/fds
+      - name: Run test simulations
+        run: |
+          FDS=$HOME/fds/bin/fds_openmp
+          for dir in tests/cases/fds_inputs/*.fds; do
+            name=$(basename "$dir" .fds)
+            mkdir -p /tmp/fds_out/$name
+            cd /tmp/fds_out/$name
+            $FDS "$GITHUB_WORKSPACE/$dir" || true
+            cd $GITHUB_WORKSPACE
+          done
+      - name: Install fdsreader and run tests
+        run: |
+          pip install ".[dev]"
+          cd tests/cases && for f in *.tgz; do tar -xzvf "$f"; done
+          cd ../..
+          pytest tests/ -v
+      - name: Update tracked FDS version
+        if: success()
+        run: |
+          echo "${{ needs.detect-version.outputs.fds_version }}" > .github/last_tested_fds_version.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .github/last_tested_fds_version.txt
+          git diff --staged --quiet || git commit -m "chore: update last tested FDS version to ${{ needs.detect-version.outputs.fds_version }}"
+          git push

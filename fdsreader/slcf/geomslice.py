@@ -1,23 +1,22 @@
+import logging
 import math
 import os
 from copy import deepcopy
+from typing import Collection, Dict, List, Union
 
 import numpy as np
-import logging
-from typing import Dict, Collection, Union, List
 from typing_extensions import Literal
 
-from fdsreader.fds_classes import Mesh
-from fdsreader.utils import Quantity, Extent
-from fdsreader import settings
 import fdsreader.utils.fortran_data as fdtype
+from fdsreader import settings
+from fdsreader.fds_classes import Mesh
+from fdsreader.utils import Extent, Quantity
 
 _HANDLED_FUNCTIONS = {}
 
 
 def implements(np_function):
-    """Decorator to register an __array_function__ implementation for GeomSlices.
-    """
+    """Decorator to register an __array_function__ implementation for GeomSlices."""
 
     def decorator(func):
         _HANDLED_FUNCTIONS[np_function] = func
@@ -45,50 +44,49 @@ class SubGeomSlice:
 
     @property
     def orientation(self) -> Literal[1, 2, 3]:
-        """Orientation [1,2,3] of the geomslice in case it is 2D, 0 otherwise.
-        """
+        """Orientation [1,2,3] of the geomslice in case it is 2D, 0 otherwise."""
         return self._parent_slice.orientation
 
     @property
     def times(self):
         return self._parent_slice.times
 
-
     @property
     def n_t(self) -> int:
-        """Get the number of timesteps for which data was output.
-        """
+        """Get the number of timesteps for which data was output."""
         return self._parent_slice.n_t
 
     def _load_geom_data(self):
-        with open(self.geom_file_path, 'rb') as infile:
-            dtype_meta = fdtype.new((('i', 3),))
+        with open(self.geom_file_path, "rb") as infile:
+            dtype_meta = fdtype.new((("i", 3),))
             infile.seek(2 * fdtype.INT.itemsize + dtype_meta.itemsize + fdtype.FLOAT.itemsize)
             self.n_verts, self.n_faces, n_vols = fdtype.read(infile, dtype_meta, 1)[0][0]
 
             if self.n_verts > 0 and self.n_faces > 0:
-                dtype_verts = fdtype.new((('f', 3 * self.n_verts),))
-                dtype_faces = fdtype.new((('i', 3 * self.n_faces),))
+                dtype_verts = fdtype.new((("f", 3 * self.n_verts),))
+                dtype_faces = fdtype.new((("i", 3 * self.n_faces),))
                 # dtype_locations = fdtype.new((('i', self.n_faces),))
                 # dtype_zero_floats = fdtype.new((('f', 3 * self.n_faces * 2),))
-                self._vertices = fdtype.read(infile, dtype_verts, 1)[0][0].reshape((self.n_verts, 3), order='F')
-                self._faces = fdtype.read(infile, dtype_faces, 1)[0][0].reshape((self.n_faces, 3), order='F')
+                self._vertices = fdtype.read(infile, dtype_verts, 1)[0][0].reshape((self.n_verts, 3), order="F")
+                self._faces = fdtype.read(infile, dtype_faces, 1)[0][0].reshape((self.n_faces, 3), order="F")
             else:
                 self._vertices = np.array([])
                 self._faces = np.array([])
 
     def _load_data(self):
-        with open(self.file_path, 'rb') as infile:
+        with open(self.file_path, "rb") as infile:
             infile.seek(2 * fdtype.INT.itemsize)
 
             if self.n_verts > 0 and self.n_faces > 0:
-                dtype_data = fdtype.combine(fdtype.FLOAT, fdtype.new((('i', 4),)), fdtype.new((('f', self.n_faces),)))
+                dtype_data = fdtype.combine(fdtype.FLOAT, fdtype.new((("i", 4),)), fdtype.new((("f", self.n_faces),)))
             else:
-                dtype_data = fdtype.combine(fdtype.FLOAT, fdtype.new((('i', 4),)))
+                dtype_data = fdtype.combine(fdtype.FLOAT, fdtype.new((("i", 4),)))
 
             load_times = self.n_t == -1
             if load_times:
-                self._parent_slice.n_t = (os.stat(self.file_path).st_size - 2 * fdtype.INT.itemsize) // dtype_data.itemsize
+                self._parent_slice.n_t = (
+                    os.stat(self.file_path).st_size - 2 * fdtype.INT.itemsize
+                ) // dtype_data.itemsize
                 self._parent_slice.times = np.empty(self.n_t)
 
             self._data = np.empty((self.n_t, self.n_faces), dtype=np.float32)
@@ -101,8 +99,7 @@ class SubGeomSlice:
 
     @property
     def data(self) -> np.ndarray:
-        """Method to lazy load the geomslice's data.
-        """
+        """Method to lazy load the geomslice's data."""
         if not hasattr(self, "_data"):
             _ = self.vertices  # Make sure geom data has been loaded already
             self._load_data()
@@ -110,16 +107,14 @@ class SubGeomSlice:
 
     @property
     def vertices(self) -> np.ndarray:
-        """Method to lazy load the geomslice's data.
-        """
+        """Method to lazy load the geomslice's data."""
         if not hasattr(self, "_vertices"):
             self._load_geom_data()
         return self._vertices
 
     @property
     def faces(self) -> np.ndarray:
-        """Method to lazy load the geomslice's data.
-        """
+        """Method to lazy load the geomslice's data."""
         if not hasattr(self, "_faces"):
             self._load_geom_data()
         return self._faces
@@ -148,8 +143,7 @@ class SubGeomSlice:
         return np.max(self.data)
 
     def clear_cache(self):
-        """Remove all data from the internal cache that has been loaded so far to free memory.
-        """
+        """Remove all data from the internal cache that has been loaded so far to free memory."""
         if hasattr(self, "_data"):
             del self._data
             # del self._vector_data
@@ -195,7 +189,9 @@ class GeomSlice(np.lib.mixins.NDArrayOperatorsMixin):
         for mesh_data in multimesh_data:
             if mesh_data["mesh"].id not in self._subgeomslices:
                 self.quantity = Quantity(mesh_data["quantity"], mesh_data["short_name"], mesh_data["unit"])
-                self._subgeomslices[mesh_data["mesh"].id] = SubGeomSlice(self, mesh_data["filename"], mesh_data["geomfilename"], mesh_data["extent"], mesh_data["mesh"])
+                self._subgeomslices[mesh_data["mesh"].id] = SubGeomSlice(
+                    self, mesh_data["filename"], mesh_data["geomfilename"], mesh_data["extent"], mesh_data["mesh"]
+                )
 
             # if "-VELOCITY" in mesh_data["quantity"]:
             #     vector_temp[mesh_data["mesh"]][mesh_data["quantity"]] = mesh_data["filename"]
@@ -222,12 +218,14 @@ class GeomSlice(np.lib.mixins.NDArrayOperatorsMixin):
         #         del self._subgeomslices[mesh]
         #
         vals = self._subgeomslices.values()
-        self.extent = Extent(min(vals, key=lambda e: e.extent.x_start).extent.x_start,
-                             max(vals, key=lambda e: e.extent.x_end).extent.x_end,
-                             min(vals, key=lambda e: e.extent.y_start).extent.y_start,
-                             max(vals, key=lambda e: e.extent.y_end).extent.y_end,
-                             min(vals, key=lambda e: e.extent.z_start).extent.z_start,
-                             max(vals, key=lambda e: e.extent.z_end).extent.z_end)
+        self.extent = Extent(
+            min(vals, key=lambda e: e.extent.x_start).extent.x_start,
+            max(vals, key=lambda e: e.extent.x_end).extent.x_end,
+            min(vals, key=lambda e: e.extent.y_start).extent.y_start,
+            max(vals, key=lambda e: e.extent.y_end).extent.y_end,
+            min(vals, key=lambda e: e.extent.z_start).extent.z_start,
+            max(vals, key=lambda e: e.extent.z_end).extent.z_end,
+        )
 
         if self.extent.x_start == self.extent.x_end:
             self.orientation = 1
@@ -245,17 +243,17 @@ class GeomSlice(np.lib.mixins.NDArrayOperatorsMixin):
 
     def get_subgeomslice(self, key: Union[int, str, Mesh]) -> SubGeomSlice:
         """Returns the :class:`SubGeomSlice` that cuts through the given mesh. When an int is
-            provided the nth SubGeomSlice will be returned.
+        provided the nth SubGeomSlice will be returned.
         """
         return self[key]
 
     def __getitem__(self, key: Union[int, str, Mesh]) -> SubGeomSlice:
         """Returns the :class:`SubGeomSlice` that cuts through the given mesh. When an int is
-            provided the nth SubGeomSlice will be returned.
+        provided the nth SubGeomSlice will be returned.
         """
-        if type(key) == int:
+        if isinstance(key, int):
             return tuple(self._subgeomslices.values())[key]
-        if type(key) == str:
+        if isinstance(key, str):
             return self._subgeomslices[key]
         return self._subgeomslices[key.id]
 
@@ -264,8 +262,7 @@ class GeomSlice(np.lib.mixins.NDArrayOperatorsMixin):
 
     @property
     def subgeomslices(self) -> List[SubGeomSlice]:
-        """Get a list with all SubGeomSlices.
-        """
+        """Get a list with all SubGeomSlices."""
         return list(self._subgeomslices.values())
 
     # @property
@@ -283,11 +280,11 @@ class GeomSlice(np.lib.mixins.NDArrayOperatorsMixin):
     #         return 'x', 'y'
 
     def get_nearest_timestep(self, time: float) -> int:
-        """Calculates the nearest timestep for which data has been output for this geomslice.
-        """
+        """Calculates the nearest timestep for which data has been output for this geomslice."""
         idx = np.searchsorted(self.times, time, side="left")
-        if time > 0 and (idx == len(self.times) or math.fabs(
-                time - self.times[idx - 1]) < math.fabs(time - self.times[idx])):
+        if time > 0 and (
+            idx == len(self.times) or math.fabs(time - self.times[idx - 1]) < math.fabs(time - self.times[idx])
+        ):
             return idx - 1
         else:
             return idx
@@ -305,8 +302,7 @@ class GeomSlice(np.lib.mixins.NDArrayOperatorsMixin):
 
     @property
     def meshes(self) -> List[Mesh]:
-        """Returns a list of all meshes this geomslice cuts through.
-        """
+        """Returns a list of all meshes this geomslice cuts through."""
         return [subgeomslc.mesh for subgeomslc in self._subgeomslices]
 
     # @property
@@ -337,8 +333,7 @@ class GeomSlice(np.lib.mixins.NDArrayOperatorsMixin):
         return np.max(self)
 
     def clear_cache(self):
-        """Remove all data from the internal cache that has been loaded so far to free memory.
-        """
+        """Remove all data from the internal cache that has been loaded so far to free memory."""
         for subgeomslice in self._subgeomslices.values():
             subgeomslice.clear_cache()
 
@@ -350,7 +345,7 @@ class GeomSlice(np.lib.mixins.NDArrayOperatorsMixin):
         counter = 0
         for subgeomslice in self._subgeomslices.values():
             size = subgeomslice.vertices.shape[0]
-            vertices[:, counter:counter+size] = subgeomslice.vertices
+            vertices[:, counter : counter + size] = subgeomslice.vertices
             counter += size
 
         return vertices
@@ -363,7 +358,7 @@ class GeomSlice(np.lib.mixins.NDArrayOperatorsMixin):
         counter = 0
         for subgeomslice in self._subgeomslices.values():
             size = subgeomslice.faces.shape[0]
-            faces[:, counter:counter + size] = subgeomslice.faces
+            faces[:, counter : counter + size] = subgeomslice.faces
             counter += size
 
         return faces
@@ -376,7 +371,7 @@ class GeomSlice(np.lib.mixins.NDArrayOperatorsMixin):
         counter = 0
         for subgeomslice in self._subgeomslices.values():
             size = subgeomslice.data.shape[1]
-            data[:, counter:counter + size] = subgeomslice.data
+            data[:, counter : counter + size] = subgeomslice.data
             counter += size
 
         return data
@@ -409,12 +404,12 @@ class GeomSlice(np.lib.mixins.NDArrayOperatorsMixin):
         return np.sqrt(sum / N)
 
     def __array__(self):
-        """Method that will be called by numpy when trying to convert the object to a numpy ndarray.
-        """
+        """Method that will be called by numpy when trying to convert the object to a numpy ndarray."""
         raise UserWarning(
             "Slices can not be converted to numpy arrays, but they support all typical numpy"
             " operations such as np.multiply. If a 'global' array containing all subgeomslices is"
-            " required, use the 'to_global' method and use the returned numpy-array explicitly.")
+            " required, use the 'to_global' method and use the returned numpy-array explicitly."
+        )
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """Method that will be called by numpy when using a ufunction with a GeomSlice as input.
@@ -425,7 +420,9 @@ class GeomSlice(np.lib.mixins.NDArrayOperatorsMixin):
             logging.warning(
                 "The %s method has been used which is not explicitly implemented. Correctness of"
                 " results is not guaranteed. If you require this feature to be implemented please"
-                " submit an issue on Github where you explain your use case.", method)
+                " submit an issue on Github where you explain your use case.",
+                method,
+            )
         input_list = list(inputs)
         for i, inp in enumerate(inputs):
             if isinstance(inp, self.__class__):
@@ -434,7 +431,8 @@ class GeomSlice(np.lib.mixins.NDArrayOperatorsMixin):
             raise UserWarning(
                 f"The {method} operation is not implemented for multiple geomslices as input yet. If"
                 " you require this feature, please request this functionality by submitting an"
-                " issue on Github.")
+                " issue on Github."
+            )
 
         new_slice = deepcopy(self)
         for subgeomslice in new_slice._subgeomslices.values():
@@ -455,10 +453,12 @@ class GeomSlice(np.lib.mixins.NDArrayOperatorsMixin):
 
     def __repr__(self):
         # if self.type == '3D':  # 3D-Slice
-        #     return f"GeomSlice([3D] quantity={self.quantity}, cell_centered={self.cell_centered}, extent={self.extent})"
+        #     return (f"GeomSlice([3D] quantity={self.quantity}, cell_centered={self.cell_centered}, "
+        #             f"extent={self.extent})")
         # else:  # 2D-Slice
-        #     return f"GeomSlice([2D] quantity={self.quantity}, cell_centered={self.cell_centered}, extent={self.extent}, " \
-        #            f"extent_dirs={self.extent_dirs}, orientation={self.orientation})"
+        #     return (f"GeomSlice([2D] quantity={self.quantity}, cell_centered={self.cell_centered}, "
+        #             f"extent={self.extent}, extent_dirs={self.extent_dirs}, orientation={self.orientation})")
         return f"GeomSlice(quantity={self.quantity})"
+
 
 # __array_function__ implementations

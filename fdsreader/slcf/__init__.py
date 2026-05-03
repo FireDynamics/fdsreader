@@ -1,7 +1,4 @@
-from .slice import Slice
-
-from .slice_collection import SliceCollection
-
-from .geomslice import GeomSlice
-
-from .geomslice_collection import GeomSliceCollection
+from .geomslice import GeomSlice as GeomSlice
+from .geomslice_collection import GeomSliceCollection as GeomSliceCollection
+from .slice import Slice as Slice
+from .slice_collection import SliceCollection as SliceCollection

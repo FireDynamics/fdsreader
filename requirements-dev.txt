@@ -1,0 +1,5 @@
+pytest>=7.0
+pytest-cov
+ruff
+coverage[toml]
+pre-commit

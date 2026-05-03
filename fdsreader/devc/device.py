@@ -1,4 +1,4 @@
-from typing import Tuple, Union
+from typing import Tuple
 
 from fdsreader.utils import Quantity
 
@@ -12,8 +12,14 @@ class Device:
     :ivar orientation: The direction the device was facing.
     :ivar data: All data the device measured.
     """
-    def __init__(self, device_id: str, quantity: Quantity, position: Tuple[float, float, float],
-                 orientation: Tuple[float, float, float]):
+
+    def __init__(
+        self,
+        device_id: str,
+        quantity: Quantity,
+        position: Tuple[float, float, float],
+        orientation: Tuple[float, float, float],
+    ):
         self.id = device_id
         self.quantity = quantity
         self.position = position
@@ -32,33 +38,28 @@ class Device:
 
     @property
     def quantity_name(self):
-        """Alias for :class:`Device`.quantity.name.
-        """
+        """Alias for :class:`Device`.quantity.name."""
         return self.quantity.name
 
     @property
     def unit(self):
-        """Alias for :class:`Device`.quantity.unit.
-        """
+        """Alias for :class:`Device`.quantity.unit."""
         return self.quantity.unit
 
     @property
     def xyz(self):
-        """Alias for :class:`Device`.position.
-        """
+        """Alias for :class:`Device`.position."""
         return self.position
 
     def clear_cache(self):
-        """Remove all data from the internal cache that has been loaded so far to free memory.
-        """
+        """Remove all data from the internal cache that has been loaded so far to free memory."""
         if hasattr(self, "_data"):
             del self._data
 
     def __eq__(self, other):
-        if type(other) == str:
+        if isinstance(other, str):
             return self.id == other
         return self.id == other.id
 
     def __repr__(self):
         return f"Device(id='{self.id}', xyz={self.position}, quantity={self.quantity})"
-

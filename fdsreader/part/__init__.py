@@ -1,3 +1,2 @@
-from .particle import Particle
-
-from .particle_collection import ParticleCollection
+from .particle import Particle as Particle
+from .particle_collection import ParticleCollection as ParticleCollection

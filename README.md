@@ -1,8 +1,18 @@
 # FDSReader
 > Fast and easy-to-use Python reader for FDS data
 
-[![PyPI version](https://badge.fury.io/py/fdsreader.png)](https://badge.fury.io/py/fdsreader)  
+[![PyPI version](https://badge.fury.io/py/fdsreader.png)](https://badge.fury.io/py/fdsreader)
+[![CI](https://github.com/FireDynamics/fdsreader/actions/workflows/ci.yml/badge.svg)](https://github.com/FireDynamics/fdsreader/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/FireDynamics/fdsreader/branch/master/graph/badge.svg)](https://codecov.io/gh/FireDynamics/fdsreader)
 
+## FDS Version Compatibility
+
+| fdsreader         | FDS 6.7 | FDS 6.8 | FDS 6.9 | FDS 6.10 |
+|-------------------|---------|---------|---------|----------|
+| ≤ 1.11.x          | ✅      | ✅      | ✅      | ⚠️ (Geometry bug, [#TODO](https://github.com/FireDynamics/fdsreader/issues)) |
+| 1.12.x *(planed)* | ✅ | ✅ | ✅ | ✅ |
+
+_Tested against FDS outputs. If you find a compatibility issue please [open an issue](https://github.com/FireDynamics/fdsreader/issues)._
 
 ## Installation
 
@@ -52,34 +62,17 @@ documentation of all classes check the API Documentation below.
 ## API Documentation
 [https://firedynamics.github.io/fdsreader/](https://firedynamics.github.io/fdsreader/)
 
-Deployment now follows the [Python Packaging User Guide's recommendation](https://packaging.python.org/en/latest/guides/publishing-package-distribution-releases-using-github-actions-ci-cd-workflows/).
+## Releasing a new version
 
-With this setup, deployments to both TestPyPI and PyPI are automated. Every push to GitHub triggers a deployment to TestPyPI, simplifying the testing of new changes and validating the CI pipeline. Therefore, it is necessary to set the package version to `.dev` to avoid blocking version numbers.
+Versioning is handled automatically via Git tags using `setuptools-scm`.
 
-### Deploying an Untested/Unstable Version:
-1. Execute: `python3 -m incremental.update fdsreader --dev`
-2. Push changes to GitHub.
+```bash
+# New release
+git tag -a v1.12.0 -m "Version 1.12.0"
+git push origin v1.12.0
+```
 
-If you are sure your changes are stable push a GitHub Tag to perform deployment 
-to PyPI and to pack a GitHub Release
-Deploying a tested/stable version:
-1. set the new version with `python3 -m incremental.update fdsreader --newversion=<version>`
-2. Push changes to GitHub
-3. Create tag `git tag -a v<version> -m "Version <version>"`
-4. Push Tag to GitHub with `git push origin tag <version>`
-
-
-### Manual deployment
-It is also possible to deploy to PyPI and Github pages manually using the following steps:
-1. python setup.py sdist bdist_wheel
-2. twine upload dist/*
-3. sphinx-build -b html docs docs/build
-4. cd .. && mkdir gh-pages && cd gh-pages
-5. git init && git remote add origin git@github.com:FireDynamics/fdsreader.git
-6. git fetch origin gh-pages:gh-pages
-7. git checkout gh-pages
-8. cp -r ../fdsreader/docs/build/* .
-9. git add . && git commit -m "..." && git push origin HEAD:gh-pages
+This triggers the release workflow which builds the package and publishes it to PyPI.
 
 ## Meta
 

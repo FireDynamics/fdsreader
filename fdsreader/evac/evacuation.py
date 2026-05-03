@@ -1,10 +1,8 @@
-from typing import List, Tuple, Dict, Sequence, Union
+from typing import Dict, List, Sequence, Tuple, Union
 
 import numpy as np
 
-from fdsreader.fds_classes import Mesh
 from fdsreader.utils import Quantity
-
 
 # class Entrance:
 #     def __init__(self):
@@ -74,14 +72,14 @@ class Evacuation:
         return self.class_name
 
     def has_quantity(self, quantity: Union[Quantity, str]):
-        if type(quantity) == Quantity:
+        if isinstance(quantity, Quantity):
             quantity = quantity.name
         return any(
-            q.name.lower() == quantity.lower() or q.short_name.lower() == quantity.lower() for q in self.quantities)
+            q.name.lower() == quantity.lower() or q.short_name.lower() == quantity.lower() for q in self.quantities
+        )
 
     def filter_by_tag(self, tag: int):
-        """Filter all evacs by a single one with the specified tag.
-        """
+        """Filter all evacs by a single one with the specified tag."""
         data = self.data
         tags = self.tags
         positions = self.positions
@@ -116,7 +114,7 @@ class Evacuation:
     @property
     def data(self) -> Dict[str, List[np.ndarray]]:
         """Dictionary with quantities as keys and a list with a numpy array for each timestep which
-            contains data for each person in that timestep.
+        contains data for each person in that timestep.
         """
         if len(self._positions) == 0 and len(self._tags) == 0:
             self._init_callback()
@@ -124,10 +122,10 @@ class Evacuation:
 
     def get_data(self, quantity: Union[Quantity, str]) -> List[np.ndarray]:
         """Returns a list with a numpy array for each timestep which contains data about the specified quantity for
-            each person in that timestep.
+        each person in that timestep.
         """
         if self.has_quantity(quantity):
-            if type(quantity) == Quantity:
+            if isinstance(quantity, Quantity):
                 quantity = quantity.name
             return self.data[quantity]
         return []
@@ -135,7 +133,7 @@ class Evacuation:
     @property
     def tags(self) -> List[np.ndarray]:
         """List with a numpy array for each timestep which contains a tag for each evac in that
-            timestep.
+        timestep.
         """
         if len(self._positions) == 0 and len(self._tags) == 0:
             self._init_callback()
@@ -144,7 +142,7 @@ class Evacuation:
     @property
     def positions(self) -> List[np.ndarray]:
         """List with a numpy array for each timestep which contains the position of each evac in
-            that timestep.
+        that timestep.
         """
         if len(self._positions) == 0 and len(self._tags) == 0:
             self._init_callback()
@@ -152,39 +150,34 @@ class Evacuation:
 
     @property
     def body_angles(self) -> List[np.ndarray]:
-        """
-        """
+        """ """
         if len(self._positions) == 0 and len(self._tags) == 0:
             self._init_callback()
         return self._body_angles
 
     @property
     def semi_major_axis(self) -> List[np.ndarray]:
-        """
-        """
+        """ """
         if len(self._positions) == 0 and len(self._tags) == 0:
             self._init_callback()
         return self._semi_major_axis
 
     @property
     def semi_minor_axis(self) -> List[np.ndarray]:
-        """
-        """
+        """ """
         if len(self._positions) == 0 and len(self._tags) == 0:
             self._init_callback()
         return self._semi_minor_axis
 
     @property
     def agent_heights(self) -> List[np.ndarray]:
-        """
-        """
+        """ """
         if len(self._positions) == 0 and len(self._tags) == 0:
             self._init_callback()
         return self._agent_heights
 
     def clear_cache(self):
-        """Remove all data from the internal cache that has been loaded so far to free memory.
-        """
+        """Remove all data from the internal cache that has been loaded so far to free memory."""
         if len(self._positions) != 0:
             del self._positions
             self._positions = list()

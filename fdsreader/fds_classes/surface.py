@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import Tuple
 
 
 class Surface:
@@ -15,9 +15,18 @@ class Surface:
     :ivar transparency: Transparency of the color (alpha channel).
     """
 
-    def __init__(self, name: str, tmpm: float, material_emissivity: float, surface_type: int,
-                 texture_width: float, texture_height: float, texture_map: Optional[str],
-                 rgb: Tuple[float, float, float], transparency: float):
+    def __init__(
+        self,
+        name: str,
+        tmpm: float,
+        material_emissivity: float,
+        surface_type: int,
+        texture_width: float,
+        texture_height: float,
+        texture_map: str | None,
+        rgb: Tuple[float, float, float],
+        transparency: float,
+    ):
         self.name = name
         self.tmpm = tmpm
         self.material_emissivity = material_emissivity
