@@ -32,7 +32,7 @@ Before the first release, a maintainer must configure **Trusted Publishing** on 
 * Repeat for `test.pypi.org <https://test.pypi.org>`_ with environment name ``testpypi``
 
 This setup only needs to be done once.
-See :ref:`Trusted Publishing docs <https://docs.pypi.org/trusted-publishers/>` for details.
+See the `Trusted Publishing docs <https://docs.pypi.org/trusted-publishers/>`_ for details.
 
 Stable release (publishes to PyPI)
 -----------------------------------
