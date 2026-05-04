@@ -25,6 +25,7 @@ class Device:
         self.position = position
         self.orientation = orientation
         self._data_callback = lambda: None
+        self._activation_times: list[tuple[float, bool]] = []
 
     @property
     def data(self):
@@ -50,6 +51,26 @@ class Device:
     def xyz(self):
         """Alias for :class:`Device`.position."""
         return self.position
+
+    @property
+    def activation_times(self) -> list[tuple[float, bool]]:
+        """List of ``(time, state)`` tuples recording when this device activated or deactivated.
+
+        Each entry is a ``(float, bool)`` tuple where *time* is the simulation time in seconds
+        and *state* is ``True`` for activation and ``False`` for deactivation.
+        The list is sorted by time.
+        """
+        return self._activation_times
+
+    def add_activation_time(self, time: float, state: bool) -> None:
+        """Record an activation event for this device.
+
+        Args:
+            time: Simulation time of the event in seconds.
+            state: ``True`` if the device activated, ``False`` if it deactivated.
+        """
+        self._activation_times.append((time, state))
+        self._activation_times.sort(key=lambda a: a[0])
 
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory."""

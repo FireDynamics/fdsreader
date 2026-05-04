@@ -41,3 +41,18 @@ def test_clear_cache_with_line_devices():
     sim = Simulation(os.path.join(TEST_DIR, "../cases/devc_data"))
     assert any(isinstance(d, list) for d in sim.devices), "Test data should contain line devices"
     sim.clear_cache()
+
+
+def test_activation_times_type(devc_sim):
+    """activation_times entries must be (float, bool) tuples (PR #101)."""
+    for entry in devc_sim.devices["TC_Room"]:
+        for t, s in entry.activation_times:
+            assert isinstance(t, float), f"Expected float time, got {type(t)}"
+            assert isinstance(s, bool), f"Expected bool state, got {type(s)}"
+
+
+def test_activation_times_monotonic(devc_sim):
+    """activation_times must be sorted by time (PR #101)."""
+    for entry in devc_sim.devices["TC_Room"]:
+        times = [t for t, _ in entry.activation_times]
+        assert times == sorted(times), "activation_times not sorted by time"

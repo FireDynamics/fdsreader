@@ -217,6 +217,8 @@ class Simulation:
                 pickle.dump(self, open(Simulation._get_pickle_filename(self.root_path, self.chid), "wb"), protocol=4)
 
     def parse_smv_file(self):
+        # Global device list in registration order — used to resolve DEVICE_ACT indices.
+        _devices_by_global_index: list[Device] = []
         with open(self.smv_file_path) as smv_file:
             for line in smv_file:
                 keyword = line.strip()
@@ -265,6 +267,14 @@ class Simulation:
                             self._devices[device_id] = [self._devices[device_id], device]
                     else:
                         self._devices[device_id] = device
+                    _devices_by_global_index.append(device)
+                elif keyword.startswith("DEVICE_ACT"):
+                    idx_str, time_str, value_str = smv_file.readline().split()
+                    global_index = int(idx_str) - 1  # FDS uses 1-based global device index
+                    act_time = float(time_str)
+                    act_state = bool(int(value_str))
+                    if global_index < len(_devices_by_global_index):
+                        _devices_by_global_index[global_index].add_activation_time(act_time, act_state)
                 elif keyword.startswith("SLC"):
                     self._load_slice(smv_file, keyword)
                 elif keyword.startswith("BNDS"):
