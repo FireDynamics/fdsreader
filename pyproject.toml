@@ -38,9 +38,8 @@ dev = [
 ]
 docs = [
     "sphinx>=7.0",
-    "sphinx-rtd-theme",
+    "furo",
     "autodocsumm",
-    "nbsphinx",
 ]
 
 [tool.setuptools_scm]
