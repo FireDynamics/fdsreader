@@ -1,6 +1,14 @@
 FDSReader documentation!
 ========================
 
+FDSReader is a Python package for reading and analyzing output data from the
+`Fire Dynamics Simulator (FDS) <https://pages.nist.gov/fds-smv/>`_.
+It provides convenient tools for accessing simulation results such as slices,
+boundary data, devices, particles, and more.
+
+Source code, issue tracker and releases are hosted on
+`GitHub <https://github.com/FireDynamics/fdsreader>`_.
+
 .. toctree::
    :maxdepth: 1
    :caption: Maintainer Guide
