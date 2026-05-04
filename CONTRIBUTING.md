@@ -23,7 +23,10 @@ cd tests/cases && for f in *.tgz; do tar -xzvf "$f"; done && cd ../..
 ## Running tests
 
 ```bash
-# Run all tests
+# Convenience script — detects uv/python3, extracts test data automatically
+bash tests/run_tests.sh
+
+# Or manually:
 pytest tests/
 
 # With coverage report
