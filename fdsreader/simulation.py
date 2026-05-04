@@ -1015,10 +1015,7 @@ class Simulation:
                     devc = self.devices[names[k]]
 
                 devc.quantity.unit = units[k]
-                size = values.shape[0]
-                devc._data = np.empty((size,), dtype=np.float32)
-                for i in range(size):
-                    devc._data[i] = values[i][k]
+                devc._data = values[:, k].copy()
 
         line_path = self.devc_path.replace("devc", "line")
         if os.path.exists(line_path):
@@ -1071,12 +1068,7 @@ class Simulation:
         return data
 
     def _transform_csv_data(self, keys, values):
-        size = values.shape[0]
-        data = {keys[i]: np.empty((size,), dtype=float) for i in range(len(keys))}
-        for k, arr in enumerate(data.values()):
-            for i in range(size):
-                arr[i] = values[i][k]
-        return data
+        return {key: values[:, i] for i, key in enumerate(keys)}
 
     def _indices_to_extent(self, indices: Sequence[Union[int, str]], mesh: Mesh) -> Tuple[Extent, Dimension]:
         co = mesh.coordinates
