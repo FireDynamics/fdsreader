@@ -4,6 +4,7 @@
 [![PyPI version](https://badge.fury.io/py/fdsreader.png)](https://badge.fury.io/py/fdsreader)
 [![CI](https://github.com/FireDynamics/fdsreader/actions/workflows/ci.yml/badge.svg)](https://github.com/FireDynamics/fdsreader/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/FireDynamics/fdsreader/branch/master/graph/badge.svg)](https://codecov.io/gh/FireDynamics/fdsreader)
+[![Documentation](https://readthedocs.org/projects/fdsreader/badge/?version=latest)](https://fdsreader.readthedocs.io)
 
 ## FDS Version Compatibility
 
@@ -16,7 +17,7 @@ _Tested against FDS outputs. If you find a compatibility issue please [open an i
 
 ## Installation
 
-The package is available on PyPI and can be installed using pip:  
+The package is available on PyPI and can be installed using pip:
 ```sh
 pip install fdsreader
 ```
@@ -34,16 +35,16 @@ sim = fds.Simulation("./sample_data")
 print(sim.meshes, sim.surfaces, sim.slices, sim.data_3d, sim.smoke_3d, sim.isosurfaces, sim.particles, sim.obstructions)
 ```
 
-More advanced examples can be found in the respective data type directories inside of the examples directory.  
+More advanced examples can be found in the respective data type directories inside of the examples directory.
 
 ### Configuration
-The package provides a few configuration options that can be set using the `settings` module.  
+The package provides a few configuration options that can be set using the `settings` module.
 ```python
 fds.settings.KEY = VALUE
 
 # Example
 fds.settings.DEBUG = True
-```  
+```
 
 |      KEY       |  VALUE  | Default | Description |
 |----------------|---------|---------|-------------|
@@ -56,11 +57,11 @@ fds.settings.DEBUG = True
 ### Data structure
 ![Data structure](https://raw.githubusercontent.com/FireDynamics/fdsreader/master/docs/img/data-structure.svg)
 
-Beware that not all attributes and methods are covered in this diagram. For a complete  
-documentation of all classes check the API Documentation below.  
+Beware that not all attributes and methods are covered in this diagram. For a complete
+documentation of all classes check the API Documentation below.
 
 ## API Documentation
-[https://firedynamics.github.io/fdsreader/](https://firedynamics.github.io/fdsreader/)
+[https://fdsreader.readthedocs.io](https://fdsreader.readthedocs.io)
 
 ## Releasing a new version
 
@@ -85,8 +86,4 @@ Distributed under the LGPLv3 (GNU Lesser General Public License v3) license. See
 
 ## Contributing
 
-1. Fork it (<https://github.com/FireDynamics/fdsreader/fork>)
-2. Create your feature branch (`git checkout -b feature/fooBar`)
-3. Commit your changes (`git commit -am 'Add some fooBar'`)
-4. Push to the branch (`git push origin feature/fooBar`)
-5. Create a new Pull Request
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, how to run tests, and the PR checklist.
