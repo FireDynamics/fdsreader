@@ -1,6 +1,6 @@
 from functools import reduce
 from operator import mul
-from typing import Tuple, List
+from typing import List, Tuple
 
 from typing_extensions import Literal
 
@@ -13,14 +13,14 @@ class Dimension:
     :ivar z: Number of data points in z-direction (end is exclusive).
     """
 
-    def __init__(self, *args, skip_dimension: Literal['x', 1, 'y', 2, 'z', 3, ''] = ''):
+    def __init__(self, *args, skip_dimension: Literal["x", 1, "y", 2, "z", 3, ""] = ""):
         dimensions = list(args)
 
-        if skip_dimension in ('x', 1):
+        if skip_dimension in ("x", 1):
             dimensions.insert(0, 1)
-        elif skip_dimension in ('y', 2):
+        elif skip_dimension in ("y", 2):
             dimensions.insert(1, 1)
-        elif skip_dimension in ('z', 3):
+        elif skip_dimension in ("z", 3):
             dimensions.append(1)
 
         self.x = dimensions[0]
@@ -33,17 +33,16 @@ class Dimension:
     def __repr__(self, *args, **kwargs):
         return f"Dimension({self.x}, {self.y}, {self.z})"
 
-    def __getitem__(self, dimension: Literal[0, 1, 2, 'x', 'y', 'z']):
-        if type(dimension) == int:
-            dimension = ('x', 'y', 'z')[dimension]
+    def __getitem__(self, dimension: Literal[0, 1, 2, "x", "y", "z"]):
+        if isinstance(dimension, int):
+            dimension = ("x", "y", "z")[dimension]
         return self.__dict__[dimension]
 
     def size(self, cell_centered=False):
         return reduce(mul, self.shape(cell_centered))
 
     def shape(self, cell_centered=False) -> Tuple:
-        """Method to get the actual number of data points per dimension.
-        """
+        """Method to get the actual number of data points per dimension."""
         s = list()
         c = -1 if cell_centered else 0
         if self.x != 1:

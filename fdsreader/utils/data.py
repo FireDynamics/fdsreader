@@ -1,10 +1,13 @@
 """
 Collection of internal utilities (convenience functions and classes) for data handling.
 """
+
 import glob
 import hashlib
 import os
+
 import numpy as np
+
 try:
     # Python <= 3.9
     from collections import Iterable
@@ -20,6 +23,7 @@ class Quantity:
     :ivar quantity: The name of the quantity.
     :ivar unit: The corresponding unit of the quantity.
     """
+
     def __init__(self, quantity: str, short_name: str, unit: str):
         self.short_name = short_name
         self.unit = unit
@@ -44,8 +48,8 @@ class Quantity:
 
 
 class Profile:
-    """Class containing profile data.
-    """
+    """Class containing profile data."""
+
     def __init__(self, profile_id: str, times: np.ndarray, npoints: np.ndarray, depths: np.ndarray, values: np.ndarray):
         self.id = profile_id
         self.times = times
@@ -61,9 +65,8 @@ class Profile:
 
 
 def create_hash(path: str):
-    """Returns the md5 hash as string for the given file.
-    """
-    return str(hashlib.md5(open(path, 'rb').read()).hexdigest())
+    """Returns the md5 hash as string for the given file."""
+    return str(hashlib.md5(open(path, "rb").read()).hexdigest())
 
 
 def scan_directory_smv(directory: str):
@@ -87,19 +90,18 @@ def get_smv_file(path: str):
     elif os.path.isdir(path):
         files = scan_directory_smv(path)
         if len(files) > 1:
-            raise IOError("There are multiple simulations in the directory: " + path)
+            raise OSError("There are multiple simulations in the directory: " + path)
         elif len(files) == 0:
-            raise IOError("No simulations were found in the directory: " + path)
+            raise OSError("No simulations were found in the directory: " + path)
         return files[0]
     elif os.path.isfile(path + ".smv"):
         return path + ".smv"
     else:
-        raise IOError("The given path does neither point to a directory nor a file: " + path)
+        raise OSError("The given path does neither point to a directory nor a file: " + path)
 
 
 class FDSDataCollection:
-    """(Abstract) Base class for any collection of FDS data.
-    """
+    """(Abstract) Base class for any collection of FDS data."""
 
     def __init__(self, *elements: Iterable):
         self._elements = tuple(*elements)
@@ -120,7 +122,6 @@ class FDSDataCollection:
         return "[" + ",\n".join(str(e) for e in self._elements) + "]"
 
     def clear_cache(self):
-        """Remove all data from the internal cache that has been loaded so far to free memory.
-        """
+        """Remove all data from the internal cache that has been loaded so far to free memory."""
         for element in self._elements:
             element.clear_cache()

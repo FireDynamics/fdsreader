@@ -1,23 +1,22 @@
+import logging
 import math
 import os
 from copy import deepcopy
+from typing import Collection, Dict, List, Tuple, Union
 
 import numpy as np
-import logging
-from typing import Dict, Collection, Tuple, Union, List
 from typing_extensions import Literal
 
-from fdsreader.fds_classes import Mesh
-from fdsreader.utils import Dimension, Quantity, Extent
-from fdsreader import settings
 import fdsreader.utils.fortran_data as fdtype
+from fdsreader import settings
+from fdsreader.fds_classes import Mesh
+from fdsreader.utils import Dimension, Extent, Quantity
 
 _HANDLED_FUNCTIONS = {}
 
 
 def implements(np_function):
-    """Decorator to register an __array_function__ implementation for Slices.
-    """
+    """Decorator to register an __array_function__ implementation for Slices."""
 
     def decorator(func):
         _HANDLED_FUNCTIONS[np_function] = func
@@ -34,7 +33,7 @@ class SubSlice:
     :ivar dimension: :class:`Dimension` object containing information about steps in each dimension.
     """
 
-    _offset = 3 * fdtype.new((('c', 30),)).itemsize + fdtype.new((('i', 6),)).itemsize
+    _offset = 3 * fdtype.new((("c", 30),)).itemsize + fdtype.new((("i", 6),)).itemsize
 
     def __init__(self, parent_slc, filename: str, dimension: Dimension, extent: Extent, mesh: Mesh):
         self._parent_slice = parent_slc
@@ -47,17 +46,16 @@ class SubSlice:
         self.vector_filenames = dict()
         self._vector_data = dict()
 
-    def get_coordinates(self, ignore_cell_centered: bool = False) -> Dict[
-        Literal['x', 'y', 'z'], np.ndarray]:
+    def get_coordinates(self, ignore_cell_centered: bool = False) -> Dict[Literal["x", "y", "z"], np.ndarray]:
         """Returns a dictionary containing a numpy ndarray with coordinates for each dimension.
-            For cell-centered slices, the coordinates can be adjusted to represent cell-centered coordinates.
+        For cell-centered slices, the coordinates can be adjusted to represent cell-centered coordinates.
 
-            :param ignore_cell_centered: Whether to shift the coordinates when the slice is cell_centered or not.
+        :param ignore_cell_centered: Whether to shift the coordinates when the slice is cell_centered or not.
         """
         # orientation = ('x', 'y', 'z')[self.orientation - 1] if self.orientation != 0 else ''
         # coords = {'x': set(), 'y': set(), 'z': set()}
-        coords: Dict[Literal['x', 'y', 'z'], np.ndarray] = {}
-        for dim in ('x', 'y', 'z'):
+        coords: Dict[Literal["x", "y", "z"], np.ndarray] = {}
+        for dim in ("x", "y", "z"):
             co = self.mesh.coordinates[dim].copy()
             # In case the slice is cell-centered, we will shift the coordinates by half a cell
             # and remove the last coordinate
@@ -65,8 +63,7 @@ class SubSlice:
                 co = co[:-1]
                 co += abs(co[1] - co[0]) / 2
 
-            coords[dim] = co[
-                np.where(np.logical_and(co >= self.extent[dim][0], co <= self.extent[dim][1]))]
+            coords[dim] = co[np.where(np.logical_and(co >= self.extent[dim][0], co <= self.extent[dim][1]))]
             if coords[dim].size == 0:
                 coords[dim] = np.array([co[np.argmin(np.abs(co - self.extent[dim][0]))]])
 
@@ -74,8 +71,7 @@ class SubSlice:
 
     @property
     def shape(self) -> Tuple[int, int]:
-        """2D-shape of the slice.
-        """
+        """2D-shape of the slice."""
         shape = self.dimension.shape(cell_centered=self.cell_centered)
         if self.orientation != 0:
             if len(shape) < 2:
@@ -85,14 +81,12 @@ class SubSlice:
 
     @property
     def orientation(self) -> Literal[0, 1, 2, 3]:
-        """Orientation [1,2,3] of the slice in case it is 2D, 0 otherwise.
-        """
+        """Orientation [1,2,3] of the slice in case it is 2D, 0 otherwise."""
         return self._parent_slice.orientation
 
     @property
     def cell_centered(self) -> bool:
-        """Indicates whether centered positioning for data is used.
-        """
+        """Indicates whether centered positioning for data is used."""
         return self._parent_slice.cell_centered
 
     @property
@@ -101,27 +95,25 @@ class SubSlice:
 
     @property
     def n_t(self) -> int:
-        """Get the number of timesteps for which data was output.
-        """
+        """Get the number of timesteps for which data was output."""
         return self._parent_slice.n_t
 
     def _load_data(self, file_path: str, data_out: np.ndarray):
         # Both cases (cell_centered True/False) output the same number of data points
         n = self.dimension.size(cell_centered=False)
-        dtype_data = fdtype.combine(fdtype.FLOAT, fdtype.new((('f', n),)))
+        dtype_data = fdtype.combine(fdtype.FLOAT, fdtype.new((("f", n),)))
 
         load_times = self.n_t == -1
         if load_times:
-            self._parent_slice.n_t = (os.stat(
-                file_path).st_size - self._offset) // dtype_data.itemsize
+            self._parent_slice.n_t = (os.stat(file_path).st_size - self._offset) // dtype_data.itemsize
             self._parent_slice.times = np.empty(self.n_t)
 
-        with open(file_path, 'rb') as infile:
+        with open(file_path, "rb") as infile:
             infile.seek(self._offset)
             for t, data in enumerate(fdtype.read(infile, dtype_data, self.n_t)):
                 if load_times:
                     self.times[t] = data[0][0]
-                data = data[1].reshape(self.dimension.shape(cell_centered=False), order='F')
+                data = data[1].reshape(self.dimension.shape(cell_centered=False), order="F")
                 if self.cell_centered:
                     data_out[t, :] = data[1:, 1:]  # Ignore ghost points
                 else:
@@ -130,14 +122,14 @@ class SubSlice:
     def _load_times(self) -> np.ndarray:
         # Read in (only) the times for which SLCF data is available
         n = self.dimension.size(cell_centered=False)
-        dtype_data = fdtype.combine(fdtype.FLOAT, fdtype.new((('f', n),)))
+        dtype_data = fdtype.combine(fdtype.FLOAT, fdtype.new((("f", n),)))
 
         file_path = os.path.join(self._parent_slice._root_path, self.filename)
 
         n_t = (os.stat(file_path).st_size - self._offset) // dtype_data.itemsize
         times = np.empty(n_t)
 
-        with open(file_path, 'rb') as infile:
+        with open(file_path, "rb") as infile:
             infile.seek(self._offset)
             for t, data in enumerate(fdtype.read(infile, dtype_data, n_t)):
                 times[t] = data[0][0]
@@ -146,8 +138,7 @@ class SubSlice:
 
     @property
     def data(self) -> np.ndarray:
-        """Method to lazy load the slice's data.
-        """
+        """Method to lazy load the slice's data."""
         if not hasattr(self, "_data"):
             file_path = os.path.join(self._parent_slice._root_path, self.filename)
             self._data = np.empty((self.n_t,) + self.shape, dtype=np.float32)
@@ -156,16 +147,13 @@ class SubSlice:
 
     @property
     def vector_data(self) -> Dict[str, np.ndarray]:
-        """Method to lazy load the slice's vector data if it exists.
-        """
+        """Method to lazy load the slice's vector data if it exists."""
         if not hasattr(self, "_vector_data"):
             raise AttributeError("There is no vector data available for this slice.")
         if len(self._vector_data) == 0:
             for direction in self.vector_filenames.keys():
-                file_path = os.path.join(self._parent_slice._root_path,
-                                         self.vector_filenames[direction])
-                self._vector_data[direction] = np.empty((self.n_t,) + self.shape,
-                                                        dtype=np.float32)
+                file_path = os.path.join(self._parent_slice._root_path, self.vector_filenames[direction])
+                self._vector_data[direction] = np.empty((self.n_t,) + self.shape, dtype=np.float32)
                 self._load_data(file_path, self._vector_data[direction])
         return self._vector_data
 
@@ -178,8 +166,7 @@ class SubSlice:
         return np.max(self.data)
 
     def clear_cache(self):
-        """Remove all data from the internal cache that has been loaded so far to free memory.
-        """
+        """Remove all data from the internal cache that has been loaded so far to free memory."""
         if hasattr(self, "_data"):
             del self._data
             del self._vector_data
@@ -206,8 +193,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
     :ivar extent: :class:`Extent` object containing 3-dimensional extent information.
     """
 
-    def __init__(self, root_path: str, slice_id: str, cell_centered: bool,
-                 multimesh_data: Collection[Dict]):
+    def __init__(self, root_path: str, slice_id: str, cell_centered: bool, multimesh_data: Collection[Dict]):
         self._root_path = root_path
         self.cell_centered = cell_centered
 
@@ -223,12 +209,10 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
 
         for mesh_data in multimesh_data:
             if mesh_data["mesh"].id not in self._subslices:
-                self.quantity = Quantity(mesh_data["quantity"], mesh_data["short_name"],
-                                         mesh_data["unit"])
-                self._subslices[mesh_data["mesh"].id] = SubSlice(self, mesh_data["filename"],
-                                                                 mesh_data["dimension"],
-                                                                 mesh_data["extent"],
-                                                                 mesh_data["mesh"])
+                self.quantity = Quantity(mesh_data["quantity"], mesh_data["short_name"], mesh_data["unit"])
+                self._subslices[mesh_data["mesh"].id] = SubSlice(
+                    self, mesh_data["filename"], mesh_data["dimension"], mesh_data["extent"], mesh_data["mesh"]
+                )
 
             if "-VELOCITY" in mesh_data["quantity"]:
                 vector_temp[mesh_data["mesh"].id][mesh_data["quantity"]] = mesh_data["filename"]
@@ -256,21 +240,22 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                 orientations.append(0)
         self.orientation = 0 if any(o != orientations[0] for o in orientations) else orientations[0]
 
-        x_start, x_end, y_start, y_end, z_start, z_end = min(subslices, key=lambda
-            e: e.extent.x_start).extent.x_start, \
-                                                         max(subslices, key=lambda
-                                                             e: e.extent.x_end).extent.x_end, \
-                                                         min(subslices, key=lambda
-                                                             e: e.extent.y_start).extent.y_start, \
-                                                         max(subslices, key=lambda
-                                                             e: e.extent.y_end).extent.y_end, \
-                                                         min(subslices, key=lambda
-                                                             e: e.extent.z_start).extent.z_start, \
-                                                         max(subslices, key=lambda
-                                                             e: e.extent.z_end).extent.z_end
-        self.extent = Extent(x_start, x_start if self.orientation == 1 else x_end,
-                             y_start, y_start if self.orientation == 2 else y_end,
-                             z_start, z_start if self.orientation == 3 else z_end)
+        x_start, x_end, y_start, y_end, z_start, z_end = (
+            min(subslices, key=lambda e: e.extent.x_start).extent.x_start,
+            max(subslices, key=lambda e: e.extent.x_end).extent.x_end,
+            min(subslices, key=lambda e: e.extent.y_start).extent.y_start,
+            max(subslices, key=lambda e: e.extent.y_end).extent.y_end,
+            min(subslices, key=lambda e: e.extent.z_start).extent.z_start,
+            max(subslices, key=lambda e: e.extent.z_end).extent.z_end,
+        )
+        self.extent = Extent(
+            x_start,
+            x_start if self.orientation == 1 else x_end,
+            y_start,
+            y_start if self.orientation == 2 else y_end,
+            z_start,
+            z_start if self.orientation == 3 else z_end,
+        )
 
         # Read in the available time steps, using arbitrary the first sub-slice
         self.times = self.subslices[0]._load_times()
@@ -283,17 +268,17 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
 
     def get_subslice(self, key: Union[int, str, Mesh]) -> SubSlice:
         """Returns the :class:`SubSlice` that cuts through the given mesh. When an int is provided
-            the nth SubSlice will be returned.
+        the nth SubSlice will be returned.
         """
         return self[key]
 
     def __getitem__(self, key: Union[int, str, Mesh]) -> SubSlice:
         """Returns the :class:`SubSlice` that cuts through the given mesh. When an int is provided
-            the nth SubSlice will be returned.
+        the nth SubSlice will be returned.
         """
-        if type(key) == int:
+        if isinstance(key, int):
             return tuple(self._subslices.values())[key]
-        elif type(key) == str:
+        elif isinstance(key, str):
             key = tuple(mesh for mesh in self.meshes if mesh.id == key)[0]
         return self._subslices[key.id]
 
@@ -302,62 +287,55 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
 
     @property
     def subslices(self) -> List[SubSlice]:
-        """Get a list with all SubSlices.
-        """
+        """Get a list with all SubSlices."""
         return list(self._subslices.values())
 
     @property
-    def extent_dirs(self) -> Tuple[
-        Literal['x', 'y', 'z'], Literal['x', 'y', 'z'], Literal['x', 'y', 'z']]:
-        """The directions in which there is an extent. All three dimensions in case the slice is 3D.
-        """
+    def extent_dirs(self) -> Tuple[Literal["x", "y", "z"], Literal["x", "y", "z"], Literal["x", "y", "z"]]:
+        """The directions in which there is an extent. All three dimensions in case the slice is 3D."""
         ior = self.orientation
         if ior == 0:
-            return 'x', 'y', 'z'
+            return "x", "y", "z"
         elif ior == 1:
-            return 'y', 'z'
+            return "y", "z"
         elif ior == 2:
-            return 'x', 'z'
+            return "x", "z"
         else:
-            return 'x', 'y'
+            return "x", "y"
 
     def get_nearest_timestep(self, time: float) -> int:
-        """Calculates the nearest timestep for which data has been output for this slice.
-        """
+        """Calculates the nearest timestep for which data has been output for this slice."""
         idx = np.searchsorted(self.times, time, side="left")
-        if time > 0 and (idx == len(self.times) or math.fabs(
-                time - self.times[idx - 1]) < math.fabs(time - self.times[idx])):
+        if time > 0 and (
+            idx == len(self.times) or math.fabs(time - self.times[idx - 1]) < math.fabs(time - self.times[idx])
+        ):
             return idx - 1
         else:
             return idx
 
-    def get_nearest_index(self, dimension: Literal['x', 'y', 'z'], value: float) -> int:
-        """Get the nearest mesh coordinate index in a specific dimension.
-        """
+    def get_nearest_index(self, dimension: Literal["x", "y", "z"], value: float) -> int:
+        """Get the nearest mesh coordinate index in a specific dimension."""
         coords = self.get_coordinates()[dimension]
         idx = np.searchsorted(coords, value, side="left")
-        if idx > 0 and (idx == coords.size or math.fabs(value - coords[idx - 1]) < math.fabs(
-                value - coords[idx])):
+        if idx > 0 and (idx == coords.size or math.fabs(value - coords[idx - 1]) < math.fabs(value - coords[idx])):
             return idx - 1
         else:
             return idx
 
     @property
     def meshes(self) -> List[Mesh]:
-        """Returns a list of all meshes this slice cuts through.
-        """
+        """Returns a list of all meshes this slice cuts through."""
         return [subslc.mesh for subslc in self._subslices.values()]
 
-    def get_coordinates(self, ignore_cell_centered: bool = False) -> Dict[
-        Literal['x', 'y', 'z'], np.ndarray]:
+    def get_coordinates(self, ignore_cell_centered: bool = False) -> Dict[Literal["x", "y", "z"], np.ndarray]:
         """Returns a dictionary containing a numpy ndarray with coordinates for each dimension.
-            For cell-centered slices, the coordinates can be adjusted to represent cell-centered coordinates.
+        For cell-centered slices, the coordinates can be adjusted to represent cell-centered coordinates.
 
-            :param ignore_cell_centered: Whether to shift the coordinates when the slice is cell_centered or not.
+        :param ignore_cell_centered: Whether to shift the coordinates when the slice is cell_centered or not.
         """
-        orientation = ('x', 'y', 'z')[self.orientation - 1] if self.orientation != 0 else ''
-        coords = {'x': list(), 'y': list(), 'z': list()}
-        for dim in ('x', 'y', 'z'):
+        orientation = ("x", "y", "z")[self.orientation - 1] if self.orientation != 0 else ""
+        coords = {"x": list(), "y": list(), "z": list()}
+        for dim in ("x", "y", "z"):
             if orientation == dim:
                 coords[dim] = np.array([self.extent[dim][0]])
                 continue
@@ -370,8 +348,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             # floating point inaccuraciesas floats get written out with limited precision from FDS
             # (sometimes only 6 decimal places, e.g. 1.0 and 1.000001)
             diff = coords[dim][1:] - coords[dim][:-1]
-            coords[dim] = np.concatenate((coords[dim][:1], coords[dim][1:][diff > 0.000002]),
-                                         axis=0)
+            coords[dim] = np.concatenate((coords[dim][:1], coords[dim][1:][diff > 0.000002]), axis=0)
 
             if len(coords[dim]) == 0:
                 slice_coordinate = self.extent[dim][0]
@@ -379,9 +356,11 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                 for mesh in self._subslices.keys():
                     mesh_coords = mesh.coordinates[dim]
                     idx = np.searchsorted(mesh_coords, slice_coordinate, side="left")
-                    if idx > 0 and (idx == mesh_coords.size or math.fabs(
-                            slice_coordinate - mesh_coords[idx - 1]) < math.fabs(
-                        slice_coordinate - mesh_coords[idx])):
+                    if idx > 0 and (
+                        idx == mesh_coords.size
+                        or math.fabs(slice_coordinate - mesh_coords[idx - 1])
+                        < math.fabs(slice_coordinate - mesh_coords[idx])
+                    ):
                         idx = idx + 1
                     if mesh_coords[idx] - slice_coordinate < nearest_coordinate - slice_coordinate:
                         nearest_coordinate = mesh_coords[idx]
@@ -398,12 +377,11 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         return np.max(self)
 
     def clear_cache(self):
-        """Remove all data from the internal cache that has been loaded so far to free memory.
-        """
+        """Remove all data from the internal cache that has been loaded so far to free memory."""
         for subslice in self._subslices.values():
             subslice.clear_cache()
 
-    def get_2d_slice_from_3d(self, slice_direction: Literal['x', 'y', 'z', 1, 2, 3], value: float):
+    def get_2d_slice_from_3d(self, slice_direction: Literal["x", "y", "z", 1, 2, 3], value: float):
         """Creates a 2D-Slice from a 3D-Slice by slicing the Slice.
         :param slice_direction: The direction in which to cut through the slice.
         :param value: The position at which to start cutting through the slice.
@@ -411,24 +389,23 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         if self.type == "2D":
             logging.error("Trying to slice a 2D-slice, which might not yield the desired result.")
 
-        if type(slice_direction) == str:
-            slice_dim = {'x': 1, 'y': 2, 'z': 3}[slice_direction]
+        if isinstance(slice_direction, str):
+            slice_dim = {"x": 1, "y": 2, "z": 3}[slice_direction]
         else:
             slice_dim = slice_direction
-            slice_direction = ('x', 'y', 'z')[slice_dim - 1]
+            slice_direction = ("x", "y", "z")[slice_dim - 1]
         new_slice = deepcopy(self)
 
         to_remove = list()
         for mesh_id, subslc in new_slice._subslices.items():
             mesh = subslc.mesh
             # Check if the new slice cuts through the subslice
-            cut_index = mesh.coordinate_to_index((value,), (slice_direction,),
-                                                 cell_centered=self.cell_centered)
-            cut_value = mesh.get_nearest_coordinate((value,), (slice_direction,),
-                                                    cell_centered=self.cell_centered)[0]
-            if mesh.coordinates[slice_direction][0] <= value <= mesh.coordinates[slice_direction][
-                -1] and \
-                    subslc.extent[slice_dim][0] <= cut_value <= subslc.extent[slice_dim][1]:
+            cut_index = mesh.coordinate_to_index((value,), (slice_direction,), cell_centered=self.cell_centered)
+            cut_value = mesh.get_nearest_coordinate((value,), (slice_direction,), cell_centered=self.cell_centered)[0]
+            if (
+                mesh.coordinates[slice_direction][0] <= value <= mesh.coordinates[slice_direction][-1]
+                and subslc.extent[slice_dim][0] <= cut_value <= subslc.extent[slice_dim][1]
+            ):
                 shape = subslc.dimension.shape(cell_centered=self.cell_centered)
                 indices = [slice(None)]
 
@@ -440,11 +417,13 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
 
                 subslc._data = np.squeeze(subslc.data[tuple(indices)], axis=slice_dim)
                 for direction in subslc.vector_filenames.keys():
-                    subslc._vector_data[direction] = np.squeeze(subslc.vector_data[direction][tuple(indices)], axis=slice_dim)
+                    subslc._vector_data[direction] = np.squeeze(
+                        subslc.vector_data[direction][tuple(indices)], axis=slice_dim
+                    )
 
                 # Change 3D extent to 2D one
                 new_extent = subslc.extent.as_list()
-                new_extent[(slice_dim - 1) * 2:slice_dim * 2] = (cut_value, cut_value)
+                new_extent[(slice_dim - 1) * 2 : slice_dim * 2] = (cut_value, cut_value)
                 subslc.extent = Extent(*new_extent)
             else:
                 to_remove.append(mesh_id)
@@ -454,22 +433,27 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
 
         new_slice.orientation = slice_dim
         subslices = new_slice._subslices.values()
-        x_start, x_end, y_start, y_end, z_start, z_end = \
-            min(subslices, key=lambda e: e.extent.x_start).extent.x_start, \
-            max(subslices, key=lambda e: e.extent.x_end).extent.x_end, \
-            min(subslices, key=lambda e: e.extent.y_start).extent.y_start, \
-            max(subslices, key=lambda e: e.extent.y_end).extent.y_end, \
-            min(subslices, key=lambda e: e.extent.z_start).extent.z_start, \
-            max(subslices, key=lambda e: e.extent.z_end).extent.z_end
-        new_slice.extent = Extent(x_start, x_start if new_slice.orientation == 1 else x_end,
-                                  y_start, y_start if new_slice.orientation == 2 else y_end,
-                                  z_start, z_start if new_slice.orientation == 3 else z_end)
+        x_start, x_end, y_start, y_end, z_start, z_end = (
+            min(subslices, key=lambda e: e.extent.x_start).extent.x_start,
+            max(subslices, key=lambda e: e.extent.x_end).extent.x_end,
+            min(subslices, key=lambda e: e.extent.y_start).extent.y_start,
+            max(subslices, key=lambda e: e.extent.y_end).extent.y_end,
+            min(subslices, key=lambda e: e.extent.z_start).extent.z_start,
+            max(subslices, key=lambda e: e.extent.z_end).extent.z_end,
+        )
+        new_slice.extent = Extent(
+            x_start,
+            x_start if new_slice.orientation == 1 else x_end,
+            y_start,
+            y_start if new_slice.orientation == 2 else y_end,
+            z_start,
+            z_start if new_slice.orientation == 3 else z_end,
+        )
 
         return new_slice
 
     def sort_subslices_cartesian(self):
-        """Returns all subslices sorted in cartesian coordinates.
-        """
+        """Returns all subslices sorted in cartesian coordinates."""
         slices = list(self._subslices.values())
         slices_cart = [[slices[0]]]
         orientation = abs(slices[0].orientation)
@@ -504,36 +488,42 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                     slices_cart.append([slc])
         return slices_cart
 
-    def to_global(self, masked: bool = False, fill: float = 0, return_coordinates: bool = False) -> \
-    Union[np.ndarray, Tuple[np.ndarray, np.ndarray], Tuple[
-        np.ndarray, Dict[Literal['x', 'y', 'z'], np.ndarray]], Tuple[
-              Tuple[np.ndarray, np.ndarray], Tuple[Dict[Literal['x', 'y', 'z'], np.ndarray], Dict[
-                  Literal['x', 'y', 'z'], np.ndarray]]]]:
+    def to_global(
+        self, masked: bool = False, fill: float = 0, return_coordinates: bool = False
+    ) -> Union[
+        np.ndarray,
+        Tuple[np.ndarray, np.ndarray],
+        Tuple[np.ndarray, Dict[Literal["x", "y", "z"], np.ndarray]],
+        Tuple[
+            Tuple[np.ndarray, np.ndarray],
+            Tuple[Dict[Literal["x", "y", "z"], np.ndarray], Dict[Literal["x", "y", "z"], np.ndarray]],
+        ],
+    ]:
         """Creates a global numpy ndarray from all subslices (works for 2D- and 3D-slices).
-            Note: This method might create a sparse np-array that consumes lots of memory.
-            Attention: Two global slices are returned in cases where cell-centered slices cut right
-            through one or more mesh borders. If there is a cell-centered slice that cuts right
-            through the border of two meshes (mesh1 and mesh2), there will actually be two slices
-            that could be equally relevant for the user. The one will cells on mesh1 and the one
-            with cells on mesh2. As there are no cells in between (i.e. where the slice "should" be)
-            and cell-centered slices output values at the centers of each cell, FDS simply outputs
-            two slices, one on each side of the mesh borders. The fdsreader will not discard any
-            data, both slices that are output by FDS are sent to the user for him to decide which
-            one to use.
+        Note: This method might create a sparse np-array that consumes lots of memory.
+        Attention: Two global slices are returned in cases where cell-centered slices cut right
+        through one or more mesh borders. If there is a cell-centered slice that cuts right
+        through the border of two meshes (mesh1 and mesh2), there will actually be two slices
+        that could be equally relevant for the user. The one will cells on mesh1 and the one
+        with cells on mesh2. As there are no cells in between (i.e. where the slice "should" be)
+        and cell-centered slices output values at the centers of each cell, FDS simply outputs
+        two slices, one on each side of the mesh borders. The fdsreader will not discard any
+        data, both slices that are output by FDS are sent to the user for him to decide which
+        one to use.
 
-            :param masked: Whether to apply the obstruction mask to the slice or not.
-            :param fill: The fill value to use for masked slice entries. Only used when masked=True.
-            :param return_coordinates: If true, return the matching coordinate for each value on the generated grid.
+        :param masked: Whether to apply the obstruction mask to the slice or not.
+        :param fill: The fill value to use for masked slice entries. Only used when masked=True.
+        :param return_coordinates: If true, return the matching coordinate for each value on the generated grid.
         """
         if len(self._subslices) == 0:
             if return_coordinates:
-                return np.array([]), {d: np.array([]) for d in ('x', 'y', 'z')}
+                return np.array([]), {d: np.array([]) for d in ("x", "y", "z")}
             else:
                 return np.array([])
 
         subslice_sets = [dict(), dict()]
 
-        dimension = ['x', 'y', 'z'][self.orientation - 1]
+        dimension = ["x", "y", "z"][self.orientation - 1]
         base_coord = next(iter(self._subslices.values())).get_coordinates(ignore_cell_centered=False)[dimension][0]
 
         for mesh, slc in self._subslices.items():
@@ -546,67 +536,69 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             subslice_sets.pop(1)
 
         first_result_grid = None
+        first_result_coordinates = None
         for subslices in subslice_sets:
-            coord_min = {'x': math.inf, 'y': math.inf, 'z': math.inf}
-            coord_max = {'x': -math.inf, 'y': -math.inf, 'z': -math.inf}
-            for dim in ('x', 'y', 'z'):
+            coord_min = {"x": math.inf, "y": math.inf, "z": math.inf}
+            coord_max = {"x": -math.inf, "y": -math.inf, "z": -math.inf}
+            for dim in ("x", "y", "z"):
                 for slc in subslices.values():
                     co = slc.mesh.coordinates[dim]
-                    co = co[np.where(
-                        np.logical_and(co >= slc.extent[dim][0], co <= slc.extent[dim][1]))]
+                    co = co[np.where(np.logical_and(co >= slc.extent[dim][0], co <= slc.extent[dim][1]))]
                     coord_min[dim] = min(co[0], coord_min[dim])
                     coord_max[dim] = max(co[-1], coord_max[dim])
 
             # The global grid will use the finest mesh as base and duplicate values of the coarser
             # meshes. Therefore, we first find the finest mesh and calculate the step size in each
             # dimension.
-            step_sizes_min = {'x': coord_max['x'] - coord_min['x'],
-                              'y': coord_max['y'] - coord_min['y'],
-                              'z': coord_max['z'] - coord_min['z']}
-            step_sizes_max = {'x': 0, 'y': 0, 'z': 0}
+            step_sizes_min = {
+                "x": coord_max["x"] - coord_min["x"],
+                "y": coord_max["y"] - coord_min["y"],
+                "z": coord_max["z"] - coord_min["z"],
+            }
+            step_sizes_max = {"x": 0, "y": 0, "z": 0}
             steps = dict()
-            global_max = {'x': -math.inf, 'y': -math.inf, 'z': -math.inf}
+            global_max = {"x": -math.inf, "y": -math.inf, "z": -math.inf}
 
-            for dim in ('x', 'y', 'z'):
+            for dim in ("x", "y", "z"):
                 for sslc in subslices.values():
                     step_size = sslc.mesh.coordinates[dim][1] - sslc.mesh.coordinates[dim][0]
                     step_sizes_min[dim] = min(step_size, step_sizes_min[dim])
                     step_sizes_max[dim] = max(step_size, step_sizes_max[dim])
                     global_max[dim] = max(sslc.mesh.coordinates[dim][-1], global_max[dim])
 
-            for dim in ('x', 'y', 'z'):
+            for dim in ("x", "y", "z"):
                 if step_sizes_min[dim] == 0:
                     step_sizes_min[dim] = math.inf
                     steps[dim] = 1
                 else:
-                    steps[dim] = max(
-                        int(round((coord_max[dim] - coord_min[dim]) / step_sizes_min[dim])), 1) + (
-                                     0 if self.cell_centered else 1)  # + step_sizes_max[dim] / step_sizes_min[dim]
+                    steps[dim] = max(int(round((coord_max[dim] - coord_min[dim]) / step_sizes_min[dim])), 1) + (
+                        0 if self.cell_centered else 1
+                    )  # + step_sizes_max[dim] / step_sizes_min[dim]
 
-            grid = np.full((self.n_t, steps['x'], steps['y'], steps['z']), np.nan)
+            grid = np.full((self.n_t, steps["x"], steps["y"], steps["z"]), np.nan)
 
             start_idx = dict()
             end_idx = dict()
             for slc in subslices.values():
-                slc_data = slc.data.copy() if slc.orientation == 0 else np.expand_dims(slc.data.copy(),
-                                                                                axis=slc.orientation)
+                slc_data = (
+                    slc.data.copy() if slc.orientation == 0 else np.expand_dims(slc.data.copy(), axis=slc.orientation)
+                )
                 if masked:
                     mask = slc.mesh.get_obstruction_mask_slice(slc)
 
                 for axis in (0, 1, 2):
-                    dim = ('x', 'y', 'z')[axis]
+                    dim = ("x", "y", "z")[axis]
                     if axis == slc.orientation - 1:
                         start_idx[dim] = 0
                         end_idx[dim] = 1
                         continue
-                    n_repeat = max(int(round(
-                        (slc.mesh.coordinates[dim][1] - slc.mesh.coordinates[dim][0]) /
-                        step_sizes_min[dim])), 1)
+                    n_repeat = max(
+                        int(round((slc.mesh.coordinates[dim][1] - slc.mesh.coordinates[dim][0]) / step_sizes_min[dim])),
+                        1,
+                    )
 
-                    start_idx[dim] = int(round(
-                        (slc.mesh.coordinates[dim][0] - coord_min[dim]) / step_sizes_min[dim]))
-                    end_idx[dim] = int(round(
-                        (slc.mesh.coordinates[dim][-1] - coord_min[dim]) / step_sizes_min[dim]))
+                    start_idx[dim] = int(round((slc.mesh.coordinates[dim][0] - coord_min[dim]) / step_sizes_min[dim]))
+                    end_idx[dim] = int(round((slc.mesh.coordinates[dim][-1] - coord_min[dim]) / step_sizes_min[dim]))
 
                     # We ignore border points unless they are actually on the border of the simulation space as all
                     # other border points actually appear twice, as the subslices overlap. This only
@@ -644,16 +636,21 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                 if masked:
                     slc_data = np.where(mask, slc_data, fill)
 
-                grid[:, start_idx['x']: end_idx['x'], start_idx['y']: end_idx['y'],
-                start_idx['z']: end_idx['z']] = slc_data.reshape(
-                    (self.n_t, end_idx['x'] - start_idx['x'], end_idx['y'] - start_idx['y'],
-                     end_idx['z'] - start_idx['z']))
+                grid[:, start_idx["x"] : end_idx["x"], start_idx["y"] : end_idx["y"], start_idx["z"] : end_idx["z"]] = (
+                    slc_data.reshape(
+                        (
+                            self.n_t,
+                            end_idx["x"] - start_idx["x"],
+                            end_idx["y"] - start_idx["y"],
+                            end_idx["z"] - start_idx["z"],
+                        )
+                    )
+                )
 
             if return_coordinates:
                 coordinates = dict()
-                for dim_index, dim in enumerate(('x', 'y', 'z')):
-                    coordinates[dim] = np.linspace(coord_min[dim], coord_max[dim],
-                                                   grid.shape[dim_index + 1])
+                for dim_index, dim in enumerate(("x", "y", "z")):
+                    coordinates[dim] = np.linspace(coord_min[dim], coord_max[dim], grid.shape[dim_index + 1])
 
             # Remove dimension corresponding to orientation for 2D slices
             if self.orientation != 0:
@@ -677,10 +674,10 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             return first_result_grid
 
     @property
-    def type(self) -> Literal['2D', '3D']:
+    def type(self) -> Literal["2D", "3D"]:
         if self.orientation == 0:
-            return '3D'
-        return '2D'
+            return "3D"
+        return "2D"
 
     @implements(np.amin)
     def _min(self):
@@ -705,18 +702,17 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         :returns: The calculated standard deviation.
         """
         mean = self.mean
-        sum = np.sum(
-            [np.sum(np.power(subsclice.data - mean, 2)) for subsclice in self._subslices.values()])
+        sum = np.sum([np.sum(np.power(subsclice.data - mean, 2)) for subsclice in self._subslices.values()])
         N = np.sum([subsclice.data.size for subsclice in self._subslices.values()])
         return np.sqrt(sum / N)
 
     def __array__(self):
-        """Method that will be called by numpy when trying to convert the object to a numpy ndarray.
-        """
+        """Method that will be called by numpy when trying to convert the object to a numpy ndarray."""
         raise UserWarning(
             "Slices can not be converted to numpy arrays, but they support all typical numpy"
             " operations such as np.multiply. If a 'global' array containing all subslices is"
-            " required, use the 'to_global' method and use the returned numpy-array explicitly.")
+            " required, use the 'to_global' method and use the returned numpy-array explicitly."
+        )
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """Method that will be called by numpy when using a ufunction with a Slice as input.
@@ -727,7 +723,9 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             logging.warning(
                 "The %s method has been used which is not explicitly implemented. Correctness of"
                 " results is not guaranteed. If you require this feature to be implemented please"
-                " submit an issue on Github where you explain your use case.", method)
+                " submit an issue on Github where you explain your use case.",
+                method,
+            )
         input_list = list(inputs)
         for i, inp in enumerate(inputs):
             if isinstance(inp, self.__class__):
@@ -736,7 +734,8 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             raise UserWarning(
                 f"The {method} operation is not implemented for multiple slices as input yet. If"
                 " you require this feature, please request this functionality by submitting an"
-                " issue on Github.")
+                " issue on Github."
+            )
 
         new_slice = deepcopy(self)
         for subslice in new_slice._subslices.values():
@@ -756,10 +755,13 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         return _HANDLED_FUNCTIONS[func](*args, **kwargs)
 
     def __repr__(self):
-        if self.type == '3D':  # 3D-Slice
+        if self.type == "3D":  # 3D-Slice
             return f"Slice([3D] quantity={self.quantity}, cell_centered={self.cell_centered}, extent={self.extent})"
         else:  # 2D-Slice
-            return f"Slice([2D] quantity={self.quantity}, cell_centered={self.cell_centered}, extent={self.extent}, " \
-                   f"extent_dirs={self.extent_dirs}, orientation={self.orientation})"
+            return (
+                f"Slice([2D] quantity={self.quantity}, cell_centered={self.cell_centered}, extent={self.extent}, "
+                f"extent_dirs={self.extent_dirs}, orientation={self.orientation})"
+            )
+
 
 # __array_function__ implementations

@@ -1,6 +1,6 @@
-from typing import Union, Tuple, Dict
+from typing import Dict, Tuple, Union
 
-from fdsreader.fds_classes import Surface, Mesh
+from fdsreader.fds_classes import Mesh, Surface
 from fdsreader.utils import Extent
 
 
@@ -44,12 +44,17 @@ class Ventilation:
     :ivar radius: Radius of the ventilation circle.
     """
 
-    def __init__(self, surface: Surface, bound_indices: Tuple[int, int, int, int, int, int],
-                 color_index: int, draw_type: int,
-                 rgba: Union[Tuple[()], Tuple[float, float, float, float]] = (),
-                 texture_origin: Union[Tuple[()], Tuple[float, float, float]] = (),
-                 circular_vent_origin: Union[Tuple[()], Tuple[float, float, float]] = (),
-                 radius: float = -1):
+    def __init__(
+        self,
+        surface: Surface,
+        bound_indices: Tuple[int, int, int, int, int, int],
+        color_index: int,
+        draw_type: int,
+        rgba: Union[Tuple[()], Tuple[float, float, float, float]] = (),
+        texture_origin: Union[Tuple[()], Tuple[float, float, float]] = (),
+        circular_vent_origin: Union[Tuple[()], Tuple[float, float, float]] = (),
+        radius: float = -1,
+    ):
         self.surface = surface
         self.bound_indices = bound_indices
         self.color_index = color_index
@@ -72,4 +77,4 @@ class Ventilation:
         self._subventilations[mesh.id] = SubVentilation(mesh, extent)
 
     def __repr__(self, *args, **kwargs):
-        return f"Ventilation()"
+        return "Ventilation()"

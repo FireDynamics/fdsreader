@@ -1,22 +1,22 @@
+import bisect
 import logging
+import math
 import os
 from copy import deepcopy
-from typing import Dict, Sequence, Tuple, Literal, Union, List
-import numpy as np
-import math
-import bisect
+from typing import Dict, List, Literal, Tuple, Union
 
+import numpy as np
+
+import fdsreader.utils.fortran_data as fdtype
+from fdsreader import settings
 from fdsreader.fds_classes import Mesh
 from fdsreader.utils import Quantity
-from fdsreader import settings
-import fdsreader.utils.fortran_data as fdtype
 
 _HANDLED_FUNCTIONS = {np.mean: (lambda pl: pl.mean)}
 
 
 def implements(np_function):
-    """Decorator to register an __array_function__ implementation for Plot3Ds.
-    """
+    """Decorator to register an __array_function__ implementation for Plot3Ds."""
 
     def decorator(func):
         _HANDLED_FUNCTIONS[np_function] = func
@@ -30,8 +30,9 @@ class SubPlot3D:
 
     :ivar mesh: The mesh containing the data.
     """
+
     # Offset of the binary file to the end of the file header.
-    _offset = fdtype.new((('i', 3),)).itemsize + fdtype.new((('i', 4),)).itemsize
+    _offset = fdtype.new((("i", 3),)).itemsize + fdtype.new((("i", 4),)).itemsize
 
     def __init__(self, mesh: Mesh, quantity_idx: int):
         self.file_paths: List[str] = list()  # Path to the binary data file for each time step
@@ -49,17 +50,17 @@ class SubPlot3D:
         """
         if not hasattr(self, "_data"):
             self._data = np.empty(shape=(len(self.file_paths),) + self.mesh.dimension.shape())
-            dtype_data = fdtype.new((('f', self.mesh.dimension.size() * 5),))
+            dtype_data = fdtype.new((("f", self.mesh.dimension.size() * 5),))
             for t, file_path in enumerate(self.file_paths):
-                with open(file_path, 'rb') as infile:
+                with open(file_path, "rb") as infile:
                     infile.seek(self._offset)
                     self._data[t, :, :, :] = fdtype.read(infile, dtype_data, 1)[0][0].reshape(
-                        self.mesh.dimension.shape() + (5,), order='F')[:, :, :, self._quantity_idx]
+                        self.mesh.dimension.shape() + (5,), order="F"
+                    )[:, :, :, self._quantity_idx]
         return self._data
 
     def clear_cache(self):
-        """Remove all data from the internal cache that has been loaded so far to free memory.
-        """
+        """Remove all data from the internal cache that has been loaded so far to free memory."""
         if hasattr(self, "_data"):
             del self._data
 
@@ -96,8 +97,7 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
             _ = self._subplots[mesh.id].data
 
     def __getitem__(self, mesh: Mesh):
-        """Returns the :class:`SubPlot` that contains data for the given mesh.
-        """
+        """Returns the :class:`SubPlot` that contains data for the given mesh."""
         return self._subplots[mesh.id]
 
     @implements(np.mean)
@@ -123,28 +123,28 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
         return np.sqrt(sum / N)
 
     def clear_cache(self):
-        """Remove all data from the internal cache that has been loaded so far to free memory.
-        """
+        """Remove all data from the internal cache that has been loaded so far to free memory."""
         for subplot in self._subplots.values():
             subplot.clear_cache()
 
-    def to_global(self, masked: bool = False, fill: float = 0, return_coordinates: bool = False) -> \
-            Union[np.ndarray, Tuple[np.ndarray, Dict[Literal['x', 'y', 'z'], np.ndarray]]]:
+    def to_global(
+        self, masked: bool = False, fill: float = 0, return_coordinates: bool = False
+    ) -> Union[np.ndarray, Tuple[np.ndarray, Dict[Literal["x", "y", "z"], np.ndarray]]]:
         """Creates a global numpy ndarray from all subplots.
 
-            :param masked: Whether to apply the obstruction mask to the data or not.
-            :param fill: The fill value to use for masked entries. Only used when masked=True.
-            :param return_coordinates: If true, return the matching coordinate for each value on the generated grid.
+        :param masked: Whether to apply the obstruction mask to the data or not.
+        :param fill: The fill value to use for masked entries. Only used when masked=True.
+        :param return_coordinates: If true, return the matching coordinate for each value on the generated grid.
         """
         if len(self._subplots) == 0:
             if return_coordinates:
-                return np.array([]), {d: np.array([]) for d in ('x', 'y', 'z')}
+                return np.array([]), {d: np.array([]) for d in ("x", "y", "z")}
             else:
                 return np.array([])
 
-        coord_min = {'x': math.inf, 'y': math.inf, 'z': math.inf}
-        coord_max = {'x': -math.inf, 'y': -math.inf, 'z': -math.inf}
-        for dim in ('x', 'y', 'z'):
+        coord_min = {"x": math.inf, "y": math.inf, "z": math.inf}
+        coord_max = {"x": -math.inf, "y": -math.inf, "z": -math.inf}
+        for dim in ("x", "y", "z"):
             for subplot in self._subplots.values():
                 co = subplot.mesh.coordinates[dim]
                 coord_min[dim] = min(co[0], coord_min[dim])
@@ -153,29 +153,32 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
         # The global grid will use the finest mesh as base and duplicate values of the coarser
         # meshes. Therefore, we first find the finest mesh and calculate the step size in each
         # dimension.
-        step_sizes_min = {'x': coord_max['x'] - coord_min['x'],
-                          'y': coord_max['y'] - coord_min['y'],
-                          'z': coord_max['z'] - coord_min['z']}
-        step_sizes_max = {'x': 0, 'y': 0, 'z': 0}
+        step_sizes_min = {
+            "x": coord_max["x"] - coord_min["x"],
+            "y": coord_max["y"] - coord_min["y"],
+            "z": coord_max["z"] - coord_min["z"],
+        }
+        step_sizes_max = {"x": 0, "y": 0, "z": 0}
         steps = dict()
-        global_max = {'x': -math.inf, 'y': -math.inf, 'z': -math.inf}
+        global_max = {"x": -math.inf, "y": -math.inf, "z": -math.inf}
 
-        for dim in ('x', 'y', 'z'):
+        for dim in ("x", "y", "z"):
             for subplot in self._subplots.values():
                 step_size = subplot.mesh.coordinates[dim][1] - subplot.mesh.coordinates[dim][0]
                 step_sizes_min[dim] = min(step_size, step_sizes_min[dim])
                 step_sizes_max[dim] = max(step_size, step_sizes_max[dim])
                 global_max[dim] = max(subplot.mesh.coordinates[dim][-1], global_max[dim])
 
-        for dim in ('x', 'y', 'z'):
+        for dim in ("x", "y", "z"):
             if step_sizes_min[dim] == 0:
                 step_sizes_min[dim] = math.inf
                 steps[dim] = 1
             else:
-                steps[dim] = max(int(round((coord_max[dim] - coord_min[dim]) / step_sizes_min[dim])),
-                                 1) + 1  # + step_sizes_max[dim] / step_sizes_min[dim]
+                steps[dim] = (
+                    max(int(round((coord_max[dim] - coord_min[dim]) / step_sizes_min[dim])), 1) + 1
+                )  # + step_sizes_max[dim] / step_sizes_min[dim]
 
-        grid = np.full((self.n_t, steps['x'], steps['y'], steps['z']), np.nan)
+        grid = np.full((self.n_t, steps["x"], steps["y"], steps["z"]), np.nan)
 
         start_idx = dict()
         end_idx = dict()
@@ -184,15 +187,19 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
             if masked:
                 mask = subplot.mesh.get_obstruction_mask(self.times)
 
-            start_idx = {dim: int(round(
-                (subplot.mesh.coordinates[dim][0] - coord_min[dim]) / step_sizes_min[dim])) for dim in ('x', 'y', 'z')}
-            end_idx = {dim: int(round(
-                (subplot.mesh.coordinates[dim][-1] - coord_min[dim]) / step_sizes_min[dim])) for dim in ('x', 'y', 'z')}
+            start_idx = {
+                dim: int(round((subplot.mesh.coordinates[dim][0] - coord_min[dim]) / step_sizes_min[dim]))
+                for dim in ("x", "y", "z")
+            }
+            end_idx = {
+                dim: int(round((subplot.mesh.coordinates[dim][-1] - coord_min[dim]) / step_sizes_min[dim]))
+                for dim in ("x", "y", "z")
+            }
 
             temp_data = dict()
             temp_mask = dict()
             for axis in range(3):
-                dim = ('x', 'y', 'z')[axis]
+                dim = ("x", "y", "z")[axis]
                 # Temporarily save border points to add them back to the array again later
                 if np.isclose(subplot.mesh.coordinates[dim][-1], global_max[dim]):
                     temp_data_slices = [slice(s) for s in subplot_data.shape]
@@ -205,26 +212,35 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
             # We ignore border points unless they are actually on the border of the simulation space as all
             # other border points actually appear twice, as the subslices overlap. This only
             # applies for face_centered slices, as cell_centered slices will not overlap.
-            reduced_shape_slices = (slice(subplot.data.shape[0]),) + tuple(slice(1, None) for s in subplot.data.shape[1:])
+            reduced_shape_slices = (slice(subplot.data.shape[0]),) + tuple(
+                slice(1, None) for s in subplot.data.shape[1:]
+            )
             subplot_data = subplot_data[reduced_shape_slices]
             if masked:
                 mask = mask[reduced_shape_slices]
 
-                n_repeat = max(int(round(
-                    (subplot.mesh.coordinates[dim][1] - subplot.mesh.coordinates[dim][0]) /
-                    step_sizes_min[dim])), 1)
+                n_repeat = max(
+                    int(
+                        round(
+                            (subplot.mesh.coordinates[dim][1] - subplot.mesh.coordinates[dim][0]) / step_sizes_min[dim]
+                        )
+                    ),
+                    1,
+                )
                 if n_repeat > 1:
                     subplot_data = np.repeat(subplot_data, n_repeat, axis=axis + 1)
                     if masked:
                         mask = np.repeat(mask, n_repeat, axis=axis + 1)
 
             for axis in range(3):
-                dim = ('x', 'y', 'z')[axis]
+                dim = ("x", "y", "z")[axis]
                 # Add border points back again if needed
                 if np.isclose(subplot.mesh.coordinates[dim][-1], global_max[dim]):
                     temp_data_slices = [slice(s) for s in subplot_data.shape]
                     temp_data_slices[axis + 1] = slice(None)
-                    subplot_data = np.concatenate((subplot_data, temp_data[dim][tuple(temp_data_slices)]), axis=axis + 1)
+                    subplot_data = np.concatenate(
+                        (subplot_data, temp_data[dim][tuple(temp_data_slices)]), axis=axis + 1
+                    )
                     if masked:
                         mask = np.concatenate((mask, temp_mask[dim][tuple(temp_data_slices)]), axis=axis + 1)
 
@@ -233,14 +249,20 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
             if masked:
                 subplot_data = np.where(mask, subplot_data, fill)
 
-            grid[:, start_idx['x']: end_idx['x'], start_idx['y']: end_idx['y'],
-            start_idx['z']: end_idx['z']] = subplot_data.reshape(
-                (self.n_t, end_idx['x'] - start_idx['x'], end_idx['y'] - start_idx['y'],
-                 end_idx['z'] - start_idx['z']))
+            grid[:, start_idx["x"] : end_idx["x"], start_idx["y"] : end_idx["y"], start_idx["z"] : end_idx["z"]] = (
+                subplot_data.reshape(
+                    (
+                        self.n_t,
+                        end_idx["x"] - start_idx["x"],
+                        end_idx["y"] - start_idx["y"],
+                        end_idx["z"] - start_idx["z"],
+                    )
+                )
+            )
 
         if return_coordinates:
             coordinates = dict()
-            for dim_index, dim in enumerate(('x', 'y', 'z')):
+            for dim_index, dim in enumerate(("x", "y", "z")):
                 coordinates[dim] = np.linspace(coord_min[dim], coord_max[dim], grid.shape[dim_index + 1])
 
         if return_coordinates:
@@ -250,23 +272,21 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
 
     @property
     def n_t(self) -> int:
-        """Get the number of timesteps for which data was output.
-        """
+        """Get the number of timesteps for which data was output."""
         return len(self.times)
 
     @property
     def subplots(self):
-        """Returns a list with one SubPlot3D object per mesh.
-        """
+        """Returns a list with one SubPlot3D object per mesh."""
         return list(self._subplots.values())
 
     def __array__(self):
-        """Method that will be called by numpy when trying to convert the object to a numpy ndarray.
-        """
+        """Method that will be called by numpy when trying to convert the object to a numpy ndarray."""
         raise UserWarning(
             "Plot3Ds can not be converted to numpy arrays, but they support all typical numpy"
             " operations such as np.multiply. If a 'global' array containing all subplots is"
-            " required, please use the 'to_global' method and use the returned numpy-array explicitly.")
+            " required, please use the 'to_global' method and use the returned numpy-array explicitly."
+        )
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         """Method that will be called by numpy when using a ufunction with a Plot3D as input.
@@ -277,7 +297,9 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
             logging.warning(
                 "The %s method has been used which is not explicitly implemented. Correctness of"
                 " results is not guaranteed. If you require this feature to be implemented please"
-                " submit an issue on Github where you explain your use case.", method)
+                " submit an issue on Github where you explain your use case.",
+                method,
+            )
         input_list = list(inputs)
         for i, inp in enumerate(inputs):
             if isinstance(inp, self.__class__):
@@ -299,6 +321,7 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
         if not all(issubclass(t, self.__class__) for t in types):
             return NotImplemented
         return _HANDLED_FUNCTIONS[func](*args, **kwargs)
+
 
 # __array_function__ implementations
 # ...

@@ -1,6 +1,9 @@
-from . import _version
-__version__ = str(_version.__version__.public())
+from importlib.metadata import PackageNotFoundError, version
 
-from .simulation import Simulation
+try:
+    __version__ = version("fdsreader")
+except PackageNotFoundError:
+    __version__ = "unknown"
 
-from . import settings
+from . import settings as settings
+from .simulation import Simulation as Simulation

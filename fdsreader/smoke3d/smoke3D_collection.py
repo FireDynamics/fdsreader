@@ -6,7 +6,7 @@ from fdsreader.utils.data import FDSDataCollection, Quantity
 
 class Smoke3DCollection(FDSDataCollection):
     """Collection of :class:`Smoke3D` objects. Offers extensive functionality for filtering and using Smoke3Ds as well
-        as its subclasses such as :class:`SubSmoke3D`.
+    as its subclasses such as :class:`SubSmoke3D`.
     """
 
     def __init__(self, *smoke3ds: Iterable[Smoke3D]):
@@ -17,12 +17,14 @@ class Smoke3DCollection(FDSDataCollection):
         return [smoke3d.name for smoke3d in self._elements]
 
     def get_by_quantity(self, quantity: Union[Quantity, str]):
-        """Gets the :class:`Smoke3D` with a specific quantity.
-        """
-        if type(quantity) == Quantity:
+        """Gets the :class:`Smoke3D` with a specific quantity."""
+        if isinstance(quantity, Quantity):
             quantity = quantity.name
-        return next(x for x in self._elements if
-                    x.quantity.name.lower() == quantity.lower() or x.quantity.short_name.lower() == quantity.lower())
+        return next(
+            x
+            for x in self._elements
+            if x.quantity.name.lower() == quantity.lower() or x.quantity.short_name.lower() == quantity.lower()
+        )
 
     def __repr__(self):
-        return "Smoke3DCollection(" + super(Smoke3DCollection, self).__repr__() + ")"
+        return "Smoke3DCollection(" + super().__repr__() + ")"

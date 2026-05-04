@@ -8,7 +8,7 @@ from fdsreader.utils.data import FDSDataCollection, Quantity
 
 class SliceCollection(FDSDataCollection):
     """Collection of :class:`Slice` objects. Offers additional functionality for filtering and
-        using slices as well as its subclasses such as :class:`SubSlice`.
+    using slices as well as its subclasses such as :class:`SubSlice`.
     """
 
     def __init__(self, *slices: Iterable[Slice]):
@@ -19,21 +19,22 @@ class SliceCollection(FDSDataCollection):
         return list({slc.quantity.name for slc in self})
 
     def filter_by_quantity(self, quantity: Union[str, Quantity]):
-        """Filters all slices by a specific quantity.
-        """
-        if type(quantity) == Quantity:
+        """Filters all slices by a specific quantity."""
+        if isinstance(quantity, Quantity):
             quantity = quantity.name
-        return SliceCollection(x for x in self if x.quantity.name.lower() == quantity.lower()
-                               or x.quantity.short_name.lower() == quantity.lower())
+        return SliceCollection(
+            x
+            for x in self
+            if x.quantity.name.lower() == quantity.lower() or x.quantity.short_name.lower() == quantity.lower()
+        )
 
     def get_by_id(self, slice_id: str):
-        """Get the slice with corresponding id if it exists.
-        """
+        """Get the slice with corresponding id if it exists."""
         return next((slc for slc in self if slc.id == slice_id), None)
 
     def get_nearest(self, x: float = None, y: float = None, z: float = None) -> Slice:
         """Filters the slice with the shortest distance to the given point.
-            If there are multiple slices with the same distance, a random one will be selected.
+        If there are multiple slices with the same distance, a random one will be selected.
         """
 
         d_min = np.finfo(float).max
@@ -49,15 +50,15 @@ class SliceCollection(FDSDataCollection):
                 slices_min.append(slc)
 
         if x is not None:
-            slices_min.sort(key=lambda slc: (slc.extent.x_end - slc.extent.x_start))
+            slices_min.sort(key=lambda slc: slc.extent.x_end - slc.extent.x_start)
         if y is not None:
-            slices_min.sort(key=lambda slc: (slc.extent.y_end - slc.extent.y_start))
+            slices_min.sort(key=lambda slc: slc.extent.y_end - slc.extent.y_start)
         if z is not None:
-            slices_min.sort(key=lambda slc: (slc.extent.z_end - slc.extent.z_start))
+            slices_min.sort(key=lambda slc: slc.extent.z_end - slc.extent.z_start)
 
         if len(slices_min) > 0:
             return slices_min[0]
         return None
 
     def __repr__(self):
-        return "SliceCollection(" + super(SliceCollection, self).__repr__() + ")"
+        return "SliceCollection(" + super().__repr__() + ")"

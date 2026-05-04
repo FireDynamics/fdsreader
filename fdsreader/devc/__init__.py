@@ -1,3 +1,2 @@
-from .device import Device
-
-from .device_collection import DeviceCollection
+from .device import Device as Device
+from .device_collection import DeviceCollection as DeviceCollection

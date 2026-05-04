@@ -4,8 +4,7 @@ from fdsreader.bndf import Patch
 
 
 def sort_patches_cartesian(patches_in: List[Patch]):
-    """Returns all patches (of same orientation!) sorted in cartesian coordinates.
-    """
+    """Returns all patches (of same orientation!) sorted in cartesian coordinates."""
     patches = patches_in.copy()
     if len(patches) != 0:
         patches_cart = [[patches[0]]]

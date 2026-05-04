@@ -3,6 +3,12 @@ FDSReader documentation!
 
 .. toctree::
    :maxdepth: 1
+   :caption: Maintainer Guide
+
+   releasing
+
+.. toctree::
+   :maxdepth: 1
    :caption: FDSReader
 
    simulation

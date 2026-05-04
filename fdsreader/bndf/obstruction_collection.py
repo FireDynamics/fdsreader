@@ -1,4 +1,5 @@
-from typing import Iterable, Tuple, List
+from typing import Iterable, List
+
 import numpy as np
 
 from fdsreader.bndf import Obstruction
@@ -7,7 +8,7 @@ from fdsreader.utils.data import FDSDataCollection, Quantity
 
 class ObstructionCollection(FDSDataCollection):
     """Collection of :class:`Obstruction` objects. Offers extensive functionality for filtering and
-        using obstructions as well as dependent such as :class:`Boundary`.
+    using obstructions as well as dependent such as :class:`Boundary`.
     """
 
     def __init__(self, *obstructions: Iterable[Obstruction]):
@@ -22,18 +23,15 @@ class ObstructionCollection(FDSDataCollection):
         return list(qs)
 
     def filter_by_boundary_data(self):
-        """Filters all obstructions for which output data exists.
-        """
+        """Filters all obstructions for which output data exists."""
         return ObstructionCollection(x for x in self._elements if x.has_boundary_data)
 
     def get_by_id(self, obst_id: str):
-        """Get the obstruction with corresponding id if it exists.
-        """
+        """Get the obstruction with corresponding id if it exists."""
         return next((obst for obst in self._elements if obst.id == obst_id), None)
 
     def get_nearest(self, x: float = None, y: float = None, z: float = None) -> Obstruction:
-        """Filters the obstruction with the shortest distance to the given point.
-        """
+        """Filters the obstruction with the shortest distance to the given point."""
         d_min = np.finfo(float).max
         obst_min = None
 
@@ -50,4 +48,4 @@ class ObstructionCollection(FDSDataCollection):
         return obst_min
 
     def __repr__(self):
-        return "ObstructionCollection(" + super(ObstructionCollection, self).__repr__() + ")"
+        return "ObstructionCollection(" + super().__repr__() + ")"

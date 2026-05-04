@@ -1,16 +1,15 @@
-from typing import Iterable, Dict, List
+from typing import Dict, Iterable, List
+
 import numpy as np
 
-from fdsreader.part import Particle
-from fdsreader.fds_classes import Mesh
-from fdsreader.utils.data import FDSDataCollection, Quantity
 import fdsreader.utils.fortran_data as fdtype
 from fdsreader import settings
+from fdsreader.part import Particle
+from fdsreader.utils.data import FDSDataCollection, Quantity
 
 
 class ParticleCollection(FDSDataCollection):
-    """Collection of :class:`Particle` objects.
-    """
+    """Collection of :class:`Particle` objects."""
 
     def __init__(self, times: Iterable[float], particles: Iterable[Particle]):
         super().__init__(particles)
@@ -38,8 +37,7 @@ class ParticleCollection(FDSDataCollection):
             self._load_data()
 
     def _load_data(self):
-        """Function to read in all particle data for a simulation.
-        """
+        """Function to read in all particle data for a simulation."""
         particles = self
         pointer_location = {particle: [0] * len(self.times) for particle in particles}
 
@@ -55,14 +53,15 @@ class ParticleCollection(FDSDataCollection):
                     particle._tags.append(np.empty((size,), dtype=int))
 
         for mesh, file_path in self._file_paths.items():
-            with open(file_path, 'rb') as infile:
+            with open(file_path, "rb") as infile:
                 # Initial offset (ONE, fds version and number of particle classes)
                 offset = 3 * fdtype.INT.itemsize
                 # Number of quantities for each particle class (plus an INTEGER_ZERO)
-                offset += fdtype.new((('i', 2),)).itemsize * len(particles)
+                offset += fdtype.new((("i", 2),)).itemsize * len(particles)
                 # 30-char long name and unit information for each quantity
-                offset += fdtype.new((('c', 30),)).itemsize * 2 * sum(
-                    [len(particle.quantities) for particle in particles])
+                offset += (
+                    fdtype.new((("c", 30),)).itemsize * 2 * sum([len(particle.quantities) for particle in particles])
+                )
                 infile.seek(offset)
 
                 for t in range(len(self.times)):
@@ -75,30 +74,32 @@ class ParticleCollection(FDSDataCollection):
                         n_particles = fdtype.read(infile, fdtype.INT, 1)[0][0][0]
                         offset = pointer_location[particle][t]
                         # Read positions
-                        dtype_positions = fdtype.new((('f', 3 * n_particles),))
+                        dtype_positions = fdtype.new((("f", 3 * n_particles),))
                         pos = fdtype.read(infile, dtype_positions, 1)[0][0]
-                        particle._positions[t][offset: offset + n_particles] = pos.reshape((n_particles, 3),
-                                                                                           order='F').astype(float)
+                        particle._positions[t][offset : offset + n_particles] = pos.reshape(
+                            (n_particles, 3), order="F"
+                        ).astype(float)
 
                         # Read tags
-                        dtype_tags = fdtype.new((('i', n_particles),))
-                        particle._tags[t][offset: offset + n_particles] = fdtype.read(infile, dtype_tags, 1)[0][0]
+                        dtype_tags = fdtype.new((("i", n_particles),))
+                        particle._tags[t][offset : offset + n_particles] = fdtype.read(infile, dtype_tags, 1)[0][0]
 
                         # Read actual quantity values
                         if len(particle.quantities) > 0:
-                            dtype_data = fdtype.new(
-                                (('f', str((n_particles, len(particle.quantities)))),))
+                            dtype_data = fdtype.new((("f", str((n_particles, len(particle.quantities)))),))
                             data_raw = fdtype.read(infile, dtype_data, 1)[0][0].reshape(
-                                (n_particles, len(particle.quantities)), order='F')
+                                (n_particles, len(particle.quantities)), order="F"
+                            )
 
                             for q, quantity in enumerate(particle.quantities):
-                                particle._data[quantity.name][t][
-                                offset:offset + n_particles] = data_raw[:, q].astype(float)
+                                particle._data[quantity.name][t][offset : offset + n_particles] = data_raw[:, q].astype(
+                                    float
+                                )
 
                         pointer_location[particle][t] += particle.n_particles[mesh][t]
 
     def __getitem__(self, key):
-        if type(key) == int:
+        if isinstance(key, int):
             return self._elements[key]
         for particle in self:
             if particle.class_name == key:
@@ -113,4 +114,4 @@ class ParticleCollection(FDSDataCollection):
         return False
 
     def __repr__(self):
-        return "ParticleCollection(" + super(ParticleCollection, self).__repr__() + ")"
+        return "ParticleCollection(" + super().__repr__() + ")"

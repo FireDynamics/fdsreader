@@ -1,11 +1,10 @@
-import threading
-from typing import Tuple, Dict, Iterable
+from typing import Dict, Iterable, Tuple
 
 import numpy as np
 
+import fdsreader.utils.fortran_data as fdtype
 from fdsreader.fds_classes import Surface
 from fdsreader.utils import Quantity
-import fdsreader.utils.fortran_data as fdtype
 
 
 class GeomBoundary:
@@ -29,8 +28,9 @@ class GeomBoundary:
         self.file_paths_be: Dict[int, str] = dict()
         self.file_paths_gbf: Dict[int, str] = dict()
 
-    def _add_data(self, mesh: int, file_path_be: str, file_path_gbf: str, lower_bounds: np.ndarray,
-                  upper_bounds: np.ndarray):
+    def _add_data(
+        self, mesh: int, file_path_be: str, file_path_gbf: str, lower_bounds: np.ndarray, upper_bounds: np.ndarray
+    ):
         self.file_paths_be[mesh] = file_path_be
         self.file_paths_gbf[mesh] = file_path_gbf
 
@@ -46,35 +46,32 @@ class GeomBoundary:
             file_path_be = self.file_paths_be[mesh]
             file_path_gbf = self.file_paths_gbf[mesh]
             # Load .gbf
-            with open(file_path_gbf, 'rb') as infile:
-                offset = fdtype.INT.itemsize * 2 + fdtype.new(
-                    (('i', 3),)).itemsize + fdtype.FLOAT.itemsize
+            with open(file_path_gbf, "rb") as infile:
+                offset = fdtype.INT.itemsize * 2 + fdtype.new((("i", 3),)).itemsize + fdtype.FLOAT.itemsize
                 infile.seek(offset)
 
-                dtype_meta = fdtype.new((('i', 3),))
+                dtype_meta = fdtype.new((("i", 3),))
                 n_vertices, n_faces, _ = np.fromfile(infile, dtype_meta, 1)[0][1]
 
-                dtype_vertices = fdtype.new((('f', 3 * n_vertices),))
-                vertices = np.fromfile(infile, dtype_vertices, 1)[0][1].reshape(
-                    (n_vertices, 3)).astype(float)
+                dtype_vertices = fdtype.new((("f", 3 * n_vertices),))
+                vertices = np.fromfile(infile, dtype_vertices, 1)[0][1].reshape((n_vertices, 3)).astype(float)
 
-                dtype_faces = fdtype.new((('i', 3 * n_faces),))
-                faces = fdtype.read(infile, dtype_faces, 1)[0][0].reshape((n_faces, 3)).astype(
-                    int) - 1
+                dtype_faces = fdtype.new((("i", 3 * n_faces),))
+                faces = fdtype.read(infile, dtype_faces, 1)[0][0].reshape((n_faces, 3)).astype(int) - 1
 
             # Load .be
-            dtype_faces = fdtype.new((('f', n_faces),))
-            dtype_meta = fdtype.new((('i', 4),))
+            dtype_faces = fdtype.new((("f", n_faces),))
+            dtype_meta = fdtype.new((("i", 4),))
             data = np.empty((self.n_t, n_faces), dtype=np.float32)
-            with open(file_path_be, 'rb') as infile:
+            with open(file_path_be, "rb") as infile:
                 offset = fdtype.INT.itemsize * 2
                 infile.seek(offset)
                 for t in range(self.n_t):
                     # Skip time value
                     infile.seek(fdtype.FLOAT.itemsize, 1)
-                    assert fdtype.read(infile, dtype_meta, 1)[0][0][3] == n_faces, "Something went wrong, please" \
-                                                                                   " submit an issue on Github" \
-                                                                                   " attaching your fds case!"
+                    assert fdtype.read(infile, dtype_meta, 1)[0][0][3] == n_faces, (
+                        "Something went wrong, please submit an issue on Github attaching your fds case!"
+                    )
                     if n_faces > 0:
                         data[t, :] = np.fromfile(infile, dtype_faces, 1)[0][1]
 
@@ -140,7 +137,8 @@ class GeomBoundary:
     #         times.append(self.n_t)
     #         threads = list()
     #         for i in range(len(times)-1):
-    #             threads.append(BEReader(file_path_be, offset+stride*times[i], times[i+1] - times[i], data, times[i], n_faces))
+    #             threads.append(BEReader(file_path_be, offset+stride*times[i], times[i+1] - times[i],
+    #                                     data, times[i], n_faces))
     #
     #         for thread in threads:
     #             thread.start()
@@ -154,8 +152,7 @@ class GeomBoundary:
 
     @property
     def vertices(self) -> Iterable:
-        """Returns a global array of the vertices from all meshes.
-        """
+        """Returns a global array of the vertices from all meshes."""
         if not hasattr(self, "_vertices"):
             self._load_data()
 
@@ -165,15 +162,14 @@ class GeomBoundary:
 
         for v in self._vertices.values():
             size = v.shape[0]
-            ret[counter:counter + size, :] = v
+            ret[counter : counter + size, :] = v
             counter += size
 
         return ret
 
     @property
     def faces(self) -> np.ndarray:
-        """Returns a global array of the faces from all meshes.
-        """
+        """Returns a global array of the faces from all meshes."""
         if not hasattr(self, "_faces"):
             self._load_data()
 
@@ -184,7 +180,7 @@ class GeomBoundary:
 
         for m, f in self._faces.items():
             size = f.shape[0]
-            ret[counter:counter + size, :] = f + verts_counter
+            ret[counter : counter + size, :] = f + verts_counter
             counter += size
             verts_counter += self._vertices[m].shape[0]
 
@@ -192,8 +188,7 @@ class GeomBoundary:
 
     @property
     def data(self) -> np.ndarray:
-        """Returns a global array of the loaded data for the quantity with data from all meshes.
-        """
+        """Returns a global array of the loaded data for the quantity with data from all meshes."""
         if not hasattr(self, "_data"):
             self._load_data()
 
@@ -203,7 +198,7 @@ class GeomBoundary:
             counter = 0
             for d in self._data.values():
                 size = d[t].shape[0]
-                ret[t, counter:counter + size] = d[t]
+                ret[t, counter : counter + size] = d[t]
                 counter += size
 
         return ret
@@ -229,8 +224,7 @@ class GeomBoundary:
 
     @property
     def vmin(self) -> float:
-        """Minimum value of all faces at any time.
-        """
+        """Minimum value of all faces at any time."""
         curr_min = min(np.min(b) for b in self.lower_bounds.values())
         if curr_min == 0.0:
             return min(min(np.min(p.data) for p in ps) for ps in self._faces.values())
@@ -238,8 +232,7 @@ class GeomBoundary:
 
     @property
     def vmax(self) -> float:
-        """Maximum value of all faces at any time.
-        """
+        """Maximum value of all faces at any time."""
         curr_max = max(np.max(b) for b in self.upper_bounds.values())
         if curr_max == np.float32(-1e33):
             return max(max(np.max(p.data) for p in ps) for ps in self._faces.values())
@@ -260,9 +253,15 @@ class Geometry:
     :ivar surface: Surface object used for the geometry.
     """
 
-    def __init__(self, file_path: str, texture_mapping: str,
-                 texture_origin: Tuple[float, float, float],
-                 is_terrain: bool, rgb: Tuple[int, int, int], surface: Surface = None):
+    def __init__(
+        self,
+        file_path: str,
+        texture_mapping: str,
+        texture_origin: Tuple[float, float, float],
+        is_terrain: bool,
+        rgb: Tuple[int, int, int],
+        surface: Surface = None,
+    ):
         self.file_path = file_path
         self.texture_map = texture_mapping
         self.texture_origin = texture_origin

@@ -1,11 +1,12 @@
-from typing import Dict, Tuple, Sequence, List, Union
-from typing_extensions import Literal
-import numpy as np
 import math
+from typing import Dict, List, Sequence, Tuple, Union
+
+import numpy as np
+from typing_extensions import Literal
 
 from fdsreader import settings
-from fdsreader.utils import Dimension, Extent, Quantity
 from fdsreader.bndf import Boundary, Patch
+from fdsreader.utils import Dimension, Extent, Quantity
 
 
 class Mesh:
@@ -19,8 +20,12 @@ class Mesh:
     :var id: Mesh id/short_name assigned to this mesh.
     """
 
-    def __init__(self, coordinates: Dict[Literal['x', 'y', 'z'], np.ndarray],
-                 extents: Dict[Literal['x', 'y', 'z'], Tuple[float, float]], mesh_id: str):
+    def __init__(
+        self,
+        coordinates: Dict[Literal["x", "y", "z"], np.ndarray],
+        extents: Dict[Literal["x", "y", "z"], Tuple[float, float]],
+        mesh_id: str,
+    ):
         """
         :param coordinates: Coordinate values of the three axes.
         :param extents: Extent of the mesh in each dimension.
@@ -29,13 +34,15 @@ class Mesh:
         self.id = mesh_id
         self.coordinates = coordinates
         self.dimension = Dimension(
-            coordinates['x'].size if coordinates['x'].size > 0 else 1,
-            coordinates['y'].size if coordinates['y'].size > 0 else 1,
-            coordinates['z'].size if coordinates['z'].size > 0 else 1)
+            coordinates["x"].size if coordinates["x"].size > 0 else 1,
+            coordinates["y"].size if coordinates["y"].size > 0 else 1,
+            coordinates["z"].size if coordinates["z"].size > 0 else 1,
+        )
 
         self.n_size = self.dimension.size()
-        self.extent = Extent(extents['x'][0], extents['x'][1], extents['y'][0], extents['y'][1],
-                             extents['z'][0], extents['z'][1])
+        self.extent = Extent(
+            extents["x"][0], extents["x"][1], extents["y"][0], extents["y"][1], extents["z"][0], extents["z"][1]
+        )
 
         self.obstructions = list()
 
@@ -54,14 +61,14 @@ class Mesh:
 
         for obst in self.obstructions:
             subobst = obst[self]
-            x1, x2 = subobst.bound_indices['x']
-            y1, y2 = subobst.bound_indices['y']
-            z1, z2 = subobst.bound_indices['z']
+            x1, x2 = subobst.bound_indices["x"]
+            y1, y2 = subobst.bound_indices["y"]
+            z1, z2 = subobst.bound_indices["z"]
             t_idx = 0
             for t in subobst.get_visible_times(times):
                 while not np.isclose(t, times[t_idx]):
                     t_idx += 1
-                mask[t_idx, x1:max(x2 + c, x1 + 1), y1:max(y2 + c, y1 + 1), z1:max(z2 + c, z1 + 1)] = False
+                mask[t_idx, x1 : max(x2 + c, x1 + 1), y1 : max(y2 + c, y1 + 1), z1 : max(z2 + c, z1 + 1)] = False
         return mask
 
     def get_obstruction_mask_slice(self, subslice):
@@ -82,9 +89,12 @@ class Mesh:
 
         return self.get_obstruction_mask(subslice.times, cell_centered=cell_centered)[mask_indices]
 
-    def coordinate_to_index(self, coordinate: Tuple[float, ...],
-                            dimension: Tuple[Literal[1, 2, 3, 'x', 'y', 'z'], ...] = ('x', 'y', 'z'),
-                            cell_centered=False) -> Tuple[int, ...]:
+    def coordinate_to_index(
+        self,
+        coordinate: Tuple[float, ...],
+        dimension: Tuple[Literal[1, 2, 3, "x", "y", "z"], ...] = ("x", "y", "z"),
+        cell_centered=False,
+    ) -> Tuple[int, ...]:
         """Finds the nearest point in the mesh's grid and returns its indices.
 
         :param coordinate: Tuple of 3 floats. If the dimension parameter is supplied, up to 2
@@ -93,7 +103,7 @@ class Mesh:
         :param cell_centered: Instead of finding the nearest point on the mesh, find the center of the nearest cell.
         """
         # Convert possible integer input to chars
-        dimension = tuple(('x', 'y', 'z')[dim - 1] if type(dim) == int else dim for dim in dimension)
+        dimension = tuple(("x", "y", "z")[dim - 1] if isinstance(dim, int) else dim for dim in dimension)
 
         ret = list()
         for i, dim in enumerate(dimension):
@@ -102,16 +112,18 @@ class Mesh:
             if cell_centered:
                 coords = coords[:-1] + (coords[1] - coords[0]) / 2
             idx = np.searchsorted(coords, co, side="left")
-            if co > 0 and (idx == len(coords) or math.fabs(co - coords[idx - 1]) < math.fabs(
-                    co - coords[idx])):
+            if co > 0 and (idx == len(coords) or math.fabs(co - coords[idx - 1]) < math.fabs(co - coords[idx])):
                 ret.append(idx - 1)
             else:
                 ret.append(idx)
         return tuple(ret)
 
-    def get_nearest_coordinate(self, coordinate: Tuple[float, ...],
-                            dimension: Tuple[Literal[1, 2, 3, 'x', 'y', 'z'], ...] = ('x', 'y', 'z'),
-                            cell_centered=False) -> Tuple[float, ...]:
+    def get_nearest_coordinate(
+        self,
+        coordinate: Tuple[float, ...],
+        dimension: Tuple[Literal[1, 2, 3, "x", "y", "z"], ...] = ("x", "y", "z"),
+        cell_centered=False,
+    ) -> Tuple[float, ...]:
         """Finds the nearest point in the mesh's grid.
 
         :param coordinate: Tuple of 3 floats. If the dimension parameter is supplied, up to 2
@@ -128,12 +140,22 @@ class Mesh:
             ret.append(coords[indices[i]])
         return tuple(ret)
 
-    def _add_patches(self, bid: int, cell_centered: bool, quantity: str, short_name: str, unit: str,
-                     patches: List[Patch], times: np.ndarray, lower_bounds: np.ndarray,
-                     upper_bounds: np.ndarray):
+    def _add_patches(
+        self,
+        bid: int,
+        cell_centered: bool,
+        quantity: str,
+        short_name: str,
+        unit: str,
+        patches: List[Patch],
+        times: np.ndarray,
+        lower_bounds: np.ndarray,
+        upper_bounds: np.ndarray,
+    ):
         if bid not in self._boundary_data:
-            self._boundary_data[bid] = Boundary(Quantity(quantity, short_name, unit), cell_centered, times,
-                                                patches, lower_bounds, upper_bounds)
+            self._boundary_data[bid] = Boundary(
+                Quantity(quantity, short_name, unit), cell_centered, times, patches, lower_bounds, upper_bounds
+            )
             # Add reference to parent boundary class in patches
             for patch in patches:
                 patch._boundary_parent = self._boundary_data[bid]
@@ -142,19 +164,22 @@ class Mesh:
             _ = self._boundary_data[bid].data
 
     def get_boundary_data(self, quantity: Union[str, Quantity]):
-        if type(quantity) == Quantity:
+        if isinstance(quantity, Quantity):
             quantity = quantity.name
-        return next(b for b in self._boundary_data.values() if
-                    b.quantity.name.lower() == quantity.lower() or b.quantity.short_name.lower() == quantity.lower())
+        return next(
+            b
+            for b in self._boundary_data.values()
+            if b.quantity.name.lower() == quantity.lower() or b.quantity.short_name.lower() == quantity.lower()
+        )
 
-    def __getitem__(self, dimension: Literal[0, 1, 2, 'x', 'y', 'z']) -> np.ndarray:
+    def __getitem__(self, dimension: Literal[0, 1, 2, "x", "y", "z"]) -> np.ndarray:
         """Get all values in given dimension.
 
         :param dimension: The dimension in which to return all grid values (0=x, 1=y, 2=z).
         """
         # Convert possible integer input to chars
-        if type(dimension) == int:
-            dimension = ('x', 'y', 'z')[dimension]
+        if isinstance(dimension, int):
+            dimension = ("x", "y", "z")[dimension]
         return self.coordinates[dimension]
 
     def __eq__(self, other):
