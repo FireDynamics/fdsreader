@@ -12,10 +12,9 @@
 #
 import os
 import sys
+from importlib.metadata import version, PackageNotFoundError
 
 sys.path.insert(0, os.path.abspath('..'))
-from fdsreader._version import __version__
-# import sphinx_rtd_theme
 
 # -- Project information -----------------------------------------------------
 
@@ -24,7 +23,10 @@ copyright = '2020, FZJ IAS-7 (Prof. Dr. Lukas Arnold, Jan Vogelsang)'
 author = 'FZJ IAS-7 (Prof. Dr. Lukas Arnold, Jan Vogelsang)'
 
 # The full version, including alpha/beta/rc tags
-release = str(__version__)
+try:
+    release = version("fdsreader")
+except PackageNotFoundError:
+    release = "unknown"
 
 # -- General configuration ---------------------------------------------------
 

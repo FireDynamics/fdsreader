@@ -36,6 +36,12 @@ dev = [
     "coverage[toml]",
     "pre-commit",
 ]
+docs = [
+    "sphinx>=7.0",
+    "sphinx-rtd-theme",
+    "autodocsumm",
+    "nbsphinx",
+]
 
 [tool.setuptools_scm]
 version_scheme = "post-release"
