@@ -509,3 +509,28 @@ examples/
 
 /docs/build/
 Dockerfile
+
+# fdsreader specific
+# Extracted test case directories (only .tgz archives are tracked)
+tests/cases/steckler_data/
+tests/cases/bndf_data/
+tests/cases/devc_data/
+tests/cases/geom_data/
+tests/cases/part_data/
+tests/cases/pl3d_data/
+tests/cases/steckler_data_fds*/
+tests/cases/bndf_data_fds*/
+tests/cases/devc_data_fds*/
+tests/cases/geom_data_fds*/
+tests/cases/geom_data_new/
+tests/cases/part_data_fds*/
+tests/cases/pl3d_data_fds*/
+
+# Pickle cache files
+*.pickle
+
+# Ruff cache
+.ruff_cache/
+
+# Claude Code internal directory
+.claude/
