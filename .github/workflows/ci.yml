@@ -40,7 +40,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
       - name: Install dependencies
-        run: pip install ".[dev]"
+        run: pip install -e ".[dev]"
       - name: Prepare test cases
         run: cd tests/cases && for f in *.tgz; do tar -xzvf "$f"; done
       - name: Run tests
