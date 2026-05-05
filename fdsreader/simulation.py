@@ -475,11 +475,13 @@ class Simulation:
         temp_data = list()
 
         def read_common_info():
-            line = smv_file.readline().strip().split()
+            # Strip inline FDS comments (everything from '!' onward) before parsing
+            line = smv_file.readline().split("!")[0].strip().split()
             return line, [float(line[i]) for i in range(6)], int(line[6]) - 1, self.surfaces[int(line[7])]
 
         def read_common_info2():
-            line = smv_file.readline().strip().split()
+            # Strip inline FDS comments (everything from '!' onward) before parsing
+            line = smv_file.readline().split("!")[0].strip().split()
             bound_indices = tuple(int(line[i]) for i in range(6))
             color_index = int(line[6])
             draw_type = int(line[7])
