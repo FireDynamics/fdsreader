@@ -60,10 +60,18 @@ class Simulation:
         root_path = os.path.dirname(smv_file_path)
 
         with open(smv_file_path) as infile:
+            if not infile.read(1):
+                raise ValueError(f"SMV file is empty: '{smv_file_path}'")
+
+        chid = None
+        with open(smv_file_path) as infile:
             for line in infile:
                 if line.strip() == "CHID":
                     chid = infile.readline().strip()
                     break
+
+        if chid is None:
+            raise ValueError(f"Could not find CHID in '{smv_file_path}'")
 
         pickle_file_path = Simulation._get_pickle_filename(root_path, chid)
         if settings.ENABLE_CACHING:
