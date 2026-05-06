@@ -337,7 +337,14 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         coords = {"x": list(), "y": list(), "z": list()}
         for dim in ("x", "y", "z"):
             if orientation == dim:
-                coords[dim] = np.array([self.extent[dim][0]])
+                coord = self.extent[dim][0]
+                if self.cell_centered and not ignore_cell_centered:
+                    mesh = next(iter(self._subslices.keys()))
+                    mesh_co = mesh.coordinates[dim]
+                    idx = int(np.argmin(np.abs(mesh_co - coord)))
+                    if idx > 0:
+                        coord = (float(mesh_co[idx - 1]) + float(mesh_co[idx])) / 2
+                coords[dim] = np.array([coord])
                 continue
             for slc in self._subslices.values():
                 co = slc.get_coordinates(ignore_cell_centered)[dim]
