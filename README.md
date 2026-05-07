@@ -8,10 +8,10 @@
 
 ## FDS Version Compatibility
 
-| fdsreader         | FDS 6.7 | FDS 6.8 | FDS 6.9 | FDS 6.10 |
-|-------------------|---------|---------|---------|----------|
-| ≤ 1.11.x          | ✅      | ✅      | ✅      | ⚠️ (Geometry bug, [#TODO](https://github.com/FireDynamics/fdsreader/issues)) |
-| 1.12.x *(planed)* | ✅ | ✅ | ✅ | ✅ |
+| fdsreader          | FDS 6.7 | FDS 6.8 | FDS 6.9 | FDS 6.10 |
+|--------------------|---------|---------|---------|----------|
+| ≤ 1.11.x           | ✅      | ✅      | ✅      | ⚠️ (Geometry bug, [#TODO](https://github.com/FireDynamics/fdsreader/issues)) |
+| 1.12.x *(planned)* | ✅ | ✅ | ✅ | ✅ |
 
 _Tested against FDS outputs. If you find a compatibility issue please [open an issue](https://github.com/FireDynamics/fdsreader/issues)._
 
@@ -78,6 +78,8 @@ This triggers the release workflow which builds the package and publishes it to 
 ## Meta
 
 *  Jan Vogelsang – j.vogelsang@fz-juelich.de
+*  Marc Fehr - mfehr@uni.wuppertal.de
+*  Kristian Börger - k.boerger@fz-juelich.de
 *  Prof. Dr. Lukas Arnold - l.arnold@fz-juelich.de
 
 Distributed under the LGPLv3 (GNU Lesser General Public License v3) license. See ``LICENSE`` for more information.
