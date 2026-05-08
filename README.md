@@ -78,7 +78,7 @@ This triggers the release workflow which builds the package and publishes it to 
 ## Meta
 
 *  Jan Vogelsang – j.vogelsang@fz-juelich.de
-*  Marc Fehr - mfehr@uni.wuppertal.de
+*  Marc Fehr - m.fehr@fz-juelich.de
 *  Kristian Börger - k.boerger@fz-juelich.de
 *  Prof. Dr. Lukas Arnold - l.arnold@fz-juelich.de
 
