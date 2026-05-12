@@ -69,3 +69,5 @@ Since the first release of the *FDSReader* in 2020, the package received widespr
 
 # AI Usage Disclosure
 No generative AI was used for architectural design or core algorithms. Claude (Anthropic) was used for creating documentation and docstrings, and for assisting in maintenance tasks (resolving issues). Generative content was thoroughly reviewed and validated.
+
+# References
