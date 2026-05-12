@@ -1,10 +1,9 @@
 name: FDSreader JOSS submission paper
 
 on:
-  workflow_dispatch: {}
   push:
     branches:
-      - master
+      - JOSS
     paths:
       - 'paper.md'
       - 'paper.bib'
