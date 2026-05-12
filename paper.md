@@ -8,24 +8,25 @@ tags:
   - Analysis
   - Toolkit
   - FDS
+  - Large-Eddy Simulation
+  - Computational Fluid Dynamics
 authors:
   - name: Jan Vogelsang
     orcid: 0000-0003-2336-6630
     corresponding: true
-    affiliation: 1,2
-  - name: Lukas Arnold
-    orcid: 0000-0002-5939-8995
-    affiliation: 3,4
-  - name: Kristian Börger
-    orcid: 0000-0003-4371-5770
-    affiliation: 3,4
+    affiliation: "1, 2"
   - name: Marc Fehr
     orcid: 0000-0002-3140-2040
-    affiliation: 3,4
+    affiliation: "3, 4"
+  - name: Kristian Börger
+    orcid: 0000-0003-4371-5770
+    affiliation: "3, 4"
+  - name: Lukas Arnold
+    orcid: 0000-0002-5939-8995
+    affiliation: "3, 4"
 affiliations:
  - name: Neuromorphic Software Ecosystems (PGI-15), Jülich Research Centre, Jülich, Germany
    index: 1
-   ror: 00hx57361
  - name: RWTH Aachen University, Aachen, Germany
    index: 2
  - name: Institute for Advanced Simulation (IAS-7), Jülich Research Centre, Jülich, Germany
