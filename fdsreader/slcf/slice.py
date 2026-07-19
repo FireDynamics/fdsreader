@@ -58,10 +58,10 @@ class SubSlice:
         for dim in ("x", "y", "z"):
             co = self.mesh.coordinates[dim].copy()
             # In case the slice is cell-centered, we will shift the coordinates by half a cell
-            # and remove the last coordinate
+            # and remove the last coordinate. Compute the per-cell offset before trimming, since a
+            # mesh with only a single cell along this axis leaves just one coordinate afterwards.
             if self.cell_centered and not ignore_cell_centered:
-                co = co[:-1]
-                co += abs(co[1] - co[0]) / 2
+                co = co[:-1] + np.diff(co) / 2
 
             coords[dim] = co[np.where(np.logical_and(co >= self.extent[dim][0], co <= self.extent[dim][1]))]
             if coords[dim].size == 0:
