@@ -49,11 +49,15 @@ jobs:
       - name: Download FDS
         run: |
           VERSION=${{ needs.detect-version.outputs.fds_version }}
-          wget -q https://github.com/firemodels/fds/releases/download/${VERSION}/FDS-${VERSION#FDS-}_SMV-${VERSION#FDS-}_lnx.sh \
-            -O fds_install.sh || \
-          wget -q https://github.com/firemodels/fds/releases/download/${VERSION}/FDS-6.10.1_SMV-6.10.1_lnx.sh \
-            -O fds_install.sh
+          ASSET_URL=$(gh api repos/firemodels/fds/releases/tags/${VERSION} --jq '.assets[] | select(.name | test("_lnx\\.sh$")) | .browser_download_url' | head -n1)
+          if [ -z "$ASSET_URL" ]; then
+            echo "No Linux installer asset found for release $VERSION" >&2
+            exit 1
+          fi
+          wget -q "$ASSET_URL" -O fds_install.sh
           echo "" | bash fds_install.sh --prefix=$HOME/fds
+        env:
+          GH_TOKEN: ${{ github.token }}
       - name: Run test simulations
         run: |
           FDS=$HOME/fds/bin/fds_openmp
