@@ -436,7 +436,7 @@ class Simulation:
             subobst = SubObstruction(side_surfaces, bound_indices, extent, mesh)
 
             self._subobstructions[mesh.id].append(subobst)
-            obst._subobstructions[mesh.id] = subobst
+            obst._subobstructions.setdefault(mesh.id, []).append(subobst)
 
     def _toggle_obst(self, smv_file: TextIO, line: str):
         line = line.split()

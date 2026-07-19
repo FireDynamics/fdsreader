@@ -430,12 +430,20 @@ class Obstruction:
         if len(rgba) != 0:
             self.rgba = rgba
 
-        self._subobstructions: Dict[str, SubObstruction] = dict()
+        # A mesh may contain more than one SubObstruction for this Obstruction (e.g. when a MULT
+        # block repeats the same obstruction multiple times within a single mesh), so each mesh id
+        # maps to a list of SubObstructions rather than a single one.
+        self._subobstructions: Dict[str, List[SubObstruction]] = dict()
+
+    @property
+    def _all_subobstructions(self) -> List[SubObstruction]:
+        """Flat list of all SubObstructions across all meshes."""
+        return [subobst for subobsts in self._subobstructions.values() for subobst in subobsts]
 
     @property
     def bounding_box(self) -> Extent:
         """:class:`Extent` object representing the bounding box around the Obstruction."""
-        extents = [sub.extent for sub in self._subobstructions.values()]
+        extents = [sub.extent for sub in self._all_subobstructions]
 
         return Extent(
             min(extents, key=lambda e: e.x_start).x_start,
@@ -451,7 +459,7 @@ class Obstruction:
         """Return all orientations for which there is data available."""
         if self.has_boundary_data:
             orientations = set()
-            for subobst in self._subobstructions.values():
+            for subobst in self._all_subobstructions:
                 orientations.update(subobst.orientations)
             return sorted(list(orientations))
         return []
@@ -462,7 +470,7 @@ class Obstruction:
             duplicate data for a timestep. Duplicate data might be output when restarting the
             simulation in between the simulation run.
         """
-        for subobst in self._subobstructions.values():
+        for subobst in self._all_subobstructions:
             if subobst.has_boundary_data:
                 return subobst.n_t(count_duplicates=count_duplicates)
         return 0
@@ -470,14 +478,14 @@ class Obstruction:
     @property
     def times(self):
         """Return all timesteps for which boundary data is available, if any."""
-        for subobst in self._subobstructions.values():
+        for subobst in self._all_subobstructions:
             if subobst.has_boundary_data:
                 return subobst.times
         return np.array([])
 
     def get_visible_times(self, times: Sequence[float]):
         """Returns an ndarray filtering all time steps when theSubObstruction is visible/not hidden."""
-        for subobst in self._subobstructions.values():
+        for subobst in self._all_subobstructions:
             return subobst.get_visible_times(times)
         return np.array([])
 
@@ -500,7 +508,7 @@ class Obstruction:
                         coords[dim] = np.array([self.bounding_box[dim][bounding_box_index]])
                         continue
                     min_delta = math.inf
-                    for subobst in self._subobstructions.values():
+                    for subobst in self._all_subobstructions:
                         subobst_coords = subobst.get_coordinates(ignore_cell_centered)
                         if orientation_int not in subobst_coords:
                             continue
@@ -519,7 +527,7 @@ class Obstruction:
                         bounding_box_index = 0 if orientation_int < 0 else 1
                         single_coordinate = self.bounding_box[dim][bounding_box_index]
                         nearest_coordinate = np.inf
-                        for subobst in self._subobstructions.values():
+                        for subobst in self._all_subobstructions:
                             mesh = subobst.mesh
                             mesh_coords = mesh.coordinates[dim]
                             idx = np.searchsorted(mesh_coords, single_coordinate, side="left")
@@ -553,7 +561,7 @@ class Obstruction:
         """Get a list of all quantities for which boundary data exists."""
         if self.has_boundary_data:
             qs = set()
-            for subobst in self._subobstructions.values():
+            for subobst in self._all_subobstructions:
                 for b in subobst._boundary_data.values():
                     qs.add(b.quantity)
             return list(qs)
@@ -562,14 +570,14 @@ class Obstruction:
     @property
     def meshes(self) -> List["Mesh"]:
         """Returns a list of all meshes this slice cuts through."""
-        return [subobst.mesh for subobst in self._subobstructions.values()]
+        return [subobsts[0].mesh for subobsts in self._subobstructions.values()]
 
     def filter_by_orientation(self, orientation: Literal[-3, -2, -1, 0, 1, 2, 3] = 0) -> List[SubObstruction]:
         """Filter all SubObstructions by a specific orientation. All returned SubObstructions will contain boundary data
         in the specified orientation.
         """
         if self.has_boundary_data:
-            return [subobst for subobst in self._subobstructions.values() if orientation in subobst.orientations]
+            return [subobst for subobst in self._all_subobstructions if orientation in subobst.orientations]
         return []
 
     def get_boundary_data(
@@ -586,7 +594,7 @@ class Obstruction:
 
         ret = {
             subobst.mesh.id: subobst.get_data(quantity)
-            for subobst in self._subobstructions.values()
+            for subobst in self._all_subobstructions
             if subobst.has_boundary_data
         }
         if orientation == 0:
@@ -612,7 +620,7 @@ class Obstruction:
             d_min = np.finfo(float).max
             patches_with_dist = list()
 
-            for subobst in self._subobstructions.values():
+            for subobst in self._all_subobstructions:
                 for patch in subobst.get_data(self.quantities[0])._patches:
                     dx = max(patch.extent.x_start - x, 0, x - patch.extent.x_end) if x is not None else 0
                     dy = max(patch.extent.y_start - y, 0, y - patch.extent.y_end) if y is not None else 0
@@ -643,7 +651,7 @@ class Obstruction:
     @property
     def has_boundary_data(self):
         """Whether boundary data has been output in the simulation."""
-        return any(subobst.has_boundary_data for subobst in self._subobstructions.values())
+        return any(subobst.has_boundary_data for subobst in self._all_subobstructions)
 
     def get_global_boundary_data_arrays(
         self, quantity: Union[str, Quantity]
@@ -654,7 +662,7 @@ class Obstruction:
         """
         if not self.has_boundary_data:
             return dict()
-        for subobst in self._subobstructions.values():
+        for subobst in self._all_subobstructions:
             if subobst.has_boundary_data:
                 cell_centered = next(iter(subobst._boundary_data.values())).cell_centered
 
@@ -663,11 +671,11 @@ class Obstruction:
             subobst_sets = [list(), list()]
             dim = ["x", "y", "z"][abs(orientation_int) - 1]
             random_subobst = next(
-                subobst for subobst in self._subobstructions.values() if orientation_int in subobst.get_coordinates()
+                subobst for subobst in self._all_subobstructions if orientation_int in subobst.get_coordinates()
             )
             base_coord = random_subobst.get_coordinates(ignore_cell_centered=False)[orientation_int][dim][0]
 
-            for subobst in self._subobstructions.values():
+            for subobst in self._all_subobstructions:
                 if not subobst.has_boundary_data:
                     continue
                 coords = subobst.get_coordinates(ignore_cell_centered=False)
@@ -805,7 +813,7 @@ class Obstruction:
 
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory."""
-        for s in self._subobstructions.values():
+        for s in self._all_subobstructions:
             s.clear_cache()
 
     def vmin(
@@ -818,7 +826,7 @@ class Obstruction:
         :param orientation: Optionally filter by patches with a specific orientation.
         """
         if self.has_boundary_data:
-            return min(s.vmin(quantity, orientation) for s in self._subobstructions.values())
+            return min(s.vmin(quantity, orientation) for s in self._all_subobstructions)
         else:
             return np.nan
 
@@ -832,17 +840,17 @@ class Obstruction:
         :param orientation: Optionally filter by patches with a specific orientation.
         """
         if self.has_boundary_data:
-            return max(s.vmax(quantity, orientation) for s in self._subobstructions.values())
+            return max(s.vmax(quantity, orientation) for s in self._all_subobstructions)
         return np.nan
 
     def __getitem__(self, key: Union[int, str, "Mesh"]):
-        """Gets either the nth :class:`SubObstruction` or the one with the given mesh-id."""
+        """Gets either the nth :class:`SubObstruction` or the (first) one with the given mesh-id."""
 
         if isinstance(key, int):
-            return tuple(self._subobstructions.values())[key]
+            return self._all_subobstructions[key]
         elif isinstance(key, str):
-            return self._subobstructions[key]
-        return self._subobstructions[key.id]
+            return self._subobstructions[key][0]
+        return self._subobstructions[key.id][0]
 
     def __eq__(self, other):
         return self.id == other.id
@@ -850,7 +858,7 @@ class Obstruction:
     def __repr__(self, *args, **kwargs):
         return (
             f"Obstruction(id={self.id}, Bounding-Box={self.bounding_box}, "
-            f"SubObstructions={len(self._subobstructions)}"
+            f"SubObstructions={len(self._all_subobstructions)}"
             + (f", Quantities={[q.short_name for q in self.quantities]}" if self.has_boundary_data else "")
             + ")"
         )
