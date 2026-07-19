@@ -205,6 +205,10 @@ class Smoke3D(np.lib.mixins.NDArrayOperatorsMixin):
             if masked:
                 mask = mask[reduced_shape_slices]
 
+            # The global grid uses the finest mesh as base, so coarser meshes need their values
+            # repeated along every axis to match its resolution.
+            for axis in range(3):
+                dim = ("x", "y", "z")[axis]
                 n_repeat = max(
                     int(
                         round(
