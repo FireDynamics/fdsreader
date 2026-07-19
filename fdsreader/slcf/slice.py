@@ -115,7 +115,8 @@ class SubSlice:
                     self.times[t] = data[0][0]
                 data = data[1].reshape(self.dimension.shape(cell_centered=False), order="F")
                 if self.cell_centered:
-                    data_out[t, :] = data[1:, 1:]  # Ignore ghost points
+                    # Ignore ghost points on every axis (2 for 2D slices, 3 for 3D slices)
+                    data_out[t, :] = data[(slice(1, None),) * data.ndim]
                 else:
                     data_out[t, :] = data
 
