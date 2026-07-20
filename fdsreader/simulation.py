@@ -1,3 +1,4 @@
+import csv
 import glob
 import logging
 import os
@@ -1023,7 +1024,10 @@ class Simulation:
     def _load_DEVC_data(self):
         with open(self.devc_path) as infile:
             units = infile.readline().split(",")
-            names = [name.replace('"', "").replace("\n", "").strip() for name in infile.readline().split(',"')]
+            # Device names are only quoted by FDS when they contain a comma or space, so a plain
+            # split on "," or ',"' would misparse a header where none (or all) of the names need
+            # quoting. Use a real CSV parser instead so it doesn't matter which fields are quoted.
+            names = [name.strip() for name in next(csv.reader([infile.readline()]))]
             values = np.genfromtxt(infile, delimiter=",", dtype=np.float32, autostrip=True)
             for k in range(len(names)):
                 if isinstance(self.devices[names[k]], list):
