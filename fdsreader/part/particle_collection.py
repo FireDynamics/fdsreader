@@ -84,9 +84,15 @@ class ParticleCollection(FDSDataCollection):
                         dtype_tags = fdtype.new((("i", n_particles),))
                         particle._tags[t][offset : offset + n_particles] = fdtype.read(infile, dtype_tags, 1)[0][0]
 
-                        # Read actual quantity values
+                        # Read actual quantity values. FDS writes this block in Fortran
+                        # (column-major) order: all particles for quantity 1, then all particles
+                        # for quantity 2, etc. Reading it directly into an (n_particles, n_quantities)
+                        # dtype field would have numpy fill it in C order, so we read it as a flat
+                        # array first and only then reshape with order="F" to actually reinterpret it
+                        # correctly (reshaping an already-shaped array to the same shape is a no-op,
+                        # regardless of the order argument).
                         if len(particle.quantities) > 0:
-                            dtype_data = fdtype.new((("f", str((n_particles, len(particle.quantities)))),))
+                            dtype_data = fdtype.new((("f", n_particles * len(particle.quantities)),))
                             data_raw = fdtype.read(infile, dtype_data, 1)[0][0].reshape(
                                 (n_particles, len(particle.quantities)), order="F"
                             )
