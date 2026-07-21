@@ -61,11 +61,12 @@ class GeomBoundary:
             dtype_faces = fdtype.new((("i", 3 * n_faces),))
             faces = fdtype.read(infile, dtype_faces, 1)[0][0].reshape((n_faces, 3)).astype(int) - 1
 
-        return vertices, faces, n_faces
+        return vertices, faces, n_faces, None, None
 
     @staticmethod
     def _load_gcf(file_path_gcf: str):
-        """Reads vertices/faces from a per-mesh .gcf file (FDS >= 6.10, replaces .gbf).
+        """Reads vertices/faces/per-face metadata from a per-mesh .gcf file (FDS >= 6.10,
+        replaces .gbf).
 
         Binary layout written by FDS' DUMP_CFACES_GEOM (Source/dump.f90):
             INTEGER_ONE                    (1 int)
@@ -76,9 +77,9 @@ class GeomBoundary:
             -- only if NVERTS > 0 and NFACES > 0 --
             VERTS(1:3*NVERTS)              (floats)
             FACES(1:3*NFACES)              (ints, 1-based)
-            LOCATIONS(1:NFACES)            (ints, unused)
-            SURFIND(1:NFACES)              (ints, unused)
-            GEOMIND(1:NFACES)              (ints, unused)
+            LOCATIONS(1:NFACES)            (ints, placeholder in FDS itself, unused)
+            SURFIND(1:NFACES)              (ints, 1-based index into Simulation.surfaces)
+            GEOMIND(1:NFACES)              (ints, 1-based index into Simulation.geoms)
         """
         with open(file_path_gcf, "rb") as infile:
             infile.seek(fdtype.INT.itemsize * 2 + fdtype.new((("i", 3),)).itemsize + fdtype.FLOAT.itemsize)
@@ -87,7 +88,8 @@ class GeomBoundary:
             n_vertices, n_faces, _ = np.fromfile(infile, dtype_meta, 1)[0][1]
 
             if n_vertices == 0 or n_faces == 0:
-                return np.empty((0, 3), dtype=float), np.empty((0, 3), dtype=int), 0
+                empty_ind = np.empty((0,), dtype=int)
+                return np.empty((0, 3), dtype=float), np.empty((0, 3), dtype=int), 0, empty_ind, empty_ind
 
             dtype_vertices = fdtype.new((("f", 3 * n_vertices),))
             vertices = np.fromfile(infile, dtype_vertices, 1)[0][1].reshape((n_vertices, 3)).astype(float)
@@ -95,25 +97,33 @@ class GeomBoundary:
             dtype_faces = fdtype.new((("i", 3 * n_faces),))
             faces = fdtype.read(infile, dtype_faces, 1)[0][0].reshape((n_faces, 3)).astype(int) - 1
 
-            # Skip LOCATIONS, SURFIND and GEOMIND (each n_faces ints), currently unused.
-            dtype_skip = fdtype.new((("i", n_faces),))
-            infile.seek(dtype_skip.itemsize * 3, 1)
+            # Skip LOCATIONS (n_faces ints): FDS itself writes this as a placeholder, unused.
+            dtype_ind = fdtype.new((("i", n_faces),))
+            infile.seek(dtype_ind.itemsize, 1)
 
-        return vertices, faces, n_faces
+            # FDS' SURFACE array is declared as SURFACE(0:N_SURF+...) with index 0 reserved for
+            # the default INERT surface, so SURFIND is already 0-based - unlike FACES/GEOMIND,
+            # which follow the usual 1-based Fortran array convention.
+            surf_ind = fdtype.read(infile, dtype_ind, 1)[0][0].astype(int)
+            geom_ind = fdtype.read(infile, dtype_ind, 1)[0][0].astype(int) - 1
+
+        return vertices, faces, n_faces, surf_ind, geom_ind
 
     def _load_data(self):
         self._vertices: Dict[int, np.ndarray] = dict()
         self._faces: Dict[int, np.ndarray] = dict()
         self._data: Dict[int, np.ndarray] = dict()
+        self._surf_ind: Dict[int, np.ndarray] = dict()
+        self._geom_ind: Dict[int, np.ndarray] = dict()
 
         for mesh in self.file_paths_be.keys():
             file_path_be = self.file_paths_be[mesh]
             file_path_gbf = self.file_paths_gbf[mesh]
 
             if self.file_paths_is_gcf[mesh]:
-                vertices, faces, n_faces = self._load_gcf(file_path_gbf)
+                vertices, faces, n_faces, surf_ind, geom_ind = self._load_gcf(file_path_gbf)
             else:
-                vertices, faces, n_faces = self._load_gbf(file_path_gbf)
+                vertices, faces, n_faces, surf_ind, geom_ind = self._load_gbf(file_path_gbf)
 
             # Load .be
             dtype_faces = fdtype.new((("f", n_faces),))
@@ -134,6 +144,8 @@ class GeomBoundary:
             self._vertices[mesh] = vertices
             self._faces[mesh] = faces
             self._data[mesh] = data
+            self._surf_ind[mesh] = surf_ind
+            self._geom_ind[mesh] = geom_ind
 
     # def _load_data2(self):
     #     self._vertices: Dict[int, np.ndarray] = dict()
@@ -241,6 +253,36 @@ class GeomBoundary:
             verts_counter += self._vertices[m].shape[0]
 
         return ret
+
+    def _check_cface_metadata_available(self):
+        if any(v is None for v in self._surf_ind.values()):
+            raise AttributeError(
+                "Per-face surface/geometry indices are only available for simulations that write"
+                " the .gcf boundary geometry format (FDS 6.10+); the loaded simulation uses the"
+                " older .gbf format, which does not contain this information."
+            )
+
+    @property
+    def surf_ind(self) -> np.ndarray:
+        """Returns a global array mapping each face to its 0-based index into
+        :attr:`Simulation.surfaces`. Only available for FDS 6.10+ (.gcf) simulations.
+        """
+        if not hasattr(self, "_surf_ind"):
+            self._load_data()
+        self._check_cface_metadata_available()
+
+        return np.concatenate(list(self._surf_ind.values()))
+
+    @property
+    def geom_ind(self) -> np.ndarray:
+        """Returns a global array mapping each face to its 0-based index into
+        :attr:`Simulation.geoms`. Only available for FDS 6.10+ (.gcf) simulations.
+        """
+        if not hasattr(self, "_geom_ind"):
+            self._load_data()
+        self._check_cface_metadata_available()
+
+        return np.concatenate(list(self._geom_ind.values()))
 
     @property
     def data(self) -> np.ndarray:
