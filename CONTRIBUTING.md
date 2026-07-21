@@ -33,7 +33,7 @@ pytest tests/
 pytest tests/ --cov=fdsreader --cov-report=term-missing
 ```
 
-All 46 tests must pass before opening a pull request.
+All tests must pass before opening a pull request.
 
 ## Code style
 
@@ -75,6 +75,29 @@ tar -czf steckler_data_fds<version>.tgz steckler_data_fds<version>/
 See the [FDS version compatibility table](README.md#fds-version-compatibility)
 for which versions have been tested.
 
+## Stale cache after pulling (editable installs)
+
+`Simulation` caches a parsed simulation to a `.pickle` file next to the FDS
+output and reuses it on the next load (`settings.ENABLE_CACHING`, on by
+default). The cache is invalidated by comparing the installed package version
+(`fdsreader.__version__`) against the one stored in the pickle — but for an
+editable install (`pip install -e .`), that version is frozen at install time
+and does **not** update automatically when you `git pull` or check out a
+different commit. If you've changed anything that affects how a `Simulation`
+or its data classes are structured, an old `.pickle` from before your change
+can be loaded as if it were still valid and then fail later (e.g. an
+`AttributeError`) once code touches the outdated structure.
+
+After pulling changes into an editable install:
+
+```bash
+# Refresh the frozen version metadata
+pip install -e . --force-reinstall --no-deps
+
+# Or just delete any stale caches under the test data you're using
+find tests/cases -name '*.pickle' -delete
+```
+
 ## Open issues and known bugs
 
 Before starting work please check the
@@ -87,12 +110,6 @@ Before starting work please check the
 | `fdsreader/utils/extent.py` | 14 | `ValueError` is created but never raised → silent data corruption |
 | `fdsreader/utils/misc.py` | 19 | `log_error` decorator returns `None` when an exception is caught |
 | `fdsreader/utils/data.py` | 66 | `open()` without context manager → potential file handle leak |
-
-### FDS 6.10.1 compatibility
-
-Geometry data (`geom_data`) cannot be read from FDS 6.10.1 outputs because
-the `BGEOM` block was removed from the SMV format. A fix requires updating
-`simulation.py` to handle the new format.
 
 ## Pull request checklist
 

@@ -8,10 +8,10 @@
 
 ## FDS Version Compatibility
 
-| fdsreader          | FDS 6.7 | FDS 6.8 | FDS 6.9 | FDS 6.10 |
-|--------------------|---------|---------|---------|----------|
-| ≤ 1.11.x           | ✅      | ✅      | ✅      | ⚠️ (Geometry bug, [#TODO](https://github.com/FireDynamics/fdsreader/issues)) |
-| 1.12.x *(planned)* | ✅ | ✅ | ✅ | ✅ |
+| fdsreader           | FDS 6.7 | FDS 6.8 | FDS 6.9 | FDS 6.10 | FDS 6.11 |
+|---------------------|---------|---------|---------|----------|----------|
+| ≤ 1.11.9            | ✅      | ✅      | ✅      | ⚠️ (Geometry bug) | ⚠️ (Geometry bug) |
+| > 1.11.9 (unreleased, `master`) | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 _Tested against FDS outputs. If you find a compatibility issue please [open an issue](https://github.com/FireDynamics/fdsreader/issues)._
 
