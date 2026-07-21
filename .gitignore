@@ -12,9 +12,9 @@
 *.ear
 *.sar
 *.class
-# Maven 
+# Maven
 target/
-# IntelliJ project files 
+# IntelliJ project files
 *.iml
 *.iws
 *.ipr
@@ -525,6 +525,7 @@ tests/cases/geom_data_fds*/
 tests/cases/geom_data_new/
 tests/cases/part_data_fds*/
 tests/cases/pl3d_data_fds*/
+tests/cases/prof_data_fds*/
 
 # Pickle cache files
 *.pickle
