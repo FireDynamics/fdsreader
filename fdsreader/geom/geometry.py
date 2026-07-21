@@ -78,7 +78,7 @@ class GeomBoundary:
             VERTS(1:3*NVERTS)              (floats)
             FACES(1:3*NFACES)              (ints, 1-based)
             LOCATIONS(1:NFACES)            (ints, placeholder in FDS itself, unused)
-            SURFIND(1:NFACES)              (ints, 1-based index into Simulation.surfaces)
+            SURFIND(1:NFACES)              (ints, already 0-based, see below)
             GEOMIND(1:NFACES)              (ints, 1-based index into Simulation.geoms)
         """
         with open(file_path_gcf, "rb") as infile:

@@ -70,8 +70,8 @@ class SubGeomSlice:
                 self._vertices = fdtype.read(infile, dtype_verts, 1)[0][0].reshape((self.n_verts, 3)).astype(float)
                 self._faces = fdtype.read(infile, dtype_faces, 1)[0][0].reshape((self.n_faces, 3)).astype(int) - 1
             else:
-                self._vertices = np.array([])
-                self._faces = np.array([])
+                self._vertices = np.empty((0, 3), dtype=float)
+                self._faces = np.empty((0, 3), dtype=int)
 
     def _load_data(self):
         with open(self.file_path, "rb") as infile:
