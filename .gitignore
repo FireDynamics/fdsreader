@@ -526,6 +526,7 @@ tests/cases/geom_data_new/
 tests/cases/part_data_fds*/
 tests/cases/pl3d_data_fds*/
 tests/cases/prof_data_fds*/
+tests/cases/geomslice_data_fds*/
 
 # Pickle cache files
 *.pickle

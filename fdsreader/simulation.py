@@ -649,7 +649,7 @@ class Simulation:
         else:
             times = None
 
-        if slice_index not in self._slices:
+        if slice_index not in self._geomslices:
             self._geomslices[slice_index] = [{"times": times, "id": slice_id}]
         self._geomslices[slice_index].append(
             {

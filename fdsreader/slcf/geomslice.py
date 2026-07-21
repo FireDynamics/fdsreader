@@ -67,8 +67,8 @@ class SubGeomSlice:
                 dtype_faces = fdtype.new((("i", 3 * self.n_faces),))
                 # dtype_locations = fdtype.new((('i', self.n_faces),))
                 # dtype_zero_floats = fdtype.new((('f', 3 * self.n_faces * 2),))
-                self._vertices = fdtype.read(infile, dtype_verts, 1)[0][0].reshape((self.n_verts, 3), order="F")
-                self._faces = fdtype.read(infile, dtype_faces, 1)[0][0].reshape((self.n_faces, 3), order="F")
+                self._vertices = fdtype.read(infile, dtype_verts, 1)[0][0].reshape((self.n_verts, 3)).astype(float)
+                self._faces = fdtype.read(infile, dtype_faces, 1)[0][0].reshape((self.n_faces, 3)).astype(int) - 1
             else:
                 self._vertices = np.array([])
                 self._faces = np.array([])
@@ -345,7 +345,7 @@ class GeomSlice(np.lib.mixins.NDArrayOperatorsMixin):
         counter = 0
         for subgeomslice in self._subgeomslices.values():
             size = subgeomslice.vertices.shape[0]
-            vertices[:, counter : counter + size] = subgeomslice.vertices
+            vertices[counter : counter + size, :] = subgeomslice.vertices
             counter += size
 
         return vertices
@@ -353,13 +353,15 @@ class GeomSlice(np.lib.mixins.NDArrayOperatorsMixin):
     @property
     def faces(self):
         n_faces = sum(x.faces.shape[0] for x in self._subgeomslices.values())
-        faces = np.empty((n_faces, 3))
+        faces = np.empty((n_faces, 3), dtype=int)
 
         counter = 0
+        verts_counter = 0
         for subgeomslice in self._subgeomslices.values():
             size = subgeomslice.faces.shape[0]
-            faces[:, counter : counter + size] = subgeomslice.faces
+            faces[counter : counter + size, :] = subgeomslice.faces + verts_counter
             counter += size
+            verts_counter += subgeomslice.vertices.shape[0]
 
         return faces
 
