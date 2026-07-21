@@ -110,6 +110,14 @@ Before starting work please check the
 | `fdsreader/utils/extent.py` | 14 | `ValueError` is created but never raised → silent data corruption |
 | `fdsreader/utils/misc.py` | 19 | `log_error` decorator returns `None` when an exception is caught |
 | `fdsreader/utils/data.py` | 66 | `open()` without context manager → potential file handle leak |
+| `fdsreader/simulation.py` | 468 | `is_terrain = bool(texture_line[4])` — `texture_line[4]` is a `"0"`/`"1"` string from the SMV file; `bool("0")` is `True` in Python (any non-empty string is truthy), so `is_terrain` is always `True` regardless of the actual FDS value. Needs `bool(int(texture_line[4]))`. |
+| `fdsreader/simulation.py` | 472 | `surface_id = line[0].split("%")[-1]` is never `.strip()`-ped, while `Surface.id()` is; the `s.id() == surface_id` match can silently fail on whitespace, leaving `geom.surface` as `None` even when a matching `SURF_ID` exists. |
+
+### Other known gaps (not urgent, no action planned unless there's a concrete need)
+
+- `tests/cases/*_fds6100.tgz` (bndf/devc/part/pl3d/steckler) are unused by any test — leftover from an earlier FDS-6.10.1 compatibility check, never wired up or cleaned up.
+- `GeomBoundary._load_gbf`/`_load_gcf` (`fdsreader/geom/geometry.py`) and `SubGeomSlice._load_geom_data` (`fdsreader/slcf/geomslice.py`) duplicate near-identical Fortran-record-reading logic; a shared helper would reduce the risk of the two drifting (as already nearly happened once).
+- `GeomBoundary.surf_ind`/`.geom_ind` (`fdsreader/geom/geometry.py`) are only available for FDS 6.10+ (`.gcf`) simulations; HVAC, `&RADF`, `&CTRL`, and detailed zone-model output aren't read by fdsreader at all.
 
 ## Pull request checklist
 
