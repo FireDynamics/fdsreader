@@ -771,7 +771,15 @@ class Simulation:
         bid = int(filename_be.split("_")[-1][:-3]) - 1
 
         file_path_be = os.path.join(self.root_path, filename_be)
-        file_path_gbf = os.path.join(self.root_path, filename_gbf)
+        if filename_gbf == "-":
+            # FDS 6.10+ no longer writes a per-quantity .gbf file. The boundary geometry
+            # (vertices/faces) instead lives in a per-mesh .gcf file with a deterministic
+            # name (see FN_CFACE_GEOM in FDS' Source/dump.f90).
+            is_gcf = True
+            file_path_gbf = os.path.join(self.root_path, f"{self.chid}_{mesh_index + 1}.gcf")
+        else:
+            is_gcf = False
+            file_path_gbf = os.path.join(self.root_path, filename_gbf)
 
         times = list()
         lower_bounds = list()
@@ -789,7 +797,7 @@ class Simulation:
 
         if bid >= len(self._geom_data):
             self._geom_data.append(GeomBoundary(Quantity(quantity, short_name, unit), times, n_t))
-        self._geom_data[bid]._add_data(mesh_index, file_path_be, file_path_gbf, lower_bounds, upper_bounds)
+        self._geom_data[bid]._add_data(mesh_index, file_path_be, file_path_gbf, is_gcf, lower_bounds, upper_bounds)
 
     @log_error("pl3d")
     def _load_plot_3d(self, smv_file: TextIO, line: str):

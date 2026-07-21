@@ -1,0 +1,33 @@
+import numpy as np
+import pytest
+
+from fdsreader import Simulation
+
+
+@pytest.fixture(scope="module")
+def geom_sim():
+    return Simulation("./geom_data_fds611")
+
+
+@pytest.fixture(scope="module")
+def geom(geom_sim):
+    return geom_sim.geom_data.filter_by_quantity("Radiative Heat Flux")[0]
+
+
+def test_geom_faces_match_data(geom):
+    assert len(geom.faces) == len(geom.data[-1])
+
+
+def test_geom_data_non_empty(geom):
+    assert len(geom.data) > 0
+
+
+def test_geom_vertices_finite(geom):
+    vertices = np.array(geom.vertices)
+    assert not np.isnan(vertices).any(), "NaN in Geometrie-Vertices"
+    assert not np.isinf(vertices).any(), "Inf in Geometrie-Vertices"
+
+
+def test_geom_non_empty(geom):
+    assert len(geom.faces) > 0
+    assert len(geom.vertices) > 0

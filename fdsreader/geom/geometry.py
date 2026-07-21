@@ -27,15 +27,79 @@ class GeomBoundary:
 
         self.file_paths_be: Dict[int, str] = dict()
         self.file_paths_gbf: Dict[int, str] = dict()
+        self.file_paths_is_gcf: Dict[int, bool] = dict()
 
     def _add_data(
-        self, mesh: int, file_path_be: str, file_path_gbf: str, lower_bounds: np.ndarray, upper_bounds: np.ndarray
+        self,
+        mesh: int,
+        file_path_be: str,
+        file_path_gbf: str,
+        is_gcf: bool,
+        lower_bounds: np.ndarray,
+        upper_bounds: np.ndarray,
     ):
         self.file_paths_be[mesh] = file_path_be
         self.file_paths_gbf[mesh] = file_path_gbf
+        self.file_paths_is_gcf[mesh] = is_gcf
 
         self.lower_bounds[mesh] = lower_bounds
         self.upper_bounds[mesh] = upper_bounds
+
+    @staticmethod
+    def _load_gbf(file_path_gbf: str):
+        """Reads vertices/faces from a legacy .gbf file (FDS < 6.10)."""
+        with open(file_path_gbf, "rb") as infile:
+            offset = fdtype.INT.itemsize * 2 + fdtype.new((("i", 3),)).itemsize + fdtype.FLOAT.itemsize
+            infile.seek(offset)
+
+            dtype_meta = fdtype.new((("i", 3),))
+            n_vertices, n_faces, _ = np.fromfile(infile, dtype_meta, 1)[0][1]
+
+            dtype_vertices = fdtype.new((("f", 3 * n_vertices),))
+            vertices = np.fromfile(infile, dtype_vertices, 1)[0][1].reshape((n_vertices, 3)).astype(float)
+
+            dtype_faces = fdtype.new((("i", 3 * n_faces),))
+            faces = fdtype.read(infile, dtype_faces, 1)[0][0].reshape((n_faces, 3)).astype(int) - 1
+
+        return vertices, faces, n_faces
+
+    @staticmethod
+    def _load_gcf(file_path_gcf: str):
+        """Reads vertices/faces from a per-mesh .gcf file (FDS >= 6.10, replaces .gbf).
+
+        Binary layout written by FDS' DUMP_CFACES_GEOM (Source/dump.f90):
+            INTEGER_ONE                    (1 int)
+            VERSION                        (1 int)
+            0, 0, FIRST_FRAME_STATIC       (3 ints)
+            STIME                          (1 float)
+            NVERTS, NFACES, NVOLS          (3 ints)
+            -- only if NVERTS > 0 and NFACES > 0 --
+            VERTS(1:3*NVERTS)              (floats)
+            FACES(1:3*NFACES)              (ints, 1-based)
+            LOCATIONS(1:NFACES)            (ints, unused)
+            SURFIND(1:NFACES)              (ints, unused)
+            GEOMIND(1:NFACES)              (ints, unused)
+        """
+        with open(file_path_gcf, "rb") as infile:
+            infile.seek(fdtype.INT.itemsize * 2 + fdtype.new((("i", 3),)).itemsize + fdtype.FLOAT.itemsize)
+
+            dtype_meta = fdtype.new((("i", 3),))
+            n_vertices, n_faces, _ = np.fromfile(infile, dtype_meta, 1)[0][1]
+
+            if n_vertices == 0 or n_faces == 0:
+                return np.empty((0, 3), dtype=float), np.empty((0, 3), dtype=int), 0
+
+            dtype_vertices = fdtype.new((("f", 3 * n_vertices),))
+            vertices = np.fromfile(infile, dtype_vertices, 1)[0][1].reshape((n_vertices, 3)).astype(float)
+
+            dtype_faces = fdtype.new((("i", 3 * n_faces),))
+            faces = fdtype.read(infile, dtype_faces, 1)[0][0].reshape((n_faces, 3)).astype(int) - 1
+
+            # Skip LOCATIONS, SURFIND and GEOMIND (each n_faces ints), currently unused.
+            dtype_skip = fdtype.new((("i", n_faces),))
+            infile.seek(dtype_skip.itemsize * 3, 1)
+
+        return vertices, faces, n_faces
 
     def _load_data(self):
         self._vertices: Dict[int, np.ndarray] = dict()
@@ -45,19 +109,11 @@ class GeomBoundary:
         for mesh in self.file_paths_be.keys():
             file_path_be = self.file_paths_be[mesh]
             file_path_gbf = self.file_paths_gbf[mesh]
-            # Load .gbf
-            with open(file_path_gbf, "rb") as infile:
-                offset = fdtype.INT.itemsize * 2 + fdtype.new((("i", 3),)).itemsize + fdtype.FLOAT.itemsize
-                infile.seek(offset)
 
-                dtype_meta = fdtype.new((("i", 3),))
-                n_vertices, n_faces, _ = np.fromfile(infile, dtype_meta, 1)[0][1]
-
-                dtype_vertices = fdtype.new((("f", 3 * n_vertices),))
-                vertices = np.fromfile(infile, dtype_vertices, 1)[0][1].reshape((n_vertices, 3)).astype(float)
-
-                dtype_faces = fdtype.new((("i", 3 * n_faces),))
-                faces = fdtype.read(infile, dtype_faces, 1)[0][0].reshape((n_faces, 3)).astype(int) - 1
+            if self.file_paths_is_gcf[mesh]:
+                vertices, faces, n_faces = self._load_gcf(file_path_gbf)
+            else:
+                vertices, faces, n_faces = self._load_gbf(file_path_gbf)
 
             # Load .be
             dtype_faces = fdtype.new((("f", n_faces),))
