@@ -37,6 +37,10 @@ version = release
 # ones.
 extensions = ["sphinx.ext.autodoc", "sphinx.ext.viewcode", "autodocsumm"]
 
+# fdsreader.explorer's Jupyter front end needs matplotlib and ipywidgets, which are an
+# optional extra and are not installed for a docs build.
+autodoc_mock_imports = ["matplotlib", "ipywidgets", "ipympl", "IPython"]
+
 autoclass_content = "both"
 
 # List of patterns, relative to source directory, that match files and
