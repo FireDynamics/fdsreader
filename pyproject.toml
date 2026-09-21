@@ -28,6 +28,9 @@ dependencies = [
 [project.urls]
 Repository = "https://github.com/FireDynamics/fdsreader"
 
+[project.scripts]
+fdsreader-explorer-cli = "fdsreader.explorer.cli:main"
+
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0",
@@ -41,6 +44,10 @@ docs = [
     "furo",
     "autodocsumm",
 ]
+notebook = [
+    "matplotlib>=3.5",
+    "ipywidgets>=8",
+]
 
 [tool.setuptools_scm]
 version_scheme = "post-release"
@@ -52,6 +59,7 @@ packages = [
     "fdsreader.bndf",
     "fdsreader.devc",
     "fdsreader.evac",
+    "fdsreader.explorer",
     "fdsreader.export",
     "fdsreader.fds_classes",
     "fdsreader.geom",

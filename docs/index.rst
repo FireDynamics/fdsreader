@@ -33,6 +33,7 @@ Source code, issue tracker and releases are hosted on
    fds_classes
    utils
    export
+   explorer
 
 .. include::  simulation.rst
 .. include::  slcf.rst
@@ -48,3 +49,4 @@ Source code, issue tracker and releases are hosted on
 .. include::  fds_classes.rst
 .. include::  utils.rst
 .. include::  export.rst
+.. include::  explorer.rst
