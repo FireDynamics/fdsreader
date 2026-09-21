@@ -4,7 +4,8 @@ Three of them share one core:
 
 * :mod:`~fdsreader.explorer.notebook` -- widgets for Jupyter, ``explore()``
 * :mod:`~fdsreader.explorer.cli` -- ``fdsreader-explorer-cli``, which draws one view
-  in a terminal and exits
+  in a terminal and exits, or with ``-i`` hands over to
+  :mod:`~fdsreader.explorer.tui` for a full-screen interactive view
 * a desktop front end may follow; it would sit beside these two
 
 The shared parts are :mod:`~fdsreader.explorer.data` (reading devices, HRR and slices,
@@ -65,6 +66,7 @@ _LAZY = {
     "plot_device": "plots",
     "plot_series": "plots",
     "plot_slice": "plots",
+    "Interactive": "tui",
     "RAMP": "render",
     "series_lines": "render",
     "slice_lines": "render",

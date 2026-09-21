@@ -71,7 +71,8 @@ documentation of all classes check the API Documentation below.
 
 `fdsreader.explorer` looks at a simulation without writing plotting code for it: a time
 bar driving a 2D slice, and any number of device or HRR quantities plotted against time.
-In Jupyter that is an interactive widget; in a terminal it draws one view and exits.
+In Jupyter that is an interactive widget; in a terminal you can either explore it
+interactively or draw a single view and exit.
 
 ### In Jupyter
 
@@ -107,8 +108,31 @@ extension is not loading — pass `interactive_canvas=False`.
 
 ### In a terminal
 
-The command line front end draws one view and exits. It needs nothing but numpy, so it
-works over SSH on a machine with no plotting stack and no browser:
+The command line front end needs nothing but numpy, so it works over SSH on a machine
+with no plotting stack and no browser.
+
+`-i` opens a full-screen interactive view, where the slice and the curves are chosen from
+lists rather than named on the command line:
+
+```sh
+fdsreader-explorer-cli ./sample_data -i
+```
+
+| key | |
+|---|---|
+| `←` `→` or `h` `l` | step through time |
+| `page up` / `page down` | ten steps |
+| `home` / `end` | first / last step |
+| `space` | play, pause |
+| `+` `-` | play speed |
+| `f` | pick the slice from a list |
+| `c` | pick the curves from a list (`space` ticks, `enter` accepts) |
+| `[` `]` | previous / next slice |
+| `g` / `s` | colour scale over the whole run / this step |
+| `?` | help |
+| `q` | quit |
+
+Without `-i` it draws one view and exits, which is what you want in a script:
 
 ```sh
 fdsreader-explorer-cli ./sample_data                        # what is in it
@@ -146,6 +170,9 @@ TEMPERATURE [C] — x = 0 m  #0   ·   t = 4.401 s (step 630 of 749)
 
 `--save FILE` writes the current view as an image or an animation instead
 (`.png`/`.pdf`/`.svg`/`.gif`/`.mp4`, needs matplotlib).
+
+The interactive view uses `curses`, which is in the standard library everywhere except
+Windows; there, `pip install windows-curses` provides it.
 
 Slices are read one time step at a time, so stepping through a long run costs a few
 hundred kilobytes rather than loading the whole series into memory.

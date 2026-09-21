@@ -4,6 +4,7 @@ A one-shot renderer: it prints what a simulation contains, or draws one slice ti
 or a set of curves, as text. Needs nothing but numpy, so it works over SSH on a machine
 that has no plotting stack and no browser.
 
+    fdsreader-explorer-cli CASE -i                    explore it interactively
     fdsreader-explorer-cli CASE                       what is in it
     fdsreader-explorer-cli CASE --slice 0 --time 4.4  draw a slice
     fdsreader-explorer-cli CASE --curve T_1.0 --curve HRR
@@ -33,11 +34,14 @@ def _load(path, caching=False):
 
 def _state_from(args, fields):
     """Build the shared state from the command line arguments."""
+    # One picture is best scaled to itself; while stepping through time a fixed scale
+    # keeps the frames comparable.
+    scale = args.scale or ("global" if args.interactive else "step")
     state = ExplorerState(scale_mode="step")
     if args.slice is not None:
         state.field_index = args.slice
-    if args.scale in ("global", "step"):
-        state.scale_mode = args.scale
+    if scale in ("global", "step"):
+        state.scale_mode = scale
     else:
         try:
             low, high = (float(part) for part in args.scale.split(","))
@@ -259,13 +263,26 @@ def build_parser():
         epilog="With no options it prints what the simulation contains.",
     )
     parser.add_argument("path", help="simulation directory, or the .smv file")
+    parser.add_argument(
+        "-i",
+        "--interactive",
+        action="store_true",
+        help="explore the simulation in a full-screen terminal view, "
+        "choosing the slice and the curves from lists rather than "
+        "naming them here",
+    )
     parser.add_argument("--list", action="store_true", help="list every slice and curve with the name to pass back in")
     parser.add_argument("--slice", type=int, metavar="N", help="draw slice N")
     parser.add_argument(
         "--time", type=float, metavar="SECONDS", help="time step to draw, the nearest one is used (default: first)"
     )
     parser.add_argument(
-        "--scale", default="step", metavar="MODE", help="colour limits: 'global', 'step' (default) or 'LOW,HIGH'"
+        "--scale",
+        default=None,
+        metavar="MODE",
+        help="colour limits: 'global', 'step' or 'LOW,HIGH'. Defaults to 'step' for a "
+        "single picture and 'global' interactively, where frames should stay comparable "
+        "while stepping through time",
     )
     parser.add_argument(
         "--curve",
@@ -328,6 +345,18 @@ def main(argv=None):
     state = _state_from(args, fields)
     state.render = args.render
     series = resolve_curves(sim, args.curve)
+
+    if args.interactive:
+        from .tui import run as run_interactive
+
+        if series:
+            state.curves = tuple(range(len(series)))
+        try:
+            run_interactive(sim, state=state)
+        except ModuleNotFoundError as exc:
+            print(f"{PROG}: {exc}", file=sys.stderr)
+            return 1
+        return 0
 
     if args.json:
         json.dump(as_json(sim, fields, state, series), sys.stdout, indent=2)
