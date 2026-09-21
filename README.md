@@ -22,10 +22,11 @@ The package is available on PyPI and can be installed using pip:
 pip install fdsreader
 ```
 
-The interactive [explorer](#explorer) needs a plotting stack, which is an optional extra:
+The Jupyter [explorer](#explorer) needs a plotting stack, which is an optional extra:
 ```sh
 pip install "fdsreader[notebook]"
 ```
+Its command line counterpart needs nothing beyond numpy and is always installed.
 
 _FDS Version 6.7.5 and above are fully supported. Versions below 6.7.5 might work, but are not guaranteed to work._
 
@@ -68,9 +69,9 @@ documentation of all classes check the API Documentation below.
 
 ## Explorer
 
-`fdsreader.explorer` looks at a simulation interactively instead of writing plotting code
-for it: a time bar driving a 2D slice, and any number of device or HRR quantities plotted
-against time.
+`fdsreader.explorer` looks at a simulation without writing plotting code for it: a time
+bar driving a 2D slice, and any number of device or HRR quantities plotted against time.
+In Jupyter that is an interactive widget; in a terminal it draws one view and exits.
 
 ### In Jupyter
 
@@ -106,8 +107,8 @@ extension is not loading — pass `interactive_canvas=False`.
 
 ### In a terminal
 
-The command line front end needs nothing but numpy, so it works over SSH on a machine
-with no plotting stack and no browser:
+The command line front end draws one view and exits. It needs nothing but numpy, so it
+works over SSH on a machine with no plotting stack and no browser:
 
 ```sh
 fdsreader-explorer-cli ./sample_data                        # what is in it

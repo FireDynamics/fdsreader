@@ -1,8 +1,9 @@
 Explorer
 ________
 
-Front ends for looking at a simulation interactively. The core is importable with nothing
-but numpy; the Jupyter front end additionally needs ``pip install "fdsreader[notebook]"``.
+Front ends for looking at a simulation: an interactive widget for Jupyter, and a command
+line renderer that draws one view and exits. The core is importable with nothing but
+numpy; only the Jupyter front end needs ``pip install "fdsreader[notebook]"``.
 
 .. automodule:: fdsreader.explorer
    :autosummary:

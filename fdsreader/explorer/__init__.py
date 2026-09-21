@@ -3,7 +3,8 @@
 Three of them share one core:
 
 * :mod:`~fdsreader.explorer.notebook` -- widgets for Jupyter, ``explore()``
-* :mod:`~fdsreader.explorer.cli` -- a terminal application, ``fdsreader-explorer-cli``
+* :mod:`~fdsreader.explorer.cli` -- ``fdsreader-explorer-cli``, which draws one view
+  in a terminal and exits
 * a desktop front end may follow; it would sit beside these two
 
 The shared parts are :mod:`~fdsreader.explorer.data` (reading devices, HRR and slices,
