@@ -63,6 +63,11 @@ jobs:
       - name: Run test simulations
         run: |
           source $HOME/fds/bin/FDS6VARS.sh
+          # The bundled Intel MPI runtime tries to use the OFI/libfabric network
+          # provider by default, which fails to initialize in the GH Actions
+          # container ("OFI endpoint open failed"). Force it onto shared memory.
+          export FI_PROVIDER=tcp
+          export I_MPI_FABRICS=shm
           FDS=$HOME/fds/bin/fds_openmp
           for dir in tests/cases/fds_inputs/*.fds; do
             name=$(basename "$dir" .fds)
@@ -76,7 +81,7 @@ jobs:
           pip install ".[dev]"
           cd tests/cases && for f in *.tgz; do tar -xzvf "$f"; done
           cd ../..
-          pytest tests/ -v
+          FDS_FRESH_OUTPUT_DIR=/tmp/fds_out pytest tests/ -v
       - name: Update tracked FDS version
         if: success()
         run: |
