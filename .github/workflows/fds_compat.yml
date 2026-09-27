@@ -62,6 +62,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
       - name: Run test simulations
         run: |
+          source $HOME/fds/bin/FDS6VARS.sh
           FDS=$HOME/fds/bin/fds_openmp
           for dir in tests/cases/fds_inputs/*.fds; do
             name=$(basename "$dir" .fds)
