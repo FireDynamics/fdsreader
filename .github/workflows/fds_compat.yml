@@ -39,6 +39,7 @@ jobs:
     needs: detect-version
     if: needs.detect-version.outputs.run_compat == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
         with:
@@ -55,17 +56,24 @@ jobs:
             exit 1
           fi
           wget -q "$ASSET_URL" -O fds_install.sh
-          echo "" | bash fds_install.sh --prefix=$HOME/fds
+          chmod +x fds_install.sh
+          printf '\n%s\nyes\n' "$HOME/fds" | ./fds_install.sh
         env:
           GH_TOKEN: ${{ github.token }}
       - name: Run test simulations
         run: |
+          source $HOME/fds/bin/FDS6VARS.sh
+          # The bundled Intel MPI runtime tries to use the OFI/libfabric network
+          # provider by default, which fails to initialize in the GH Actions
+          # container ("OFI endpoint open failed"). Force it onto shared memory.
+          export FI_PROVIDER=tcp
+          export I_MPI_FABRICS=shm
           FDS=$HOME/fds/bin/fds_openmp
           for dir in tests/cases/fds_inputs/*.fds; do
             name=$(basename "$dir" .fds)
             mkdir -p /tmp/fds_out/$name
             cd /tmp/fds_out/$name
-            $FDS "$GITHUB_WORKSPACE/$dir" || true
+            timeout 600 $FDS "$GITHUB_WORKSPACE/$dir" || true
             cd $GITHUB_WORKSPACE
           done
       - name: Install fdsreader and run tests
@@ -73,7 +81,7 @@ jobs:
           pip install ".[dev]"
           cd tests/cases && for f in *.tgz; do tar -xzvf "$f"; done
           cd ../..
-          pytest tests/ -v
+          FDS_FRESH_OUTPUT_DIR=/tmp/fds_out pytest tests/ -v
       - name: Update tracked FDS version
         if: success()
         run: |
