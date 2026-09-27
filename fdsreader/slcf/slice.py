@@ -340,7 +340,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             if orientation == dim:
                 coord = self.extent[dim][0]
                 if self.cell_centered and not ignore_cell_centered:
-                    mesh = next(iter(self._subslices.keys()))
+                    mesh = next(iter(self._subslices.values())).mesh
                     mesh_co = mesh.coordinates[dim]
                     idx = int(np.argmin(np.abs(mesh_co - coord)))
                     if idx > 0:
@@ -361,16 +361,18 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             if len(coords[dim]) == 0:
                 slice_coordinate = self.extent[dim][0]
                 nearest_coordinate = np.inf
-                for mesh in self._subslices.keys():
-                    mesh_coords = mesh.coordinates[dim]
+                for subslice in self._subslices.values():
+                    mesh_coords = subslice.mesh.coordinates[dim]
                     idx = np.searchsorted(mesh_coords, slice_coordinate, side="left")
                     if idx > 0 and (
                         idx == mesh_coords.size
                         or math.fabs(slice_coordinate - mesh_coords[idx - 1])
                         < math.fabs(slice_coordinate - mesh_coords[idx])
                     ):
-                        idx = idx + 1
-                    if mesh_coords[idx] - slice_coordinate < nearest_coordinate - slice_coordinate:
+                        idx = idx - 1
+                    if math.fabs(mesh_coords[idx] - slice_coordinate) < math.fabs(
+                        nearest_coordinate - slice_coordinate
+                    ):
                         nearest_coordinate = mesh_coords[idx]
                 coords[dim] = np.array([nearest_coordinate])
 
