@@ -1,5 +1,7 @@
 from typing import Tuple
 
+import numpy as np
+
 from fdsreader.utils import Quantity
 
 
@@ -35,6 +37,10 @@ class Device:
             # class is called, which is needed to get the path to the device file as well as fill in the data for all
             # other devices as well as we are reading all the data anyway
             self._data_callback()
+            if not hasattr(self, "_data"):
+                # Some devices (e.g. SETPOINT-triggered control devices) never get a column in
+                # devc.csv -- their activity is only recorded via activation_times.
+                self._data = np.array([])
         return self._data
 
     @property

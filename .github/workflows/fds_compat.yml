@@ -76,12 +76,6 @@ jobs:
             timeout 600 $FDS "$GITHUB_WORKSPACE/$dir" || true
             cd $GITHUB_WORKSPACE
           done
-      - name: Upload water_droplets output for local debugging
-        uses: actions/upload-artifact@v4
-        with:
-          name: water_droplets-debug
-          path: /tmp/fds_out/water_droplets
-          retention-days: 3
       - name: Install fdsreader and run tests
         run: |
           pip install ".[dev]"
