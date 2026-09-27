@@ -54,10 +54,10 @@ def test_fresh_fds_output_loads_without_crashing(case_dir):
             iso.to_global(len(iso.times) - 1)
 
     for p3d in sim.data_3d:
-        _ = p3d.data
+        _ = p3d.to_global(masked=True)
 
     for sm in sim.smoke_3d:
-        _ = sm.data
+        _ = sm.to_global(masked=True)
 
     for particle in sim.particles:
         _ = particle.positions
