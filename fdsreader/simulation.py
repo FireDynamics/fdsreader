@@ -52,6 +52,10 @@ class Simulation:
     :ivar cpu: Dictionary mapping .csv header keys to numpy arrays containing cpu data.
     :ivar hrr: Dictionary mapping .csv header keys to numpy arrays containing hrr data.
     :ivar steps: Dictionary mapping .csv header keys to numpy arrays containing steps data.
+    :ivar ctrl: Dictionary mapping control (&CTRL) names to numpy arrays of their state over time.
+        Only set if the simulation has a CTRL csv export.
+    :ivar mass: Dictionary mapping species names to numpy arrays of their mass history. Only set
+        if the simulation has a mass csv export.
     :ivar load_errors: List of (module, exception) tuples for loaders that failed and were
         swallowed during parsing. Empty when nothing went wrong.
     """
@@ -254,6 +258,10 @@ class Simulation:
                         self.hrr = self._load_HRR_data(file_path)
                     elif csv_type == "steps":
                         self.steps = self._load_step_data(file_path)
+                    elif csv_type == "ctrl":
+                        self.ctrl = self._load_named_csv_data(file_path)
+                    elif csv_type == "mass":
+                        self.mass = self._load_named_csv_data(file_path)
                     elif csv_type == "devc":
                         self.devc_path = file_path
                         self._devices["Time"] = Device(
@@ -462,7 +470,7 @@ class Simulation:
     def _load_geoms(self, smv_file: TextIO, line: str):
         ngeoms = int(line.split()[1])
 
-        filename = smv_file.readline()
+        filename = smv_file.readline().strip()
         file_path = os.path.join(self.root_path, filename)
 
         for g in range(ngeoms):
@@ -1043,17 +1051,40 @@ class Simulation:
                 infile.readline()  # Skip "ID, IOR, face center x(m), ..." header
                 profile_id = infile.readline().split(",")[0].strip()
                 infile.readline()  # Skip "Time(s), Npoints, ..." header
-                data: np.ndarray = np.genfromtxt(infile, delimiter=",", dtype=np.float32, autostrip=True).T
-                times = data[0]
-                npoints = data[1].astype(int)
-                depths = np.empty((data.shape[1],), dtype=object)
-                values = np.empty((data.shape[1],), dtype=object)
+                raw_rows = [row for row in csv.reader(infile) if row]
 
-                for i, n in enumerate(npoints):
-                    depths[i] = data[2 : 2 + n, i]
-                    values[i] = data[2 + n :, i]
+            # Npoints can change between timesteps (FDS shrinks/grows the profile), which
+            # produces rows with different lengths - np.genfromtxt can't handle that, so each row
+            # is parsed on its own instead. Only trailing padding is stripped (not fields in the
+            # middle of a row), and a row that's shorter than its own declared Npoints - e.g. the
+            # last line of a profile still being written by a running simulation - is skipped
+            # rather than raising, so one incomplete row doesn't take out every other profile file.
+            times_list, npoints_list, depths_list, values_list = [], [], [], []
+            for row in raw_rows:
+                while row and row[-1].strip() == "":
+                    row.pop()
+                if len(row) < 2:
+                    continue
+                try:
+                    row_values = np.array(row, dtype=np.float32)
+                except ValueError:
+                    continue
+                n = int(row_values[1])
+                if len(row_values) < 2 + 2 * n:
+                    continue
+                times_list.append(row_values[0])
+                npoints_list.append(n)
+                depths_list.append(row_values[2 : 2 + n])
+                values_list.append(row_values[2 + n : 2 + 2 * n])
 
-                self.profiles[profile_id] = Profile(profile_id, times, npoints, depths, values)
+            times = np.array(times_list, dtype=np.float32)
+            npoints = np.array(npoints_list, dtype=int)
+            depths = np.empty(len(depths_list), dtype=object)
+            depths[:] = depths_list
+            values = np.empty(len(values_list), dtype=object)
+            values[:] = values_list
+
+            self.profiles[profile_id] = Profile(profile_id, times, npoints, depths, values)
 
     @log_error("devc")
     def _register_device(self, smv_file: TextIO) -> Tuple[str, Device]:
@@ -1088,7 +1119,7 @@ class Simulation:
                 devc.quantity.unit = units[k]
                 devc._data = values[:, k].copy()
 
-        line_path = self.devc_path.replace("devc", "line")
+        line_path = os.path.join(self.root_path, self.chid + "_line.csv")
         if os.path.exists(line_path):
             with open(line_path) as infile:
                 units = infile.readline()
@@ -1124,6 +1155,19 @@ class Simulation:
         data = self._transform_csv_data(keys, float_values)
         data["Time Step"] = timesteps
         return data
+
+    @log_error("csv")
+    def _load_named_csv_data(self, file_path: str) -> Dict[str, np.ndarray]:
+        """Loads a generic two-header-row FDS csv export (e.g. CTRL or mass/species history)."""
+        with open(file_path) as infile:
+            infile.readline()  # Skip units header
+            keys = [name.strip() for name in next(csv.reader([infile.readline()]))]
+        values = np.loadtxt(file_path, delimiter=",", ndmin=2, skiprows=2)
+        if values.size == 0:
+            # np.loadtxt can't infer the column count from zero data rows (e.g. a run that was
+            # killed before its first sample was written), so it comes back as shape (0, 1).
+            values = np.empty((0, len(keys)))
+        return self._transform_csv_data(keys, values)
 
     @log_error("csv")
     def _load_CPU_data(self) -> Dict[str, np.ndarray]:

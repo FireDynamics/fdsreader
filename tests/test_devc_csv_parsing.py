@@ -23,6 +23,8 @@ def _make_sim(tmp_path, header_line: str, device_ids):
     devices["Time"] = Device("Time", Quantity("TIME", "TIME", "s"), (0.0, 0.0, 0.0), (0.0, 0.0, 0.0))
 
     sim = object.__new__(Simulation)
+    sim.root_path = str(tmp_path)
+    sim.chid = "test"
     sim.devc_path = str(csv_path)
     sim._devices = devices
     sim.devices = DeviceCollection(devices.values())
