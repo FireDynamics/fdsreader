@@ -15,7 +15,7 @@ class GeometryCollection(FDSDataCollection):
 
         if not settings.LAZY_LOAD:
             for geom in self:
-                geom._load_prt_data()
+                geom._load_data()
 
     @property
     def quantities(self) -> List[Quantity]:

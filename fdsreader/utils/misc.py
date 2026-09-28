@@ -22,6 +22,8 @@ def log_error(module):
                     )
                     if not settings.IGNORE_ERRORS:
                         logging.warning(msg, exc_info=True)
+                    if args and hasattr(args[0], "load_errors"):
+                        args[0].load_errors.append((str(module), e))
 
         return wrapped
 

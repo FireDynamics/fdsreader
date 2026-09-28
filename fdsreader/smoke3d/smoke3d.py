@@ -336,7 +336,7 @@ class Smoke3D(np.lib.mixins.NDArrayOperatorsMixin):
     @implements(np.std)
     def std(self) -> np.ndarray:
         """Calculates the standard deviation of all Smoke3D data for this quantity."""
-        mean = self.mean
+        mean = self.mean()
         sum = np.sum([np.sum(np.power(subsmoke.data - mean, 2)) for subsmoke in self._subsmokes.values()])
         N = np.sum([subsmoke.data.size for subsmoke in self._subsmokes.values()])
         return np.sqrt(sum / N)
@@ -366,14 +366,21 @@ class Smoke3D(np.lib.mixins.NDArrayOperatorsMixin):
                 " submit an issue on Github where you explain your use case.",
                 method,
             )
-        input_list = list(inputs)
-        for i, inp in enumerate(inputs):
-            if isinstance(inp, self.__class__):
-                del input_list[i]
+        if sum(isinstance(inp, self.__class__) for inp in inputs) > 1:
+            raise UserWarning(
+                f"The {method} operation is not implemented for multiple smoke3ds as input yet. If"
+                " you require this feature, please request this functionality by submitting an"
+                " issue on Github."
+            )
+        # 'out' (e.g. from in-place operators like +=) references this wrapper object, not a plain
+        # array; forwarding it would make numpy re-dispatch to this same method and recurse forever.
+        # We always return a new object instead, so the in-place target is discarded here.
+        kwargs.pop("out", None)
 
         new_smoke3d = deepcopy(self)
-        for subsmoke in self._subsmokes.values():
-            subsmoke._data = ufunc(subsmoke.data, input_list[0], **kwargs)
+        for subsmoke in new_smoke3d._subsmokes.values():
+            args = [subsmoke.data if isinstance(inp, self.__class__) else inp for inp in inputs]
+            subsmoke._data = ufunc(*args, **kwargs)
         return new_smoke3d
 
     def __array_function__(self, func, types, args, kwargs):

@@ -52,6 +52,8 @@ class Simulation:
     :ivar cpu: Dictionary mapping .csv header keys to numpy arrays containing cpu data.
     :ivar hrr: Dictionary mapping .csv header keys to numpy arrays containing hrr data.
     :ivar steps: Dictionary mapping .csv header keys to numpy arrays containing steps data.
+    :ivar load_errors: List of (module, exception) tuples for loaders that failed and were
+        swallowed during parsing. Empty when nothing went wrong.
     """
 
     _loading = False
@@ -94,6 +96,9 @@ class Simulation:
                     valid &= sim._hash == create_hash(smv_file_path)
 
                     if valid:
+                        # Older pickle caches may predate the load_errors attribute
+                        if not hasattr(sim, "load_errors"):
+                            sim.load_errors = list()
                         # Return cached sim if it turned out to be valid
                         return sim
 
@@ -164,6 +169,7 @@ class Simulation:
             self._devices = dict()
 
             self.profiles: Dict[str, Profile] = dict()
+            self.load_errors: List[Tuple[str, Exception]] = list()
 
             self.parse_smv_file()
 
@@ -223,7 +229,8 @@ class Simulation:
                 # Hash will be saved to simulation pickle file and compared to new hash when loading
                 # the pickled simulation again in the next run of the program.
                 self._hash = create_hash(self.smv_file_path)
-                pickle.dump(self, open(Simulation._get_pickle_filename(self.root_path, self.chid), "wb"), protocol=4)
+                with open(Simulation._get_pickle_filename(self.root_path, self.chid), "wb") as pickle_file:
+                    pickle.dump(self, pickle_file, protocol=4)
 
     def parse_smv_file(self):
         # Global device list in registration order — used to resolve DEVICE_ACT indices.
@@ -465,11 +472,11 @@ class Simulation:
 
             texture_mapping = texture_line[0]
             texture_origin = (float(texture_line[1]), float(texture_line[2]), float(texture_line[3]))
-            is_terrain = bool(texture_line[4])
+            is_terrain = bool(int(texture_line[4]))
             rgb = (int(rgb_line[0]), int(rgb_line[1]), int(rgb_line[2]))
 
             if "%" in line[0]:
-                surface_id = line[0].split("%")[-1]
+                surface_id = line[0].split("%")[-1].strip()
                 surface = next((s for s in self.surfaces if s.id() == surface_id), None)
                 geom = Geometry(file_path, texture_mapping, texture_origin, is_terrain, rgb, surface=surface)
             else:
