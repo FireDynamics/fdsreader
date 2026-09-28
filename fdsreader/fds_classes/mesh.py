@@ -78,6 +78,13 @@ class Mesh:
             The array depends on time as obstructions may be hidden at specific points in time.
         """
         orientation = subslice.orientation
+        if orientation == 0:
+            # 3D slices have no single axis to cut a plane from, and there is no fixture
+            # exercising this path yet to validate a full 3-axis mask extraction against.
+            raise NotImplementedError(
+                "Masking a 3D slice's obstruction cells is not supported yet. Use"
+                " to_global(masked=False) for 3D slices, or a 2D slice instead."
+            )
         value = subslice.extent[orientation][0]
         cell_centered = subslice.cell_centered
 
@@ -110,7 +117,7 @@ class Mesh:
             co = coordinate[i]
             coords = self.coordinates[dim]
             if cell_centered:
-                coords = coords[:-1] + (coords[1] - coords[0]) / 2
+                coords = coords[:-1] + np.diff(coords) / 2
             idx = np.searchsorted(coords, co, side="left")
             if idx > 0 and (idx == len(coords) or math.fabs(co - coords[idx - 1]) < math.fabs(co - coords[idx])):
                 ret.append(idx - 1)
@@ -136,7 +143,7 @@ class Mesh:
         for i, dim in enumerate(dimension):
             coords = self.coordinates[dim]
             if cell_centered:
-                coords = coords[:-1] + (coords[1] - coords[0]) / 2
+                coords = coords[:-1] + np.diff(coords) / 2
             ret.append(coords[indices[i]])
         return tuple(ret)
 

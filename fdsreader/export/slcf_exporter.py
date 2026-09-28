@@ -18,11 +18,18 @@ def export_slcf_raw(slc: Slice, output_dir: str, ordering: Literal["C", "F"] = "
     from pathos.pools import ProcessPool as Pool
 
     slc2d = slc.type == "2D"
+    vmax = float(slc.vmax)
+    vmin = float(slc.vmin)
+
+    # Abort if there is no useful data range to scale by (e.g. a constant slice)
+    if vmax - vmin <= 0:
+        return ""
+
     meta = {
         "CellCentered": 1 if slc.cell_centered else 0,
-        "DataValMax": float(slc.vmax),
-        "DataValMin": float(slc.vmin),
-        "ScaleFactor": 255.0 / (float(slc.vmax) - float(slc.vmin)),
+        "DataValMax": vmax,
+        "DataValMin": vmin,
+        "ScaleFactor": 255.0 / (vmax - vmin),
         "MeshNum": len(slc.subslices),
         "Quantity": slc.quantity.name,
     }

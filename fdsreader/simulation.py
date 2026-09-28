@@ -88,16 +88,22 @@ class Simulation:
                     with open(pickle_file_path, "rb") as f:
                         sim = pickle.load(f)
                 except Exception as e:
+                    sim = None
                     if settings.DEBUG:
                         logging.exception(e)
-                else:
-                    valid = True
-                    # Check if pickle file stores a Simulation
-                    valid &= isinstance(sim, cls)
-                    # Check if the fdsreader version still matches
-                    valid &= sim.reader_version == __version__
-                    # Check if the smv_file did not change
-                    valid &= sim._hash == create_hash(smv_file_path)
+                finally:
+                    # Reset immediately after unpickling so the cache can be used again by any
+                    # later Simulation(...) call in this process, not just the first one.
+                    Simulation._loading = False
+
+                if sim is not None:
+                    # Short-circuiting matters here: a pickle file holding some other/older
+                    # object shape must not reach sim.reader_version/sim._hash at all.
+                    valid = (
+                        isinstance(sim, cls)  # Check if pickle file stores a Simulation
+                        and sim.reader_version == __version__  # Check if the fdsreader version still matches
+                        and sim._hash == create_hash(smv_file_path)  # Check if the smv_file did not change
+                    )
 
                     if valid:
                         # Older pickle caches may predate the load_errors attribute
@@ -1036,6 +1042,10 @@ class Simulation:
         times = self._load_prt5_meta(self._evacs, file_path + ".bnd", mesh)[1:]  # First timestep is weird somehow
         if isinstance(self._evacs, list):
             self.evacs = EvacCollection(self._evacs, os.path.join(self.root_path, self.chid + "_evac"), times)
+            # Mirror the assignment onto _evacs too, so a later mesh's EVA5 block sees the guard
+            # above as already satisfied instead of silently rebuilding (and discarding
+            # z_offsets/_file_paths recorded so far) on every subsequent mesh.
+            self._evacs = self.evacs
 
         self.evacs.z_offsets[mesh.id] = float(z_offset)
         self.evacs._file_paths[mesh.id] = file_path
@@ -1101,7 +1111,7 @@ class Simulation:
 
     def _load_DEVC_data(self):
         with open(self.devc_path) as infile:
-            units = infile.readline().split(",")
+            units = [unit.strip() for unit in infile.readline().split(",")]
             # Device names are only quoted by FDS when they contain a comma or space, so a plain
             # split on "," or ',"' would misparse a header where none (or all) of the names need
             # quoting. Use a real CSV parser instead so it doesn't matter which fields are quoted.
@@ -1122,15 +1132,16 @@ class Simulation:
         line_path = os.path.join(self.root_path, self.chid + "_line.csv")
         if os.path.exists(line_path):
             with open(line_path) as infile:
-                units = infile.readline()
-                names = [name.replace('"', "").replace("\n", "").strip() for name in infile.readline().split(",")]
+                units = [unit.replace('"', "").strip() for unit in infile.readline().split(",")]
+                names = [name.strip() for name in next(csv.reader([infile.readline()]))]
                 data = np.genfromtxt(infile, delimiter=",", dtype=np.float32, autostrip=True)
                 for k, key in enumerate(names):
                     if key in self.devices:
                         devc = self.devices[key]
-                        for i in range(len(devc)):
-                            devc[i].quantity.unit = units[k]
-                            devc[i]._data = data[i, k]
+                        devices = devc if isinstance(devc, list) else [devc]
+                        for i, d in enumerate(devices):
+                            d.quantity.unit = units[k]
+                            d._data = data[i, k]
                     else:
                         pass  # Probably only x,y,z coordinates
 
