@@ -24,6 +24,63 @@ def implements(np_function):
     return decorator
 
 
+def _decode_rle_scalar(rle_data: np.ndarray, nchars_out: int, total_size: int) -> np.ndarray:
+    """Reference (slow) run-length decoder, used as a fallback for encodings the vectorized
+    decoder can't safely handle (see :func:`_decode_rle`)."""
+    decoded_data = np.empty(total_size)
+    i = 0
+    mark = np.uint8(255)
+    out_pos = 0
+    while i < nchars_out:
+        if rle_data[i] == mark:
+            value = rle_data[i + 1]
+            repeats = rle_data[i + 2]
+            i += 3
+        else:
+            value = rle_data[i]
+            repeats = 1
+            i += 1
+        decoded_data[out_pos : out_pos + repeats] = value
+        out_pos += repeats
+    return decoded_data
+
+
+def _decode_rle(rle_data: np.ndarray, nchars_out: int, total_size: int) -> np.ndarray:
+    """Decode run-length-encoded smoke3d data (see "RLE" subroutine in smvv.f90).
+
+    The format escapes runs as a (255, value, repeat_count) triple; every other byte is a
+    single literal value. In practice, encoded values and repeat counts never reach 255
+    themselves (255 is reserved as the escape marker), which means every occurrence of a 255
+    byte in the stream unambiguously starts a run and the whole stream can be decoded with
+    vectorized numpy operations instead of a per-token Python loop. If that assumption doesn't
+    hold for some file (i.e. two escape sequences would overlap), fall back to the slow but
+    always-correct scalar decoder.
+    """
+    mark = np.uint8(255)
+    data = rle_data[:nchars_out]
+    mark_positions = np.flatnonzero(data == mark)
+    if mark_positions.size > 0:
+        if mark_positions[-1] + 3 > nchars_out or (mark_positions.size > 1 and np.any(np.diff(mark_positions) < 3)):
+            return _decode_rle_scalar(rle_data, nchars_out, total_size)
+
+    # Every byte is either a literal (kept as-is, 1 repeat) or the first byte of an escaped run
+    # (replaced by the run's value/repeat-count, with the following 2 payload bytes dropped).
+    consumed = np.zeros(nchars_out, dtype=bool)
+    if mark_positions.size > 0:
+        consumed[mark_positions + 1] = True
+        consumed[mark_positions + 2] = True
+    keep = ~consumed
+
+    values = data.copy()
+    repeats = np.ones(nchars_out, dtype=np.int64)
+    if mark_positions.size > 0:
+        values[mark_positions] = data[mark_positions + 1]
+        repeats[mark_positions] = data[mark_positions + 2].astype(np.int64)
+
+    decoded = np.repeat(values[keep], repeats[keep])
+    return decoded[:total_size].astype(np.float64)
+
+
 class SubSmoke3D:
     """Part of a smoke3d output for a single mesh.
 
@@ -61,23 +118,7 @@ class SubSmoke3D:
                         dtype_data = fdtype.new((("u", nchars_out),))
 
                         rle_data = fdtype.read(infile, dtype_data, 1)[0][0]
-                        decoded_data = np.empty((nx + 1) * (ny + 1) * (nz + 1))
-
-                        # Decode run-length-encoded data (see "RLE" subroutine in smvv.f90)
-                        i = 0
-                        mark = np.uint8(255)
-                        out_pos = 0
-                        while i < nchars_out:
-                            if rle_data[i] == mark:
-                                value = rle_data[i + 1]
-                                repeats = rle_data[i + 2]
-                                i += 3
-                            else:
-                                value = rle_data[i]
-                                repeats = 1
-                                i += 1
-                            decoded_data[out_pos : out_pos + repeats] = value
-                            out_pos += repeats
+                        decoded_data = _decode_rle(rle_data, nchars_out, (nx + 1) * (ny + 1) * (nz + 1))
 
                         self._data[t, :, :, :] = decoded_data.reshape(data_shape, order="F")
 

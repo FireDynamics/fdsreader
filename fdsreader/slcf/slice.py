@@ -103,22 +103,20 @@ class SubSlice:
         n = self.dimension.size(cell_centered=False)
         dtype_data = fdtype.combine(fdtype.FLOAT, fdtype.new((("f", n),)))
 
-        load_times = self.n_t == -1
-        if load_times:
-            self._parent_slice.n_t = (os.stat(file_path).st_size - self._offset) // dtype_data.itemsize
-            self._parent_slice.times = np.empty(self.n_t)
-
         with open(file_path, "rb") as infile:
             infile.seek(self._offset)
-            for t, data in enumerate(fdtype.read(infile, dtype_data, self.n_t)):
-                if load_times:
-                    self.times[t] = data[0][0]
-                data = data[1].reshape(self.dimension.shape(cell_centered=False), order="F")
-                if self.cell_centered:
-                    # Ignore ghost points on every axis (2 for 2D slices, 3 for 3D slices)
-                    data_out[t, :] = data[(slice(1, None),) * data.ndim]
-                else:
-                    data_out[t, :] = data
+            _, data_col = fdtype.read_columns(infile, dtype_data, self.n_t)
+
+            # Every record's data field was written by Fortran in column-major (F) order;
+            # reshaping with order="F" applies that per-record reshape across the whole (n_t, n)
+            # block at once, without a Python-level loop.
+            shape = self.dimension.shape(cell_centered=False)
+            full = data_col.reshape((self.n_t,) + shape, order="F")
+            if self.cell_centered:
+                # Ignore ghost points on every axis (2 for 2D slices, 3 for 3D slices)
+                data_out[:] = full[(slice(None),) + (slice(1, None),) * (full.ndim - 1)]
+            else:
+                data_out[:] = full
 
     def _load_times(self) -> np.ndarray:
         # Read in (only) the times for which SLCF data is available
@@ -128,14 +126,12 @@ class SubSlice:
         file_path = os.path.join(self._parent_slice._root_path, self.filename)
 
         n_t = (os.stat(file_path).st_size - self._offset) // dtype_data.itemsize
-        times = np.empty(n_t)
 
         with open(file_path, "rb") as infile:
             infile.seek(self._offset)
-            for t, data in enumerate(fdtype.read(infile, dtype_data, n_t)):
-                times[t] = data[0][0]
+            times_col, _ = fdtype.read_columns(infile, dtype_data, n_t)
 
-        return times
+        return times_col.reshape(-1)
 
     @property
     def data(self) -> np.ndarray:
@@ -258,14 +254,34 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             z_start if self.orientation == 3 else z_end,
         )
 
-        # Read in the available time steps, using arbitrary the first sub-slice
-        self.times = self.subslices[0]._load_times()
-        self.n_t = len(self.times)
-
         # If lazy loading has been disabled by the user, load the data instantaneously instead
+        # (this also triggers computing `times`/`n_t` below as a side effect).
         if not settings.LAZY_LOAD:
             for _, subslice in self._subslices.items():
                 _ = subslice.data
+
+    @property
+    def times(self) -> np.ndarray:
+        """Numpy array containing all times for which data has been recorded."""
+        if not hasattr(self, "_times"):
+            # Read in the available time steps, using arbitrarily the first sub-slice
+            self._times = self.subslices[0]._load_times()
+        return self._times
+
+    @times.setter
+    def times(self, value: np.ndarray):
+        self._times = value
+
+    @property
+    def n_t(self) -> int:
+        """Total number of time steps for which output data has been written."""
+        if not hasattr(self, "_n_t"):
+            self._n_t = len(self.times)
+        return self._n_t
+
+    @n_t.setter
+    def n_t(self, value: int):
+        self._n_t = value
 
     def get_subslice(self, key: Union[int, str, Mesh]) -> SubSlice:
         """Returns the :class:`SubSlice` that cuts through the given mesh. When an int is provided

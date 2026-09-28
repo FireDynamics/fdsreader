@@ -105,20 +105,46 @@ class Patch:
 
             if self._n_t == -1:
                 self._n_t = (os.stat(self.file_path).st_size - self._initial_offset) // self._time_offset
+            n_t = self.n_t(count_duplicates=True)
 
-            self._data = np.empty((self.n_t(count_duplicates=True),) + self.shape)
+            # This patch's record repeats every `_time_offset` bytes, with `_patch_offset` bytes
+            # (the leading time value and any other patches' data) before it and the rest of the
+            # timestep's block after it. Reading all timesteps in one go via a dtype that treats
+            # those surrounding bytes as raw padding is far faster than seeking + reading a single
+            # record at a time in a Python loop.
+            #
+            # Known inefficiency: when N patches share the same underlying file (the normal case
+            # for a mesh/quantity with multiple boundary faces), each patch's own `.data` call
+            # re-reads and discards the *other* N-1 patches' bytes as padding, so the file ends up
+            # read from disk N times instead of once (e.g. triggered by Boundary.vmin()/vmax()'s
+            # fallback over all patches, or cumulatively by Obstruction.get_global_boundary_data_
+            # arrays() iterating every orientation). Fixing this properly means caching the bulk
+            # read once per file (e.g. on `Boundary`, shared across its patches) instead of once
+            # per `Patch` -- a real refactor, not attempted here; tracked as a follow-up.
+            pre_pad = self._patch_offset
+            post_pad = self._time_offset - self._patch_offset - dtype_data.itemsize
+            # A size-0 void field is valid and has no effect, so pre/post padding never needs to
+            # be conditionally omitted.
+            row_dtype = np.dtype([("_pre", "V" + str(pre_pad)), ("data", dtype_data), ("_post", "V" + str(post_pad))])
+
             with open(self.file_path, "rb") as infile:
-                for t in range(self.n_t(count_duplicates=True)):
-                    infile.seek(self._initial_offset + self._patch_offset + t * self._time_offset)
-                    data = np.fromfile(infile, dtype_data, 1)[0][1].reshape(
-                        self.dimension.shape(cell_centered=False), order="F"
-                    )
-                    if self.cell_centered:
-                        self._data[t, :] = data[:-1, :-1]
-                    else:
-                        self._data[t, :] = data
+                infile.seek(self._initial_offset)
+                rows = np.fromfile(infile, dtype=row_dtype, count=n_t)
+            # fdtype.new(...) always auto-names its border/payload/border fields f0/f1/f2.
+            all_data = rows["data"]["f1"]
+
+            # Every record's data field was written by Fortran in column-major (F) order;
+            # reshaping with order="F" applies that per-record reshape across the whole (n_t, n)
+            # block at once, without a Python-level loop.
+            shape = self.dimension.shape(cell_centered=False)
+            full = all_data.reshape((n_t,) + shape, order="F")
+            if self.cell_centered:
+                full = full[:, :-1, :-1]
+
             unique_times_indices = np.unique(self._boundary_parent.times, return_index=True)[1]
-            self._data = self._data[unique_times_indices]
+            # The on-disk values are float32; match the float64 dtype the old np.empty(...)
+            # allocation produced instead of silently narrowing precision.
+            self._data = full[unique_times_indices].astype(np.float64)
         return self._data
 
     def clear_cache(self):
