@@ -448,7 +448,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                     )
 
                 # Change 3D extent to 2D one
-                new_extent = subslc.extent.as_list()
+                new_extent = subslc.extent.as_list(reduced=False)
                 new_extent[(slice_dim - 1) * 2 : slice_dim * 2] = (cut_value, cut_value)
                 subslc.extent = Extent(*new_extent)
             else:
@@ -706,10 +706,12 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         return "2D"
 
     @implements(np.amin)
+    @implements(np.min)
     def _min(self):
         return min(subsclice.vmin for subsclice in self._subslices.values())
 
     @implements(np.amax)
+    @implements(np.max)
     def _max(self):
         return max(subsclice.vmax for subsclice in self._subslices.values())
 
@@ -727,7 +729,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
 
         :returns: The calculated standard deviation.
         """
-        mean = self.mean
+        mean = self.mean()
         sum = np.sum([np.sum(np.power(subsclice.data - mean, 2)) for subsclice in self._subslices.values()])
         N = np.sum([subsclice.data.size for subsclice in self._subslices.values()])
         return np.sqrt(sum / N)
@@ -752,20 +754,21 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                 " submit an issue on Github where you explain your use case.",
                 method,
             )
-        input_list = list(inputs)
-        for i, inp in enumerate(inputs):
-            if isinstance(inp, self.__class__):
-                del input_list[i]
-        if len(input_list) == 0:
+        if sum(isinstance(inp, self.__class__) for inp in inputs) > 1:
             raise UserWarning(
                 f"The {method} operation is not implemented for multiple slices as input yet. If"
                 " you require this feature, please request this functionality by submitting an"
                 " issue on Github."
             )
+        # 'out' (e.g. from in-place operators like +=) references this wrapper object, not a plain
+        # array; forwarding it would make numpy re-dispatch to this same method and recurse forever.
+        # We always return a new object instead, so the in-place target is discarded here.
+        kwargs.pop("out", None)
 
         new_slice = deepcopy(self)
         for subslice in new_slice._subslices.values():
-            subslice._data = ufunc(subslice.data, input_list[0], **kwargs)
+            args = [subslice.data if isinstance(inp, self.__class__) else inp for inp in inputs]
+            subslice._data = ufunc(*args, **kwargs)
         return new_slice
 
     def __array_function__(self, func, types, args, kwargs):

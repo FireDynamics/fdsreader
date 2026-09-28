@@ -66,7 +66,8 @@ class Profile:
 
 def create_hash(path: str):
     """Returns the md5 hash as string for the given file."""
-    return str(hashlib.md5(open(path, "rb").read()).hexdigest())
+    with open(path, "rb") as f:
+        return str(hashlib.md5(f.read()).hexdigest())
 
 
 def scan_directory_smv(directory: str):

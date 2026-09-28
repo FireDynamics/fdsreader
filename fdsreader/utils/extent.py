@@ -9,8 +9,12 @@ class Extent:
     def __init__(self, *args, skip_dimension: Literal["x", 1, "y", 2, "z", 3, ""] = ""):
         self._extents = list()
 
-        if len(args) % 2 != 0:
-            ValueError("An invalid number of arguments were passed to the constructor.")
+        expected_args = 4 if skip_dimension in ("x", 1, "y", 2, "z", 3) else 6
+        if len(args) != expected_args:
+            raise ValueError(
+                f"Extent expected {expected_args} arguments"
+                f" ({'with' if expected_args == 4 else 'without'} skip_dimension), but got {len(args)}."
+            )
         for i in range(0, len(args), 2):
             self._extents.append((float(args[i]), float(args[i + 1])))
 

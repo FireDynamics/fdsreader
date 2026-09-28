@@ -117,7 +117,7 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
 
         :returns: The calculated standard deviation.
         """
-        mean = self.mean
+        mean = self.mean()
         sum = np.sum([np.sum(np.power(subplot.data - mean, 2)) for subplot in self._subplots.values()])
         N = np.sum([subplot.data.size for subplot in self._subplots.values()])
         return np.sqrt(sum / N)
@@ -304,14 +304,21 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
                 " submit an issue on Github where you explain your use case.",
                 method,
             )
-        input_list = list(inputs)
-        for i, inp in enumerate(inputs):
-            if isinstance(inp, self.__class__):
-                del input_list[i]
+        if sum(isinstance(inp, self.__class__) for inp in inputs) > 1:
+            raise UserWarning(
+                f"The {method} operation is not implemented for multiple pl3ds as input yet. If"
+                " you require this feature, please request this functionality by submitting an"
+                " issue on Github."
+            )
+        # 'out' (e.g. from in-place operators like +=) references this wrapper object, not a plain
+        # array; forwarding it would make numpy re-dispatch to this same method and recurse forever.
+        # We always return a new object instead, so the in-place target is discarded here.
+        kwargs.pop("out", None)
 
         new_pl3d = deepcopy(self)
-        for subplot in self._subplots.values():
-            subplot._data = ufunc(subplot.data, input_list[0], **kwargs)
+        for subplot in new_pl3d._subplots.values():
+            args = [subplot.data if isinstance(inp, self.__class__) else inp for inp in inputs]
+            subplot._data = ufunc(*args, **kwargs)
         return new_pl3d
 
     def __array_function__(self, func, types, args, kwargs):

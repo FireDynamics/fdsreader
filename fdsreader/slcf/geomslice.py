@@ -400,7 +400,7 @@ class GeomSlice(np.lib.mixins.NDArrayOperatorsMixin):
 
         :returns: The calculated standard deviation.
         """
-        mean = self.mean
+        mean = self.mean()
         sum = np.sum([np.sum(np.power(subgeomsclice.data - mean, 2)) for subgeomsclice in self._subgeomslices.values()])
         N = np.sum([subgeomsclice.data.size for subgeomsclice in self._subgeomslices.values()])
         return np.sqrt(sum / N)
@@ -425,20 +425,21 @@ class GeomSlice(np.lib.mixins.NDArrayOperatorsMixin):
                 " submit an issue on Github where you explain your use case.",
                 method,
             )
-        input_list = list(inputs)
-        for i, inp in enumerate(inputs):
-            if isinstance(inp, self.__class__):
-                del input_list[i]
-        if len(input_list) == 0:
+        if sum(isinstance(inp, self.__class__) for inp in inputs) > 1:
             raise UserWarning(
                 f"The {method} operation is not implemented for multiple geomslices as input yet. If"
                 " you require this feature, please request this functionality by submitting an"
                 " issue on Github."
             )
+        # 'out' (e.g. from in-place operators like +=) references this wrapper object, not a plain
+        # array; forwarding it would make numpy re-dispatch to this same method and recurse forever.
+        # We always return a new object instead, so the in-place target is discarded here.
+        kwargs.pop("out", None)
 
         new_slice = deepcopy(self)
         for subgeomslice in new_slice._subgeomslices.values():
-            subgeomslice._data = ufunc(subgeomslice.data, input_list[0], **kwargs)
+            args = [subgeomslice.data if isinstance(inp, self.__class__) else inp for inp in inputs]
+            subgeomslice._data = ufunc(*args, **kwargs)
         return new_slice
 
     def __array_function__(self, func, types, args, kwargs):
