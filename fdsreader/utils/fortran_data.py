@@ -25,7 +25,7 @@ def _get_dtype_output_format(d, n):
     """Returns the correct output format needed to create a numpy dtype depending on input."""
     if d == "c":
         return str(n)
-    if isinstance(n, (int, np.int32)):
+    if isinstance(n, int | np.int32):
         return f"({n},)"
     return str(n)
 
@@ -85,6 +85,30 @@ def read(infile: BinaryIO, dtype: np.dtype, n: int):
     :param n: The number of times a dtype object should be read in from the stream.
     :returns: Read in data.
     """
-    return np.array(
-        [[t[i] for i in range(1, len(t), 3)] for t in np.fromfile(infile, dtype=dtype, count=n)], dtype=object
-    )
+    arr = np.fromfile(infile, dtype=dtype, count=n)
+    # Every 3rd field (starting at index 1) is an actual payload field; the fields in between
+    # are the fortran record borders (block sizes) that get skipped. Extracting each payload
+    # field as a whole column (vectorized) is much faster than accessing it record-by-record,
+    # since indexing a structured/void scalar by field goes through numpy's generic (slow)
+    # field-lookup machinery on every single access.
+    columns = [arr[name] for name in arr.dtype.names[1::3]]
+    if len(columns) == 1:
+        return np.array([[x] for x in columns[0]], dtype=object)
+    return np.array([list(row) for row in zip(*columns)], dtype=object)
+
+
+def read_columns(infile: BinaryIO, dtype: np.dtype, n: int) -> list:
+    """Like :func:`read`, but returns each payload field as its own fully vectorized array of
+    shape ``(n, *field_shape)`` instead of boxing every record into a Python list first.
+
+    Useful for callers that post-process every record identically (e.g. reshaping per-timestep
+    data), since that post-processing can then be vectorized across all ``n`` records at once
+    instead of looping over them in Python.
+
+    :param infile: Already opened binary IO stream.
+    :param dtype: Numpy dtype object.
+    :param n: The number of times a dtype object should be read in from the stream.
+    :returns: One array per payload field, each of shape ``(n, *field_shape)``.
+    """
+    arr = np.fromfile(infile, dtype=dtype, count=n)
+    return [arr[name] for name in arr.dtype.names[1::3]]

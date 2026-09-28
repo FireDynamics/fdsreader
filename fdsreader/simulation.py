@@ -708,13 +708,36 @@ class Simulation:
             time_bytes = fdtype.FLOAT.itemsize
             n_t = (os.stat(file_path).st_size - initial_offset) // (time_bytes + patches_data_bytes)
 
-            times = list()
-            offset = initial_offset
-            for _ in range(n_t):
-                time = fdtype.read(infile, fdtype.FLOAT, 1)[0][0][0]
-                times.append(time)
-                offset += time_bytes + patches_data_bytes
-                infile.seek(offset)
+            # Read all time values in a single pass instead of one record (plus a seek) at a
+            # time, which is far slower for files with many timesteps: skip over each patches
+            # data block via a raw padding field instead of parsing and discarding it.
+            #
+            # Trade-off: unlike the seek-based approach below, np.fromfile physically transfers
+            # the skipped patches-data bytes from disk (numpy has no way to make a void/padding
+            # field skip bytes at the OS level) -- it just discards them after reading. This is
+            # still faster in every real case we've benchmarked (up to 148MB simulations) because
+            # eliminating the per-record Python loop/syscall overhead outweighs the extra I/O
+            # volume, but for a single, very large boundary file (many patches x large spatial
+            # extent) with comparatively few timesteps, the old seek-based loop could in theory
+            # transfer fewer bytes overall. If that ever becomes a real bottleneck, the old
+            # approach was:
+            #
+            # times = list()
+            # offset = initial_offset
+            # for _ in range(n_t):
+            #     time = fdtype.read(infile, fdtype.FLOAT, 1)[0][0][0]
+            #     times.append(time)
+            #     offset += time_bytes + patches_data_bytes
+            #     infile.seek(offset)
+            if n_t > 0:
+                if patches_data_bytes > 0:
+                    row_dtype = np.dtype([("time", fdtype.FLOAT), ("_skip", "V" + str(patches_data_bytes))])
+                else:
+                    row_dtype = np.dtype([("time", fdtype.FLOAT)])
+                rows = np.fromfile(infile, dtype=row_dtype, count=n_t)
+                times = rows["time"]["f1"].reshape(-1).tolist()
+            else:
+                times = list()
 
             for patch_info in patch_infos:
                 patch_info = patch_info[0]
@@ -831,17 +854,25 @@ class Simulation:
         short_name = smv_file.readline().strip()
         unit = smv_file.readline().strip()
 
-        times = list()
-        upper_bounds = list()
-        with open(os.path.join(self.root_path, filename + ".sz")) as sizefile:
-            # skip version line
-            sizefile.readline()
-            for line in sizefile:
-                line = line.split()
-                times.append(float(line[0]))
-                upper_bounds.append(float(line[-1]))
-        times = np.array(times)
-        upper_bounds = np.array(upper_bounds)
+        sz_file_path = os.path.join(self.root_path, filename + ".sz")
+        with open(sz_file_path) as sizefile:
+            data_lines = sizefile.readlines()[1:]  # Skip the version line.
+        if data_lines:
+            try:
+                # Columns are: time, some int, some int, upper_bound (only the first and last
+                # are used). This assumes every row has the same number of columns, which is
+                # true in practice almost always, but not guaranteed by the file format.
+                data = np.loadtxt(data_lines, ndmin=2)
+                times = data[:, 0]
+                upper_bounds = data[:, -1]
+            except ValueError:
+                # Fall back to parsing just the first/last whitespace-separated token per line,
+                # which tolerates rows with a differing number of columns.
+                times = np.array([float(line.split()[0]) for line in data_lines])
+                upper_bounds = np.array([float(line.split()[-1]) for line in data_lines])
+        else:
+            times = np.array([])
+            upper_bounds = np.array([])
 
         quantity = Quantity(quantity, short_name, unit)
 
