@@ -237,7 +237,7 @@ class Isosurface:
         if isinstance(time, float):
             time = self.get_nearest_timestep(time)
 
-        if time > len(self.times):
+        if time >= len(self.times):
             time = len(self.times) - 1
         if time < 0:
             time = 0

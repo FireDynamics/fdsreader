@@ -3,7 +3,9 @@ import os
 from typing_extensions import Literal
 
 from .. import Simulation
-from . import export_obst_raw, export_slcf_raw, export_smoke_raw
+from .obst_exporter import export_obst_raw
+from .slcf_exporter import export_slcf_raw
+from .smoke3d_exporter import export_smoke_raw
 
 
 def export_sim(sim: Simulation, output_dir: str, ordering: Literal["C", "F"] = "C"):

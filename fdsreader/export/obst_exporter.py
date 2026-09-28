@@ -59,6 +59,10 @@ def export_obst_raw(obst: Obstruction, output_dir: str, ordering: Literal["C", "
     def worker(
         quantity: str, faces: Dict[int, Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]], vmin: float, vmax: float
     ):
+        # Abort if no useful data is available
+        if vmax <= 0:
+            return
+
         quantity_name = quantity.replace(" ", "_").replace(".", "-")
         filename = obst_filename_base + "_quantity-" + quantity_name + ".dat"
 
@@ -69,10 +73,6 @@ def export_obst_raw(obst: Obstruction, output_dir: str, ordering: Literal["C", "
             "DataValMin": vmin,
             "ScaleFactor": 255.0 / vmax,
         }
-
-        # Abort if no useful data is available
-        if out["DataValMax"] <= 0:
-            return
 
         with open(os.path.join(output_dir, quantity_name, filename), "wb") as rawfile:
             for face in faces.values():  # face for each orientation

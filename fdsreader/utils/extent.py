@@ -41,7 +41,9 @@ class Extent:
             return self.y_start, self.y_end
         elif item == "z":
             return self.z_start, self.z_end
-        return self._extents[item - 1]
+        elif item in (1, 2, 3):
+            return self._extents[item - 1]
+        raise IndexError(f"Extent index must be 'x'/'y'/'z' or 1/2/3, got {item!r}.")
 
     @property
     def x_start(self) -> float:

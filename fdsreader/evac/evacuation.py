@@ -84,19 +84,20 @@ class Evacuation:
         tags = self.tags
         positions = self.positions
         evac = Evacuation(self.class_name, self.quantities, self.color)
-        evac._tags = tag
+        evac._tags = list()
 
         evac._data = {quantity: list() for quantity in data.keys()}
         evac._positions = list()
         evac.times = list()
 
-        for t, tags in enumerate(tags):
-            if tag in tags:
-                idx = np.where(tags == tag)[0]
+        for t, tags_t in enumerate(tags):
+            if tag in tags_t:
+                idx = np.where(tags_t == tag)[0]
 
                 for quantity in data.keys():
                     evac._data[quantity].append(data[quantity][t][idx][0])
                 evac._positions.append(positions[t][idx][0])
+                evac._tags.append(tags_t[idx])
                 evac.times.append(self.times[t])
 
         evac.lower_bounds = dict()
