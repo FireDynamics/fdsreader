@@ -1,8 +1,6 @@
 import bisect
-import logging
 import math
 import os
-from copy import deepcopy
 from typing import Dict, List, Literal, Optional, Tuple, Union
 
 import numpy as np
@@ -10,19 +8,9 @@ import numpy as np
 import fdsreader.utils.fortran_data as fdtype
 from fdsreader import settings
 from fdsreader.fds_classes import Mesh
-from fdsreader.utils import Quantity
+from fdsreader.utils import NumpyArrayMixin, Quantity
 
-_HANDLED_FUNCTIONS = {np.mean: (lambda pl: pl.mean)}
-
-
-def implements(np_function):
-    """Decorator to register an __array_function__ implementation for Plot3Ds."""
-
-    def decorator(func):
-        _HANDLED_FUNCTIONS[np_function] = func
-        return func
-
-    return decorator
+_HANDLED_FUNCTIONS = {}
 
 
 class SubPlot3D:
@@ -65,7 +53,7 @@ class SubPlot3D:
             del self._data
 
 
-class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
+class Plot3D(NumpyArrayMixin):
     """Plot3d file data container including metadata. Consists of multiple subplots, one for each
         mesh.
 
@@ -73,6 +61,13 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
     :ivar quantities: List with quantity objects containing information about recorded quantities
      calculated for this Plot3D with the corresponding short_name and unit.
     """
+
+    _handled_functions = _HANDLED_FUNCTIONS
+    _HANDLED_FUNCTIONS[np.mean] = NumpyArrayMixin.mean
+    _HANDLED_FUNCTIONS[np.std] = NumpyArrayMixin.std
+
+    def _array_subitems(self):
+        return self._subplots.values()
 
     def __init__(self, root_path: str):
         self._root_path = root_path
@@ -105,28 +100,6 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
 
     def __repr__(self):
         return f"Plot3D(quantity={self.quantity}, meshes={len(self._subplots)})"
-
-    @implements(np.mean)
-    def mean(self) -> float:
-        """Calculates the mean value of the whole Plot3D.
-
-        :returns: The calculated mean value.
-        """
-        mean_sum = 0
-        for subplot in self._subplots.values():
-            mean_sum += np.mean(subplot.data)
-        return mean_sum / len(self._subplots)
-
-    @implements(np.std)
-    def std(self) -> float:
-        """Calculates the standard deviation for each quantity individually of the whole Plot3D.
-
-        :returns: The calculated standard deviation.
-        """
-        mean = self.mean()
-        sum = np.sum([np.sum(np.power(subplot.data - mean, 2)) for subplot in self._subplots.values()])
-        N = np.sum([subplot.data.size for subplot in self._subplots.values()])
-        return np.sqrt(sum / N)
 
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory."""
@@ -289,55 +262,6 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
     def subplots(self):
         """Returns a list with one SubPlot3D object per mesh."""
         return list(self._subplots.values())
-
-    def __array__(self):
-        """Method that will be called by numpy when trying to convert the object to a numpy ndarray."""
-        raise TypeError(
-            "Plot3Ds can not be converted to numpy arrays, but they support all typical numpy"
-            " operations such as np.multiply. If a 'global' array containing all subplots is"
-            " required, please use the 'to_global' method and use the returned numpy-array explicitly."
-        )
-
-    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        """Method that will be called by numpy when using a ufunction with a Plot3D as input.
-
-        :returns: A new pl3d on which the ufunc has been applied.
-        """
-        if method != "__call__":
-            logging.warning(
-                "The %s method has been used which is not explicitly implemented. Correctness of"
-                " results is not guaranteed. If you require this feature to be implemented please"
-                " submit an issue on Github where you explain your use case.",
-                method,
-            )
-        if sum(isinstance(inp, self.__class__) for inp in inputs) > 1:
-            raise UserWarning(
-                f"The {method} operation is not implemented for multiple pl3ds as input yet. If"
-                " you require this feature, please request this functionality by submitting an"
-                " issue on Github."
-            )
-        # 'out' (e.g. from in-place operators like +=) references this wrapper object, not a plain
-        # array; forwarding it would make numpy re-dispatch to this same method and recurse forever.
-        # We always return a new object instead, so the in-place target is discarded here.
-        kwargs.pop("out", None)
-
-        new_pl3d = deepcopy(self)
-        for subplot in new_pl3d._subplots.values():
-            args = [subplot.data if isinstance(inp, self.__class__) else inp for inp in inputs]
-            subplot._data = ufunc(*args, **kwargs)
-        return new_pl3d
-
-    def __array_function__(self, func, types, args, kwargs):
-        """Method that will be called by numpy when using an array function with a Slice as input.
-
-        :returns: The output of the array function.
-        """
-        if func not in _HANDLED_FUNCTIONS:
-            return NotImplemented
-            # Note: this allows subclasses that don't override __array_function__ to handle Plot3Ds.
-        if not all(issubclass(t, self.__class__) for t in types):
-            return NotImplemented
-        return _HANDLED_FUNCTIONS[func](*args, **kwargs)
 
 
 # __array_function__ implementations

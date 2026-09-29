@@ -1,7 +1,5 @@
-import logging
 import math
 import os
-from copy import deepcopy
 from typing import Dict, Literal, Tuple, Union
 
 import numpy as np
@@ -9,19 +7,9 @@ import numpy as np
 import fdsreader.utils.fortran_data as fdtype
 from fdsreader import settings
 from fdsreader.fds_classes import Mesh
-from fdsreader.utils import Quantity
+from fdsreader.utils import NumpyArrayMixin, Quantity
 
-_HANDLED_FUNCTIONS = {np.mean: (lambda pl: pl.mean)}
-
-
-def implements(np_function):
-    """Decorator to register an __array_function__ implementation for Smoke3Ds."""
-
-    def decorator(func):
-        _HANDLED_FUNCTIONS[np_function] = func
-        return func
-
-    return decorator
+_HANDLED_FUNCTIONS = {}
 
 
 def _decode_rle_scalar(rle_data: np.ndarray, nchars_out: int, total_size: int) -> np.ndarray:
@@ -130,13 +118,20 @@ class SubSmoke3D:
             del self._data
 
 
-class Smoke3D(np.lib.mixins.NDArrayOperatorsMixin):
+class Smoke3D(NumpyArrayMixin):
     """Smoke3D file data container including metadata. Consists of multiple subsmokes, one for each
         mesh.
 
     :ivar times: Numpy ndarray containing all time steps for which data has been written out.
     :ivar quantity: :class:`Quantity` object containing information about the recorded quantity and its unit.
     """
+
+    _handled_functions = _HANDLED_FUNCTIONS
+    _HANDLED_FUNCTIONS[np.mean] = NumpyArrayMixin.mean
+    _HANDLED_FUNCTIONS[np.std] = NumpyArrayMixin.std
+
+    def _array_subitems(self):
+        return self._subsmokes.values()
 
     def __init__(self, root_path: str, times: np.ndarray, quantity: Quantity):
         self._root_path = root_path
@@ -331,72 +326,10 @@ class Smoke3D(np.lib.mixins.NDArrayOperatorsMixin):
             return max(np.max(subsmoke3d.data) for subsmoke3d in self._subsmokes.values())
         return curr_max
 
-    @implements(np.mean)
-    def mean(self) -> np.ndarray:
-        """Calculates the mean value of all Smoke3D data for this quantity."""
-        return np.sum([np.mean(subsmoke.data) for subsmoke in self._subsmokes.values()]) / len(self._subsmokes)
-
-    @implements(np.std)
-    def std(self) -> np.ndarray:
-        """Calculates the standard deviation of all Smoke3D data for this quantity."""
-        mean = self.mean()
-        sum = np.sum([np.sum(np.power(subsmoke.data - mean, 2)) for subsmoke in self._subsmokes.values()])
-        N = np.sum([subsmoke.data.size for subsmoke in self._subsmokes.values()])
-        return np.sqrt(sum / N)
-
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory."""
         for subsmoke in self._subsmokes.values():
             subsmoke.clear_cache()
-
-    def __array__(self):
-        """Method that will be called by numpy when trying to convert the object to a numpy ndarray."""
-        raise TypeError(
-            "Smoke3Ds can not be converted to numpy arrays, but they support all typical numpy"
-            " operations such as np.multiply. If a 'global' array containing all subsmokes is"
-            " required, please use the 'to_global' method and use the returned numpy-array explicitly."
-        )
-
-    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        """Method that will be called by numpy when using a ufunction with a Smoke3D as input.
-
-        :returns: A new smoke3d on which the ufunc has been applied.
-        """
-        if method != "__call__":
-            logging.warning(
-                "The %s method has been used which is not explicitly implemented. Correctness of"
-                " results is not guaranteed. If you require this feature to be implemented please"
-                " submit an issue on Github where you explain your use case.",
-                method,
-            )
-        if sum(isinstance(inp, self.__class__) for inp in inputs) > 1:
-            raise UserWarning(
-                f"The {method} operation is not implemented for multiple smoke3ds as input yet. If"
-                " you require this feature, please request this functionality by submitting an"
-                " issue on Github."
-            )
-        # 'out' (e.g. from in-place operators like +=) references this wrapper object, not a plain
-        # array; forwarding it would make numpy re-dispatch to this same method and recurse forever.
-        # We always return a new object instead, so the in-place target is discarded here.
-        kwargs.pop("out", None)
-
-        new_smoke3d = deepcopy(self)
-        for subsmoke in new_smoke3d._subsmokes.values():
-            args = [subsmoke.data if isinstance(inp, self.__class__) else inp for inp in inputs]
-            subsmoke._data = ufunc(*args, **kwargs)
-        return new_smoke3d
-
-    def __array_function__(self, func, types, args, kwargs):
-        """Method that will be called by numpy when using an array function with a Slice as input.
-
-        :returns: The output of the array function.
-        """
-        if func not in _HANDLED_FUNCTIONS:
-            return NotImplemented
-            # Note: this allows subclasses that don't override __array_function__ to handle Smoke3Ds.
-        if not all(issubclass(t, self.__class__) for t in types):
-            return NotImplemented
-        return _HANDLED_FUNCTIONS[func](*args, **kwargs)
 
 
 # __array_function__ implementations

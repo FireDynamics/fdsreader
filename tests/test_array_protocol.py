@@ -29,6 +29,16 @@ def geomslice_sim():
     return Simulation("./geomslice_data_fds611")
 
 
+@pytest.fixture(scope="module")
+def steckler_fds6100_sim():
+    return Simulation("./steckler_data_fds6100")
+
+
+@pytest.fixture(scope="module")
+def pl3d_fds6100_sim():
+    return Simulation("./pl3d_data_fds6100")
+
+
 def _check_array_like(obj, subitems):
     """Shared checks for Slice/GeomSlice/Smoke3D/Plot3D: vmin/vmax, std(), operand order,
     non-mutation of the original, __array__ raising TypeError, and the `out=` in-place path.
@@ -40,6 +50,15 @@ def _check_array_like(obj, subitems):
         assert obj.vmin <= obj.vmax
     elif hasattr(obj, "vmax"):
         assert obj.vmax is not None
+
+    # np.mean(obj) must dispatch through __array_function__/_HANDLED_FUNCTIONS to obj.mean(),
+    # not silently fall through to something else. Only np.std(obj) was covered here before,
+    # which internally calls self.mean() as a plain method call - a class whose module-level
+    # _HANDLED_FUNCTIONS registration for np.mean was ever dropped would still pass every check
+    # in this function except this one (confirmed by reproducing that exact regression during a
+    # code review of the mixin extraction: np.mean(obj) silently returned a bound method object
+    # instead of raising or computing anything).
+    assert np.mean(obj) == obj.mean()
 
     # std() must not crash (previously "unsupported operand type(s) for -: 'float' and 'method'").
     std = np.std(obj)
@@ -105,3 +124,43 @@ def test_plot3d_placeholder_has_no_quantity(pl3d_sim):
     for p in empty:
         assert p.quantity is None
         assert "Plot3D" in repr(p)
+
+
+# The fixtures above cover FDS 6.11 output only (via geomslice_data_fds611) for GeomSlice; the
+# rest use whatever the default fixtures happen to be. The two tests below explicitly exercise
+# the shared NumpyArrayMixin against real FDS 6.10.1 output for Slice/Smoke3D/Plot3D, since
+# CONTRIBUTING.md notes the *_fds6100.tgz fixtures were previously "unused by any test" - this
+# also served as the manual verification requested when extracting the mixin (does it still work
+# against a second, real FDS version, not just the one everything else already happens to use).
+def test_slice_and_smoke3d_array_protocol_on_fds6100_output(steckler_fds6100_sim):
+    slc = steckler_fds6100_sim.slices[0]
+    _check_array_like(slc, slc.subslices)
+
+    # smoke_3d[0] (SOOT DENSITY) is all-zero for this fixture; HRRPUV has real non-zero data and
+    # actually exercises the numeric checks below instead of trivially satisfying them at 0.0.
+    smoke = steckler_fds6100_sim.smoke_3d.get_by_quantity("HRRPUV")
+    _check_array_like(smoke, smoke.subsmokes)
+
+
+def test_plot3d_array_protocol_on_fds6100_output(pl3d_fds6100_sim):
+    pl3d = next(p for p in pl3d_fds6100_sim.data_3d if len(p._subplots) > 0)
+    _check_array_like(pl3d, list(pl3d._subplots.values()))
+
+
+def test_handled_functions_registry_is_not_shared_across_classes(slcf_sim, geomslice_sim):
+    """Each of Slice/GeomSlice/Smoke3D/Plot3D keeps its own module-level _HANDLED_FUNCTIONS dict
+    even though they all now share NumpyArrayMixin.mean/std - np.mean(a_slice) must not
+    accidentally dispatch through GeomSlice's registry or vice versa."""
+    from fdsreader.slcf.geomslice import _HANDLED_FUNCTIONS as geomslice_funcs
+    from fdsreader.slcf.geomslice import GeomSlice
+    from fdsreader.slcf.slice import _HANDLED_FUNCTIONS as slice_funcs
+    from fdsreader.slcf.slice import Slice
+
+    assert slice_funcs is not geomslice_funcs
+    assert Slice._handled_functions is slice_funcs
+    assert GeomSlice._handled_functions is geomslice_funcs
+
+    slc = slcf_sim.slices[0]
+    geomslice = geomslice_sim.geomslices[0]
+    assert np.mean(slc) == slc.mean()
+    assert np.mean(geomslice) == geomslice.mean()

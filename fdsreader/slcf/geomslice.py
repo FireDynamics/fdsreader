@@ -1,7 +1,5 @@
-import logging
 import math
 import os
-from copy import deepcopy
 from typing import Collection, Dict, List, Union
 
 import numpy as np
@@ -10,7 +8,7 @@ from typing_extensions import Literal
 import fdsreader.utils.fortran_data as fdtype
 from fdsreader import settings
 from fdsreader.fds_classes import Mesh
-from fdsreader.utils import Extent, Quantity
+from fdsreader.utils import Extent, NumpyArrayMixin, Quantity
 
 _HANDLED_FUNCTIONS = {}
 
@@ -153,7 +151,7 @@ class SubGeomSlice:
         return f"SubGeomSlice(mesh={self.mesh.id})"
 
 
-class GeomSlice(np.lib.mixins.NDArrayOperatorsMixin):
+class GeomSlice(NumpyArrayMixin):
     """Slice file data container including metadata. Consists of multiple subgeomslices, one for each
         mesh the geomslice cuts through.
 
@@ -165,6 +163,13 @@ class GeomSlice(np.lib.mixins.NDArrayOperatorsMixin):
     :ivar orientation: Orientation [1,2,3] of the geomslice in case it is 2D, 0 otherwise.
     :ivar extent: :class:`Extent` object containing 3-dimensional extent information.
     """
+
+    _handled_functions = _HANDLED_FUNCTIONS
+    _HANDLED_FUNCTIONS[np.mean] = NumpyArrayMixin.mean
+    _HANDLED_FUNCTIONS[np.std] = NumpyArrayMixin.std
+
+    def _array_subitems(self):
+        return self._subgeomslices.values()
 
     def __init__(self, root_path: str, geomslice_id: str, times: np.ndarray, multimesh_data: Collection[Dict]):
         self._root_path = root_path
@@ -385,74 +390,6 @@ class GeomSlice(np.lib.mixins.NDArrayOperatorsMixin):
     @implements(np.max)
     def _max(self):
         return max(subgeomsclice.vmax for subgeomsclice in self._subgeomslices.values())
-
-    @implements(np.mean)
-    def mean(self):
-        """Calculates the mean over the whole geomslice.
-
-        :returns: The calculated mean value.
-        """
-        return np.mean([np.mean(subgeomsclice.data) for subgeomsclice in self._subgeomslices.values()])
-
-    @implements(np.std)
-    def std(self):
-        """Calculates the standard deviation over the whole geomslice.
-
-        :returns: The calculated standard deviation.
-        """
-        mean = self.mean()
-        sum = np.sum([np.sum(np.power(subgeomsclice.data - mean, 2)) for subgeomsclice in self._subgeomslices.values()])
-        N = np.sum([subgeomsclice.data.size for subgeomsclice in self._subgeomslices.values()])
-        return np.sqrt(sum / N)
-
-    def __array__(self):
-        """Method that will be called by numpy when trying to convert the object to a numpy ndarray."""
-        raise TypeError(
-            "Slices can not be converted to numpy arrays, but they support all typical numpy"
-            " operations such as np.multiply. If a 'global' array containing all subgeomslices is"
-            " required, use the 'to_global' method and use the returned numpy-array explicitly."
-        )
-
-    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        """Method that will be called by numpy when using a ufunction with a GeomSlice as input.
-
-        :returns: A new geomslice on which the ufunc has been applied.
-        """
-        if method != "__call__":
-            logging.warning(
-                "The %s method has been used which is not explicitly implemented. Correctness of"
-                " results is not guaranteed. If you require this feature to be implemented please"
-                " submit an issue on Github where you explain your use case.",
-                method,
-            )
-        if sum(isinstance(inp, self.__class__) for inp in inputs) > 1:
-            raise UserWarning(
-                f"The {method} operation is not implemented for multiple geomslices as input yet. If"
-                " you require this feature, please request this functionality by submitting an"
-                " issue on Github."
-            )
-        # 'out' (e.g. from in-place operators like +=) references this wrapper object, not a plain
-        # array; forwarding it would make numpy re-dispatch to this same method and recurse forever.
-        # We always return a new object instead, so the in-place target is discarded here.
-        kwargs.pop("out", None)
-
-        new_slice = deepcopy(self)
-        for subgeomslice in new_slice._subgeomslices.values():
-            args = [subgeomslice.data if isinstance(inp, self.__class__) else inp for inp in inputs]
-            subgeomslice._data = ufunc(*args, **kwargs)
-        return new_slice
-
-    def __array_function__(self, func, types, args, kwargs):
-        """Method that will be called by numpy when using an array function with a GeomSlice as input.
-
-        :returns: The output of the array function.
-        """
-        if func not in _HANDLED_FUNCTIONS:
-            return NotImplemented
-            # Note: this allows subclasses that don't override __array_function__ to handle GeomSlices.
-        if not all(issubclass(t, self.__class__) for t in types):
-            return NotImplemented
-        return _HANDLED_FUNCTIONS[func](*args, **kwargs)
 
     def __repr__(self):
         # if self.type == '3D':  # 3D-Slice
