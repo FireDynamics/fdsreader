@@ -19,7 +19,7 @@ def pytest_configure(config):
     cases_dir = Path(__file__).parent / "cases"
     if cases_dir.exists():
         os.chdir(cases_dir)
-        for pickle_file in cases_dir.glob("*/*.pickle"):
+        for pickle_file in cases_dir.rglob("*.pickle"):
             pickle_file.unlink()
 
 
