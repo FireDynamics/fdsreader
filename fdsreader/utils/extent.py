@@ -26,7 +26,12 @@ class Extent:
             self._extents.append((0, 0))
 
     def __eq__(self, other):
+        if not isinstance(other, Extent):
+            return NotImplemented
         return self._extents == other._extents
+
+    def __hash__(self):
+        return hash(tuple(self._extents))
 
     def __repr__(self, *args, **kwargs):
         return (

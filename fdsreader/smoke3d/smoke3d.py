@@ -315,6 +315,9 @@ class Smoke3D(np.lib.mixins.NDArrayOperatorsMixin):
         """Returns the :class:`SubSmoke` that contains data for the given mesh."""
         return self._subsmokes[mesh.id]
 
+    def __repr__(self):
+        return f"Smoke3D(quantity={self.quantity}, meshes={len(self._subsmokes)})"
+
     @property
     def subsmokes(self):
         """Returns a list with one SubSmoke3D object per mesh."""
@@ -348,7 +351,7 @@ class Smoke3D(np.lib.mixins.NDArrayOperatorsMixin):
 
     def __array__(self):
         """Method that will be called by numpy when trying to convert the object to a numpy ndarray."""
-        raise UserWarning(
+        raise TypeError(
             "Smoke3Ds can not be converted to numpy arrays, but they support all typical numpy"
             " operations such as np.multiply. If a 'global' array containing all subsmokes is"
             " required, please use the 'to_global' method and use the returned numpy-array explicitly."

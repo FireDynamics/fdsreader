@@ -3,7 +3,7 @@ import logging
 import math
 import os
 from copy import deepcopy
-from typing import Dict, List, Literal, Tuple, Union
+from typing import Dict, List, Literal, Optional, Tuple, Union
 
 import numpy as np
 
@@ -77,6 +77,9 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
     def __init__(self, root_path: str):
         self._root_path = root_path
         self.times: List[float] = list()
+        # Only set once the first subplot is added; a Plot3D can exist as an empty
+        # placeholder (see Simulation.data_3d) before any actual output is assigned to it.
+        self.quantity: Optional[Quantity] = None
 
         # List of all subplots this Plot3D consists of (one per mesh).
         self._subplots: Dict[str, SubPlot3D] = dict()
@@ -99,6 +102,9 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
     def __getitem__(self, mesh: Mesh):
         """Returns the :class:`SubPlot` that contains data for the given mesh."""
         return self._subplots[mesh.id]
+
+    def __repr__(self):
+        return f"Plot3D(quantity={self.quantity}, meshes={len(self._subplots)})"
 
     @implements(np.mean)
     def mean(self) -> float:
@@ -286,7 +292,7 @@ class Plot3D(np.lib.mixins.NDArrayOperatorsMixin):
 
     def __array__(self):
         """Method that will be called by numpy when trying to convert the object to a numpy ndarray."""
-        raise UserWarning(
+        raise TypeError(
             "Plot3Ds can not be converted to numpy arrays, but they support all typical numpy"
             " operations such as np.multiply. If a 'global' array containing all subplots is"
             " required, please use the 'to_global' method and use the returned numpy-array explicitly."

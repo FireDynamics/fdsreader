@@ -173,11 +173,17 @@ class Mesh:
     def get_boundary_data(self, quantity: Union[str, Quantity]):
         if isinstance(quantity, Quantity):
             quantity = quantity.name
-        return next(
-            b
-            for b in self._boundary_data.values()
-            if b.quantity.name.lower() == quantity.lower() or b.quantity.short_name.lower() == quantity.lower()
+        b = next(
+            (
+                b
+                for b in self._boundary_data.values()
+                if b.quantity.name.lower() == quantity.lower() or b.quantity.short_name.lower() == quantity.lower()
+            ),
+            None,
         )
+        if b is None:
+            raise KeyError(f"No boundary data found for quantity '{quantity}'")
+        return b
 
     def __getitem__(self, dimension: Literal[0, 1, 2, "x", "y", "z"]) -> np.ndarray:
         """Get all values in given dimension.
@@ -190,7 +196,12 @@ class Mesh:
         return self.coordinates[dimension]
 
     def __eq__(self, other):
+        if not isinstance(other, Mesh):
+            return NotImplemented
         return self.id == other.id
+
+    def __hash__(self):
+        return hash(self.id)
 
     def __repr__(self, *args, **kwargs):
         return f'Mesh(id="{self.id}", extent={str(self.extent)}, dimension={str(self.dimension)})'

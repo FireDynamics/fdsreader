@@ -37,11 +37,17 @@ class Surface:
         self.rgb = rgb
         self.transparency = transparency
 
+    @property
     def id(self):
         return self.name
 
     def __eq__(self, other):
+        if not isinstance(other, Surface):
+            return NotImplemented
         return self.name == other.name
+
+    def __hash__(self):
+        return hash(self.name)
 
     def __repr__(self, *args, **kwargs):
         return f'Surface(name="{self.name}")'

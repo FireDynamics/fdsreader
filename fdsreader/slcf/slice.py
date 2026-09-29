@@ -736,7 +736,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
 
     def __array__(self):
         """Method that will be called by numpy when trying to convert the object to a numpy ndarray."""
-        raise UserWarning(
+        raise TypeError(
             "Slices can not be converted to numpy arrays, but they support all typical numpy"
             " operations such as np.multiply. If a 'global' array containing all subslices is"
             " required, use the 'to_global' method and use the returned numpy-array explicitly."
