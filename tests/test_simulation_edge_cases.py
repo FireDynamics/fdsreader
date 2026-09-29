@@ -146,6 +146,28 @@ class TestToggleObst:
         visible = sub.get_visible_times([0.0, 1.0, 1.5, 2.0, 3.0])
         assert list(visible) == [0.0, 2.0, 3.0]
 
+    def test_addresses_the_correct_mesh_and_subobstruction_among_several(self):
+        # With only one mesh and one subobstruction, int(line[-1])-1 and int(obst_index)-1 can
+        # only ever resolve to index 0 - an off-by-one or a mesh/obst-index mix-up would still
+        # pass. Build 2 meshes x 2 subobstructions each and toggle only one specific pair.
+        def _sub():
+            return SubObstruction(
+                side_surfaces=(), bound_indices=(0, 1, 0, 1, 0, 1), extent=Extent(0, 1, 0, 1, 0, 1), mesh=None
+            )
+
+        subs = {"mesh1": [_sub(), _sub()], "mesh2": [_sub(), _sub()]}
+        fake_sim = SimpleNamespace(
+            _meshes=[SimpleNamespace(id="mesh1"), SimpleNamespace(id="mesh2")], _subobstructions=subs
+        )
+
+        # Mesh index 2 (mesh2), obst index 2 (second subobstruction in mesh2).
+        SimulationClass._toggle_obst(fake_sim, io.StringIO("2 5.0\n"), "HIDE_OBST 2")
+
+        assert subs["mesh2"][1].hide_times == [5.0]
+        assert subs["mesh1"][0].hide_times == []
+        assert subs["mesh1"][1].hide_times == []
+        assert subs["mesh2"][0].hide_times == []
+
 
 class TestNewCachingEdgeCases:
     """Simulation.__new__'s on-disk pickle-cache branches (corrupt file, stale version/hash,
@@ -158,6 +180,12 @@ class TestNewCachingEdgeCases:
     def isolated_case(self, tmp_path):
         case_dir = tmp_path / "devc_data"
         shutil.copytree("./devc_data", case_dir)
+        # Another test may have left a valid *.pickle behind in the real devc_data directory
+        # (e.g. via Simulation.clear_cache()'s default clear_persistent_cache=False) - copytree
+        # would carry that into this "isolated" copy, making sim1 below a silent cache hit instead
+        # of the fresh parse every test in this class assumes.
+        for pickle_file in case_dir.glob("*.pickle"):
+            pickle_file.unlink()
         settings.ENABLE_CACHING = True
         return case_dir
 
