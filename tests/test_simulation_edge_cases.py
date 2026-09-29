@@ -6,16 +6,33 @@
 - Profile parsing tolerating rows whose Npoints shrinks/grows between timesteps.
 - &CTRL CSV support (previously unhandled CSVF type, silently ignored).
 - log_error stripping the traceback before storing a failed loader's exception in load_errors.
+
+Also covers two gaps found while investigating why local coverage of simulation.py looked far
+lower than it should: stale *.pickle caches left over in tests/cases/ (now cleaned up by
+conftest.py) meant Simulation.__new__'s pickle-cache branches, and _toggle_obst (no fixture uses
+&HIDE_OBST/&SHOW_OBST), were essentially never exercised.
 """
 
+import io
+import pickle
+import shutil
 from types import SimpleNamespace
 
-from fdsreader import Simulation, settings
+import pytest
+
+from fdsreader import Simulation, __version__, settings
+from fdsreader.bndf.obstruction import SubObstruction
 from fdsreader.simulation import Simulation as SimulationClass
+from fdsreader.utils import Extent
 from fdsreader.utils.misc import log_error
 
 
 def test_geometry_collection_eager_loads_when_lazy_load_disabled():
+    # The on-disk pickle cache's validity check (Simulation.__new__) only compares fdsreader
+    # version and smv-file hash, not settings.LAZY_LOAD - so without disabling caching here, this
+    # test could silently hit a cache another test already wrote for this same fixture under the
+    # default LAZY_LOAD=True, and would then assert on stale (non-eagerly-loaded) data.
+    settings.ENABLE_CACHING = False
     settings.LAZY_LOAD = False
     sim = Simulation("./geom_data")
     assert len(sim.geom_data) > 0
@@ -96,3 +113,101 @@ def test_log_error_strips_traceback_before_storing_exception():
     assert module == "test-module"
     assert isinstance(exc, ValueError)
     assert exc.__traceback__ is None
+
+
+class TestToggleObst:
+    """_toggle_obst (SMV keywords HIDE_OBST/SHOW_OBST) has no fixture exercising it, so it's
+    tested directly against a fake Simulation carrying real SubObstruction instances."""
+
+    @staticmethod
+    def _fake_sim():
+        sub = SubObstruction(
+            side_surfaces=(), bound_indices=(0, 1, 0, 1, 0, 1), extent=Extent(0, 1, 0, 1, 0, 1), mesh=None
+        )
+        mesh = SimpleNamespace(id="mesh1")
+        return SimpleNamespace(_meshes=[mesh], _subobstructions={"mesh1": [sub]}), sub
+
+    def test_hide_obst_records_a_hide_time_on_the_addressed_subobstruction(self):
+        fake_sim, sub = self._fake_sim()
+        SimulationClass._toggle_obst(fake_sim, io.StringIO("1 12.5\n"), "HIDE_OBST 1")
+        assert sub.hide_times == [12.5]
+        assert sub.show_times == []
+
+    def test_show_obst_records_a_show_time_on_the_addressed_subobstruction(self):
+        fake_sim, sub = self._fake_sim()
+        SimulationClass._toggle_obst(fake_sim, io.StringIO("1 3.0\n"), "SHOW_OBST 1")
+        assert sub.show_times == [3.0]
+        assert sub.hide_times == []
+
+    def test_visibility_toggles_are_reflected_in_get_visible_times(self):
+        fake_sim, sub = self._fake_sim()
+        SimulationClass._toggle_obst(fake_sim, io.StringIO("1 1.0\n"), "HIDE_OBST 1")
+        SimulationClass._toggle_obst(fake_sim, io.StringIO("1 2.0\n"), "SHOW_OBST 1")
+        visible = sub.get_visible_times([0.0, 1.0, 1.5, 2.0, 3.0])
+        assert list(visible) == [0.0, 2.0, 3.0]
+
+
+class TestNewCachingEdgeCases:
+    """Simulation.__new__'s on-disk pickle-cache branches (corrupt file, stale version/hash,
+    missing load_errors on an old cache) were essentially untested locally because leftover
+    *.pickle files from earlier runs made every fixture load hit the cache-valid fast path
+    instead. conftest.py now clears those caches before each test session; these tests exercise
+    the cache-miss/invalid-cache paths directly using an isolated copy of a small fixture."""
+
+    @pytest.fixture
+    def isolated_case(self, tmp_path):
+        case_dir = tmp_path / "devc_data"
+        shutil.copytree("./devc_data", case_dir)
+        settings.ENABLE_CACHING = True
+        return case_dir
+
+    def test_new_raises_valueerror_for_empty_smv_file(self, tmp_path):
+        smv_path = tmp_path / "empty.smv"
+        smv_path.write_text("")
+        with pytest.raises(ValueError, match="empty"):
+            Simulation(str(smv_path))
+
+    def test_new_raises_valueerror_when_chid_missing(self, tmp_path):
+        smv_path = tmp_path / "no_chid.smv"
+        smv_path.write_text("VERSION\n1\nTITLE\nfoo\n")
+        with pytest.raises(ValueError, match="CHID"):
+            Simulation(str(smv_path))
+
+    def test_new_recovers_from_a_corrupt_pickle_cache_file(self, isolated_case):
+        sim1 = Simulation(str(isolated_case))
+        pickle_path = isolated_case / (sim1.chid + ".pickle")
+        assert pickle_path.exists()
+
+        pickle_path.write_bytes(b"not a valid pickle stream")
+        sim2 = Simulation(str(isolated_case))  # must fall back to a fresh parse, not raise
+        assert sim2.chid == sim1.chid
+
+    def test_new_discards_cache_from_a_different_fdsreader_version(self, isolated_case):
+        sim1 = Simulation(str(isolated_case))
+        pickle_path = isolated_case / (sim1.chid + ".pickle")
+        sim1.reader_version = "0.0.0-not-a-real-version"
+        with open(pickle_path, "wb") as f:
+            pickle.dump(sim1, f)
+
+        sim2 = Simulation(str(isolated_case))
+        assert sim2.reader_version == __version__
+
+    def test_new_discards_cache_when_smv_file_hash_no_longer_matches(self, isolated_case):
+        sim1 = Simulation(str(isolated_case))
+        pickle_path = isolated_case / (sim1.chid + ".pickle")
+        sim1._hash = "not-the-real-hash"
+        with open(pickle_path, "wb") as f:
+            pickle.dump(sim1, f)
+
+        sim2 = Simulation(str(isolated_case))
+        assert sim2._hash != "not-the-real-hash"
+
+    def test_new_backfills_load_errors_on_a_pickle_cache_missing_the_attribute(self, isolated_case):
+        sim1 = Simulation(str(isolated_case))
+        pickle_path = isolated_case / (sim1.chid + ".pickle")
+        del sim1.load_errors
+        with open(pickle_path, "wb") as f:
+            pickle.dump(sim1, f)
+
+        sim2 = Simulation(str(isolated_case))
+        assert sim2.load_errors == []
