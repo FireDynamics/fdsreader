@@ -45,7 +45,8 @@ def export_smoke_raw(smoke3d: Smoke3D, output_dir: str, ordering: Literal["C", "
     meta["Meshes"] = m.list()
     lock = m.Lock()
 
-    def worker(mesh, subsmoke):
+    def worker(subsmoke):
+        mesh = subsmoke.mesh
         mesh_id = mesh.id.replace(" ", "_").replace(".", "-")
         filename = filename_base + "_mesh-" + mesh_id + ".dat"
 
@@ -77,7 +78,7 @@ def export_smoke_raw(smoke3d: Smoke3D, output_dir: str, ordering: Literal["C", "
             )
 
     with Pool() as pool:
-        pool.map(lambda args: worker(*args), list(smoke3d._subsmokes.items()))
+        pool.map(worker, list(smoke3d._subsmokes.values()))
 
     meta["Meshes"] = list(meta["Meshes"])
 

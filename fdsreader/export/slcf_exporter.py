@@ -42,7 +42,8 @@ def export_slcf_raw(slc: Slice, output_dir: str, ordering: Literal["C", "F"] = "
     meta["Meshes"] = m.list()
     lock = m.Lock()
 
-    def worker(mesh, subslice):
+    def worker(subslice):
+        mesh = subslice.mesh
         mesh_id = mesh.id.replace(" ", "_").replace(".", "-")
         filename = filename_base + "_mesh-" + mesh_id + ".dat"
 
@@ -77,7 +78,7 @@ def export_slcf_raw(slc: Slice, output_dir: str, ordering: Literal["C", "F"] = "
             )
 
     with Pool() as pool:
-        pool.map(lambda args: worker(*args), list(slc._subslices.items()))
+        pool.map(worker, list(slc._subslices.values()))
 
     meta["Meshes"] = list(meta["Meshes"])
 
