@@ -23,7 +23,10 @@ def log_error(module):
                     if not settings.IGNORE_ERRORS:
                         logging.warning(msg, exc_info=True)
                     if args and hasattr(args[0], "load_errors"):
-                        args[0].load_errors.append((str(module), e))
+                        # Drop the traceback before storing: it otherwise keeps the failed
+                        # loader's whole frame (locals, self, open file handles) reachable via
+                        # load_errors for as long as the Simulation object lives.
+                        args[0].load_errors.append((str(module), e.with_traceback(None)))
 
         return wrapped
 
