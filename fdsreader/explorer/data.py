@@ -32,12 +32,20 @@ def device_values(device):
     A DEVC section can be named in the .smv while the CSV beside it is missing, empty or
     just a header -- a run that was cut short, or one whose devices never wrote. fdsreader
     raises a different error for each of those cases, and none of them should take a front
-    end down, so they are all treated as "nothing to plot".
+    end down, so they are all treated as "nothing to plot", as is a device holding a
+    single value rather than a series.
     """
     try:
-        return np.asarray(device.data)
+        values = np.asarray(device.data)
     except Exception:
         return None
+
+    if values.ndim == 0:
+        # A DEVC *line* -- FDS writes <chid>_line.csv and fdsreader stores one scalar per
+        # point along the line -- is a profile through space, not a series through time,
+        # so there is nothing here to plot against a time axis.
+        return None
+    return values
 
 
 def load_device_data(devices):

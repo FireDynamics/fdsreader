@@ -18,10 +18,16 @@ def test_devices_without_data_are_skipped(devc_without_data):
 
 
 def test_device_values_reports_nothing_rather_than_raising(devc_without_data):
+    """Either None or an empty array is fine; what matters is that it does not raise.
+
+    fdsreader returns an empty array for a device with no column of its own, and raises
+    for a CSV it cannot read at all, so both shapes of "nothing" turn up here.
+    """
     fdsreader.settings.ENABLE_CACHING = False
     sim = fdsreader.Simulation(str(devc_without_data))
     for device in list_devices(sim):
-        assert device_values(device) is None
+        values = device_values(device)
+        assert values is None or len(values) == 0
         assert len(device_time(sim, device)) == 0
 
 
@@ -40,3 +46,22 @@ def test_a_normal_device_still_works(tiny_case):
     assert [s["name"] for s in series] == ["TC_1", "TC_2", "HRR"]
     for entry in series:
         assert len(entry["times"]) == len(entry["values"]) > 0
+
+
+def test_a_device_line_is_not_offered_as_a_time_series(devc_line_case):
+    """fdsreader gives a line device a single scalar, which has no time axis."""
+    fdsreader.settings.ENABLE_CACHING = False
+    sim = fdsreader.Simulation(str(devc_line_case))
+
+    line = sim.devices["LINE"]
+    assert not hasattr(line[0].data, "__len__")      # a bare scalar, not a series
+
+    names = [entry["name"] for entry in build_series(sim)]
+    assert names == ["TC"]                           # the real series is still there
+
+
+def test_device_values_rejects_a_scalar(devc_line_case):
+    fdsreader.settings.ENABLE_CACHING = False
+    sim = fdsreader.Simulation(str(devc_line_case))
+    assert device_values(sim.devices["LINE"][0]) is None
+    assert len(device_time(sim, sim.devices["LINE"][0])) == 0

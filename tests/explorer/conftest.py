@@ -128,3 +128,24 @@ def simulation_with_nothing(tmp_path):
     root.mkdir()
     (root / "n.smv").write_text("CHID\n n\n")
     return root
+
+
+@pytest.fixture
+def devc_line_case(tmp_path):
+    """A simulation with a DEVC *line*.
+
+    FDS writes <chid>_line.csv for a line of devices, and fdsreader stores one scalar per
+    point rather than a series -- a profile through space, not through time.
+    """
+    root = tmp_path / "line"
+    root.mkdir()
+    (root / "c.smv").write_text(
+        "CHID\n c\n\n"
+        "CSVF\n devc\n c_devc.csv\n\n"
+        "DEVICE\n TC % TEMPERATURE\n 1.0 0.0 1.0 0.0 0.0 1.0\n\n"
+        "DEVICE\n LINE % TEMPERATURE\n 1.0 0.0 0.5 0.0 0.0 1.0\n\n"
+        "DEVICE\n LINE % TEMPERATURE\n 1.0 0.0 1.5 0.0 0.0 1.0\n"
+    )
+    (root / "c_devc.csv").write_text("s,C\nTime,TC\n0.0,20.0\n1.0,30.0\n2.0,45.0\n")
+    (root / "c_line.csv").write_text("m,C\nHeight,LINE\n0.5,100.0\n1.5,200.0\n")
+    return root

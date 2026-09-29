@@ -202,3 +202,12 @@ def test_a_simulation_with_nothing_in_it_still_draws(simulation_with_nothing):
     assert any(line.strip() for line in app.slice_text(20, 60))
     assert any(line.strip() for line in app.curves_text(20, 60))
     assert app.title() and app.status()
+
+
+def test_a_device_line_does_not_break_the_curve_list(devc_line_case):
+    import fdsreader
+
+    fdsreader.settings.ENABLE_CACHING = False
+    app = Interactive(fdsreader.Simulation(str(devc_line_case)))
+    assert app.curve_choices() == ["DEVC  TC — TEMPERATURE [C]"]
+    assert any(line.strip() for line in app.curves_text(20, 60))

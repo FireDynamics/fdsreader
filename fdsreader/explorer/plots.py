@@ -7,7 +7,7 @@ figures for a report without any of the widget machinery.
 import matplotlib.pyplot as plt
 import numpy as np
 
-from .data import axis_label, device_label, device_time, quantity_of, unit_of
+from .data import axis_label, device_label, device_time, device_values, quantity_of, unit_of
 
 #: Colour maps offered for slices. "Auto" picks a one-sided map for quantities such as
 #: temperature and a zero-centred one for signed quantities such as velocities.
@@ -117,14 +117,21 @@ def plot_series(series, ax=None, cursor_time=None):
 
 
 def plot_device(sim, device, ax=None, cursor_time=None):
-    """Plot a single device against simulation time."""
+    """Plot a single device against simulation time.
+
+    A device with nothing to plot -- see :func:`~fdsreader.explorer.data.device_values` --
+    draws an empty axes rather than raising.
+    """
+    values = device_values(device)
+    if values is None:
+        return plot_series([], ax=ax, cursor_time=cursor_time)
     return plot_series(
         [
             {
                 "label": device_label(device),
                 "name": device.id,
-                "times": device_time(sim, device),
-                "values": np.asarray(device.data),
+                "times": device_time(sim, device, values),
+                "values": values,
                 "quantity": quantity_of(device),
                 "unit": unit_of(device),
                 "source": "device",
