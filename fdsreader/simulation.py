@@ -491,7 +491,7 @@ class Simulation:
 
             if "%" in line[0]:
                 surface_id = line[0].split("%")[-1].strip()
-                surface = next((s for s in self.surfaces if s.id() == surface_id), None)
+                surface = next((s for s in self.surfaces if s.id == surface_id), None)
                 geom = Geometry(file_path, texture_mapping, texture_origin, is_terrain, rgb, surface=surface)
             else:
                 geom = Geometry(file_path, texture_mapping, texture_origin, is_terrain, rgb)

@@ -26,11 +26,17 @@ class Plot3DCollection(FDSDataCollection):
         """Filters all plot3d data by a specific quantity."""
         if isinstance(quantity, Quantity):
             quantity = quantity.name
-        return next(
-            x
-            for x in self._elements
-            if x.quantity.name.lower() == quantity.lower() or x.quantity.short_name.lower() == quantity.lower()
+        x = next(
+            (
+                x
+                for x in self._elements
+                if x.quantity.name.lower() == quantity.lower() or x.quantity.short_name.lower() == quantity.lower()
+            ),
+            None,
         )
+        if x is None:
+            raise KeyError(f"No Plot3D found for quantity '{quantity}'")
+        return x
 
     def __repr__(self):
         return "Plot3DCollection(" + super().__repr__() + ")"

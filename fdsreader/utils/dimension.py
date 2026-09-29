@@ -28,7 +28,12 @@ class Dimension:
         self.z = dimensions[2]
 
     def __eq__(self, other):
+        if not isinstance(other, Dimension):
+            return NotImplemented
         return self.x == other.x and self.y == other.y and self.z == other.z
+
+    def __hash__(self):
+        return hash((self.x, self.y, self.z))
 
     def __repr__(self, *args, **kwargs):
         return f"Dimension({self.x}, {self.y}, {self.z})"

@@ -103,21 +103,14 @@ find tests/cases -name '*.pickle' -delete
 Before starting work please check the
 [issue tracker](https://github.com/FireDynamics/fdsreader/issues) for known bugs.
 
-### Critical bugs (good first issues)
-
-| File | Line | Bug |
-|------|------|-----|
-| `fdsreader/utils/extent.py` | 14 | `ValueError` is created but never raised → silent data corruption |
-| `fdsreader/utils/misc.py` | 19 | `log_error` decorator returns `None` when an exception is caught |
-| `fdsreader/utils/data.py` | 66 | `open()` without context manager → potential file handle leak |
-| `fdsreader/simulation.py` | 468 | `is_terrain = bool(texture_line[4])` — `texture_line[4]` is a `"0"`/`"1"` string from the SMV file; `bool("0")` is `True` in Python (any non-empty string is truthy), so `is_terrain` is always `True` regardless of the actual FDS value. Needs `bool(int(texture_line[4]))`. |
-| `fdsreader/simulation.py` | 472 | `surface_id = line[0].split("%")[-1]` is never `.strip()`-ped, while `Surface.id()` is; the `s.id() == surface_id` match can silently fail on whitespace, leaving `geom.surface` as `None` even when a matching `SURF_ID` exists. |
-
 ### Other known gaps (not urgent, no action planned unless there's a concrete need)
 
 - `tests/cases/*_fds6100.tgz` (bndf/devc/part/pl3d/steckler) are unused by any test — leftover from an earlier FDS-6.10.1 compatibility check, never wired up or cleaned up.
 - `GeomBoundary._load_gbf`/`_load_gcf` (`fdsreader/geom/geometry.py`) and `SubGeomSlice._load_geom_data` (`fdsreader/slcf/geomslice.py`) duplicate near-identical Fortran-record-reading logic; a shared helper would reduce the risk of the two drifting (as already nearly happened once).
-- `GeomBoundary.surf_ind`/`.geom_ind` (`fdsreader/geom/geometry.py`) are only available for FDS 6.10+ (`.gcf`) simulations; HVAC, `&RADF`, `&CTRL`, and detailed zone-model output aren't read by fdsreader at all.
+- The cell-centered coordinate calculation (`coords[:-1] + np.diff(coords) / 2`) is duplicated across `fdsreader/fds_classes/mesh.py` (twice), `fdsreader/bndf/obstruction.py`, and `fdsreader/slcf/slice.py`; a shared `utils` helper would collapse these into one maintained implementation.
+- `Particle.filter_by_tag` (`fdsreader/part/particle.py`) and `Evacuation.filter_by_tag` (`fdsreader/evac/evacuation.py`) are near-identical, independently-maintained implementations; a bug found in one needs to be fixed in both by hand.
+- `GeomBoundary.surf_ind`/`.geom_ind` (`fdsreader/geom/geometry.py`) are only available for FDS 6.10+ (`.gcf`) simulations; HVAC, `&RADF`, and detailed zone-model output aren't read by fdsreader at all. `&CTRL` and mass/species-history CSV output are supported (`Simulation.ctrl`/`.mass`).
+- `Mesh.get_obstruction_mask_slice` raises `NotImplementedError` for a genuine 3D slice (`orientation == 0`) — masking a 3D slice's obstruction cells would need a 3-axis index range this function doesn't compute yet, and no test fixture contains a 3D `&SLCF` to verify an implementation against.
 
 ## Pull request checklist
 

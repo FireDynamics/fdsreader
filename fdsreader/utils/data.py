@@ -30,6 +30,10 @@ class Quantity:
         self.name = quantity
 
     def __eq__(self, other):
+        if isinstance(other, str):
+            return self.name.lower() == other.lower() or self.short_name.lower() == other.lower()
+        if not isinstance(other, Quantity):
+            return NotImplemented
         return self.name == other.name and self.short_name == other.short_name and self.unit == other.unit
 
     @property
@@ -58,7 +62,12 @@ class Profile:
         self.values = values
 
     def __eq__(self, other):
+        if not isinstance(other, Profile):
+            return NotImplemented
         return self.id == other.id
+
+    def __hash__(self):
+        return hash(self.id)
 
     def __repr__(self):
         return f"Profile(id='{self.id}', times={self.times}, depths={self.depths}, values={self.values})"
