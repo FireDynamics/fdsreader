@@ -97,3 +97,34 @@ def fake_series():
          "values": 20 + 4 * times ** 2, "quantity": "TEMPERATURE", "unit": "C",
          "source": "device", "device": None},
     ]
+
+
+@pytest.fixture(params=["missing", "empty", "header-only"])
+def devc_without_data(request, tmp_path):
+    """A simulation whose DEVC section is named in the .smv but has no usable data.
+
+    FDS writes the .smv before the run finishes, so a case that was cut short -- or whose
+    devices never fired -- leaves the CSV missing, empty or holding nothing but a header.
+    fdsreader raises a different error for each.
+    """
+    root = tmp_path / request.param
+    root.mkdir()
+    (root / "c.smv").write_text(
+        "CHID\n c\n\n"
+        "CSVF\n devc\n c_devc.csv\n\n"
+        "DEVICE\n TC % TEMPERATURE\n 1.0 0.0 1.0 0.0 0.0 1.0\n"
+    )
+    if request.param == "empty":
+        (root / "c_devc.csv").write_text("")
+    elif request.param == "header-only":
+        (root / "c_devc.csv").write_text("s,C\nTime,TC\n")
+    return root
+
+
+@pytest.fixture
+def simulation_with_nothing(tmp_path):
+    """A simulation with no devices, no HRR file and no slices."""
+    root = tmp_path / "nothing"
+    root.mkdir()
+    (root / "n.smv").write_text("CHID\n n\n")
+    return root

@@ -26,6 +26,20 @@ def list_devices(sim):
     return devices
 
 
+def device_values(device):
+    """A device's samples, or ``None`` when FDS wrote no usable data for it.
+
+    A DEVC section can be named in the .smv while the CSV beside it is missing, empty or
+    just a header -- a run that was cut short, or one whose devices never wrote. fdsreader
+    raises a different error for each of those cases, and none of them should take a front
+    end down, so they are all treated as "nothing to plot".
+    """
+    try:
+        return np.asarray(device.data)
+    except Exception:
+        return None
+
+
 def load_device_data(devices):
     """Force the device data to be read.
 
@@ -34,21 +48,27 @@ def load_device_data(devices):
     whole file, hence the single access.
     """
     for device in devices:
-        try:
-            device.data
-        except Exception:
-            pass
+        device_values(device)
         break
 
 
-def device_time(sim, device):
-    """Time axis in seconds matching ``device.data``."""
+def device_time(sim, device, values=None):
+    """Time axis in seconds matching the device's samples.
+
+    ``values`` is the already-read data, if the caller has it. Returns an empty array for
+    a device with nothing to plot.
+    """
+    if values is None:
+        values = device_values(device)
+    if values is None:
+        return np.array([])
+
     if TIME_DEVICE_ID in sim.devices:
-        times = np.asarray(sim.devices[TIME_DEVICE_ID].data)
-        if len(times) == len(device.data):
+        times = device_values(sim.devices[TIME_DEVICE_ID])
+        if times is not None and len(times) == len(values):
             return times
     # Fall back to the sample index if the simulation has no device time column.
-    return np.arange(len(device.data))
+    return np.arange(len(values))
 
 
 def unit_of(device):
@@ -184,12 +204,15 @@ def build_series(sim):
         (duplicate_ids if device.id in seen else seen).add(device.id)
 
     for device in devices:
+        values = device_values(device)
+        if values is None or not len(values):
+            continue  # named in the .smv, but nothing usable was written for it
         series.append(
             {
                 "label": "DEVC  " + device_label(device, duplicate_ids),
                 "name": device.id,
-                "times": device_time(sim, device),
-                "values": np.asarray(device.data),
+                "times": device_time(sim, device, values),
+                "values": values,
                 "quantity": quantity_of(device),
                 "unit": unit_of(device),
                 "source": "device",
@@ -197,13 +220,20 @@ def build_series(sim):
             }
         )
 
-    # `sim.hrr` only exists when the simulation wrote an HRR file.
-    hrr = getattr(sim, "hrr", None)
+    # `sim.hrr` only exists when the simulation wrote an HRR file, and reading it can
+    # fail the same way the device CSV can.
+    try:
+        hrr = getattr(sim, "hrr", None)
+    except Exception:
+        hrr = None
     if hrr and "Time" in hrr:
         units = hrr_units(sim)
         times = np.asarray(hrr["Time"])
         for name, values in hrr.items():
             if name == "Time":
+                continue
+            values = np.asarray(values)
+            if not len(values) or len(values) != len(times):
                 continue
             unit = units.get(name, "").strip()
             series.append(

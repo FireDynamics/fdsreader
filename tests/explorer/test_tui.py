@@ -171,3 +171,34 @@ def test_a_simulation_without_slices(monkeypatch, fake_series):
     assert "no slice" in " ".join(app.slice_text(20, 60)).lower()
     app.handle_key("right")                    # must not raise
     app.advance()
+
+
+# -- a simulation missing whole kinds of output -----------------------------
+def test_devices_without_data_leave_the_curve_list_empty(devc_without_data):
+    import fdsreader
+
+    fdsreader.settings.ENABLE_CACHING = False
+    app = Interactive(fdsreader.Simulation(str(devc_without_data)))
+    assert app.series == []
+    assert app.state.curves == ()
+    assert "press c" in " ".join(app.curves_text(20, 60))
+    app.handle_key("c")                        # opening the picker must not raise
+    assert app.curve_choices() == []
+
+
+def test_a_simulation_with_nothing_in_it_still_draws(simulation_with_nothing):
+    import fdsreader
+
+    fdsreader.settings.ENABLE_CACHING = False
+    app = Interactive(fdsreader.Simulation(str(simulation_with_nothing)))
+    assert app.fields == [] and app.series == []
+    assert app.field is None
+    assert app.current_time is None if hasattr(app, "current_time") else True
+    # every key, on a simulation with nothing to show
+    for key in ("right", "left", "h", "l", "pgup", "pgdn", "<", ">", "home", "end",
+                " ", "+", "-", "g", "s", "[", "]", "f", "c", "?", "q"):
+        app.handle_key(key)
+    app.advance()
+    assert any(line.strip() for line in app.slice_text(20, 60))
+    assert any(line.strip() for line in app.curves_text(20, 60))
+    assert app.title() and app.status()
