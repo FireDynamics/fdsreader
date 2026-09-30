@@ -7,10 +7,11 @@ import numpy as np
 import fdsreader.utils.fortran_data as fdtype
 from fdsreader import settings
 from fdsreader.evac.evacuation import Evacuation
+from fdsreader.utils.collection_mixins import ClassNameLookupMixin
 from fdsreader.utils.data import FDSDataCollection, Quantity
 
 
-class EvacCollection(FDSDataCollection):
+class EvacCollection(ClassNameLookupMixin, FDSDataCollection):
     """Collection of :class:`Evacuation` objects. Next to agent-class specific data (such as
     trajectories) lots of other data such as FED-data is provided via this class.
     Note: Evac support was removed from FDS in all versions after 6.7.7!
@@ -446,22 +447,6 @@ class EvacCollection(FDSDataCollection):
                             for q, quantity in enumerate(evac.quantities):
                                 evac._data[quantity.name][t][offset : offset + n_humans] = data_raw[:, q].astype(float)
                         pointer_location[evac][t] += evac.n_humans[mesh][t]
-
-    def __getitem__(self, key):
-        """Get the evac data for a specific agent/human class."""
-        if isinstance(key, int):
-            return self._elements[key]
-        for evac in self:
-            if evac.class_name == key:
-                return evac
-
-    def __contains__(self, value):
-        if value in self._elements:
-            return True
-        for evac in self:
-            if evac.class_name == value:
-                return True
-        return False
 
     def __repr__(self):
         return "EvacCollection(" + super().__repr__() + ")"

@@ -1,6 +1,7 @@
 from typing import Iterable, List, Union
 
 from fdsreader.smoke3d import Smoke3D
+from fdsreader.utils.collection_mixins import matches_quantity
 from fdsreader.utils.data import FDSDataCollection, Quantity
 
 
@@ -20,14 +21,7 @@ class Smoke3DCollection(FDSDataCollection):
         """Gets the :class:`Smoke3D` with a specific quantity."""
         if isinstance(quantity, Quantity):
             quantity = quantity.name
-        x = next(
-            (
-                x
-                for x in self._elements
-                if x.quantity.name.lower() == quantity.lower() or x.quantity.short_name.lower() == quantity.lower()
-            ),
-            None,
-        )
+        x = next((x for x in self._elements if matches_quantity(x, quantity)), None)
         if x is None:
             raise KeyError(f"No Smoke3D found for quantity '{quantity}'")
         return x

@@ -1,11 +1,12 @@
-from typing import Iterable, List, Union
+from typing import Iterable
 
 from fdsreader import settings
 from fdsreader.geom import GeomBoundary
-from fdsreader.utils.data import FDSDataCollection, Quantity
+from fdsreader.utils.collection_mixins import QuantityFilterMixin
+from fdsreader.utils.data import FDSDataCollection
 
 
-class GeometryCollection(FDSDataCollection):
+class GeometryCollection(QuantityFilterMixin, FDSDataCollection):
     """Collection of :class:`GeomBoundary` objects. Offers extensive functionality for filtering and
     using geometry data.
     """
@@ -16,20 +17,6 @@ class GeometryCollection(FDSDataCollection):
         if not settings.LAZY_LOAD:
             for geom in self:
                 geom._load_data()
-
-    @property
-    def quantities(self) -> List[Quantity]:
-        return list({geom.name for geom in self})
-
-    def filter_by_quantity(self, quantity: Union[str, Quantity]):
-        """Filters all GeomBoundaries by a specific quantity."""
-        if isinstance(quantity, Quantity):
-            quantity = quantity.name
-        return GeometryCollection(
-            x
-            for x in self
-            if x.quantity.name.lower() == quantity.lower() or x.quantity.short_name.lower() == quantity.lower()
-        )
 
     def __repr__(self):
         return "GeometryCollection(" + super().__repr__() + ")"

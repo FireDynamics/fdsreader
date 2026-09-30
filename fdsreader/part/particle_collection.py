@@ -5,10 +5,11 @@ import numpy as np
 import fdsreader.utils.fortran_data as fdtype
 from fdsreader import settings
 from fdsreader.part import Particle
+from fdsreader.utils.collection_mixins import ClassNameLookupMixin
 from fdsreader.utils.data import FDSDataCollection, Quantity
 
 
-class ParticleCollection(FDSDataCollection):
+class ParticleCollection(ClassNameLookupMixin, FDSDataCollection):
     """Collection of :class:`Particle` objects."""
 
     def __init__(self, times: Iterable[float], particles: Iterable[Particle]):
@@ -103,21 +104,6 @@ class ParticleCollection(FDSDataCollection):
                                 )
 
                         pointer_location[particle][t] += particle.n_particles[mesh][t]
-
-    def __getitem__(self, key):
-        if isinstance(key, int):
-            return self._elements[key]
-        for particle in self:
-            if particle.class_name == key:
-                return particle
-
-    def __contains__(self, value):
-        if value in self._elements:
-            return True
-        for particle in self:
-            if particle.class_name == value:
-                return True
-        return False
 
     def __repr__(self):
         return "ParticleCollection(" + super().__repr__() + ")"
