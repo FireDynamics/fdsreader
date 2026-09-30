@@ -239,3 +239,30 @@ class TestNewCachingEdgeCases:
 
         sim2 = Simulation(str(isolated_case))
         assert sim2.load_errors == []
+
+
+class TestKeywordHandlerRegistry:
+    """parse_smv_file's if/elif chain was replaced with two frozen registries
+    (_EXACT_KEYWORD_HANDLERS/_PREFIX_KEYWORD_HANDLERS_BEFORE_ISOG/_AFTER_ISOG) mapping SMV
+    keywords to handler-method NAMES (strings), resolved via getattr() at parse time. A typo'd or
+    renamed handler name would only surface as an AttributeError the next time a real .smv file
+    happens to contain that specific keyword - not at import/class-definition time and not
+    necessarily caught by the fixture-based acceptance tests, since not every fixture exercises
+    every keyword. This test catches that class of regression immediately."""
+
+    def test_every_registered_handler_name_resolves_to_a_real_method(self):
+        handler_names = set(SimulationClass._EXACT_KEYWORD_HANDLERS.values())
+        handler_names.update(name for _, name in SimulationClass._PREFIX_KEYWORD_HANDLERS_BEFORE_ISOG)
+        handler_names.update(name for _, name in SimulationClass._PREFIX_KEYWORD_HANDLERS_AFTER_ISOG)
+        handler_names.add("_load_isosurface")  # the ISOG substring fallback, not in either registry
+
+        for name in handler_names:
+            assert callable(getattr(SimulationClass, name, None)), f"{name!r} is not a callable attribute"
+
+    def test_registries_are_frozen_against_accidental_mutation(self):
+        with pytest.raises(TypeError):
+            SimulationClass._EXACT_KEYWORD_HANDLERS["NEW"] = "_handle_new"
+        with pytest.raises(TypeError):
+            SimulationClass._PREFIX_KEYWORD_HANDLERS_BEFORE_ISOG[0] = ("NEW", "_handle_new")
+        with pytest.raises(TypeError):
+            SimulationClass._PREFIX_KEYWORD_HANDLERS_AFTER_ISOG[0] = ("NEW", "_handle_new")
