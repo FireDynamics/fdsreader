@@ -56,20 +56,7 @@ class SubGeomSlice:
 
     def _load_geom_data(self):
         with open(self.geom_file_path, "rb") as infile:
-            dtype_meta = fdtype.new((("i", 3),))
-            infile.seek(2 * fdtype.INT.itemsize + dtype_meta.itemsize + fdtype.FLOAT.itemsize)
-            self.n_verts, self.n_faces, n_vols = fdtype.read(infile, dtype_meta, 1)[0][0]
-
-            if self.n_verts > 0 and self.n_faces > 0:
-                dtype_verts = fdtype.new((("f", 3 * self.n_verts),))
-                dtype_faces = fdtype.new((("i", 3 * self.n_faces),))
-                # dtype_locations = fdtype.new((('i', self.n_faces),))
-                # dtype_zero_floats = fdtype.new((('f', 3 * self.n_faces * 2),))
-                self._vertices = fdtype.read(infile, dtype_verts, 1)[0][0].reshape((self.n_verts, 3)).astype(float)
-                self._faces = fdtype.read(infile, dtype_faces, 1)[0][0].reshape((self.n_faces, 3)).astype(int) - 1
-            else:
-                self._vertices = np.empty((0, 3), dtype=float)
-                self._faces = np.empty((0, 3), dtype=int)
+            self.n_verts, self.n_faces, _, self._vertices, self._faces = fdtype.read_geom_header_and_faces(infile)
 
     def _load_data(self):
         with open(self.file_path, "rb") as infile:

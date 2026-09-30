@@ -97,6 +97,45 @@ def read(infile: BinaryIO, dtype: np.dtype, n: int):
     return np.array([list(row) for row in zip(*columns)], dtype=object)
 
 
+def read_geom_header_and_faces(infile: BinaryIO) -> Tuple[int, int, int, np.ndarray, np.ndarray]:
+    """Reads the header shared by FDS' .gbf/.gcf boundary-geometry files and the geomslice
+    companion (.gsf) file, as written by FDS' geometry dump routines (e.g. DUMP_CFACES_GEOM in
+    Source/dump.f90):
+        INTEGER_ONE                    (1 int)
+        VERSION                        (1 int)
+        0, 0, FIRST_FRAME_STATIC       (3 ints)
+        STIME                          (1 float)
+        NVERTS, NFACES, NVOLS          (3 ints)
+        -- only if NVERTS > 0 and NFACES > 0 --
+        VERTS(1:3*NVERTS)              (floats)
+        FACES(1:3*NFACES)              (ints, 1-based)
+
+    Leaves the file position right after FACES (or right after NVERTS/NFACES/NVOLS if either is
+    0), so a caller whose format has more fields afterwards (.gcf's LOCATIONS/SURFIND/GEOMIND)
+    can keep reading from there.
+
+    :param infile: Already opened binary .gbf/.gcf/.gsf-style geometry file.
+    :returns: (n_verts, n_faces, n_vols, vertices, faces). `vertices` is a `(n_verts, 3)` float
+        array, `faces` a `(n_faces, 3)` 0-based int array (FDS itself writes 1-based indices);
+        both are empty arrays if `n_verts` or `n_faces` is 0.
+    """
+    infile.seek(INT.itemsize * 2 + new((("i", 3),)).itemsize + FLOAT.itemsize)
+
+    dtype_meta = new((("i", 3),))
+    n_verts, n_faces, n_vols = np.fromfile(infile, dtype_meta, 1)[0][1]
+
+    if n_verts <= 0 or n_faces <= 0:
+        return n_verts, n_faces, n_vols, np.empty((0, 3), dtype=float), np.empty((0, 3), dtype=int)
+
+    dtype_vertices = new((("f", 3 * n_verts),))
+    vertices = np.fromfile(infile, dtype_vertices, 1)[0][1].reshape((n_verts, 3)).astype(float)
+
+    dtype_faces = new((("i", 3 * n_faces),))
+    faces = read(infile, dtype_faces, 1)[0][0].reshape((n_faces, 3)).astype(int) - 1
+
+    return n_verts, n_faces, n_vols, vertices, faces
+
+
 def read_columns(infile: BinaryIO, dtype: np.dtype, n: int) -> list:
     """Like :func:`read`, but returns each payload field as its own fully vectorized array of
     shape ``(n, *field_shape)`` instead of boxing every record into a Python list first.

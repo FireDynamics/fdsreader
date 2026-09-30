@@ -49,17 +49,7 @@ class GeomBoundary:
     def _load_gbf(file_path_gbf: str):
         """Reads vertices/faces from a legacy .gbf file (FDS < 6.10)."""
         with open(file_path_gbf, "rb") as infile:
-            offset = fdtype.INT.itemsize * 2 + fdtype.new((("i", 3),)).itemsize + fdtype.FLOAT.itemsize
-            infile.seek(offset)
-
-            dtype_meta = fdtype.new((("i", 3),))
-            n_vertices, n_faces, _ = np.fromfile(infile, dtype_meta, 1)[0][1]
-
-            dtype_vertices = fdtype.new((("f", 3 * n_vertices),))
-            vertices = np.fromfile(infile, dtype_vertices, 1)[0][1].reshape((n_vertices, 3)).astype(float)
-
-            dtype_faces = fdtype.new((("i", 3 * n_faces),))
-            faces = fdtype.read(infile, dtype_faces, 1)[0][0].reshape((n_faces, 3)).astype(int) - 1
+            _, n_faces, _, vertices, faces = fdtype.read_geom_header_and_faces(infile)
 
         return vertices, faces, n_faces, None, None
 
@@ -82,20 +72,11 @@ class GeomBoundary:
             GEOMIND(1:NFACES)              (ints, 1-based index into Simulation.geoms)
         """
         with open(file_path_gcf, "rb") as infile:
-            infile.seek(fdtype.INT.itemsize * 2 + fdtype.new((("i", 3),)).itemsize + fdtype.FLOAT.itemsize)
-
-            dtype_meta = fdtype.new((("i", 3),))
-            n_vertices, n_faces, _ = np.fromfile(infile, dtype_meta, 1)[0][1]
+            n_vertices, n_faces, _, vertices, faces = fdtype.read_geom_header_and_faces(infile)
 
             if n_vertices == 0 or n_faces == 0:
                 empty_ind = np.empty((0,), dtype=int)
-                return np.empty((0, 3), dtype=float), np.empty((0, 3), dtype=int), 0, empty_ind, empty_ind
-
-            dtype_vertices = fdtype.new((("f", 3 * n_vertices),))
-            vertices = np.fromfile(infile, dtype_vertices, 1)[0][1].reshape((n_vertices, 3)).astype(float)
-
-            dtype_faces = fdtype.new((("i", 3 * n_faces),))
-            faces = fdtype.read(infile, dtype_faces, 1)[0][0].reshape((n_faces, 3)).astype(int) - 1
+                return vertices, faces, n_faces, empty_ind, empty_ind
 
             # Skip LOCATIONS (n_faces ints): FDS itself writes this as a placeholder, unused.
             dtype_ind = fdtype.new((("i", n_faces),))
