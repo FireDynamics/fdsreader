@@ -74,9 +74,12 @@ def test_profile_parsing_tolerates_shrinking_npoints_between_rows(tmp_path):
 
     profile = fake_sim.profiles["profile1"]
     assert list(profile.npoints) == [3, 2]
-    assert list(profile.depths[0]) == [0.1, 0.2, 0.3]
-    assert list(profile.depths[1]) == [0.1, 0.2]
-    assert list(profile.values[1]) == [10.0, 20.0]
+    # depths/values are parsed as float32 (see _load_profiles), so 0.1/0.2/0.3 - not exactly
+    # representable in binary - round-trip to slightly different values than the float64 literals
+    # here; pytest.approx tolerates that gap without weakening what the test actually checks.
+    assert list(profile.depths[0]) == pytest.approx([0.1, 0.2, 0.3])
+    assert list(profile.depths[1]) == pytest.approx([0.1, 0.2])
+    assert list(profile.values[1]) == pytest.approx([10.0, 20.0])
 
 
 def test_profile_parsing_skips_incomplete_trailing_row(tmp_path):
