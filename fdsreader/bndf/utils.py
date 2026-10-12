@@ -7,7 +7,6 @@ def sort_patches_cartesian(patches_in: List[Patch]):
     """Returns all patches (of same orientation!) sorted in cartesian coordinates."""
     patches = patches_in.copy()
     if len(patches) != 0:
-        patches_cart = [[patches[0]]]
         orientation = abs(patches[0].orientation)
         if orientation == 1:  # x
             patches.sort(key=lambda p: (p.extent.y_start, p.extent.z_start))
@@ -16,6 +15,10 @@ def sort_patches_cartesian(patches_in: List[Patch]):
         elif orientation == 3:  # z
             patches.sort(key=lambda p: (p.extent.x_start, p.extent.y_start))
 
+        # Seed from the now-sorted list: seeding from the pre-sort order would duplicate
+        # whichever patch happened to come first in the input while silently dropping the
+        # patch that sorts first, unless the input was already sorted by pure chance.
+        patches_cart = [[patches[0]]]
         if orientation == 1:
             for patch in patches[1:]:
                 if patch.extent.y_start == patches_cart[-1][-1].extent.y_start:

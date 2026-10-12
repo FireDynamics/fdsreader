@@ -16,7 +16,7 @@ class GeomSliceCollection(FDSDataCollection):
 
     @property
     def quantities(self) -> List[Quantity]:
-        return list({slc.name for slc in self})
+        return list({slc.quantity for slc in self})
 
     def filter_by_quantity(self, quantity: Union[str, Quantity]):
         """Filters all geomslices by a specific quantity."""
@@ -44,8 +44,10 @@ class GeomSliceCollection(FDSDataCollection):
             dy = max(slc.extent.y_start - y, 0, y - slc.extent.y_end) if y is not None else 0
             dz = max(slc.extent.z_start - z, 0, z - slc.extent.z_end) if z is not None else 0
             d = np.sqrt(dx * dx + dy * dy + dz * dz)
-            if d <= d_min:
+            if d < d_min:
                 d_min = d
+                geomslices_min = [slc]
+            elif d == d_min:
                 geomslices_min.append(slc)
 
         if x is not None:

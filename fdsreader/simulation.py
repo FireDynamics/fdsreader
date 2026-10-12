@@ -52,6 +52,12 @@ class Simulation:
     :ivar cpu: Dictionary mapping .csv header keys to numpy arrays containing cpu data.
     :ivar hrr: Dictionary mapping .csv header keys to numpy arrays containing hrr data.
     :ivar steps: Dictionary mapping .csv header keys to numpy arrays containing steps data.
+    :ivar ctrl: Dictionary mapping control (&CTRL) names to numpy arrays of their state over time.
+        Only set if the simulation has a CTRL csv export.
+    :ivar mass: Dictionary mapping species names to numpy arrays of their mass history. Only set
+        if the simulation has a mass csv export.
+    :ivar load_errors: List of (module, exception) tuples for loaders that failed and were
+        swallowed during parsing. Empty when nothing went wrong.
     """
 
     _loading = False
@@ -82,18 +88,27 @@ class Simulation:
                     with open(pickle_file_path, "rb") as f:
                         sim = pickle.load(f)
                 except Exception as e:
+                    sim = None
                     if settings.DEBUG:
                         logging.exception(e)
-                else:
-                    valid = True
-                    # Check if pickle file stores a Simulation
-                    valid &= isinstance(sim, cls)
-                    # Check if the fdsreader version still matches
-                    valid &= sim.reader_version == __version__
-                    # Check if the smv_file did not change
-                    valid &= sim._hash == create_hash(smv_file_path)
+                finally:
+                    # Reset immediately after unpickling so the cache can be used again by any
+                    # later Simulation(...) call in this process, not just the first one.
+                    Simulation._loading = False
+
+                if sim is not None:
+                    # Short-circuiting matters here: a pickle file holding some other/older
+                    # object shape must not reach sim.reader_version/sim._hash at all.
+                    valid = (
+                        isinstance(sim, cls)  # Check if pickle file stores a Simulation
+                        and sim.reader_version == __version__  # Check if the fdsreader version still matches
+                        and sim._hash == create_hash(smv_file_path)  # Check if the smv_file did not change
+                    )
 
                     if valid:
+                        # Older pickle caches may predate the load_errors attribute
+                        if not hasattr(sim, "load_errors"):
+                            sim.load_errors = list()
                         # Return cached sim if it turned out to be valid
                         return sim
 
@@ -164,6 +179,7 @@ class Simulation:
             self._devices = dict()
 
             self.profiles: Dict[str, Profile] = dict()
+            self.load_errors: List[Tuple[str, Exception]] = list()
 
             self.parse_smv_file()
 
@@ -223,7 +239,8 @@ class Simulation:
                 # Hash will be saved to simulation pickle file and compared to new hash when loading
                 # the pickled simulation again in the next run of the program.
                 self._hash = create_hash(self.smv_file_path)
-                pickle.dump(self, open(Simulation._get_pickle_filename(self.root_path, self.chid), "wb"), protocol=4)
+                with open(Simulation._get_pickle_filename(self.root_path, self.chid), "wb") as pickle_file:
+                    pickle.dump(self, pickle_file, protocol=4)
 
     def parse_smv_file(self):
         # Global device list in registration order — used to resolve DEVICE_ACT indices.
@@ -247,6 +264,10 @@ class Simulation:
                         self.hrr = self._load_HRR_data(file_path)
                     elif csv_type == "steps":
                         self.steps = self._load_step_data(file_path)
+                    elif csv_type == "ctrl":
+                        self.ctrl = self._load_named_csv_data(file_path)
+                    elif csv_type == "mass":
+                        self.mass = self._load_named_csv_data(file_path)
                     elif csv_type == "devc":
                         self.devc_path = file_path
                         self._devices["Time"] = Device(
@@ -455,7 +476,7 @@ class Simulation:
     def _load_geoms(self, smv_file: TextIO, line: str):
         ngeoms = int(line.split()[1])
 
-        filename = smv_file.readline()
+        filename = smv_file.readline().strip()
         file_path = os.path.join(self.root_path, filename)
 
         for g in range(ngeoms):
@@ -465,12 +486,12 @@ class Simulation:
 
             texture_mapping = texture_line[0]
             texture_origin = (float(texture_line[1]), float(texture_line[2]), float(texture_line[3]))
-            is_terrain = bool(texture_line[4])
+            is_terrain = bool(int(texture_line[4]))
             rgb = (int(rgb_line[0]), int(rgb_line[1]), int(rgb_line[2]))
 
             if "%" in line[0]:
-                surface_id = line[0].split("%")[-1]
-                surface = next((s for s in self.surfaces if s.id() == surface_id), None)
+                surface_id = line[0].split("%")[-1].strip()
+                surface = next((s for s in self.surfaces if s.id == surface_id), None)
                 geom = Geometry(file_path, texture_mapping, texture_origin, is_terrain, rgb, surface=surface)
             else:
                 geom = Geometry(file_path, texture_mapping, texture_origin, is_terrain, rgb)
@@ -1021,6 +1042,10 @@ class Simulation:
         times = self._load_prt5_meta(self._evacs, file_path + ".bnd", mesh)[1:]  # First timestep is weird somehow
         if isinstance(self._evacs, list):
             self.evacs = EvacCollection(self._evacs, os.path.join(self.root_path, self.chid + "_evac"), times)
+            # Mirror the assignment onto _evacs too, so a later mesh's EVA5 block sees the guard
+            # above as already satisfied instead of silently rebuilding (and discarding
+            # z_offsets/_file_paths recorded so far) on every subsequent mesh.
+            self._evacs = self.evacs
 
         self.evacs.z_offsets[mesh.id] = float(z_offset)
         self.evacs._file_paths[mesh.id] = file_path
@@ -1036,17 +1061,40 @@ class Simulation:
                 infile.readline()  # Skip "ID, IOR, face center x(m), ..." header
                 profile_id = infile.readline().split(",")[0].strip()
                 infile.readline()  # Skip "Time(s), Npoints, ..." header
-                data: np.ndarray = np.genfromtxt(infile, delimiter=",", dtype=np.float32, autostrip=True).T
-                times = data[0]
-                npoints = data[1].astype(int)
-                depths = np.empty((data.shape[1],), dtype=object)
-                values = np.empty((data.shape[1],), dtype=object)
+                raw_rows = [row for row in csv.reader(infile) if row]
 
-                for i, n in enumerate(npoints):
-                    depths[i] = data[2 : 2 + n, i]
-                    values[i] = data[2 + n :, i]
+            # Npoints can change between timesteps (FDS shrinks/grows the profile), which
+            # produces rows with different lengths - np.genfromtxt can't handle that, so each row
+            # is parsed on its own instead. Only trailing padding is stripped (not fields in the
+            # middle of a row), and a row that's shorter than its own declared Npoints - e.g. the
+            # last line of a profile still being written by a running simulation - is skipped
+            # rather than raising, so one incomplete row doesn't take out every other profile file.
+            times_list, npoints_list, depths_list, values_list = [], [], [], []
+            for row in raw_rows:
+                while row and row[-1].strip() == "":
+                    row.pop()
+                if len(row) < 2:
+                    continue
+                try:
+                    row_values = np.array(row, dtype=np.float32)
+                except ValueError:
+                    continue
+                n = int(row_values[1])
+                if len(row_values) < 2 + 2 * n:
+                    continue
+                times_list.append(row_values[0])
+                npoints_list.append(n)
+                depths_list.append(row_values[2 : 2 + n])
+                values_list.append(row_values[2 + n : 2 + 2 * n])
 
-                self.profiles[profile_id] = Profile(profile_id, times, npoints, depths, values)
+            times = np.array(times_list, dtype=np.float32)
+            npoints = np.array(npoints_list, dtype=int)
+            depths = np.empty(len(depths_list), dtype=object)
+            depths[:] = depths_list
+            values = np.empty(len(values_list), dtype=object)
+            values[:] = values_list
+
+            self.profiles[profile_id] = Profile(profile_id, times, npoints, depths, values)
 
     @log_error("devc")
     def _register_device(self, smv_file: TextIO) -> Tuple[str, Device]:
@@ -1063,7 +1111,7 @@ class Simulation:
 
     def _load_DEVC_data(self):
         with open(self.devc_path) as infile:
-            units = infile.readline().split(",")
+            units = [unit.strip() for unit in infile.readline().split(",")]
             # Device names are only quoted by FDS when they contain a comma or space, so a plain
             # split on "," or ',"' would misparse a header where none (or all) of the names need
             # quoting. Use a real CSV parser instead so it doesn't matter which fields are quoted.
@@ -1081,18 +1129,19 @@ class Simulation:
                 devc.quantity.unit = units[k]
                 devc._data = values[:, k].copy()
 
-        line_path = self.devc_path.replace("devc", "line")
+        line_path = os.path.join(self.root_path, self.chid + "_line.csv")
         if os.path.exists(line_path):
             with open(line_path) as infile:
-                units = infile.readline()
-                names = [name.replace('"', "").replace("\n", "").strip() for name in infile.readline().split(",")]
+                units = [unit.replace('"', "").strip() for unit in infile.readline().split(",")]
+                names = [name.strip() for name in next(csv.reader([infile.readline()]))]
                 data = np.genfromtxt(infile, delimiter=",", dtype=np.float32, autostrip=True)
                 for k, key in enumerate(names):
                     if key in self.devices:
                         devc = self.devices[key]
-                        for i in range(len(devc)):
-                            devc[i].quantity.unit = units[k]
-                            devc[i]._data = data[i, k]
+                        devices = devc if isinstance(devc, list) else [devc]
+                        for i, d in enumerate(devices):
+                            d.quantity.unit = units[k]
+                            d._data = data[i, k]
                     else:
                         pass  # Probably only x,y,z coordinates
 
@@ -1117,6 +1166,19 @@ class Simulation:
         data = self._transform_csv_data(keys, float_values)
         data["Time Step"] = timesteps
         return data
+
+    @log_error("csv")
+    def _load_named_csv_data(self, file_path: str) -> Dict[str, np.ndarray]:
+        """Loads a generic two-header-row FDS csv export (e.g. CTRL or mass/species history)."""
+        with open(file_path) as infile:
+            infile.readline()  # Skip units header
+            keys = [name.strip() for name in next(csv.reader([infile.readline()]))]
+        values = np.loadtxt(file_path, delimiter=",", ndmin=2, skiprows=2)
+        if values.size == 0:
+            # np.loadtxt can't infer the column count from zero data rows (e.g. a run that was
+            # killed before its first sample was written), so it comes back as shape (0, 1).
+            values = np.empty((0, len(keys)))
+        return self._transform_csv_data(keys, values)
 
     @log_error("csv")
     def _load_CPU_data(self) -> Dict[str, np.ndarray]:

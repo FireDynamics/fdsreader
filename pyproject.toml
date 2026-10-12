@@ -48,6 +48,11 @@ notebook = [
     "matplotlib>=3.5",
     "ipywidgets>=8",
 ]
+export = [
+    "multiprocess",
+    "pathos",
+    "pyyaml",
+]
 
 [tool.setuptools_scm]
 version_scheme = "post-release"

@@ -86,10 +86,10 @@ class Patch:
         for dim in ("x", "y", "z"):
             co = self.mesh.coordinates[dim].copy()
             # In case the slice is cell-centered, we will shift the coordinates by half a cell
-            # and remove the last coordinate
+            # and remove the last coordinate. Compute the per-cell offset before trimming, since a
+            # mesh with only a single cell along this axis leaves just one coordinate afterwards.
             if self.cell_centered and not ignore_cell_centered:
-                co = co[:-1]
-                co += abs(co[1] - co[0]) / 2
+                co = co[:-1] + np.diff(co) / 2
 
             coords[dim] = co[np.where(np.logical_and(co >= self.extent[dim][0], co <= self.extent[dim][1]))]
             if coords[dim].size == 0:
@@ -337,11 +337,17 @@ class SubObstruction:
     def get_data(self, quantity: Union[str, Quantity]):
         if isinstance(quantity, Quantity):
             quantity = quantity.name
-        return next(
-            b
-            for b in self._boundary_data.values()
-            if b.quantity.name.lower() == quantity.lower() or b.quantity.short_name.lower() == quantity.lower()
+        b = next(
+            (
+                b
+                for b in self._boundary_data.values()
+                if b.quantity.name.lower() == quantity.lower() or b.quantity.short_name.lower() == quantity.lower()
+            ),
+            None,
         )
+        if b is None:
+            raise KeyError(f"No boundary data found for quantity '{quantity}'")
+        return b
 
     def __getitem__(self, item):
         if isinstance(item, int):
@@ -697,8 +703,11 @@ class Obstruction:
             subobst_sets = [list(), list()]
             dim = ["x", "y", "z"][abs(orientation_int) - 1]
             random_subobst = next(
-                subobst for subobst in self._all_subobstructions if orientation_int in subobst.get_coordinates()
+                (subobst for subobst in self._all_subobstructions if orientation_int in subobst.get_coordinates()),
+                None,
             )
+            if random_subobst is None:
+                raise KeyError(f"No sub-obstruction found for orientation {orientation_int}")
             base_coord = random_subobst.get_coordinates(ignore_cell_centered=False)[orientation_int][dim][0]
 
             for subobst in self._all_subobstructions:
@@ -879,7 +888,12 @@ class Obstruction:
         return self._subobstructions[key.id][0]
 
     def __eq__(self, other):
+        if not isinstance(other, Obstruction):
+            return NotImplemented
         return self.id == other.id
+
+    def __hash__(self):
+        return hash(self.id)
 
     def __repr__(self, *args, **kwargs):
         return (
