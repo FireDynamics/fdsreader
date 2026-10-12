@@ -1,7 +1,7 @@
 import bisect
 import math
 import os
-from typing import Dict, List, Literal, Optional, Tuple, Union
+from typing import Dict, List, Literal, Tuple, Union
 
 import numpy as np
 
@@ -74,7 +74,7 @@ class Plot3D(NumpyArrayMixin):
         self.times: List[float] = list()
         # Only set once the first subplot is added; a Plot3D can exist as an empty
         # placeholder (see Simulation.data_3d) before any actual output is assigned to it.
-        self.quantity: Optional[Quantity] = None
+        self.quantity: Quantity | None = None
 
         # List of all subplots this Plot3D consists of (one per mesh).
         self._subplots: Dict[str, SubPlot3D] = dict()
