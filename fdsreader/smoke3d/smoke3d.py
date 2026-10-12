@@ -8,6 +8,7 @@ import fdsreader.utils.fortran_data as fdtype
 from fdsreader import settings
 from fdsreader.fds_classes import Mesh
 from fdsreader.utils import NumpyArrayMixin, Quantity
+from fdsreader.utils.data import resample_mesh_axis
 
 _HANDLED_FUNCTIONS = {}
 
@@ -202,7 +203,7 @@ class Smoke3D(NumpyArrayMixin):
                     max(int(round((coord_max[dim] - coord_min[dim]) / step_sizes_min[dim])), 1) + 1
                 )  # + step_sizes_max[dim] / step_sizes_min[dim]
 
-        grid = np.full((self.n_t, steps["x"], steps["y"], steps["z"]), np.nan)
+        grid = np.full((self.n_t, steps["x"], steps["y"], steps["z"]), np.nan, dtype=np.float32)
 
         for subsmoke in self._subsmokes.values():
             subsmoke_data = subsmoke.data.copy()
@@ -218,58 +219,19 @@ class Smoke3D(NumpyArrayMixin):
                 for dim in ("x", "y", "z")
             }
 
-            temp_data = dict()
-            temp_mask = dict()
-            for axis in range(3):
-                dim = ("x", "y", "z")[axis]
-                # Temporarily save border points to add them back to the array again later
-                if np.isclose(subsmoke.mesh.coordinates[dim][-1], global_max[dim]):
-                    temp_data_slices = [slice(s) for s in subsmoke_data.shape]
+            # Map each axis onto the global grid in turn. Border points are dropped unless they lie on the
+            # border of the simulation space, as all other border points appear twice where meshes overlap.
+            # The global grid uses the finest mesh as base, so coarser meshes need their values repeated
+            # along every axis to match its resolution.
+            for axis, dim in enumerate(("x", "y", "z")):
+                co = subsmoke.mesh.coordinates[dim]
+                n_repeat = max(int(round((co[1] - co[0]) / step_sizes_min[dim])), 1)
+                keep_last = bool(np.isclose(co[-1], global_max[dim]))
+                if keep_last:
                     end_idx[dim] += 1
-                    temp_data_slices[axis + 1] = slice(subsmoke_data.shape[axis + 1] - 1, None)
-                    temp_data[dim] = subsmoke_data[tuple(temp_data_slices)]
-                    if masked:
-                        temp_mask[dim] = mask[tuple(temp_data_slices)]
-
-            # We ignore border points unless they are actually on the border of the simulation space as all
-            # other border points actually appear twice, as the subslices overlap. This only
-            # applies for face_centered slices, as cell_centered slices will not overlap.
-            reduced_shape_slices = (slice(subsmoke.data.shape[0]),) + tuple(
-                slice(1, None) for s in subsmoke.data.shape[1:]
-            )
-            subsmoke_data = subsmoke_data[reduced_shape_slices]
-            if masked:
-                mask = mask[reduced_shape_slices]
-
-            # The global grid uses the finest mesh as base, so coarser meshes need their values
-            # repeated along every axis to match its resolution.
-            for axis in range(3):
-                dim = ("x", "y", "z")[axis]
-                n_repeat = max(
-                    int(
-                        round(
-                            (subsmoke.mesh.coordinates[dim][1] - subsmoke.mesh.coordinates[dim][0])
-                            / step_sizes_min[dim]
-                        )
-                    ),
-                    1,
-                )
-                if n_repeat > 1:
-                    subsmoke_data = np.repeat(subsmoke_data, n_repeat, axis=axis + 1)
-                    if masked:
-                        mask = np.repeat(mask, n_repeat, axis=axis + 1)
-
-            for axis in range(3):
-                dim = ("x", "y", "z")[axis]
-                # Add border points back again if needed
-                if np.isclose(subsmoke.mesh.coordinates[dim][-1], global_max[dim]):
-                    temp_data_slices = [slice(s) for s in subsmoke_data.shape]
-                    temp_data_slices[axis + 1] = slice(None)
-                    subsmoke_data = np.concatenate(
-                        (subsmoke_data, temp_data[dim][tuple(temp_data_slices)]), axis=axis + 1
-                    )
-                    if masked:
-                        mask = np.concatenate((mask, temp_mask[dim][tuple(temp_data_slices)]), axis=axis + 1)
+                subsmoke_data = resample_mesh_axis(subsmoke_data, axis + 1, n_repeat, keep_last)
+                if masked:
+                    mask = resample_mesh_axis(mask, axis + 1, n_repeat, keep_last)
 
             # If the slice should be masked, we set all cells at which an obstruction is in the
             # simulation space to the fill value set by the user

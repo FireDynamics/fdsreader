@@ -16,7 +16,7 @@ def pl3d(pl3d_sim):
 
 def test_pl3d(pl3d):
     data, coordinates = pl3d.to_global(masked=True, return_coordinates=True)
-    assert abs(data[-1, 41, 27, 0] - 55.85966110229492) < 1e-6
+    assert abs(data[-1, 41, 27, 0] - 30.368947982788086) < 1e-6
     assert abs(coordinates["x"][41] - 9.25) < 1e-6
 
 

@@ -73,6 +73,22 @@ class Profile:
         return f"Profile(id='{self.id}', times={self.times}, depths={self.depths}, values={self.values})"
 
 
+def resample_mesh_axis(array: np.ndarray, axis: int, n_repeat: int, keep_last: bool) -> np.ndarray:
+    """Maps node data of one mesh along one axis onto a global grid that is n_repeat times finer.
+
+    The last node is dropped, as it coincides with the first node of the neighbouring mesh,
+    unless keep_last is set because the mesh ends at the border of the simulation space.
+    The remaining nodes are repeated n_repeat times.
+    """
+    last = array.take([-1], axis=axis) if keep_last else None
+    array = array.take(range(array.shape[axis] - 1), axis=axis)
+    if n_repeat > 1:
+        array = np.repeat(array, n_repeat, axis=axis)
+    if keep_last:
+        array = np.concatenate((array, last), axis=axis)
+    return array
+
+
 def create_hash(path: str):
     """Returns the md5 hash as string for the given file."""
     with open(path, "rb") as f:

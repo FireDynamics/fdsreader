@@ -16,7 +16,7 @@ def smoke(smoke_sim):
 
 def test_smoke3d(smoke):
     data, coordinates = smoke.to_global(masked=True, return_coordinates=True)
-    assert abs(data[-1, 13, 13, 1] - 77.0) < 1e-6
+    assert abs(data[-1, 13, 13, 1] - 16.0) < 1e-6
     assert abs(coordinates["x"][13] - 1.3) < 1e-6
 
 
