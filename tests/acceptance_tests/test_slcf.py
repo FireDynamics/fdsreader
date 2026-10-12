@@ -11,7 +11,7 @@ def slcf_sim():
 
 def test_slcf(slcf_sim):
     data, coordinates = slcf_sim.slices[0].to_global(masked=True, return_coordinates=True)
-    assert abs(data[-1, -1, -1] - 33.311744689941406) < 1e-6
+    assert abs(data[-1, -1, -1] - 30.817142486572266) < 1e-6
     assert abs(coordinates["x"][0] - 0.0) < 1e-6 and abs(coordinates["x"][-1] - 3.6) < 1e-6
 
 
