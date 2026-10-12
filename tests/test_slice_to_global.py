@@ -260,3 +260,19 @@ def test_to_global_repeats_values_of_a_coarse_cell_centred_mesh():
     coarse_x = np.where(Xc > 1.0, 1.0 + (np.floor((Xc - 1.0) / 0.5) + 0.5) * 0.5, Xc)
     coarse_y = np.where(Xc > 1.0, (np.floor(Yc / 0.5) + 0.5) * 0.5, Yc)
     np.testing.assert_allclose(grid, coarse_x + 10 * coarse_y)
+
+
+def test_to_global_masks_a_recovered_face_node_of_a_coarse_mesh():
+    # C has twice the cell size; an obstruction on its coarse node x = 1.5, y = 1 (top face, no neighbour above)
+    # covers the fine nodes x = 1.5 and x = 1.75 once C's values are repeated onto the global grid
+    slc = BoxSlice([L_SHAPE[0] + (0.25,), L_SHAPE[1] + (0.25,), L_SHAPE[2] + (0.5,)])
+    _add_obstruction(slc, "M2", x=(1, 2), y=(2, 3))
+    grid = np.asarray(slc.to_global(masked=True, fill=np.nan))[0]
+
+    (X, Y), inside = _union_grid(L_SHAPE, 0.25)
+    obstructed = np.isclose(Y, 1.0) & (np.isclose(X, 1.5) | np.isclose(X, 1.75))
+    assert np.isnan(grid[obstructed]).all()
+    assert not np.isnan(grid[inside & ~obstructed]).any()
+    top_of_c = np.isclose(Y, 1.0) & (X > 1.0) & ~obstructed
+    Xc = np.where(X == 2.0, 2.0, 1.0 + np.floor((X - 1.0) / 0.5) * 0.5)
+    np.testing.assert_allclose(grid[top_of_c], (Xc + 10 * Y)[top_of_c])
