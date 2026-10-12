@@ -105,8 +105,9 @@ def test_to_global_keeps_a_nan_the_neighbouring_mesh_wrote_at_a_shared_face():
 
 def _union_grid(boxes, h, n_dims=2):
     """Global node grid over the bounding box and a mask of the nodes inside any of the boxes."""
+    lo = [min(b[2 * d] for b in boxes) for d in range(n_dims)]
     hi = [max(b[2 * d + 1] for b in boxes) for d in range(n_dims)]
-    axes = [np.arange(0.0, m + h / 2, h) for m in hi]
+    axes = [np.arange(a, m + h / 2, h) for a, m in zip(lo, hi)]
     coords = np.meshgrid(*axes, indexing="ij")
     inside = np.zeros(coords[0].shape, dtype=bool)
     for b in boxes:
@@ -124,6 +125,7 @@ SHAPES = {
     "courtyard": [(x, x + 1, y, y + 1) for x in range(3) for y in range(3) if (x, y) != (1, 1)],
     "diagonal_only": [(0, 1, 0, 1), (1, 2, 1, 2)],
     "l_reversed_order": [(1, 2, 0, 1), (0, 1, 1, 2), (0, 1, 0, 1)],
+    "l_off_origin": [(1, 2, 1, 2), (1, 2, 2, 3), (2, 3, 1, 2)],
 }
 
 
@@ -174,3 +176,48 @@ def test_to_global_fills_every_node_of_a_3d_slice_with_a_step_in_height():
     (X, Y, Z), inside = _union_grid(boxes, 0.25, n_dims=3)
     np.testing.assert_allclose(grid[inside], (X + 10 * Y + 100 * Z)[inside])
     assert np.isnan(grid[~inside]).all()
+
+
+class FakeObstruction:
+    """Obstruction visible at all times, covering the given node index ranges of one mesh."""
+
+    def __init__(self, mesh, x, y, z):
+        self._sub = {mesh: self}
+        self.bound_indices = {"x": x, "y": y, "z": z}
+
+    def __getitem__(self, mesh):
+        return self._sub[mesh]
+
+    def get_visible_times(self, times):
+        return times
+
+
+def _add_obstruction(slc, mesh_id, x, y):
+    """Puts an obstruction on a node of the given mesh at the slice height z = 1 (node index 1)."""
+    mesh = slc._subslices[mesh_id].mesh
+    mesh.obstructions.append(FakeObstruction(mesh, x, y, (1, 2)))
+
+
+def test_to_global_masks_a_recovered_upper_face_node():
+    slc = BoxSlice([box + (0.25,) for box in L_SHAPE])
+    _add_obstruction(slc, "M1", x=(4, 5), y=(1, 2))  # B's right face at x = 1, y = 1.25: no neighbour supplies it
+    grid = np.asarray(slc.to_global(masked=True, fill=np.nan))[0]
+
+    (X, Y), inside = _union_grid(L_SHAPE, 0.25)
+    obstructed = np.isclose(X, 1.0) & np.isclose(Y, 1.25)
+    assert np.isnan(grid[obstructed]).all()
+    np.testing.assert_allclose(grid[inside & ~obstructed], (X + 10 * Y)[inside & ~obstructed])
+
+
+@pytest.mark.parametrize("order", [(0, 1, 2), (1, 0, 2), (2, 1, 0)])
+def test_to_global_masks_a_recovered_node_if_any_supplying_mesh_masks_it(order):
+    # Corner x = 1, y = 1 lies on upper faces of A, B and C, so pass 2 supplies it; only B has the obstruction
+    boxes = [L_SHAPE[i] for i in order]
+    slc = BoxSlice([box + (0.25,) for box in boxes])
+    _add_obstruction(slc, f"M{order.index(1)}", x=(4, 5), y=(0, 1))
+    grid = np.asarray(slc.to_global(masked=True, fill=np.nan))[0]
+
+    (X, Y), inside = _union_grid(L_SHAPE, 0.25)
+    corner = np.isclose(X, 1.0) & np.isclose(Y, 1.0)
+    assert np.isnan(grid[corner]).all()
+    np.testing.assert_allclose(grid[inside & ~corner], (X + 10 * Y)[inside & ~corner])
