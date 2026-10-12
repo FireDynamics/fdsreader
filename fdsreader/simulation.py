@@ -3,6 +3,7 @@ import glob
 import logging
 import os
 import pickle
+import re
 import warnings
 from typing import AnyStr, Dict, List, Sequence, TextIO, Tuple, Union
 
@@ -22,6 +23,22 @@ from fdsreader.slcf import GeomSlice, GeomSliceCollection, Slice, SliceCollectio
 from fdsreader.smoke3d import Smoke3D, Smoke3DCollection
 from fdsreader.utils import Dimension, Extent, Quantity, log_error
 from fdsreader.utils.data import Profile, create_hash, get_smv_file
+
+_PLOT3D_FILE_TIME = re.compile(r"_(-?\d+)p(\d{2})\.q$")
+
+
+def _plot3d_time(label: str, filename: str) -> float:
+    """Returns the time of a Plot3D file.
+
+    FDS 6.8.0 to 6.10.1 write the hundredths in the .smv PL3D line without a leading zero (0.07 s as 0.7), so
+    different times share one label. The file name always carries two digits (_0p07.q) and is used instead.
+    """
+    match = _PLOT3D_FILE_TIME.search(filename)
+    if match is None:
+        return float(label)
+    seconds, hundredths = match.groups()
+    sign = -1 if seconds.startswith("-") else 1
+    return sign * (abs(int(seconds)) + int(hundredths) / 100)
 
 
 class Simulation:
@@ -848,11 +865,10 @@ class Simulation:
         """Loads the pl3d at current pointer position."""
         line = line.strip().split()
 
-        time = float(line[1])
-
         mesh_index = int(line[2]) - 1
 
         filename = smv_file.readline().strip()
+        time = _plot3d_time(line[1], filename)
         for i in range(5):
             quantity = smv_file.readline().strip()
             short_name = smv_file.readline().strip()

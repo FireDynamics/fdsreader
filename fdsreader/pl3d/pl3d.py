@@ -1,4 +1,5 @@
 import bisect
+import logging
 import math
 import os
 from typing import Dict, List, Literal, Tuple, Union
@@ -18,6 +19,8 @@ class SubPlot3D:
     """Subplot of a pl3d output for a single mesh.
 
     :ivar mesh: The mesh containing the data.
+    :ivar times: Time steps for which this mesh has written data, matching the first axis of data. These can be
+        fewer than the times of the parent :class:`Plot3D` while FDS is still running.
     """
 
     # Offset of the binary file to the end of the file header.
@@ -25,10 +28,13 @@ class SubPlot3D:
 
     def __init__(self, mesh: Mesh, quantity_idx: int):
         self.file_paths: List[str] = list()  # Path to the binary data file for each time step
+        self.times: List[float] = list()  # Time steps for which this mesh has written data
         self.mesh = mesh
         self._quantity_idx = quantity_idx
 
-    def _add_timestep(self, time_idx: int, file_path: str):
+    def _add_timestep(self, time: float, file_path: str):
+        time_idx = bisect.bisect(self.times, time)
+        self.times.insert(time_idx, time)
         self.file_paths.insert(time_idx, file_path)
 
     @property
@@ -85,11 +91,8 @@ class Plot3D(NumpyArrayMixin):
         if mesh.id not in self._subplots.keys():
             self._subplots[mesh.id] = SubPlot3D(mesh, quantity_idx)
         if not any(np.isclose(time, t) for t in self.times):
-            time_idx = bisect.bisect(self.times, time)
-            self.times.insert(time_idx, time)
-        else:
-            time_idx = next(idx for idx, t in enumerate(self.times) if np.isclose(time, t))
-        self._subplots[mesh.id]._add_timestep(time_idx, os.path.join(self._root_path, filename))
+            bisect.insort(self.times, time)
+        self._subplots[mesh.id]._add_timestep(time, os.path.join(self._root_path, filename))
 
         # If lazy loading has been disabled by the user, load the data instantaneously instead
         if not settings.LAZY_LOAD:
@@ -163,7 +166,7 @@ class Plot3D(NumpyArrayMixin):
         start_idx = dict()
         end_idx = dict()
         for subplot in self._subplots.values():
-            subplot_data = subplot.data.copy()
+            subplot_data = self._data_on_global_times(subplot)
             if masked:
                 mask = subplot.mesh.get_obstruction_mask(self.times)
 
@@ -215,6 +218,29 @@ class Plot3D(NumpyArrayMixin):
             return grid, coordinates
         else:
             return grid
+
+    def _data_on_global_times(self, subplot: SubPlot3D) -> np.ndarray:
+        """Returns the data of a subplot for all time steps of the Plot3D, filling time steps for which the
+        mesh has not written data (yet) with NaN.
+        """
+        t_global = [next(idx for idx, t in enumerate(self.times) if np.isclose(time, t)) for time in subplot.times]
+        if len(set(t_global)) < len(t_global):
+            raise ValueError(
+                f"Mesh {subplot.mesh.id} has Plot3D data for several time steps that match the same time of the "
+                "Plot3D, so they cannot be told apart."
+            )
+        if t_global == list(range(self.n_t)):
+            return subplot.data.copy()
+
+        logging.warning(
+            "Mesh %s has Plot3D data for %d of %d time steps, the missing ones are filled with NaN.",
+            subplot.mesh.id,
+            len(subplot.times),
+            self.n_t,
+        )
+        data = np.full((self.n_t,) + subplot.data.shape[1:], np.nan, dtype=subplot.data.dtype)
+        data[t_global] = subplot.data
+        return data
 
     @property
     def n_t(self) -> int:
