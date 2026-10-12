@@ -14,9 +14,17 @@ class DeviceCollection(FDSDataCollection):
         if isinstance(key, int):
             return self._elements[key]
         else:
-            return next(
-                devc for devc in self._elements if (devc.id == key if isinstance(devc, Device) else devc[0].id == key)
+            devc = next(
+                (
+                    devc
+                    for devc in self._elements
+                    if (devc.id == key if isinstance(devc, Device) else devc[0].id == key)
+                ),
+                None,
             )
+            if devc is None:
+                raise KeyError(f"No device found with id '{key}'")
+            return devc
 
     def __contains__(self, value: Union[Device, str]):
         id_matching = any(

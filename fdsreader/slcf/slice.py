@@ -10,7 +10,7 @@ from typing_extensions import Literal
 import fdsreader.utils.fortran_data as fdtype
 from fdsreader import settings
 from fdsreader.fds_classes import Mesh
-from fdsreader.utils import Dimension, Extent, Quantity
+from fdsreader.utils import Dimension, Extent, NumpyArrayMixin, Quantity
 
 _HANDLED_FUNCTIONS = {}
 
@@ -103,22 +103,20 @@ class SubSlice:
         n = self.dimension.size(cell_centered=False)
         dtype_data = fdtype.combine(fdtype.FLOAT, fdtype.new((("f", n),)))
 
-        load_times = self.n_t == -1
-        if load_times:
-            self._parent_slice.n_t = (os.stat(file_path).st_size - self._offset) // dtype_data.itemsize
-            self._parent_slice.times = np.empty(self.n_t)
-
         with open(file_path, "rb") as infile:
             infile.seek(self._offset)
-            for t, data in enumerate(fdtype.read(infile, dtype_data, self.n_t)):
-                if load_times:
-                    self.times[t] = data[0][0]
-                data = data[1].reshape(self.dimension.shape(cell_centered=False), order="F")
-                if self.cell_centered:
-                    # Ignore ghost points on every axis (2 for 2D slices, 3 for 3D slices)
-                    data_out[t, :] = data[(slice(1, None),) * data.ndim]
-                else:
-                    data_out[t, :] = data
+            _, data_col = fdtype.read_columns(infile, dtype_data, self.n_t)
+
+            # Every record's data field was written by Fortran in column-major (F) order;
+            # reshaping with order="F" applies that per-record reshape across the whole (n_t, n)
+            # block at once, without a Python-level loop.
+            shape = self.dimension.shape(cell_centered=False)
+            full = data_col.reshape((self.n_t,) + shape, order="F")
+            if self.cell_centered:
+                # Ignore ghost points on every axis (2 for 2D slices, 3 for 3D slices)
+                data_out[:] = full[(slice(None),) + (slice(1, None),) * (full.ndim - 1)]
+            else:
+                data_out[:] = full
 
     def _load_times(self) -> np.ndarray:
         # Read in (only) the times for which SLCF data is available
@@ -128,14 +126,12 @@ class SubSlice:
         file_path = os.path.join(self._parent_slice._root_path, self.filename)
 
         n_t = (os.stat(file_path).st_size - self._offset) // dtype_data.itemsize
-        times = np.empty(n_t)
 
         with open(file_path, "rb") as infile:
             infile.seek(self._offset)
-            for t, data in enumerate(fdtype.read(infile, dtype_data, n_t)):
-                times[t] = data[0][0]
+            times_col, _ = fdtype.read_columns(infile, dtype_data, n_t)
 
-        return times
+        return times_col.reshape(-1)
 
     @property
     def data(self) -> np.ndarray:
@@ -177,7 +173,7 @@ class SubSlice:
         return f"SubSlice(shape={self.shape}, mesh={self.mesh.id}, extent={self.extent})"
 
 
-class Slice(np.lib.mixins.NDArrayOperatorsMixin):
+class Slice(NumpyArrayMixin):
     """Slice file data container including metadata. Consists of multiple subslices, one for each
         mesh the slice cuts through. In case a slice cuts right through the border of two meshes, the generated data
         would be duplicated. For edge-centered slices a random of both generated slices will be discarded as the data
@@ -193,6 +189,13 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
     :ivar orientation: Orientation [1,2,3] of the slice in case it is 2D, 0 otherwise.
     :ivar extent: :class:`Extent` object containing 3-dimensional extent information.
     """
+
+    _handled_functions = _HANDLED_FUNCTIONS
+    _HANDLED_FUNCTIONS[np.mean] = NumpyArrayMixin.mean
+    _HANDLED_FUNCTIONS[np.std] = NumpyArrayMixin.std
+
+    def _array_subitems(self):
+        return self._subslices.values()
 
     def __init__(self, root_path: str, slice_id: str, cell_centered: bool, multimesh_data: Collection[Dict]):
         self._root_path = root_path
@@ -258,14 +261,34 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
             z_start if self.orientation == 3 else z_end,
         )
 
-        # Read in the available time steps, using arbitrary the first sub-slice
-        self.times = self.subslices[0]._load_times()
-        self.n_t = len(self.times)
-
         # If lazy loading has been disabled by the user, load the data instantaneously instead
+        # (this also triggers computing `times`/`n_t` below as a side effect).
         if not settings.LAZY_LOAD:
             for _, subslice in self._subslices.items():
                 _ = subslice.data
+
+    @property
+    def times(self) -> np.ndarray:
+        """Numpy array containing all times for which data has been recorded."""
+        if not hasattr(self, "_times"):
+            # Read in the available time steps, using arbitrarily the first sub-slice
+            self._times = self.subslices[0]._load_times()
+        return self._times
+
+    @times.setter
+    def times(self, value: np.ndarray):
+        self._times = value
+
+    @property
+    def n_t(self) -> int:
+        """Total number of time steps for which output data has been written."""
+        if not hasattr(self, "_n_t"):
+            self._n_t = len(self.times)
+        return self._n_t
+
+    @n_t.setter
+    def n_t(self, value: int):
+        self._n_t = value
 
     def get_subslice(self, key: Union[int, str, Mesh]) -> SubSlice:
         """Returns the :class:`SubSlice` that cuts through the given mesh. When an int is provided
@@ -432,7 +455,7 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
                     )
 
                 # Change 3D extent to 2D one
-                new_extent = subslc.extent.as_list()
+                new_extent = subslc.extent.as_list(reduced=False)
                 new_extent[(slice_dim - 1) * 2 : slice_dim * 2] = (cut_value, cut_value)
                 subslc.extent = Extent(*new_extent)
             else:
@@ -690,79 +713,14 @@ class Slice(np.lib.mixins.NDArrayOperatorsMixin):
         return "2D"
 
     @implements(np.amin)
+    @implements(np.min)
     def _min(self):
         return min(subsclice.vmin for subsclice in self._subslices.values())
 
     @implements(np.amax)
+    @implements(np.max)
     def _max(self):
         return max(subsclice.vmax for subsclice in self._subslices.values())
-
-    @implements(np.mean)
-    def mean(self):
-        """Calculates the mean over the whole slice.
-
-        :returns: The calculated mean value.
-        """
-        return np.mean([np.mean(subsclice.data) for subsclice in self._subslices.values()])
-
-    @implements(np.std)
-    def std(self):
-        """Calculates the standard deviation over the whole slice.
-
-        :returns: The calculated standard deviation.
-        """
-        mean = self.mean
-        sum = np.sum([np.sum(np.power(subsclice.data - mean, 2)) for subsclice in self._subslices.values()])
-        N = np.sum([subsclice.data.size for subsclice in self._subslices.values()])
-        return np.sqrt(sum / N)
-
-    def __array__(self):
-        """Method that will be called by numpy when trying to convert the object to a numpy ndarray."""
-        raise UserWarning(
-            "Slices can not be converted to numpy arrays, but they support all typical numpy"
-            " operations such as np.multiply. If a 'global' array containing all subslices is"
-            " required, use the 'to_global' method and use the returned numpy-array explicitly."
-        )
-
-    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        """Method that will be called by numpy when using a ufunction with a Slice as input.
-
-        :returns: A new slice on which the ufunc has been applied.
-        """
-        if method != "__call__":
-            logging.warning(
-                "The %s method has been used which is not explicitly implemented. Correctness of"
-                " results is not guaranteed. If you require this feature to be implemented please"
-                " submit an issue on Github where you explain your use case.",
-                method,
-            )
-        input_list = list(inputs)
-        for i, inp in enumerate(inputs):
-            if isinstance(inp, self.__class__):
-                del input_list[i]
-        if len(input_list) == 0:
-            raise UserWarning(
-                f"The {method} operation is not implemented for multiple slices as input yet. If"
-                " you require this feature, please request this functionality by submitting an"
-                " issue on Github."
-            )
-
-        new_slice = deepcopy(self)
-        for subslice in new_slice._subslices.values():
-            subslice._data = ufunc(subslice.data, input_list[0], **kwargs)
-        return new_slice
-
-    def __array_function__(self, func, types, args, kwargs):
-        """Method that will be called by numpy when using an array function with a Slice as input.
-
-        :returns: The output of the array function.
-        """
-        if func not in _HANDLED_FUNCTIONS:
-            return NotImplemented
-            # Note: this allows subclasses that don't override __array_function__ to handle Slices.
-        if not all(issubclass(t, self.__class__) for t in types):
-            return NotImplemented
-        return _HANDLED_FUNCTIONS[func](*args, **kwargs)
 
     def __repr__(self):
         if self.type == "3D":  # 3D-Slice

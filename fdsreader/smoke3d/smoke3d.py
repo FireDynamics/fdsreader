@@ -1,7 +1,5 @@
-import logging
 import math
 import os
-from copy import deepcopy
 from typing import Dict, Literal, Tuple, Union
 
 import numpy as np
@@ -9,20 +7,67 @@ import numpy as np
 import fdsreader.utils.fortran_data as fdtype
 from fdsreader import settings
 from fdsreader.fds_classes import Mesh
-from fdsreader.utils import Quantity
+from fdsreader.utils import NumpyArrayMixin, Quantity
 from fdsreader.utils.data import resample_mesh_axis
 
-_HANDLED_FUNCTIONS = {np.mean: (lambda pl: pl.mean)}
+_HANDLED_FUNCTIONS = {}
 
 
-def implements(np_function):
-    """Decorator to register an __array_function__ implementation for Smoke3Ds."""
+def _decode_rle_scalar(rle_data: np.ndarray, nchars_out: int, total_size: int) -> np.ndarray:
+    """Reference (slow) run-length decoder, used as a fallback for encodings the vectorized
+    decoder can't safely handle (see :func:`_decode_rle`)."""
+    decoded_data = np.empty(total_size)
+    i = 0
+    mark = np.uint8(255)
+    out_pos = 0
+    while i < nchars_out:
+        if rle_data[i] == mark:
+            value = rle_data[i + 1]
+            repeats = rle_data[i + 2]
+            i += 3
+        else:
+            value = rle_data[i]
+            repeats = 1
+            i += 1
+        decoded_data[out_pos : out_pos + repeats] = value
+        out_pos += repeats
+    return decoded_data
 
-    def decorator(func):
-        _HANDLED_FUNCTIONS[np_function] = func
-        return func
 
-    return decorator
+def _decode_rle(rle_data: np.ndarray, nchars_out: int, total_size: int) -> np.ndarray:
+    """Decode run-length-encoded smoke3d data (see "RLE" subroutine in smvv.f90).
+
+    The format escapes runs as a (255, value, repeat_count) triple; every other byte is a
+    single literal value. In practice, encoded values and repeat counts never reach 255
+    themselves (255 is reserved as the escape marker), which means every occurrence of a 255
+    byte in the stream unambiguously starts a run and the whole stream can be decoded with
+    vectorized numpy operations instead of a per-token Python loop. If that assumption doesn't
+    hold for some file (i.e. two escape sequences would overlap), fall back to the slow but
+    always-correct scalar decoder.
+    """
+    mark = np.uint8(255)
+    data = rle_data[:nchars_out]
+    mark_positions = np.flatnonzero(data == mark)
+    if mark_positions.size > 0:
+        if mark_positions[-1] + 3 > nchars_out or (mark_positions.size > 1 and np.any(np.diff(mark_positions) < 3)):
+            return _decode_rle_scalar(rle_data, nchars_out, total_size)
+
+    # Every byte is either a literal (kept as-is, 1 repeat) or the first byte of an escaped run
+    # (replaced by the run's value/repeat-count, with the following 2 payload bytes dropped).
+    consumed = np.zeros(nchars_out, dtype=bool)
+    if mark_positions.size > 0:
+        consumed[mark_positions + 1] = True
+        consumed[mark_positions + 2] = True
+    keep = ~consumed
+
+    values = data.copy()
+    repeats = np.ones(nchars_out, dtype=np.int64)
+    if mark_positions.size > 0:
+        values[mark_positions] = data[mark_positions + 1]
+        repeats[mark_positions] = data[mark_positions + 2].astype(np.int64)
+
+    decoded = np.repeat(values[keep], repeats[keep])
+    return decoded[:total_size].astype(np.float64)
 
 
 class SubSmoke3D:
@@ -62,23 +107,7 @@ class SubSmoke3D:
                         dtype_data = fdtype.new((("u", nchars_out),))
 
                         rle_data = fdtype.read(infile, dtype_data, 1)[0][0]
-                        decoded_data = np.empty((nx + 1) * (ny + 1) * (nz + 1))
-
-                        # Decode run-length-encoded data (see "RLE" subroutine in smvv.f90)
-                        i = 0
-                        mark = np.uint8(255)
-                        out_pos = 0
-                        while i < nchars_out:
-                            if rle_data[i] == mark:
-                                value = rle_data[i + 1]
-                                repeats = rle_data[i + 2]
-                                i += 3
-                            else:
-                                value = rle_data[i]
-                                repeats = 1
-                                i += 1
-                            decoded_data[out_pos : out_pos + repeats] = value
-                            out_pos += repeats
+                        decoded_data = _decode_rle(rle_data, nchars_out, (nx + 1) * (ny + 1) * (nz + 1))
 
                         self._data[t, :, :, :] = decoded_data.reshape(data_shape, order="F")
 
@@ -90,13 +119,20 @@ class SubSmoke3D:
             del self._data
 
 
-class Smoke3D(np.lib.mixins.NDArrayOperatorsMixin):
+class Smoke3D(NumpyArrayMixin):
     """Smoke3D file data container including metadata. Consists of multiple subsmokes, one for each
         mesh.
 
     :ivar times: Numpy ndarray containing all time steps for which data has been written out.
     :ivar quantity: :class:`Quantity` object containing information about the recorded quantity and its unit.
     """
+
+    _handled_functions = _HANDLED_FUNCTIONS
+    _HANDLED_FUNCTIONS[np.mean] = NumpyArrayMixin.mean
+    _HANDLED_FUNCTIONS[np.std] = NumpyArrayMixin.std
+
+    def _array_subitems(self):
+        return self._subsmokes.values()
 
     def __init__(self, root_path: str, times: np.ndarray, quantity: Quantity):
         self._root_path = root_path
@@ -236,6 +272,9 @@ class Smoke3D(np.lib.mixins.NDArrayOperatorsMixin):
         """Returns the :class:`SubSmoke` that contains data for the given mesh."""
         return self._subsmokes[mesh.id]
 
+    def __repr__(self):
+        return f"Smoke3D(quantity={self.quantity}, meshes={len(self._subsmokes)})"
+
     @property
     def subsmokes(self):
         """Returns a list with one SubSmoke3D object per mesh."""
@@ -249,65 +288,10 @@ class Smoke3D(np.lib.mixins.NDArrayOperatorsMixin):
             return max(np.max(subsmoke3d.data) for subsmoke3d in self._subsmokes.values())
         return curr_max
 
-    @implements(np.mean)
-    def mean(self) -> np.ndarray:
-        """Calculates the mean value of all Smoke3D data for this quantity."""
-        return np.sum([np.mean(subsmoke.data) for subsmoke in self._subsmokes.values()]) / len(self._subsmokes)
-
-    @implements(np.std)
-    def std(self) -> np.ndarray:
-        """Calculates the standard deviation of all Smoke3D data for this quantity."""
-        mean = self.mean
-        sum = np.sum([np.sum(np.power(subsmoke.data - mean, 2)) for subsmoke in self._subsmokes.values()])
-        N = np.sum([subsmoke.data.size for subsmoke in self._subsmokes.values()])
-        return np.sqrt(sum / N)
-
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory."""
         for subsmoke in self._subsmokes.values():
             subsmoke.clear_cache()
-
-    def __array__(self):
-        """Method that will be called by numpy when trying to convert the object to a numpy ndarray."""
-        raise UserWarning(
-            "Smoke3Ds can not be converted to numpy arrays, but they support all typical numpy"
-            " operations such as np.multiply. If a 'global' array containing all subsmokes is"
-            " required, please use the 'to_global' method and use the returned numpy-array explicitly."
-        )
-
-    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        """Method that will be called by numpy when using a ufunction with a Smoke3D as input.
-
-        :returns: A new smoke3d on which the ufunc has been applied.
-        """
-        if method != "__call__":
-            logging.warning(
-                "The %s method has been used which is not explicitly implemented. Correctness of"
-                " results is not guaranteed. If you require this feature to be implemented please"
-                " submit an issue on Github where you explain your use case.",
-                method,
-            )
-        input_list = list(inputs)
-        for i, inp in enumerate(inputs):
-            if isinstance(inp, self.__class__):
-                del input_list[i]
-
-        new_smoke3d = deepcopy(self)
-        for subsmoke in self._subsmokes.values():
-            subsmoke._data = ufunc(subsmoke.data, input_list[0], **kwargs)
-        return new_smoke3d
-
-    def __array_function__(self, func, types, args, kwargs):
-        """Method that will be called by numpy when using an array function with a Slice as input.
-
-        :returns: The output of the array function.
-        """
-        if func not in _HANDLED_FUNCTIONS:
-            return NotImplemented
-            # Note: this allows subclasses that don't override __array_function__ to handle Smoke3Ds.
-        if not all(issubclass(t, self.__class__) for t in types):
-            return NotImplemented
-        return _HANDLED_FUNCTIONS[func](*args, **kwargs)
 
 
 # __array_function__ implementations

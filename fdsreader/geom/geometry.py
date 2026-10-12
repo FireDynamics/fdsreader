@@ -324,8 +324,10 @@ class GeomBoundary:
     def vmin(self) -> float:
         """Minimum value of all faces at any time."""
         curr_min = min(np.min(b) for b in self.lower_bounds.values())
-        if curr_min == 0.0:
-            return min(min(np.min(p.data) for p in ps) for ps in self._faces.values())
+        if curr_min == np.float32(1e33):
+            if not hasattr(self, "_data"):
+                self._load_data()
+            return min(np.min(d) for d in self._data.values())
         return curr_min
 
     @property
@@ -333,7 +335,9 @@ class GeomBoundary:
         """Maximum value of all faces at any time."""
         curr_max = max(np.max(b) for b in self.upper_bounds.values())
         if curr_max == np.float32(-1e33):
-            return max(max(np.max(p.data) for p in ps) for ps in self._faces.values())
+            if not hasattr(self, "_data"):
+                self._load_data()
+            return max(np.max(d) for d in self._data.values())
         return curr_max
 
     def __repr__(self, *args, **kwargs):
