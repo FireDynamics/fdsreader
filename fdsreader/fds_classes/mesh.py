@@ -78,6 +78,13 @@ class Mesh:
             The array depends on time as obstructions may be hidden at specific points in time.
         """
         orientation = subslice.orientation
+        if orientation == 0:
+            # 3D slices have no single axis to cut a plane from, and there is no fixture
+            # exercising this path yet to validate a full 3-axis mask extraction against.
+            raise NotImplementedError(
+                "Masking a 3D slice's obstruction cells is not supported yet. Use"
+                " to_global(masked=False) for 3D slices, or a 2D slice instead."
+            )
         value = subslice.extent[orientation][0]
         cell_centered = subslice.cell_centered
 
@@ -110,9 +117,9 @@ class Mesh:
             co = coordinate[i]
             coords = self.coordinates[dim]
             if cell_centered:
-                coords = coords[:-1] + (coords[1] - coords[0]) / 2
+                coords = coords[:-1] + np.diff(coords) / 2
             idx = np.searchsorted(coords, co, side="left")
-            if co > 0 and (idx == len(coords) or math.fabs(co - coords[idx - 1]) < math.fabs(co - coords[idx])):
+            if idx > 0 and (idx == len(coords) or math.fabs(co - coords[idx - 1]) < math.fabs(co - coords[idx])):
                 ret.append(idx - 1)
             else:
                 ret.append(idx)
@@ -136,7 +143,7 @@ class Mesh:
         for i, dim in enumerate(dimension):
             coords = self.coordinates[dim]
             if cell_centered:
-                coords = coords[:-1] + (coords[1] - coords[0]) / 2
+                coords = coords[:-1] + np.diff(coords) / 2
             ret.append(coords[indices[i]])
         return tuple(ret)
 
@@ -166,11 +173,17 @@ class Mesh:
     def get_boundary_data(self, quantity: Union[str, Quantity]):
         if isinstance(quantity, Quantity):
             quantity = quantity.name
-        return next(
-            b
-            for b in self._boundary_data.values()
-            if b.quantity.name.lower() == quantity.lower() or b.quantity.short_name.lower() == quantity.lower()
+        b = next(
+            (
+                b
+                for b in self._boundary_data.values()
+                if b.quantity.name.lower() == quantity.lower() or b.quantity.short_name.lower() == quantity.lower()
+            ),
+            None,
         )
+        if b is None:
+            raise KeyError(f"No boundary data found for quantity '{quantity}'")
+        return b
 
     def __getitem__(self, dimension: Literal[0, 1, 2, "x", "y", "z"]) -> np.ndarray:
         """Get all values in given dimension.
@@ -183,7 +196,12 @@ class Mesh:
         return self.coordinates[dimension]
 
     def __eq__(self, other):
+        if not isinstance(other, Mesh):
+            return NotImplemented
         return self.id == other.id
+
+    def __hash__(self):
+        return hash(self.id)
 
     def __repr__(self, *args, **kwargs):
         return f'Mesh(id="{self.id}", extent={str(self.extent)}, dimension={str(self.dimension)})'

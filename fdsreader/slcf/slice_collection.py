@@ -16,7 +16,7 @@ class SliceCollection(FDSDataCollection):
 
     @property
     def quantities(self) -> List[Quantity]:
-        return list({slc.quantity.name for slc in self})
+        return list({slc.quantity for slc in self})
 
     def filter_by_quantity(self, quantity: Union[str, Quantity]):
         """Filters all slices by a specific quantity."""
@@ -45,8 +45,10 @@ class SliceCollection(FDSDataCollection):
             dy = max(slc.extent.y_start - y, 0, y - slc.extent.y_end) if y is not None else 0
             dz = max(slc.extent.z_start - z, 0, z - slc.extent.z_end) if z is not None else 0
             d = np.sqrt(dx * dx + dy * dy + dz * dz)
-            if d <= d_min:
+            if d < d_min:
                 d_min = d
+                slices_min = [slc]
+            elif d == d_min:
                 slices_min.append(slc)
 
         if x is not None:

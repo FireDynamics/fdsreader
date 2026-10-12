@@ -9,8 +9,12 @@ class Extent:
     def __init__(self, *args, skip_dimension: Literal["x", 1, "y", 2, "z", 3, ""] = ""):
         self._extents = list()
 
-        if len(args) % 2 != 0:
-            ValueError("An invalid number of arguments were passed to the constructor.")
+        expected_args = 4 if skip_dimension in ("x", 1, "y", 2, "z", 3) else 6
+        if len(args) != expected_args:
+            raise ValueError(
+                f"Extent expected {expected_args} arguments"
+                f" ({'with' if expected_args == 4 else 'without'} skip_dimension), but got {len(args)}."
+            )
         for i in range(0, len(args), 2):
             self._extents.append((float(args[i]), float(args[i + 1])))
 
@@ -22,7 +26,12 @@ class Extent:
             self._extents.append((0, 0))
 
     def __eq__(self, other):
+        if not isinstance(other, Extent):
+            return NotImplemented
         return self._extents == other._extents
+
+    def __hash__(self):
+        return hash(tuple(self._extents))
 
     def __repr__(self, *args, **kwargs):
         return (
@@ -37,7 +46,9 @@ class Extent:
             return self.y_start, self.y_end
         elif item == "z":
             return self.z_start, self.z_end
-        return self._extents[item - 1]
+        elif item in (1, 2, 3):
+            return self._extents[item - 1]
+        raise IndexError(f"Extent index must be 'x'/'y'/'z' or 1/2/3, got {item!r}.")
 
     @property
     def x_start(self) -> float:

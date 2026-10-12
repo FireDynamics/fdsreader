@@ -86,7 +86,12 @@ class Device:
     def __eq__(self, other):
         if isinstance(other, str):
             return self.id == other
+        if not isinstance(other, Device):
+            return NotImplemented
         return self.id == other.id
+
+    def __hash__(self):
+        return hash(self.id)
 
     def __repr__(self):
         return f"Device(id='{self.id}', xyz={self.position}, quantity={self.quantity})"

@@ -42,19 +42,20 @@ class Particle:
         tags = self.tags
         positions = self.positions
         part = Particle(self.class_name, self.quantities, self.color)
-        part._tags = tag
+        part._tags = list()
 
         part._data = {quantity: list() for quantity in data.keys()}
         part._positions = list()
         part.times = list()
 
-        for t, tags in enumerate(tags):
-            if tag in tags:
-                idx = np.where(tags == tag)[0]
+        for t, tags_t in enumerate(tags):
+            if tag in tags_t:
+                idx = np.where(tags_t == tag)[0]
 
                 for quantity in data.keys():
                     part._data[quantity].append(data[quantity][t][idx][0])
                 part._positions.append(positions[t][idx][0])
+                part._tags.append(tags_t[idx])
                 part.times.append(self.times[t])
 
         part.lower_bounds = dict()
