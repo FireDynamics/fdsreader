@@ -221,3 +221,42 @@ def test_to_global_masks_a_recovered_node_if_any_supplying_mesh_masks_it(order):
     corner = np.isclose(X, 1.0) & np.isclose(Y, 1.0)
     assert np.isnan(grid[corner]).all()
     np.testing.assert_allclose(grid[inside & ~corner], (X + 10 * Y)[inside & ~corner])
+
+
+class CellSlice(NodeSlice):
+    """Horizontal cell-centred slice over meshes given as (x0, x1, cell size) side by side in x, y from 0 to 1,
+    holding K = x + 10 y at the cell centres."""
+
+    cell_centered = True
+
+    def __init__(self, x_meshes):
+        self._subslices = {}
+        for i, (x0, x1, h) in enumerate(x_meshes):
+            nodes = {
+                "x": np.arange(x0, x1 + h / 2, h),
+                "y": np.arange(0.0, 1.0 + h / 2, h),
+                "z": np.array([0.0, 1.0, 2.0]),
+            }
+            mesh = Mesh(nodes, {"x": (x0, x1), "y": (0.0, 1.0), "z": (0.0, 2.0)}, f"M{i}")
+            sub = SubSlice(self, "", None, Extent(x0, x1, 0.0, 1.0, 1.0, 1.0), mesh)
+            Xc, Yc = np.meshgrid(nodes["x"][:-1] + h / 2, nodes["y"][:-1] + h / 2, indexing="ij")
+            sub._data = (Xc + 10 * Yc)[None].astype(np.float32)
+            self._subslices[mesh.id] = sub
+        self.extent = Extent(x_meshes[0][0], x_meshes[-1][1], 0.0, 1.0, 1.0, 1.0)
+
+
+def test_to_global_places_cell_centred_meshes_side_by_side():
+    grid = np.asarray(CellSlice([(0.0, 1.0, 0.25), (1.0, 2.0, 0.25)]).to_global())[0]
+
+    Xc, Yc = np.meshgrid(np.arange(0.125, 2.0, 0.25), np.arange(0.125, 1.0, 0.25), indexing="ij")
+    np.testing.assert_allclose(grid, Xc + 10 * Yc)
+
+
+def test_to_global_repeats_values_of_a_coarse_cell_centred_mesh():
+    grid = np.asarray(CellSlice([(0.0, 1.0, 0.25), (1.0, 2.0, 0.5)]).to_global())[0]
+
+    Xc, Yc = np.meshgrid(np.arange(0.125, 2.0, 0.25), np.arange(0.125, 1.0, 0.25), indexing="ij")
+    # Each coarse cell covers 2 x 2 fine cells, which all take its centre value
+    coarse_x = np.where(Xc > 1.0, 1.0 + (np.floor((Xc - 1.0) / 0.5) + 0.5) * 0.5, Xc)
+    coarse_y = np.where(Xc > 1.0, (np.floor(Yc / 0.5) + 0.5) * 0.5, Yc)
+    np.testing.assert_allclose(grid, coarse_x + 10 * coarse_y)

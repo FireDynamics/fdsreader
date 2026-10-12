@@ -671,22 +671,23 @@ class Slice(NumpyArrayMixin):
                 slc_data, mask, region, inner_axes = place(slc)
 
                 # The node row on an upper face inside the simulation space coincides with the first row of the
-                # neighbouring mesh, which supplies it, so it is left out here
-                kept_region = list(region)
-                kept_data = [slice(None)] * 4
+                # neighbouring mesh, which supplies it, so it is left out here. A copy of it is kept for the case
+                # that no mesh does (np.take copies, so the rest of the subslice's data can be freed).
                 for axis in inner_axes:
-                    kept_region[axis] = slice(region[axis].start, region[axis].stop - 1)
-                    kept_data[axis + 1] = slice(None, -1)
-                    face_region = list(region)
-                    face_region[axis] = slice(region[axis].stop - 1, region[axis].stop)
-                    face = [slice(None)] * 4
-                    face[axis + 1] = slice(-1, None)
-                    inner_faces.append(
-                        (slc_data[tuple(face)], None if mask is None else mask[tuple(face)], tuple(face_region))
-                    )
-                grid[(slice(None),) + tuple(kept_region)] = slc_data[tuple(kept_data)]
+                    last = region[axis].stop - 1
+                    face_region = tuple(slice(last, last + 1) if a == axis else r for a, r in enumerate(region))
+                    face_mask = None if mask is None else np.take(mask, [-1], axis=axis + 1)
+                    inner_faces.append((np.take(slc_data, [-1], axis=axis + 1), face_mask, face_region))
+
+                    region = tuple(slice(r.start, last) if a == axis else r for a, r in enumerate(region))
+                    without_face = (slice(None),) * (axis + 1) + (slice(None, -1),)
+                    slc_data = slc_data[without_face]
+                    if mask is not None:
+                        mask = mask[without_face]
+
+                grid[(slice(None),) + region] = slc_data
                 if written is not None:
-                    written[tuple(kept_region)] = True
+                    written[region] = True
 
             # On a domain that does not fill its bounding box (e.g. L-shaped), no neighbouring mesh supplies some
             # of those rows. Take their nodes from the mesh itself. Checking written rather than NaN keeps NaNs a
