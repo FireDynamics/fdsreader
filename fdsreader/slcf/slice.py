@@ -11,6 +11,7 @@ import fdsreader.utils.fortran_data as fdtype
 from fdsreader import settings
 from fdsreader.fds_classes import Mesh
 from fdsreader.utils import Dimension, Extent, NumpyArrayMixin, Quantity
+from fdsreader.utils.data import resample_mesh_axis
 
 _HANDLED_FUNCTIONS = {}
 
@@ -610,15 +611,21 @@ class Slice(NumpyArrayMixin):
 
             grid = np.full((self.n_t, steps["x"], steps["y"], steps["z"]), np.nan)
 
-            start_idx = dict()
-            end_idx = dict()
-            for slc in subslices.values():
+            def place(slc: SubSlice):
+                """Maps a subslice onto the global grid, keeping the node rows on all of its upper faces.
+
+                :returns: The data (masked if requested), the obstruction mask (None if not masked), the region of
+                    the grid the data covers and the axes on which the subslice's upper face lies inside the
+                    simulation space. Cell-centered subslices do not overlap, so no axis is reported for them.
+                """
                 slc_data = (
                     slc.data.copy() if slc.orientation == 0 else np.expand_dims(slc.data.copy(), axis=slc.orientation)
                 )
-                if masked:
-                    mask = slc.mesh.get_obstruction_mask_slice(slc)
+                mask = slc.mesh.get_obstruction_mask_slice(slc) if masked else None
 
+                start_idx = dict()
+                end_idx = dict()
+                inner_axes = list()
                 for axis in (0, 1, 2):
                     dim = ("x", "y", "z")[axis]
                     if axis == slc.orientation - 1:
@@ -633,52 +640,71 @@ class Slice(NumpyArrayMixin):
                     start_idx[dim] = int(round((slc.mesh.coordinates[dim][0] - coord_min[dim]) / step_sizes_min[dim]))
                     end_idx[dim] = int(round((slc.mesh.coordinates[dim][-1] - coord_min[dim]) / step_sizes_min[dim]))
 
-                    # We ignore border points unless they are actually on the border of the simulation space as all
-                    # other border points actually appear twice, as the subslices overlap. This only
-                    # applies for face_centered slices, as cell_centered slices will not overlap.
-                    if not self.cell_centered:
-                        # Temporarily save border points to add them back to the array again later
-                        if np.isclose(slc.mesh.coordinates[dim][-1], global_max[dim]):
-                            end_idx[dim] += 1
-                            temp_data_slices = [slice(s) for s in slc_data.shape]
-                            temp_data_slices[axis + 1] = slice(slc_data.shape[axis + 1] - 1, None)
-                            temp_data = slc_data[tuple(temp_data_slices)]
+                    if self.cell_centered:
+                        if n_repeat > 1:
+                            slc_data = np.repeat(slc_data, n_repeat, axis=axis + 1)
                             if masked:
-                                temp_mask = mask[tuple(temp_data_slices)]
+                                mask = np.repeat(mask, n_repeat, axis=axis + 1)
+                        continue
 
-                        reduced_shape = list(slc_data.shape)
-                        reduced_shape[axis + 1] -= 1
-                        reduced_data_slices = tuple(slice(s) for s in reduced_shape)
-                        slc_data = slc_data[reduced_data_slices]
-                        if masked:
-                            mask = mask[reduced_data_slices]
+                    end_idx[dim] += 1
+                    if not np.isclose(slc.mesh.coordinates[dim][-1], global_max[dim]):
+                        inner_axes.append(axis)
+                    slc_data = resample_mesh_axis(slc_data, axis + 1, n_repeat, keep_last=True)
+                    if masked:
+                        mask = resample_mesh_axis(mask, axis + 1, n_repeat, keep_last=True)
 
-                    if n_repeat > 1:
-                        slc_data = np.repeat(slc_data, n_repeat, axis=axis + 1)
-                        if masked:
-                            mask = np.repeat(mask, n_repeat, axis=axis + 1)
-
-                    # Add border points back again if needed
-                    if not self.cell_centered and np.isclose(slc.mesh.coordinates[dim][-1], global_max[dim]):
-                        slc_data = np.concatenate((slc_data, temp_data), axis=axis + 1)
-                        if masked:
-                            mask = np.concatenate((mask, temp_mask), axis=axis + 1)
-
+                region = tuple(slice(start_idx[dim], end_idx[dim]) for dim in ("x", "y", "z"))
+                shape = (self.n_t,) + tuple(end_idx[dim] - start_idx[dim] for dim in ("x", "y", "z"))
                 # If the slice should be masked, we set all cells at which an obstruction is in the
                 # simulation space to the fill value set by the user
                 if masked:
-                    slc_data = np.where(mask, slc_data, fill)
+                    mask = mask.reshape(shape)
+                    slc_data = np.where(mask, slc_data.reshape(shape), fill)
+                return slc_data.reshape(shape), mask, region, inner_axes
 
-                grid[:, start_idx["x"] : end_idx["x"], start_idx["y"] : end_idx["y"], start_idx["z"] : end_idx["z"]] = (
-                    slc_data.reshape(
-                        (
-                            self.n_t,
-                            end_idx["x"] - start_idx["x"],
-                            end_idx["y"] - start_idx["y"],
-                            end_idx["z"] - start_idx["z"],
-                        )
-                    )
-                )
+            # Grid nodes some subslice has written, and the node rows of upper faces that lie inside the
+            # simulation space, which were left to a neighbouring mesh (node-based slices only)
+            written = None if self.cell_centered else np.zeros(grid.shape[1:], dtype=bool)
+            inner_faces = list()
+            for slc in subslices.values():
+                slc_data, mask, region, inner_axes = place(slc)
+
+                # The node row on an upper face inside the simulation space coincides with the first row of the
+                # neighbouring mesh, which supplies it, so it is left out here. A copy of it is kept for the case
+                # that no mesh does (np.take copies, so the rest of the subslice's data can be freed).
+                for axis in inner_axes:
+                    last = region[axis].stop - 1
+                    face_region = tuple(slice(last, last + 1) if a == axis else r for a, r in enumerate(region))
+                    face_mask = None if mask is None else np.take(mask, [-1], axis=axis + 1)
+                    inner_faces.append((np.take(slc_data, [-1], axis=axis + 1), face_mask, face_region))
+
+                    region = tuple(slice(r.start, last) if a == axis else r for a, r in enumerate(region))
+                    without_face = (slice(None),) * (axis + 1) + (slice(None, -1),)
+                    slc_data = slc_data[without_face]
+                    if mask is not None:
+                        mask = mask[without_face]
+
+                grid[(slice(None),) + region] = slc_data
+                if written is not None:
+                    written[region] = True
+
+            # On a domain that does not fill its bounding box (e.g. L-shaped), no neighbouring mesh supplies some
+            # of those rows. Take their nodes from the mesh itself. Checking written rather than NaN keeps NaNs a
+            # mesh did write, e.g. masked obstructions with fill=np.nan. Where several meshes supply a node, the
+            # first one's value is used, and the node is masked if any of them masks it.
+            if inner_faces:
+                recovered = np.zeros_like(written)
+                for face_data, face_mask, face_region in inner_faces:
+                    missing = ~written[face_region]
+                    if not missing.any():
+                        continue
+                    grid_face = grid[(slice(None),) + face_region]
+                    first = missing & ~recovered[face_region]
+                    grid_face[:, first] = face_data[:, first]
+                    recovered[face_region] |= first
+                    if face_mask is not None:
+                        grid_face[:, missing] = np.where(face_mask[:, missing], grid_face[:, missing], fill)
 
             if return_coordinates:
                 coordinates = dict()
