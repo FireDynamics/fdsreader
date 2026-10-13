@@ -276,3 +276,79 @@ def test_to_global_masks_a_recovered_face_node_of_a_coarse_mesh():
     top_of_c = np.isclose(Y, 1.0) & (X > 1.0) & ~obstructed
     Xc = np.where(X == 2.0, 2.0, 1.0 + np.floor((X - 1.0) / 0.5) * 0.5)
     np.testing.assert_allclose(grid[top_of_c], (Xc + 10 * Y)[top_of_c])
+
+
+class TimedFakeObstruction(FakeObstruction):
+    """FakeObstruction that is only visible at the given times."""
+
+    def __init__(self, mesh, x, y, z, visible):
+        super().__init__(mesh, x, y, z)
+        self._visible = visible
+
+    def get_visible_times(self, times):
+        return [t for t in times if t in self._visible]
+
+
+class TwoStepVolumeSlice(VolumeSlice):
+    """VolumeSlice with two timesteps (t = 0 and t = 1) holding the same data."""
+
+    n_t, times = 2, np.array([0.0, 1.0])
+
+    def __init__(self, boxes, h=0.25):
+        super().__init__(boxes, h)
+        for sub in self._subslices.values():
+            sub._data = np.concatenate([sub._data, sub._data])
+
+
+class TwoStepCellVolumeSlice(TwoStepVolumeSlice):
+    """Cell-centred variant: holds K = x + 10 y + 100 z at the cell centres of each mesh."""
+
+    cell_centered = True
+
+    def __init__(self, boxes, h=0.25):
+        super().__init__(boxes, h)
+        for sub in self._subslices.values():
+            centres = [sub.mesh.coordinates[dim][:-1] + h / 2 for dim in "xyz"]
+            X, Y, Z = np.meshgrid(*centres, indexing="ij")
+            sub._data = np.stack([X + 10 * Y + 100 * Z] * 2).astype(np.float32)
+
+
+def _one_mesh_with_obstruction_at_second_timestep(slice_class):
+    """One unit-cube mesh (0.25 m) with an obstruction between nodes 1 and 3 on every axis, visible at t = 1 only."""
+    slc = slice_class([(0.0, 1.0, 0.0, 1.0, 0.0, 1.0)])
+    sub = slc._subslices["M0"]
+    sub.mesh.obstructions.append(TimedFakeObstruction(sub.mesh, (1, 3), (1, 3), (1, 3), visible=[1.0]))
+    return slc, sub
+
+
+# These tests check the time handling of 3D slice masks (#125) only. Which nodes or cells on an obstruction's faces
+# are masked is left open: they only assert points strictly inside the obstruction and points beyond its lower faces.
+
+
+def test_obstruction_mask_of_a_3d_slice_keeps_every_timestep():
+    slc, sub = _one_mesh_with_obstruction_at_second_timestep(TwoStepVolumeSlice)
+
+    mask = sub.mesh.get_obstruction_mask_slice(sub)
+
+    assert mask.shape == (2, 5, 5, 5)
+    assert mask[0].all()  # the obstruction is hidden at t = 0
+    assert not mask[1, 2, 2, 2]  # node strictly inside the obstruction
+    assert mask[1, 0].all() and mask[1, :, 0].all() and mask[1, :, :, 0].all()  # nodes beyond its lower faces
+
+
+@pytest.mark.parametrize("slice_class", [TwoStepVolumeSlice, TwoStepCellVolumeSlice])
+def test_to_global_masks_a_3d_slice_per_timestep(slice_class):
+    slc, sub = _one_mesh_with_obstruction_at_second_timestep(slice_class)
+
+    grid = np.asarray(slc.to_global(masked=True, fill=np.nan))
+
+    points = np.arange(0.0, 1.125, 0.25) if not slc.cell_centered else np.arange(0.125, 1.0, 0.25)
+    X, Y, Z = np.meshgrid(points, points, points, indexing="ij")
+    expected_values = X + 10 * Y + 100 * Z
+    assert grid.shape == (2,) + X.shape
+    np.testing.assert_allclose(grid[0], expected_values)  # nothing is masked at t = 0
+
+    inside = (X > 0.25) & (X < 0.75) & (Y > 0.25) & (Y < 0.75) & (Z > 0.25) & (Z < 0.75)
+    beyond_lower_faces = (X < 0.25) | (Y < 0.25) | (Z < 0.25)
+    assert inside.any() and np.isnan(grid[1][inside]).all()
+    np.testing.assert_allclose(grid[1][beyond_lower_faces], expected_values[beyond_lower_faces])
