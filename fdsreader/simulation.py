@@ -5,6 +5,7 @@ import os
 import pickle
 import re
 import warnings
+from datetime import datetime, timezone
 from typing import AnyStr, Dict, List, Sequence, TextIO, Tuple, Union
 
 import numpy as np
@@ -41,22 +42,15 @@ def _plot3d_time(label: str, filename: str) -> float:
     return sign * (abs(int(seconds)) + int(hundredths) / 100)
 
 
-_UTC_OFFSET = re.compile(r"(Z|[+-]\d\d:?\d\d)$")
-
-
-def _wall_time_to_utc(stamp: str) -> np.datetime64:
-    """Parse a wall-clock time stamp from CHID_steps.csv as UTC, the same as numpy did before it
+def _wall_times_to_utc(stamps: Sequence[str]) -> np.ndarray:
+    """Parse the wall-clock time stamps of CHID_steps.csv as UTC, as numpy did before it
     deprecated time zone offsets (and warned on every load)."""
-    stamp = stamp.strip()
-    match = _UTC_OFFSET.search(stamp)
-    if match is None:
-        return np.datetime64(stamp, "ms")
-    local = np.datetime64(stamp[: match.start()], "ms")
-    offset = match.group(1)
-    if offset == "Z":
-        return local
-    minutes = int(offset[1:3]) * 60 + int(offset[-2:])
-    return local - np.timedelta64(minutes if offset[0] == "+" else -minutes, "m")
+    utc = []
+    for stamp in stamps:
+        time = datetime.fromisoformat(stamp.strip())
+        # Without an offset the stamp stays as written; astimezone would assume the local time zone
+        utc.append(time.astimezone(timezone.utc).replace(tzinfo=None) if time.tzinfo else time)
+    return np.array(utc, dtype="datetime64[ms]")
 
 
 class Simulation:
@@ -253,7 +247,8 @@ class Simulation:
                 self.particles = self._particles
                 self.particles._post_init()
             # If no evacs are simulates, initialize empty data container for consistency
-            if len(self._evacs) == 0:
+            # (also when Evac classes were registered but their data could not be loaded)
+            if not isinstance(self._evacs, EvacCollection):
                 self.evacs = EvacCollection((), "", ())
             self.meshes = MeshCollection(self._meshes)
             del (
@@ -1202,7 +1197,7 @@ class Simulation:
             infile.readline()
             keys = [name.replace('"', "").replace("\n", "").strip() for name in infile.readline().split(",")][2:]
         wall_times = np.loadtxt(file_path, dtype=str, delimiter=",", ndmin=1, usecols=1, skiprows=2)
-        timesteps = np.array([_wall_time_to_utc(stamp) for stamp in wall_times], dtype="datetime64[ms]")
+        timesteps = _wall_times_to_utc(wall_times)
         float_values = np.loadtxt(file_path, delimiter=",", usecols=range(2, len(keys) + 2), ndmin=2, skiprows=2)
         data = self._transform_csv_data(keys, float_values)
         data["Time Step"] = timesteps

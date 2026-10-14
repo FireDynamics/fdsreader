@@ -555,9 +555,12 @@ class Obstruction:
 
                     coords[dim] = np.array(sorted(list(coords[dim])))
                     to_keep = np.full(coords[dim].shape, True)
-                    tolerance = min_delta / 2 if math.isfinite(min_delta) else 0.0
+                    if not math.isfinite(min_delta):  # all faces one node wide: use the grid spacing
+                        min_delta = min(
+                            np.min(np.diff(subobst.mesh.coordinates[dim])) for subobst in self._all_subobstructions
+                        )
                     for i in range(len(coords[dim]) - 1):
-                        if abs(coords[dim][i] - coords[dim][i + 1]) < tolerance:
+                        if abs(coords[dim][i] - coords[dim][i + 1]) < min_delta / 2:
                             to_keep[i + 1] = False
                     coords[dim] = coords[dim][to_keep]
 
