@@ -114,10 +114,19 @@ documented twice, in `README.md` and in `docs/guide/explorer.rst`; keep both in 
 
 ## Examples
 
-Every folder in `examples/` holds a script and the FDS input it was written for.
-Before a release, run the inputs with the current FDS version and the scripts
-against the output. Only `*.py` and `*.fds` files under `examples/` are tracked;
-the FDS output you generate there is ignored by `.gitignore`.
+The examples are Jupyter notebooks in `examples/<type>/`, next to the FDS input they read.
+They are committed with their output, which the documentation shows as is (Read the Docs
+cannot run FDS). Before a release, refresh them with the current FDS:
+
+```bash
+source /path/to/FDS6VARS.sh        # fds and mpiexec on the PATH
+pip install -e ".[notebook,export]" jupyterlab pyvista pandas
+python examples/run_examples.py    # runs FDS, executes the notebooks, saves the output
+```
+
+`python examples/run_examples.py slcf` refreshes a single folder, `--skip-fds` reuses
+existing FDS output. Only `*.py`, `*.fds` and `*.ipynb` files under `examples/` are tracked;
+the FDS output is ignored by `.gitignore`.
 
 ## Open issues and known bugs
 

@@ -62,6 +62,7 @@ docs = [
     "furo",
     "autodocsumm",
     "sphinxcontrib-mermaid",
+    "myst-nb",
 ]
 notebook = [
     "matplotlib>=3.5",

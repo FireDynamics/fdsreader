@@ -160,4 +160,4 @@ Objects that hold data also carry a :class:`~fdsreader.utils.data.Quantity` (nam
 name and unit), and the per-mesh parts refer to their :class:`~fdsreader.fds_classes.mesh.Mesh`.
 ``sim.hrr`` and ``sim.cpu`` are plain dictionaries of NumPy arrays.
 
-More complete scripts for every data type are collected under :doc:`examples`.
+Step-by-step notebooks for every data type are collected under :doc:`examples`.
