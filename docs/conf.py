@@ -47,15 +47,27 @@ extensions = [
     "myst_nb",
 ]
 
-# The example notebooks live next to their FDS input in examples/<type>/ and are copied into
-# docs/examples/ for the build. They are committed with their outputs and only rendered,
-# because Read the Docs cannot run FDS to produce the data they read.
-_docs_dir = Path(__file__).parent
-_notebook_dir = _docs_dir / "examples"
-shutil.rmtree(_notebook_dir, ignore_errors=True)
-_notebook_dir.mkdir()
-for _notebook in sorted((_docs_dir.parent / "examples").glob("*/*.ipynb")):
-    shutil.copy(_notebook, _notebook_dir / _notebook.name)
+
+# The example notebooks live next to their FDS input in examples/<type>/ and are copied to
+# docs/examples/<type>/ for the build. They are committed with their outputs and only rendered,
+# because Read the Docs cannot run FDS to produce the data they read. Only changed notebooks are
+# copied, so file-watching builders (sphinx-autobuild) do not rebuild in a loop.
+def _sync_example_notebooks():
+    docs_dir = Path(__file__).parent
+    source_dir, target_dir = docs_dir.parent / "examples", docs_dir / "examples"
+    wanted = set()
+    for notebook in source_dir.glob("*/*.ipynb"):
+        target = target_dir / notebook.relative_to(source_dir)
+        wanted.add(target)
+        if not target.exists() or target.read_bytes() != notebook.read_bytes():
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(notebook, target)
+    for stale in target_dir.rglob("*.ipynb"):
+        if stale not in wanted:
+            stale.unlink()
+
+
+_sync_example_notebooks()
 nb_execution_mode = "off"
 
 # Let diagrams take their natural height instead of squeezing them into 500px.

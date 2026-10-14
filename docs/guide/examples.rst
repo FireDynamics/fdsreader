@@ -14,15 +14,15 @@ Jupyter. They need a few packages that are not installed with fdsreader:
 .. toctree::
    :maxdepth: 1
 
-   ../examples/slices
-   ../examples/boundary
-   ../examples/devices
-   ../examples/complex_geometry
-   ../examples/isosurfaces
-   ../examples/particles
-   ../examples/plot3d
-   ../examples/smoke3d
-   ../examples/export
+   ../examples/slcf/slices
+   ../examples/bndf/boundary
+   ../examples/devc/devices
+   ../examples/geom/complex_geometry
+   ../examples/isof/isosurfaces
+   ../examples/part/particles
+   ../examples/pl3d/plot3d
+   ../examples/smoke3d/smoke3d
+   ../examples/export/export
 
 ``examples/evac`` still holds a script
 for the evacuation output of FDS+Evac, which current FDS versions no longer include.
