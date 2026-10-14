@@ -507,6 +507,9 @@ examples/**
 !examples/**/
 !examples/**/*.py
 !examples/**/*.fds
+!examples/**/*.ipynb
+# Notebooks copied from examples/ by docs/conf.py
+docs/examples/
 
 /docs/build/
 Dockerfile
