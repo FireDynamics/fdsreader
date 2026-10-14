@@ -152,29 +152,40 @@ class SubSmoke3D:
     def _codes(self) -> np.ndarray:
         """Load the display codes from the .s3d file, without warning."""
         if not hasattr(self, "_data"):
-            with open(self._file_path, "rb") as infile:
-                dtype_header = fdtype.new((("i", 8),))
-                dtype_nchars = fdtype.new((("i", 2),))
-
-                header = fdtype.read(infile, dtype_header, 1)[0][0]
-                nx, ny, nz = int(header[3]), int(header[5]), int(header[7])
-                data_shape = (nx + 1, ny + 1, nz + 1)
-
-                self._data = np.empty((self.times.size,) + data_shape, dtype=np.float32)
-
-                for t in range(self.times.size):
-                    fdtype.read(infile, fdtype.FLOAT, 1)  # Skip time value
-                    nchars_out = int(fdtype.read(infile, dtype_nchars, 1)[0][0][1])
-
-                    if nchars_out > 0:
-                        dtype_data = fdtype.new((("u", nchars_out),))
-
-                        rle_data = fdtype.read(infile, dtype_data, 1)[0][0]
-                        decoded_data = _decode_rle(rle_data, nchars_out, (nx + 1) * (ny + 1) * (nz + 1))
-
-                        self._data[t, :, :, :] = decoded_data.reshape(data_shape, order="F")
-
+            self._data = self._read_codes(self._file_path)
         return self._data
+
+    def _density_codes(self) -> np.ndarray | None:
+        """Load the linear density codes ``254 * rho / max_density`` that FDS 6.10 writes into an
+        additional .s3dd file for gas densities, or None if there is no such file."""
+        if not hasattr(self, "_density_data"):
+            path = self._file_path + "d"
+            self._density_data = self._read_codes(path) if os.path.exists(path) else None
+        return self._density_data
+
+    def _read_codes(self, file_path: str) -> np.ndarray:
+        with open(file_path, "rb") as infile:
+            dtype_header = fdtype.new((("i", 8),))
+            dtype_nchars = fdtype.new((("i", 2),))
+
+            header = fdtype.read(infile, dtype_header, 1)[0][0]
+            nx, ny, nz = int(header[3]), int(header[5]), int(header[7])
+            data_shape = (nx + 1, ny + 1, nz + 1)
+
+            data = np.empty((self.times.size,) + data_shape, dtype=np.float32)
+
+            for t in range(self.times.size):
+                fdtype.read(infile, fdtype.FLOAT, 1)  # Skip time value
+                nchars_out = int(fdtype.read(infile, dtype_nchars, 1)[0][0][1])
+
+                if nchars_out > 0:
+                    dtype_data = fdtype.new((("u", nchars_out),))
+
+                    rle_data = fdtype.read(infile, dtype_data, 1)[0][0]
+                    decoded_data = _decode_rle(rle_data, nchars_out, (nx + 1) * (ny + 1) * (nz + 1))
+
+                    data[t, :, :, :] = decoded_data.reshape(data_shape, order="F")
+        return data
 
     def to_physical(
         self,
@@ -191,7 +202,9 @@ class SubSmoke3D:
         - Gas density, e.g. soot (kg/m3): before FDS 6.11 (format version 0) the obscuration
           ``254 * (1 - exp(-K_m * dx * rho))`` over the size ``dx`` of the first cell along x;
           from FDS 6.11 on (version 1) ``254 * rho / MAX_VAL``, normalised by the maximum
-          density of each frame.
+          density of each frame. FDS 6.10 also writes this linear encoding into a .s3dd file,
+          normalised by the maximum density in the last column of the .s3d.sz file; it is
+          used instead of the obscuration when it exists, which is about ten times as accurate.
         - HRRPUV (kW/m3): ``254 * q / q_max``, clipped to ``[0, q_max]``.
         - Temperature and every other quantity (C for temperature):
           ``254 * (T - T_min) / (T_max - T_min)``, clipped to ``[T_min, T_max]``. The default
@@ -205,7 +218,7 @@ class SubSmoke3D:
 
         The result keeps the 8-bit resolution and FDS's averaging onto cell corners. Code 254
         means at or above the upper limit (within half a step from FDS 6.11 on, as it rounds), so
-        those values, and soot that saturates the obscuration before FDS 6.11, are returned at the
+        those values, and soot that saturates the obscuration (before FDS 6.11, without .s3dd), are returned at the
         limit and marked in the array ``return_saturated`` adds.
 
         :param return_saturated: Also return a boolean array marking values that were cut off.
@@ -228,8 +241,13 @@ class SubSmoke3D:
         saturated = codes >= 254
 
         if kind == "gas":
-            if self.version >= 1:
-                max_vals = np.asarray(self.max_vals, dtype=np.float32)[: codes.shape[0]]
+            density_codes = self._density_codes() if self.version < 1 else None
+            if self.version >= 1 or density_codes is not None:
+                if density_codes is not None:  # FDS 6.10 .s3dd, normalised by the last .sz column
+                    codes, max_vals = density_codes, self.upper_bounds
+                else:
+                    max_vals = self.max_vals
+                max_vals = np.asarray(max_vals, dtype=np.float32)[: codes.shape[0]]
                 values = codes * (max_vals / 254).reshape((-1, 1, 1, 1))
                 saturated = np.zeros_like(saturated)  # 254 is the maximum of the frame, not a cut-off
             else:

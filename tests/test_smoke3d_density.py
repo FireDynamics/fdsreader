@@ -309,3 +309,33 @@ def test_cache_from_an_older_layout_is_parsed_again(monkeypatch, tmp_path):
     monkeypatch.setattr(Simulation, "_CACHE_FORMAT", Simulation._CACHE_FORMAT + 1)
     reparsed = Simulation(str(case))
     assert reparsed._cache_format == Simulation._CACHE_FORMAT
+
+
+def _fds610_soot(case):
+    sim = Simulation(str(case))
+    return sim.smoke_3d.get_by_quantity("SOOT DENSITY").subsmokes[0]
+
+
+def test_fds610_soot_uses_the_linear_s3dd_codes():
+    soot = _fds610_soot(CASES_DIR / "steckler_data_fds6100")
+    assert soot.version == 0
+    density_codes = soot._read_codes(soot._file_path + "d")
+    expected = density_codes * (soot.upper_bounds / 254).reshape((-1, 1, 1, 1))
+    values, saturated = soot.to_physical(return_saturated=True)
+    np.testing.assert_allclose(values, expected, rtol=1e-6)
+    assert values.max() == pytest.approx(soot.upper_bounds.max(), rel=1e-6)
+    assert not saturated.any()
+
+
+def test_fds610_soot_without_s3dd_falls_back_to_the_obscuration(tmp_path):
+    import shutil
+
+    case = tmp_path / "steckler"
+    shutil.copytree(CASES_DIR / "steckler_data_fds6100", case)
+    for path in case.glob("*.s3dd"):
+        path.unlink()
+    soot = _fds610_soot(case)
+    dx = soot.mesh.coordinates["x"][1] - soot.mesh.coordinates["x"][0]
+    obscuration = np.minimum(soot._codes(), 253) / 254
+    expected = -np.log1p(-obscuration) / (soot.mass_extinction_coefficient * dx)
+    np.testing.assert_allclose(soot.to_physical(), expected, rtol=1e-5)

@@ -11,7 +11,8 @@ Smoke3D
      cut off, and values below one 8-bit step (about 4.7 kW/m³, half of it from FDS 6.11
      on, which rounds instead of truncating) become 0.
    - Soot is stored as obscuration before FDS 6.11, and from FDS 6.11 on normalised by
-     the maximum of each frame, so codes are not comparable between time steps.
+     the maximum of each frame, so codes are not comparable between time steps. FDS 6.10
+     additionally writes the normalised density into a ``.s3dd`` file.
    - FDS averages the values onto cell corners before writing them.
 
    Summing or integrating Smoke3D values therefore does not give physical results, for
@@ -27,8 +28,9 @@ Smoke3D
    averaging onto cell corners; values FDS cut off at the upper limit are returned at the
    limit and marked with ``return_saturated=True``. Checked against slices of the same
    quantities with FDS 6.10.1 and 6.11.1: the median difference is about a third of an 8-bit
-   step, for soot before FDS 6.11 a few percent, as the obscuration resolves thin smoke
-   coarsely.
+   step, for soot below one percent. Soot from FDS 6.10 is read from the ``.s3dd`` file
+   when it exists; otherwise, and for FDS 6.9 and older, it is recovered from the
+   obscuration, which resolves thin smoke coarsely (a few percent).
 
    The default Smoke3D temperature is the effective flame temperature, which FDS before 6.11
    labels ``TEMPERATURE``; compare it with an ``EFFECTIVE FLAME TEMPERATURE`` slice, not the
