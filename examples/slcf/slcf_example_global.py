@@ -1,5 +1,6 @@
-from matplotlib import cm, pyplot as plt
+import matplotlib
 import numpy as np
+from matplotlib import pyplot as plt
 
 import fdsreader as fds
 
@@ -7,14 +8,14 @@ import fdsreader as fds
 def main():
     sim = fds.Simulation("./fds_multimesh")
 
-    # Get the first slice
+    # Get the second slice
     slc = sim.slices[1]
     data, coordinates = slc.to_global(masked=True, fill=np.nan, return_coordinates=True)
 
     # Set colormap
-    cmap = cm.get_cmap('coolwarm').copy()
+    cmap = matplotlib.colormaps["coolwarm"].copy()
     # Set obsts color
-    cmap.set_bad('white')
+    cmap.set_bad("white")
 
     # Plot the slice
     plt.imshow(data[-1].T, vmin=0, vmax=slc.vmax, origin="lower", cmap=cmap)

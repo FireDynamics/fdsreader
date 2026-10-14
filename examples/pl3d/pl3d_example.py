@@ -1,5 +1,6 @@
-import pyvista as pv
 import numpy as np
+import pyvista as pv
+
 import fdsreader as fds
 
 
@@ -15,10 +16,11 @@ def main():
     t = -1
 
     # Create 3D grid
-    x_ = np.linspace(coordinates['x'][0], coordinates['x'][-1], len(coordinates['x']))
-    y_ = np.linspace(coordinates['y'][0], coordinates['y'][-1], len(coordinates['y']))  # y_ = np.array([29])  # when using a slice
-    z_ = np.linspace(coordinates['z'][0], coordinates['z'][-1], len(coordinates['z']))
-    x, y, z = np.meshgrid(x_, y_, z_, indexing='ij')
+    x_ = np.linspace(coordinates["x"][0], coordinates["x"][-1], len(coordinates["x"]))
+    # y_ = np.array([29])  # when using a slice
+    y_ = np.linspace(coordinates["y"][0], coordinates["y"][-1], len(coordinates["y"]))
+    z_ = np.linspace(coordinates["z"][0], coordinates["z"][-1], len(coordinates["z"]))
+    x, y, z = np.meshgrid(x_, y_, z_, indexing="ij")
     points = np.stack((x.flatten(), y.flatten(), z.flatten()), axis=1)
 
     color_data = data[t, :, :, :]
@@ -27,9 +29,14 @@ def main():
 
     # Plot 3D data
     plotter = pv.Plotter()
-    plotter.add_mesh(pv.PolyData(points), scalars=color_data.flatten(),
-                     opacity=0.3, render_points_as_spheres=False, point_size=25)
-    plotter.add_scalar_bar(title=quantity)
+    plotter.add_mesh(
+        pv.PolyData(points),
+        scalars=color_data.flatten(),
+        opacity=0.3,
+        render_points_as_spheres=False,
+        point_size=25,
+        scalar_bar_args={"title": quantity},
+    )
     plotter.show()
 
 
