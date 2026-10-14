@@ -1,7 +1,7 @@
 Installation
 ============
 
-fdsreader is on `PyPI <https://pypi.org/project/fdsreader/>`_ and needs Python 3.10 or
+fdsreader is on `PyPI <https://pypi.org/project/fdsreader/>`_ and needs Python 3.11 or
 newer. Its only dependencies are numpy and typing_extensions.
 
 .. code-block:: sh
