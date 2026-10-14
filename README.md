@@ -28,7 +28,7 @@ numpy and is always installed.
 
 fdsreader needs Python 3.10 or newer and reads output of FDS 6.7.5 and later, tested up to
 FDS 6.11.1. For complex geometry (`&GEOM`) from FDS 6.10 or newer, use fdsreader 1.12.1 or
-later. Details are in the [compatibility table](https://fdsreader.readthedocs.io/en/latest/compatibility.html);
+later. Details are in the [compatibility table](https://fdsreader.readthedocs.io/en/latest/guide/compatibility.html);
 if something does not read correctly, please [open an issue](https://github.com/FireDynamics/fdsreader/issues).
 
 ## Quickstart
@@ -168,7 +168,7 @@ TEMPERATURE [C] — x = 0 m  #0   ·   t = 4.401 s (step 630 of 749)
 ## Documentation
 
 The [documentation](https://fdsreader.readthedocs.io) covers every data type, the
-[settings](https://fdsreader.readthedocs.io/en/latest/configuration.html) (lazy loading,
+[settings](https://fdsreader.readthedocs.io/en/latest/guide/configuration.html) (lazy loading,
 caching, error handling) and the full API.
 
 ## Citing

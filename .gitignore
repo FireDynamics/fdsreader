@@ -502,8 +502,9 @@ fabric.properties
 *.pyproj
 
 # CUSTOM
-examples/
-!examples/*/
+# Only the example scripts and their FDS inputs are tracked, not the FDS output
+examples/**
+!examples/**/
 !examples/**/*.py
 !examples/**/*.fds
 
