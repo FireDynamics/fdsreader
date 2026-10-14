@@ -1,22 +1,22 @@
 Export
-______
+======
 
 .. automodule:: fdsreader.export.sim_exporter
+   :autosummary:
    :members:
    :undoc-members:
-   :noindex:
 
 .. automodule:: fdsreader.export.slcf_exporter
+   :autosummary:
    :members:
    :undoc-members:
-   :noindex:
 
 .. automodule:: fdsreader.export.obst_exporter
+   :autosummary:
    :members:
    :undoc-members:
-   :noindex:
 
 .. automodule:: fdsreader.export.smoke3d_exporter
+   :autosummary:
    :members:
    :undoc-members:
-   :noindex:

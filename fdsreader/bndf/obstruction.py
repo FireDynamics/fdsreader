@@ -52,6 +52,7 @@ class Patch:
 
     def n_t(self, count_duplicates=True) -> int:
         """Get the number of timesteps for which data was output.
+
         :param count_duplicates: If true, return the total number of data points, even if there is
             duplicate data for a timestep. Duplicate data might be output when restarting the
             simulation in between the simulation run.
@@ -186,6 +187,7 @@ class Boundary:
 
     def n_t(self, count_duplicates=True) -> int:
         """Get the number of timesteps for which data was output.
+
         :param count_duplicates: If true, return the total number of data points, even if there is
             duplicate data for a timestep. Duplicate data might be output when restarting the
             simulation in between the simulation run.
@@ -364,6 +366,7 @@ class SubObstruction:
 
     def n_t(self, count_duplicates=True) -> int:
         """Returns the number of timesteps for which boundary data is available.
+
         :param count_duplicates: If true, return the total number of data points, even if there is
             duplicate data for a timestep. Duplicate data might be output when restarting the
             simulation in between the simulation run.
@@ -498,6 +501,7 @@ class Obstruction:
 
     def n_t(self, count_duplicates=True) -> int:
         """Returns the number of timesteps for which boundary data is available.
+
         :param count_duplicates: If true, return the total number of data points, even if there is
             duplicate data for a timestep. Duplicate data might be output when restarting the
             simulation in between the simulation run.

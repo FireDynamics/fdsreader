@@ -1,26 +1,22 @@
-Slice files
-___________
+Slices
+======
 
-.. automodule:: fdsreader.slcf.SliceCollection
+.. automodule:: fdsreader.slcf.slice_collection
    :autosummary:
    :members:
    :undoc-members:
-   :noindex:
 
 .. automodule:: fdsreader.slcf.slice
    :autosummary:
    :members:
    :undoc-members:
-   :noindex:
 
-.. automodule:: fdsreader.slcf.GeomSliceCollection
+.. automodule:: fdsreader.slcf.geomslice_collection
    :autosummary:
    :members:
    :undoc-members:
-   :noindex:
 
 .. automodule:: fdsreader.slcf.geomslice
    :autosummary:
    :members:
    :undoc-members:
-   :noindex:

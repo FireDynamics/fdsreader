@@ -1,14 +1,12 @@
-Isosurface files
-________________
+Isosurfaces
+===========
 
-.. automodule:: fdsreader.isof.IsosurfaceCollection
+.. automodule:: fdsreader.isof.isosurface_collection
    :autosummary:
    :members:
    :undoc-members:
-   :noindex:
 
 .. automodule:: fdsreader.isof.isosurface
    :autosummary:
    :members:
    :undoc-members:
-   :noindex:

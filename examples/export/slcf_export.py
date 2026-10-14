@@ -1,15 +1,16 @@
 import os
+
 import fdsreader as fds
 import fdsreader.export
 
 
 def main():
     base_path = "."
-    case = "Apartment"
-    sim = fds.Simulation(os.path.join(base_path, "fds_data", case))
+    sim = fds.Simulation(os.path.join(base_path, "fds_data"))
 
     for slc in sim.slices:
-        fds.export.export_slcf_raw(slc, os.path.join(base_path, "fds_post", case, "slices", slc.quantity.name.replace(' ', '_').lower()), 'F')
+        quantity = slc.quantity.name.replace(" ", "_").lower()
+        fds.export.export_slcf_raw(slc, os.path.join(base_path, "fds_post", "slices", quantity), "F")
 
 
 if __name__ == "__main__":

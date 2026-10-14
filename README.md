@@ -1,71 +1,58 @@
-# FDSReader
-> Fast and easy-to-use Python reader for FDS data
+# fdsreader
 
-[![PyPI version](https://badge.fury.io/py/fdsreader.png)](https://badge.fury.io/py/fdsreader)
+**Fast and easy-to-use Python reader for [Fire Dynamics Simulator (FDS)](https://pages.nist.gov/fds-smv/) output.**
+
+[![PyPI](https://img.shields.io/pypi/v/fdsreader)](https://pypi.org/project/fdsreader/)
+[![Python](https://img.shields.io/pypi/pyversions/fdsreader)](https://pypi.org/project/fdsreader/)
 [![CI](https://github.com/FireDynamics/fdsreader/actions/workflows/ci.yml/badge.svg)](https://github.com/FireDynamics/fdsreader/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/FireDynamics/fdsreader/branch/master/graph/badge.svg)](https://codecov.io/gh/FireDynamics/fdsreader)
-[![Documentation](https://readthedocs.org/projects/fdsreader/badge/?version=latest)](https://fdsreader.readthedocs.io)
+[![Docs](https://readthedocs.org/projects/fdsreader/badge/?version=latest)](https://fdsreader.readthedocs.io)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6783225.svg)](https://doi.org/10.5281/zenodo.6783225)
+[![License: LGPL v3](https://img.shields.io/badge/license-LGPLv3-blue)](https://github.com/FireDynamics/fdsreader/blob/master/LICENSE.LESSER)
 
-## FDS Version Compatibility
-
-| fdsreader           | FDS 6.7 | FDS 6.8 | FDS 6.9 | FDS 6.10 | FDS 6.11 |
-|---------------------|---------|---------|---------|----------|----------|
-| ≤ 1.11.9            | ✅      | ✅      | ✅      | ⚠️ (Geometry bug) | ⚠️ (Geometry bug) |
-| > 1.11.9 (unreleased, `master`) | ✅ | ✅ | ✅ | ✅ | ✅ |
-
-_Tested against FDS outputs. If you find a compatibility issue please [open an issue](https://github.com/FireDynamics/fdsreader/issues)._
+fdsreader reads the binary and CSV files an FDS simulation writes and hands you the data
+as NumPy arrays. Point it at a simulation directory and every output is available as a
+Python object, loaded only when you first access it. Data from multi-mesh simulations can
+be merged into one global array. For a quick look without writing any plotting code,
+there is an [explorer](https://fdsreader.readthedocs.io/en/latest/guide/explorer.html) for Jupyter and the terminal.
 
 ## Installation
 
-The package is available on PyPI and can be installed using pip:
 ```sh
 pip install fdsreader
 ```
 
-The Jupyter [explorer](#explorer) needs a plotting stack, which is an optional extra:
-```sh
-pip install "fdsreader[notebook]"
-```
-Its command line counterpart needs nothing beyond numpy and is always installed.
+The Jupyter [explorer](https://fdsreader.readthedocs.io/en/latest/guide/explorer.html) needs a plotting stack, which is an optional extra:
+`pip install "fdsreader[notebook]"`. Its command line counterpart needs nothing beyond
+numpy and is always installed.
 
-_FDS Version 6.7.5 and above are fully supported. Versions below 6.7.5 might work, but are not guaranteed to work._
+fdsreader needs Python 3.10 or newer and reads output of FDS 6.7.5 and later; it is tested
+against the latest FDS release. For complex geometry (`&GEOM`) from FDS 6.10 or newer, use fdsreader 1.12.1 or
+later. Details are in the [compatibility table](https://fdsreader.readthedocs.io/en/latest/guide/compatibility.html);
+if something does not read correctly, please [open an issue](https://github.com/FireDynamics/fdsreader/issues).
 
-## Usage example
+## Quickstart
 
 ```python
 import fdsreader as fds
 
-# Creates an instance of a simulation master-class which manages all data for a given simulation
-sim = fds.Simulation("./sample_data")
+sim = fds.Simulation("./my_simulation")  # the directory containing the .smv file
+print(sim)                               # what the simulation wrote
 
-# Examples of data that can be easily accessed
-print(sim.meshes, sim.surfaces, sim.slices, sim.data_3d, sim.smoke_3d, sim.isosurfaces, sim.particles, sim.obstructions)
+# Temperature slice closest to x = 0, merged over all meshes into one array
+slc = sim.slices.filter_by_quantity("TEMPERATURE").get_nearest(x=0)
+temperature = slc.to_global()            # shape (time, ...)
+step = slc.get_nearest_timestep(30.0)
+print(slc.times[step], temperature[step].max())
+
+# Time series: devices by their ID from the input file, and the heat release rate
+time = sim.devices["Time"].data
+hgl_temp = sim.devices["HGL Temp"].data
+hrr = sim.hrr["HRR"]
 ```
 
-More advanced examples can be found in the respective data type directories inside of the examples directory.
-
-### Configuration
-The package provides a few configuration options that can be set using the `settings` module.
-```python
-fds.settings.KEY = VALUE
-
-# Example
-fds.settings.DEBUG = True
-```
-
-|      KEY       |  VALUE  | Default | Description |
-|----------------|---------|---------|-------------|
-|    LAZY_LOAD   | boolean |   True  | Load all data when initially loading the simulation (False) or only when specific data is needed (True). |
-| ENABLE_CACHING | boolean |   True  | Cache the loaded simulation to reduce startup times when loading the same simulation again. |
-|     DEBUG      | boolean |  False  | Crash on non-critical errors with an exception (True) or output non-critical errors as warnings (False). |
-| IGNORE_ERRORS  | boolean |  False  | Ignore any non-critical errors completely. |
-
-
-### Data structure
-![Data structure](https://raw.githubusercontent.com/FireDynamics/fdsreader/master/docs/img/data-structure.svg)
-
-Beware that not all attributes and methods are covered in this diagram. For a complete
-documentation of all classes check the API Documentation below.
+More examples for every data type are in [`examples/`](https://github.com/FireDynamics/fdsreader/tree/master/examples), the full API is in the
+[documentation](https://fdsreader.readthedocs.io).
 
 ## Explorer
 
@@ -118,7 +105,7 @@ lists rather than named on the command line:
 fdsreader-explorer-cli ./sample_data -i
 ```
 
-| key | |
+| Key | Action |
 |---|---|
 | `←` `→` or `h` `l` | step through time |
 | `page up` / `page down` | ten steps |
@@ -145,24 +132,24 @@ fdsreader-explorer-cli ./sample_data --json                 # for scripting
 ```
 TEMPERATURE [C] — x = 0 m  #0   ·   t = 4.401 s (step 630 of 749)
 
-  10.00 |                  
-        |                  
-   8.82 |                  
-        |                  
-        |                  
-        |          ...     
-        |        .....     
-   5.88 |       .....      
-        |      ...:...     
-        |       .....      
-        |        ....      
-        |        ...       
-   2.94 |       .:..       
-        |       -.         
-        |       -:-.       
-        |       .-*:       
-        |        +%+.      
-   0.00 |        +#:       
+  10.00 |
+        |
+   8.82 |
+        |
+        |
+        |          ...
+        |        .....
+   5.88 |       .....
+        |      ...:...
+        |       .....
+        |        ....
+        |        ...
+   2.94 |       .:..
+        |       -.
+        |       -:-.
+        |       .-*:
+        |        +%+.
+   0.00 |        +#:
         +------------------
          -2.5           2.5   y [m]
          scale 20 … 1412   ramp ' .:-=+*#%@'   grid 18x18
@@ -171,38 +158,34 @@ TEMPERATURE [C] — x = 0 m  #0   ·   t = 4.401 s (step 630 of 749)
 `--save FILE` writes the current view as an image or an animation instead
 (`.png`/`.pdf`/`.svg`/`.gif`/`.mp4`, needs matplotlib).
 
-The interactive view uses `curses`, which is in the standard library everywhere except
-Windows; there, `pip install windows-curses` provides it.
+### Notes
 
-Slices are read one time step at a time, so stepping through a long run costs a few
-hundred kilobytes rather than loading the whole series into memory.
+- The interactive terminal view uses `curses`, which is in the standard library everywhere except
+  Windows; there, `pip install windows-curses` provides it.
+- Slices are read one time step at a time, so stepping through a long run costs a few
+  hundred kilobytes rather than loading the whole series into memory.
 
-## API Documentation
-[https://fdsreader.readthedocs.io](https://fdsreader.readthedocs.io)
+## Documentation
 
-## Releasing a new version
+The [documentation](https://fdsreader.readthedocs.io) covers every data type, the
+[settings](https://fdsreader.readthedocs.io/en/latest/guide/configuration.html) (lazy loading,
+caching, error handling) and the full API.
 
-Versioning is handled automatically via Git tags using `setuptools-scm`.
+## Citing
 
-```bash
-# New release
-git tag -a v1.12.0 -m "Version 1.12.0"
-git push origin v1.12.0
-```
-
-This triggers the release workflow which builds the package and publishes it to PyPI.
-
-## Meta
-
-*  Jan Vogelsang – j.vogelsang@fz-juelich.de
-*  Marc Fehr - m.fehr@fz-juelich.de
-*  Kristian Börger - k.boerger@fz-juelich.de
-*  Prof. Dr. Lukas Arnold - l.arnold@fz-juelich.de
-
-Distributed under the LGPLv3 (GNU Lesser General Public License v3) license. See ``LICENSE`` for more information.
-
-[https://github.com/FireDynamics/fdsreader](https://github.com/FireDynamics/fdsreader)
+If fdsreader helps your research, please cite it via its Zenodo DOI
+[10.5281/zenodo.6783225](https://doi.org/10.5281/zenodo.6783225). GitHub's
+"Cite this repository" button gives you the reference in BibTeX or APA.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, how to run tests, and the PR checklist.
+Bug reports and pull requests are welcome. See [CONTRIBUTING.md](https://github.com/FireDynamics/fdsreader/blob/master/CONTRIBUTING.md)
+for the development setup and how to run the tests.
+
+## Authors and maintainers
+
+fdsreader is developed at [Forschungszentrum Jülich, IAS-7](https://www.fz-juelich.de/en/ias/ias-7)
+and maintained by Jan Vogelsang, Marc Fehr, Tristan Hehnen and Lukas Arnold.
+For all authors see [CITATION.cff](https://github.com/FireDynamics/fdsreader/blob/master/CITATION.cff).
+
+fdsreader is licensed under the [LGPLv3](https://github.com/FireDynamics/fdsreader/blob/master/LICENSE.LESSER).
