@@ -41,6 +41,24 @@ def _plot3d_time(label: str, filename: str) -> float:
     return sign * (abs(int(seconds)) + int(hundredths) / 100)
 
 
+_UTC_OFFSET = re.compile(r"(Z|[+-]\d\d:?\d\d)$")
+
+
+def _wall_time_to_utc(stamp: str) -> np.datetime64:
+    """Parse a wall-clock time stamp from CHID_steps.csv as UTC, the same as numpy did before it
+    deprecated time zone offsets (and warned on every load)."""
+    stamp = stamp.strip()
+    match = _UTC_OFFSET.search(stamp)
+    if match is None:
+        return np.datetime64(stamp, "ms")
+    local = np.datetime64(stamp[: match.start()], "ms")
+    offset = match.group(1)
+    if offset == "Z":
+        return local
+    minutes = int(offset[1:3]) * 60 + int(offset[-2:])
+    return local - np.timedelta64(minutes if offset[0] == "+" else -minutes, "m")
+
+
 class Simulation:
     """Master class managing all data for a given simulation.
 
@@ -258,6 +276,14 @@ class Simulation:
                 self._hash = create_hash(self.smv_file_path)
                 with open(Simulation._get_pickle_filename(self.root_path, self.chid), "wb") as pickle_file:
                     pickle.dump(self, pickle_file, protocol=4)
+
+        if len(self.evacs) > 0:
+            warnings.warn(
+                "FDS+Evac has been removed from FDS, and fdsreader's evacuation support is deprecated: "
+                "it is no longer tested and may be removed in a future release.",
+                FutureWarning,
+                stacklevel=2,
+            )
 
     def parse_smv_file(self):
         # Global device list in registration order — used to resolve DEVICE_ACT indices.
@@ -1175,9 +1201,8 @@ class Simulation:
         with open(file_path) as infile:
             infile.readline()
             keys = [name.replace('"', "").replace("\n", "").strip() for name in infile.readline().split(",")][2:]
-        timesteps = np.loadtxt(
-            file_path, dtype=np.dtype("datetime64[ms]"), delimiter=",", ndmin=1, usecols=1, skiprows=2
-        )
+        wall_times = np.loadtxt(file_path, dtype=str, delimiter=",", ndmin=1, usecols=1, skiprows=2)
+        timesteps = np.array([_wall_time_to_utc(stamp) for stamp in wall_times], dtype="datetime64[ms]")
         float_values = np.loadtxt(file_path, delimiter=",", usecols=range(2, len(keys) + 2), ndmin=2, skiprows=2)
         data = self._transform_csv_data(keys, float_values)
         data["Time Step"] = timesteps

@@ -549,13 +549,15 @@ class Obstruction:
                         if orientation_int not in subobst_coords:
                             continue
                         co = subobst_coords[orientation_int][dim]
-                        min_delta = min(min_delta, co[1] - co[0])
+                        if len(co) > 1:  # a face one node wide has no spacing along this axis
+                            min_delta = min(min_delta, co[1] - co[0])
                         coords[dim].update(co)
 
                     coords[dim] = np.array(sorted(list(coords[dim])))
                     to_keep = np.full(coords[dim].shape, True)
+                    tolerance = min_delta / 2 if math.isfinite(min_delta) else 0.0
                     for i in range(len(coords[dim]) - 1):
-                        if abs(coords[dim][i] - coords[dim][i + 1]) < min_delta / 2:
+                        if abs(coords[dim][i] - coords[dim][i + 1]) < tolerance:
                             to_keep[i + 1] = False
                     coords[dim] = coords[dim][to_keep]
 
