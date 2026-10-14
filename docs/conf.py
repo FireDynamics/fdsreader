@@ -39,12 +39,18 @@ version = release
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.viewcode",
+    "sphinx.ext.intersphinx",
     "autodocsumm",
     "sphinxcontrib.mermaid",
 ]
 
 # Let diagrams take their natural height instead of squeezing them into 500px.
 mermaid_height = "auto"
+
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+    "numpy": ("https://numpy.org/doc/stable", None),
+}
 
 # The FDS version the compatibility workflow last tested against (bumped automatically by
 # .github/workflows/fds_compat.yml), available in the docs as |fds_tested|.
