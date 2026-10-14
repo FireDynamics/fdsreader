@@ -38,6 +38,8 @@ Before a release
 ----------------
 
 * The FDS compatibility table is up to date (see below).
+* The example notebooks run with the current FDS: ``python examples/run_examples.py``
+  runs FDS on their inputs and executes them again (see ``CONTRIBUTING.md``).
 * The explorer is documented twice, in ``README.md`` and in
   ``docs/guide/explorer.rst``. If it changed, update both.
 * The Zenodo archive of the previous release exists

@@ -51,8 +51,9 @@ hgl_temp = sim.devices["HGL Temp"].data
 hrr = sim.hrr["HRR"]
 ```
 
-More examples for every data type are in [`examples/`](https://github.com/FireDynamics/fdsreader/tree/master/examples), the full API is in the
-[documentation](https://fdsreader.readthedocs.io).
+Step-by-step [example notebooks](https://fdsreader.readthedocs.io/en/latest/guide/examples.html) for every
+data type are in the documentation and in [`examples/`](https://github.com/FireDynamics/fdsreader/tree/master/examples);
+the full API is in the [documentation](https://fdsreader.readthedocs.io).
 
 ## Explorer
 
