@@ -30,8 +30,9 @@ def export_smoke_raw(smoke3d: Smoke3D, output_dir: str, ordering: Literal["C", "
     }
 
     for subsmoke in smoke3d._subsmokes.values():
-        meta["DataValMax"] = max(meta["DataValMax"], np.max(subsmoke.data))
-        meta["DataValMin"] = min(meta["DataValMin"], np.min(subsmoke.data))
+        # The export writes the display codes as they are, so read them without the warning
+        meta["DataValMax"] = max(meta["DataValMax"], np.max(subsmoke._codes()))
+        meta["DataValMin"] = min(meta["DataValMin"], np.min(subsmoke._codes()))
     meta["DataValMax"] = float(meta["DataValMax"])
     meta["DataValMin"] = float(meta["DataValMin"])
 
@@ -50,7 +51,7 @@ def export_smoke_raw(smoke3d: Smoke3D, output_dir: str, ordering: Literal["C", "
         mesh_id = mesh.id.replace(" ", "_").replace(".", "-")
         filename = filename_base + "_mesh-" + mesh_id + ".dat"
 
-        data = (subsmoke.data * meta["ScaleFactor"]).astype(np.uint8)
+        data = (subsmoke._codes() * meta["ScaleFactor"]).astype(np.uint8)
 
         with open(os.path.join(output_dir, filename_base + "-data", filename), "wb") as rawfile:
             for d in data:
