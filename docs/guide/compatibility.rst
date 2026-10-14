@@ -2,7 +2,7 @@ FDS compatibility
 =================
 
 fdsreader reads output of FDS 6.7.5 and later. Versions below 6.7.5 may work, but are not
-tested. The latest FDS version tested is 6.11.1.
+tested. The latest FDS version tested is |fds_tested|.
 
 .. list-table::
    :header-rows: 1

@@ -14,7 +14,7 @@ fdsreader reads the binary and CSV files an FDS simulation writes and hands you 
 as NumPy arrays. Point it at a simulation directory and every output is available as a
 Python object, loaded only when you first access it. Data from multi-mesh simulations can
 be merged into one global array. For a quick look without writing any plotting code,
-there is an [explorer](#explorer) for Jupyter and the terminal.
+there is an [explorer](https://fdsreader.readthedocs.io/en/latest/guide/explorer.html) for Jupyter and the terminal.
 
 ## Installation
 
@@ -22,12 +22,12 @@ there is an [explorer](#explorer) for Jupyter and the terminal.
 pip install fdsreader
 ```
 
-The Jupyter [explorer](#explorer) needs a plotting stack, which is an optional extra:
+The Jupyter [explorer](https://fdsreader.readthedocs.io/en/latest/guide/explorer.html) needs a plotting stack, which is an optional extra:
 `pip install "fdsreader[notebook]"`. Its command line counterpart needs nothing beyond
 numpy and is always installed.
 
-fdsreader needs Python 3.10 or newer and reads output of FDS 6.7.5 and later, tested up to
-FDS 6.11.1. For complex geometry (`&GEOM`) from FDS 6.10 or newer, use fdsreader 1.12.1 or
+fdsreader needs Python 3.10 or newer and reads output of FDS 6.7.5 and later; it is tested
+against the latest FDS release. For complex geometry (`&GEOM`) from FDS 6.10 or newer, use fdsreader 1.12.1 or
 later. Details are in the [compatibility table](https://fdsreader.readthedocs.io/en/latest/guide/compatibility.html);
 if something does not read correctly, please [open an issue](https://github.com/FireDynamics/fdsreader/issues).
 

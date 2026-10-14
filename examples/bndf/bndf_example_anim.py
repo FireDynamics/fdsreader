@@ -23,23 +23,21 @@ def main():
     # Value ticks
     ticks = [vmin + i * (vmax - vmin) / 10 for i in range(11)]
 
-    t = 0
     fig = plt.figure()
     # Initial contour plot
-    cont = plt.contourf(face[t].T, origin="lower", vmin=vmin, vmax=vmax, levels=ticks, cmap="coolwarm")
+    cont = plt.contourf(face[0].T, origin="lower", vmin=vmin, vmax=vmax, levels=ticks, cmap="coolwarm")
     plt.colorbar(cont)
 
     # Contour plot animation
     def animate(i):
-        nonlocal t, cont
+        nonlocal cont
         cont.remove()
-        cont = plt.contourf(face[t].T, origin="lower", vmin=vmin, vmax=vmax, levels=ticks, cmap="coolwarm")
-        t += 1
+        cont = plt.contourf(face[i].T, origin="lower", vmin=vmin, vmax=vmax, levels=ticks, cmap="coolwarm")
         return cont
 
     # Show animation or save it to disk
     # Keep a reference, otherwise the animation is garbage collected before it is shown
-    _anim = animation.FuncAnimation(fig, animate, interval=5, frames=face.shape[0] - 2, repeat=False)
+    _anim = animation.FuncAnimation(fig, animate, interval=5, frames=face.shape[0], repeat=False)
     # _anim.save("anim.mp4", fps=25)
     plt.show()
 

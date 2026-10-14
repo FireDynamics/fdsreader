@@ -10,6 +10,7 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+import datetime
 import os
 import sys
 from importlib.metadata import PackageNotFoundError
@@ -20,7 +21,7 @@ sys.path.insert(0, os.path.abspath(".."))
 # -- Project information -----------------------------------------------------
 
 project = "fdsreader"
-copyright = "2020–2026, Forschungszentrum Jülich, IAS-7"
+copyright = f"2020–{datetime.date.today().year}, Forschungszentrum Jülich, IAS-7"
 author = "Jan Vogelsang, Marc Fehr, Tristan Hehnen, Kristian Börger, Lukas Arnold"
 
 # The full version, including alpha/beta/rc tags
@@ -38,7 +39,6 @@ version = release
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.viewcode",
-    "sphinx.ext.intersphinx",
     "autodocsumm",
     "sphinxcontrib.mermaid",
 ]
@@ -46,10 +46,11 @@ extensions = [
 # Let diagrams take their natural height instead of squeezing them into 500px.
 mermaid_height = "auto"
 
-intersphinx_mapping = {
-    "python": ("https://docs.python.org/3", None),
-    "numpy": ("https://numpy.org/doc/stable", None),
-}
+# The FDS version the compatibility workflow last tested against (bumped automatically by
+# .github/workflows/fds_compat.yml), available in the docs as |fds_tested|.
+with open(os.path.join(os.path.dirname(__file__), "..", ".github", "last_tested_fds_version.txt")) as f:
+    fds_tested = f.read().strip().removeprefix("FDS-")
+rst_epilog = f".. |fds_tested| replace:: {fds_tested}\n"
 
 # fdsreader.explorer's Jupyter front end needs matplotlib and ipywidgets, which are an
 # optional extra and are not installed for a docs build.
