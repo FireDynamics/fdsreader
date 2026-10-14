@@ -1,12 +1,12 @@
 Utilities
-_________
+=========
 
 .. automodule:: fdsreader.utils.extent
+   :autosummary:
    :members:
    :undoc-members:
-   :noindex:
 
 .. automodule:: fdsreader.utils.dimension
+   :autosummary:
    :members:
    :undoc-members:
-   :noindex:

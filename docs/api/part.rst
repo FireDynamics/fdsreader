@@ -1,14 +1,12 @@
 Particles
-_________
+=========
 
-.. automodule:: fdsreader.part.ParticleCollection
+.. automodule:: fdsreader.part.particle_collection
    :autosummary:
    :members:
    :undoc-members:
-   :noindex:
 
 .. automodule:: fdsreader.part.particle
    :autosummary:
    :members:
    :undoc-members:
-   :noindex:

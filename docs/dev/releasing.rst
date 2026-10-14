@@ -34,6 +34,17 @@ Before the first release, a maintainer must configure **Trusted Publishing** on 
 This setup only needs to be done once.
 See the `Trusted Publishing docs <https://docs.pypi.org/trusted-publishers/>`_ for details.
 
+Before a release
+----------------
+
+* The FDS compatibility table is up to date (see below).
+* The explorer is documented twice, in ``README.md`` and in
+  ``docs/guide/explorer.rst``. If it changed, update both.
+* The Zenodo archive of the previous release exists
+  (`10.5281/zenodo.6783225 <https://doi.org/10.5281/zenodo.6783225>`_ always points to
+  the latest archived version). If it is missing, the GitHub–Zenodo webhook needs to be
+  reconnected on zenodo.org.
+
 Stable release (publishes to PyPI)
 -----------------------------------
 
@@ -76,10 +87,13 @@ After pushing the tag:
 3. Verify the new version on `pypi.org/project/fdsreader <https://pypi.org/project/fdsreader/>`_
 
 Updating the FDS compatibility table
---------------------------------------
+------------------------------------
 
-After testing with a new FDS version, update the compatibility table in ``README.md``
-and commit the change to master before tagging the release.
+After testing with a new FDS version, update the table in
+``docs/guide/compatibility.rst`` and the short summary under *Installation* in
+``README.md`` (latest tested FDS version), and commit the change to master before
+tagging the release. ``.github/last_tested_fds_version.txt`` holds the version the
+compatibility workflow last tested.
 
 Version number guidelines
 --------------------------

@@ -1,20 +1,17 @@
-Boundary files
-______________
+Boundary data
+=============
 
-.. automodule:: fdsreader.bndf.ObstructionCollection
+.. automodule:: fdsreader.bndf.obstruction_collection
    :autosummary:
    :members:
    :undoc-members:
-   :noindex:
 
 .. automodule:: fdsreader.bndf.obstruction
    :autosummary:
    :members:
    :undoc-members:
-   :noindex:
 
 .. automodule:: fdsreader.bndf.utils
    :autosummary:
    :members:
    :undoc-members:
-   :noindex:

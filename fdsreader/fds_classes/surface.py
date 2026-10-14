@@ -3,12 +3,12 @@ from typing import Tuple
 
 class Surface:
     """Surface objects describe what bounding surfaces consist of. Boundary conditions for obstructions and vents are
-        prescribed by referencing the appropriate surface.
+    prescribed by referencing the appropriate surface.
 
     :ivar name: Name of the surface.
     :ivar material_emissivity: Emissivity of the material.
     :ivar surface_type: Type of the surface.
-    :ivar texture_width:Width of the texture of the surface.
+    :ivar texture_width: Width of the texture of the surface.
     :ivar texture_height: Height of the texture of the surface.
     :ivar texture_map: Path to the texture map used for the surface.
     :ivar rgb: Color of the surface in form of a 3-element tuple.

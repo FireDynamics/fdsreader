@@ -1,52 +1,52 @@
-FDSReader documentation!
-========================
+fdsreader
+=========
 
-FDSReader is a Python package for reading and analyzing output data from the
-`Fire Dynamics Simulator (FDS) <https://pages.nist.gov/fds-smv/>`_.
-It provides convenient tools for accessing simulation results such as slices,
-boundary data, devices, particles, and more.
+**Fast and easy-to-use Python reader for** `Fire Dynamics Simulator (FDS)
+<https://pages.nist.gov/fds-smv/>`_ **output.**
 
-Source code, issue tracker and releases are hosted on
+fdsreader reads the binary and CSV files an FDS simulation writes and hands you the data
+as NumPy arrays. Point it at a simulation directory and every output is available as a
+Python object, loaded only when you first access it. Data from multi-mesh simulations can
+be merged into one global array. For a quick look without writing any plotting code,
+there is an :doc:`explorer <guide/explorer>` for Jupyter and the terminal.
+
+Source code, issue tracker and releases are on
 `GitHub <https://github.com/FireDynamics/fdsreader>`_.
 
 .. toctree::
    :maxdepth: 1
-   :caption: Maintainer Guide
+   :caption: User Guide
 
-   releasing
+   guide/installation
+   guide/quickstart
+   guide/configuration
+   guide/explorer
+   guide/examples
+   guide/compatibility
 
 .. toctree::
    :maxdepth: 1
-   :caption: FDSReader
+   :caption: API Reference
 
-   simulation
-   slcf
-   bndf
-   geom
-   isof
-   pl3d
-   smoke3d
-   part
-   devc
-   evac
-   quantity
-   fds_classes
-   utils
-   export
-   explorer
+   api/simulation
+   api/slcf
+   api/bndf
+   api/geom
+   api/isof
+   api/pl3d
+   api/smoke3d
+   api/part
+   api/devc
+   api/evac
+   api/quantity
+   api/fds_classes
+   api/utils
+   api/export
+   api/explorer
 
-.. include::  simulation.rst
-.. include::  slcf.rst
-.. include::  bndf.rst
-.. include::  geom.rst
-.. include::  isof.rst
-.. include::  pl3d.rst
-.. include::  smoke3d.rst
-.. include::  part.rst
-.. include::  devc.rst
-.. include::  evac.rst
-.. include::  quantity.rst
-.. include::  fds_classes.rst
-.. include::  utils.rst
-.. include::  export.rst
-.. include::  explorer.rst
+.. toctree::
+   :maxdepth: 1
+   :caption: Development
+
+   dev/contributing
+   dev/releasing
