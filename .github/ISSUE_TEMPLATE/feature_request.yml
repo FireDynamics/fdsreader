@@ -1,0 +1,38 @@
+name: Feature request
+description: Suggest a new feature or an improvement
+title: "[Feature]: "
+labels: [enhancement]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Welcome to the fdsreader GitHub repository!
+        Thank you for taking the time to suggest an improvement.
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: What do you want to do?
+      description: Describe your use case and what is missing or cumbersome today.
+      placeholder: I would like to ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: How could fdsreader support this? Code sketches or example calls are welcome.
+      placeholder: For example, sim.slices[0].some_method(...)
+
+  - type: textarea
+    id: fds-output
+    attributes:
+      label: FDS output involved
+      description: Which FDS output does this concern (e.g. slices, boundary files, Smoke3D, devices), and which FDS version?
+      placeholder: e.g. &SLCF with FDS 6.11.1
+
+  - type: markdown
+    attributes:
+      value: "_Thanks for your suggestion!_"
