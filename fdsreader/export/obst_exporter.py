@@ -37,7 +37,8 @@ def export_obst_raw(obst: Obstruction, output_dir: str, ordering: Literal["C", "
     meta["TimeSteps"] = len(random_bndf.times)
     faces = random_bndf.data
     meta["NumOrientations"] = len(faces)
-    # In the order of get_global_boundary_data_arrays, which the data files follow
+    # Sorted like get_global_boundary_data_arrays. These are the faces of one part of the obstruction; for an
+    # obstruction spanning several meshes, the data files may hold faces that are not listed here.
     for orientation, face in sorted(faces.items()):
         if abs(orientation) == 1:
             spacing1 = (bounding_box[3] - bounding_box[2]) / face.shape[0]

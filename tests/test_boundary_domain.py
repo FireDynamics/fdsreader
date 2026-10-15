@@ -24,19 +24,29 @@ def sim(request):
 
 def _floor_patches(sim, mesh_id, quantity):
     boundary = sim.meshes.get_by_id(mesh_id).get_boundary_data(quantity)
-    return sorted(
-        (p for p in boundary.patches if p.orientation == FLOOR), key=lambda p: (p.extent.x_start, p.extent.y_start)
-    )
+    return [p for p in boundary.patches if p.orientation == FLOOR]
 
 
-def test_all_patches_of_a_face_are_kept(sim):
+# The tests also run on the output of new FDS builds, so they do not rely on how FDS splits the floor into patches
+# x = 0 and the top are open, x = 1 lies between the meshes, so 'West' has no faces facing +-x and 'East' only -x
+@pytest.mark.parametrize(
+    "mesh_id, n_cells, orientations", [("West", 10 * 10, [-2, 2, 3]), ("East", 5 * 5, [-2, -1, 2, 3])]
+)
+def test_all_patches_of_a_face_are_kept(sim, mesh_id, n_cells, orientations):
+    patches = _floor_patches(sim, mesh_id, CELLS)
+    assert len(patches) > 1  # the vent splits the floor
+    assert sum(p.data[0].size for p in patches) == n_cells  # together they cover the floor of the mesh
+    boundary = sim.meshes.get_by_id(mesh_id).get_boundary_data(CELLS)
+    assert boundary.orientations == orientations
+    assert boundary.vmax(FLOOR) == max(np.max(p.data) for p in patches)
+
+
+def test_boundary_data_warns_when_it_drops_patches(sim):
     boundary = sim.meshes.get_by_id("West").get_boundary_data(CELLS)
-    assert len([p for p in boundary.patches if p.orientation == FLOOR]) == 4
-    assert boundary.orientations == [-2, 2, 3]  # x = 0 is open, x = 1 lies between the meshes, the top is open
-    assert boundary.vmax(FLOOR) == max(np.max(p.data) for p in _floor_patches(sim, "West", CELLS))
     with pytest.warns(UserWarning, match="Boundary.patches") as record:
         _ = boundary.data
-    assert record[0].filename == __file__  # points at the caller, not into fdsreader
+    warning = next(w for w in record if "Boundary.patches" in str(w.message))
+    assert warning.filename == __file__  # points at the caller, not into fdsreader
 
 
 def test_vmin_and_vmax_of_a_missing_face_are_nan(sim):
@@ -63,12 +73,13 @@ def test_the_floor_over_both_meshes(sim):
     np.testing.assert_array_equal(floor[-1] > 0, burning)
 
 
-def test_the_floor_holds_each_patch(sim):
+@pytest.mark.parametrize("mesh_id, repeat", [("West", 1), ("East", 2)])  # 'East' has cells twice as large
+def test_the_floor_holds_each_patch(sim, mesh_id, repeat):
     floor = sim.meshes.get_global_boundary_data_arrays(CELLS)[FLOOR]
-    west = _floor_patches(sim, "West", CELLS)[0]  # x 0..0.6, y 0..1
-    np.testing.assert_array_equal(floor[:, 0:6, 0:10], west.data)
-    east = _floor_patches(sim, "East", CELLS)[0]  # x 1..2, y 0..0.4, 0.2 m cells
-    np.testing.assert_array_equal(floor[:, 10:20, 0:4], east.data.repeat(2, axis=1).repeat(2, axis=2))
+    for patch in _floor_patches(sim, mesh_id, CELLS):
+        x = slice(round(patch.extent.x_start / 0.1), round(patch.extent.x_end / 0.1))
+        y = slice(round(patch.extent.y_start / 0.1), round(patch.extent.y_end / 0.1))
+        np.testing.assert_array_equal(floor[:, x, y], patch.data.repeat(repeat, axis=1).repeat(repeat, axis=2))
 
 
 def test_node_based_floor(sim):

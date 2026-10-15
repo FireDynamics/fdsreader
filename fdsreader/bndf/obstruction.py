@@ -3,13 +3,12 @@ import os
 import warnings
 
 # Unfortunately, this is necessary due to a cyclic reference. "Mesh" is only needed for static type hints anyway
-from typing import TYPE_CHECKING, Dict, List, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, Callable, Dict, List, Sequence, Tuple, Union
 
 import numpy as np
 from typing_extensions import Literal
 
 import fdsreader.utils.fortran_data as fdtype
-from fdsreader import settings
 from fdsreader.utils import Dimension, Extent, Quantity
 from fdsreader.utils.misc import caller_stacklevel
 
@@ -317,10 +316,6 @@ class SubObstruction:
             for patch in patches:
                 patch._boundary_parent = self._boundary_data[bid]
 
-        if not settings.LAZY_LOAD:
-            for patch in patches:
-                _ = patch.data
-
     @property
     def orientations(self):
         """Return all orientations for which there is data available."""
@@ -338,8 +333,8 @@ class SubObstruction:
         """
         if self.has_boundary_data:
             return {
-                orientation: patch.get_coordinates(ignore_cell_centered)
-                for orientation, patch in next(iter(self._boundary_data.values())).data.items()
+                patch.orientation: patch.get_coordinates(ignore_cell_centered)
+                for patch in next(iter(self._boundary_data.values())).patches
             }
         return {}
 
@@ -650,7 +645,7 @@ class Obstruction:
         }
         if orientation == 0:
             return ret
-        return {mesh: bndf for mesh, bndf in ret.items() if orientation in bndf.data.keys()}
+        return {mesh: bndf for mesh, bndf in ret.items() if orientation in bndf.orientations}
 
     def get_nearest_timestep(self, time: float, visible_only: bool = False) -> int:
         """Calculates the nearest timestep for which data has been output for this obstruction."""
@@ -723,7 +718,7 @@ class Obstruction:
         """
         if not self.has_boundary_data:
             return dict()
-        return _global_boundary_arrays([subobst._boundary_data for subobst in self._all_subobstructions], quantity)
+        return _global_boundary_arrays([subobst.get_data for subobst in self._all_subobstructions], quantity)
 
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory."""
@@ -740,7 +735,7 @@ class Obstruction:
         :param orientation: Optionally filter by patches with a specific orientation.
         """
         values = [s.vmin(quantity, orientation) for s in self._all_subobstructions if s.has_boundary_data]
-        return float(np.nanmin(values)) if not np.isnan(values).all() else np.nan
+        return min((v for v in values if not np.isnan(v)), default=np.nan)
 
     def vmax(
         self,
@@ -752,7 +747,7 @@ class Obstruction:
         :param orientation: Optionally filter by patches with a specific orientation.
         """
         values = [s.vmax(quantity, orientation) for s in self._all_subobstructions if s.has_boundary_data]
-        return float(np.nanmax(values)) if not np.isnan(values).all() else np.nan
+        return max((v for v in values if not np.isnan(v)), default=np.nan)
 
     def get_subobstructions(self, mesh: "Mesh") -> List[SubObstruction]:
         """All parts of this obstruction in the given mesh; several OBST lines can share an ID."""
@@ -788,30 +783,27 @@ def _find_boundary(boundary_data: Dict[int, Boundary], quantity: Union[str, Quan
     """The boundary data of a quantity, by its name or short name, among those of a mesh or subobstruction."""
     if isinstance(quantity, Quantity):
         quantity = quantity.name
-    b = next(
-        (
-            b
-            for b in boundary_data.values()
-            if b.quantity.name.lower() == quantity.lower() or b.quantity.short_name.lower() == quantity.lower()
-        ),
-        None,
-    )
+    # Quantity == str matches the name or the short name, ignoring case
+    b = next((b for b in boundary_data.values() if b.quantity == quantity), None)
     if b is None:
         raise KeyError(f"No boundary data found for quantity '{quantity}'")
     return b
 
 
 def _global_boundary_arrays(
-    owners_boundary_data: List[Dict[int, Boundary]], quantity: Union[str, Quantity]
+    lookups: List[Callable[[Union[str, Quantity]], Boundary]], quantity: Union[str, Quantity]
 ) -> Dict[int, Union[np.ndarray, Tuple[np.ndarray, ...]]]:
     """Combines the patches of a quantity from several meshes or subobstructions into one array of shape (n_t, a, b)
     per orientation, or a tuple of them, one per position, if the faces of an orientation lie at several positions.
-    See :meth:`Obstruction.get_global_boundary_data_arrays`. Raises KeyError if none of them has the quantity.
+    See :meth:`Obstruction.get_global_boundary_data_arrays`.
+
+    :param lookups: The boundary data lookup of each mesh or subobstruction, which raises KeyError if it does not have
+        the quantity. Raises KeyError if none of them has it.
     """
     patches_by_orientation: Dict[int, List[Patch]] = dict()
-    for boundary_data in owners_boundary_data:
+    for lookup in lookups:
         try:
-            boundary = _find_boundary(boundary_data, quantity)
+            boundary = lookup(quantity)
         except KeyError:
             continue
         for patch in boundary.patches:

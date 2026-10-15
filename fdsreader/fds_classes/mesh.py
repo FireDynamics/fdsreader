@@ -4,7 +4,6 @@ from typing import Dict, List, Sequence, Tuple, Union
 import numpy as np
 from typing_extensions import Literal
 
-from fdsreader import settings
 from fdsreader.bndf import Boundary, Patch
 from fdsreader.bndf.obstruction import _find_boundary
 from fdsreader.utils import Dimension, Extent, Quantity
@@ -228,10 +227,6 @@ class Mesh:
             # Add reference to parent boundary class in patches
             for patch in patches:
                 patch._boundary_parent = self._boundary_data[bid]
-
-        if not settings.LAZY_LOAD:
-            for patch in patches:
-                _ = patch.data
 
     def get_boundary_data(self, quantity: Union[str, Quantity]) -> Boundary:
         """The boundary data of a quantity on the faces of this mesh that are not faces of obstructions (those belong
