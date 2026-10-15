@@ -392,6 +392,7 @@ class Smoke3D(NumpyArrayMixin):
         temp_min: float | None = None,
         temp_max: float | None = None,
         kind: Literal["gas", "hrrpuv", "temperature"] | None = None,
+        mask: Literal["obstructions", "placeholders"] = "obstructions",
     ) -> Union[np.ndarray, tuple]:
         """Creates a global numpy ndarray from all subsmokes.
 
@@ -408,7 +409,11 @@ class Smoke3D(NumpyArrayMixin):
         :param kind: Overrides :attr:`kind`, see :meth:`SubSmoke3D.to_physical`.
         :returns: The global array, followed by the saturation mask if ``return_saturated`` and the
             coordinates if ``return_coordinates``.
+        :param mask: Which obstruction mask to apply with ``masked=True``: ``"obstructions"`` (default) hides
+            everything inside an obstruction and on its faces, ``"placeholders"`` only the values FDS did not
+            compute but filled with the ambient value; see :meth:`Mesh.get_obstruction_mask`.
         """
+        mask_mode = mask  # the local name mask is used for the mask arrays below
         if return_saturated and not physical:
             raise ValueError("return_saturated needs physical=True")
         if not physical:
@@ -470,7 +475,7 @@ class Smoke3D(NumpyArrayMixin):
             else:
                 subsmoke_data = subsmoke._codes().copy()
             if masked:
-                mask = subsmoke.mesh.get_obstruction_mask(self.times)
+                mask = subsmoke.mesh.get_obstruction_mask(self.times, mode=mask_mode)
 
             start_idx = {
                 dim: int(round((subsmoke.mesh.coordinates[dim][0] - coord_min[dim]) / step_sizes_min[dim]))
@@ -542,6 +547,7 @@ class Smoke3D(NumpyArrayMixin):
         temp_min: float | None = None,
         temp_max: float | None = None,
         kind: Literal["gas", "hrrpuv", "temperature"] | None = None,
+        mask: Literal["obstructions", "placeholders"] = "obstructions",
     ):
         """Physical values of all meshes on one grid; the same as ``to_global(physical=True)``.
         See :meth:`SubSmoke3D.to_physical` for the conversion and its limits."""
@@ -555,6 +561,7 @@ class Smoke3D(NumpyArrayMixin):
             temp_min=temp_min,
             temp_max=temp_max,
             kind=kind,
+            mask=mask,
         )
 
     def __getitem__(self, mesh: Mesh):

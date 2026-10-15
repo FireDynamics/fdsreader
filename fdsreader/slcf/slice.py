@@ -557,7 +557,11 @@ class Slice(NumpyArrayMixin):
         return slices_cart
 
     def to_global(
-        self, masked: bool = False, fill: float = 0, return_coordinates: bool = False
+        self,
+        masked: bool = False,
+        fill: float = 0,
+        return_coordinates: bool = False,
+        mask: Literal["obstructions", "placeholders"] = "obstructions",
     ) -> Union[
         np.ndarray,
         Tuple[np.ndarray, np.ndarray],
@@ -582,7 +586,11 @@ class Slice(NumpyArrayMixin):
         :param masked: Whether to apply the obstruction mask to the slice or not.
         :param fill: The fill value to use for masked slice entries. Only used when masked=True.
         :param return_coordinates: If true, return the matching coordinate for each value on the generated grid.
+        :param mask: Which obstruction mask to apply with ``masked=True``: ``"obstructions"`` (default) hides
+            everything inside an obstruction and on its faces, ``"placeholders"`` only the values FDS did not
+            compute but filled with the ambient value; see :meth:`Mesh.get_obstruction_mask`.
         """
+        mask_mode = mask  # the local name mask is used for the mask arrays below
         if len(self._subslices) == 0:
             if return_coordinates:
                 return np.array([]), {d: np.array([]) for d in ("x", "y", "z")}
@@ -653,7 +661,7 @@ class Slice(NumpyArrayMixin):
                 slc_data = (
                     slc.data.copy() if slc.orientation == 0 else np.expand_dims(slc.data.copy(), axis=slc.orientation)
                 )
-                mask = slc.mesh.get_obstruction_mask_slice(slc) if masked else None
+                mask = slc.mesh.get_obstruction_mask_slice(slc, mode=mask_mode) if masked else None
 
                 slc_nodes = nodes[mesh]
                 start_idx = dict()

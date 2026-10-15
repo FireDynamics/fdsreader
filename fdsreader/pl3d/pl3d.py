@@ -111,14 +111,22 @@ class Plot3D(NumpyArrayMixin):
             subplot.clear_cache()
 
     def to_global(
-        self, masked: bool = False, fill: float = 0, return_coordinates: bool = False
+        self,
+        masked: bool = False,
+        fill: float = 0,
+        return_coordinates: bool = False,
+        mask: Literal["obstructions", "placeholders"] = "obstructions",
     ) -> Union[np.ndarray, Tuple[np.ndarray, Dict[Literal["x", "y", "z"], np.ndarray]]]:
         """Creates a global numpy ndarray from all subplots.
 
         :param masked: Whether to apply the obstruction mask to the data or not.
         :param fill: The fill value to use for masked entries. Only used when masked=True.
         :param return_coordinates: If true, return the matching coordinate for each value on the generated grid.
+        :param mask: Which obstruction mask to apply with ``masked=True``: ``"obstructions"`` (default) hides
+            everything inside an obstruction and on its faces, ``"placeholders"`` only the values FDS did not
+            compute but filled with the ambient value; see :meth:`Mesh.get_obstruction_mask`.
         """
+        mask_mode = mask  # the local name mask is used for the mask arrays below
         if len(self._subplots) == 0:
             if return_coordinates:
                 return np.array([]), {d: np.array([]) for d in ("x", "y", "z")}
@@ -168,7 +176,7 @@ class Plot3D(NumpyArrayMixin):
         for subplot in self._subplots.values():
             subplot_data = self._data_on_global_times(subplot)
             if masked:
-                mask = subplot.mesh.get_obstruction_mask(self.times)
+                mask = subplot.mesh.get_obstruction_mask(self.times, mode=mask_mode)
 
             start_idx = {
                 dim: int(round((subplot.mesh.coordinates[dim][0] - coord_min[dim]) / step_sizes_min[dim]))

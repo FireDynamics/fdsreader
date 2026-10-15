@@ -37,12 +37,12 @@ def _shared_frames(a, b):
 
 
 @pytest.mark.parametrize("slice_id", SLICE_IDS)
-def test_mask_blocks_exactly_the_placeholder_values(sim, slice_id):
+def test_placeholder_mask_blocks_exactly_the_placeholder_values(sim, slice_id):
     for sub in sim.slices.get_by_id(slice_id).subslices:
         data = sub.data[-1]
         if sub.orientation:
             data = np.expand_dims(data, sub.orientation - 1)
-        blocked = ~sub.mesh.get_obstruction_mask_slice(sub)[-1]
+        blocked = ~sub.mesh.get_obstruction_mask_slice(sub, mode="placeholders")[-1]
         np.testing.assert_array_equal(blocked, data == PLACEHOLDER, err_msg=f"{slice_id} in {sub.mesh.id}")
 
 
@@ -50,23 +50,70 @@ def test_cells_and_nodes_of_an_obstruction(sim):
     # 'Box' spans the nodes 3..7, 3..6, 2..6 of M1: its cells are 3..6, 3..5, 2..5, its inner nodes 4..6, 4..5, 3..5
     times = sim.slices.get_by_id("vol").times
     m1 = _mesh(sim, "M1")
-    cells = ~m1.get_obstruction_mask(times, cell_centered=True)[-1]
-    nodes = ~m1.get_obstruction_mask(times)[-1]
-    assert cells[3:7, 3:6, 2:6].all() and not cells[7, 4, 4] and not cells[2, 4, 4]
+    for mode in ("obstructions", "placeholders"):
+        cells = ~m1.get_obstruction_mask(times, cell_centered=True, mode=mode)[-1]
+        assert cells[3:7, 3:6, 2:6].all() and not cells[7, 4, 4] and not cells[2, 4, 4]
+    nodes = ~m1.get_obstruction_mask(times, mode="placeholders")[-1]
     assert nodes[4:7, 4:6, 3:6].all()
     assert not nodes[3, 4, 4] and not nodes[7, 4, 4]  # the faces of 'Box' at x = 0.3 and 0.7 hold gas values
+    nodes = ~m1.get_obstruction_mask(times)[-1]
+    assert nodes[3:8, 3:7, 2:7].all() and not nodes[2, 4, 4] and not nodes[8, 4, 4]  # with its faces
 
 
-def test_nodes_where_obstructions_touch_or_meet_the_mesh_edge(sim):
+def test_placeholder_nodes_where_obstructions_touch_or_meet_the_mesh_edge(sim):
     times = sim.slices.get_by_id("vol").times
     m1, m2, m3 = (_mesh(sim, mesh_id) for mesh_id in ("M1", "M2", "M3"))
-    nodes = {mesh.id: ~mesh.get_obstruction_mask(times)[-1] for mesh in (m1, m2, m3)}
+    nodes = {mesh.id: ~mesh.get_obstruction_mask(times, mode="placeholders")[-1] for mesh in (m1, m2, m3)}
     assert nodes["M2"][4, 2, 7]  # the face shared by 'Left' (x 2..4) and 'Right' (x 4..6)
     assert nodes["M1"][10, 8, 4] and nodes["M2"][0, 8, 4]  # 'Across' on both sides of the mesh boundary
     assert nodes["M2"][10, 4, 4]  # 'Span' at the outside of the domain
     assert nodes["M1"][3, 10, 7]  # 'Under' ends at the edge of M1, although M3 has gas beyond
     assert not nodes["M3"][3, 0, 7]  # ... which M3 writes on its own edge
     assert nodes["M1"][7, 10, 7]  # 'Outside' ends at y = 1, where the domain ends
+
+
+def _inside_obstructions(sub, cell_centered):
+    """Expected obstruction mask of a subslice from the coordinates of the obstructions in the .smv file: the cells
+    whose centre lies inside an obstruction (for one without thickness, the cells right after it), or the nodes
+    inside or on it."""
+    coords = sub.get_coordinates()
+    grids = np.meshgrid(*(coords[dim] for dim in "xyz"), indexing="ij")
+    spacing = {dim: np.diff(sub.mesh.coordinates[dim]).min() for dim in "xyz"}
+    blocked = np.zeros(grids[0].shape, dtype=bool)
+    for obst in sub.mesh.obstructions:
+        for subobst in obst.get_subobstructions(sub.mesh):
+            inside = np.ones(blocked.shape, dtype=bool)
+            for grid, dim in zip(grids, "xyz"):
+                low, high = subobst.extent[dim]
+                tol = 1e-4 * spacing[dim]
+                if cell_centered and high - low < tol:  # without thickness: the cell after it
+                    inside &= (grid > low) & (grid < low + spacing[dim])
+                else:
+                    inside &= (grid > low - tol) & (grid < high + tol)
+            blocked |= inside
+    return blocked
+
+
+@pytest.mark.parametrize("slice_id", SLICE_IDS)
+def test_obstruction_mask_covers_the_obstructions_and_their_faces(sim, slice_id):
+    for sub in sim.slices.get_by_id(slice_id).subslices:
+        blocked = ~sub.mesh.get_obstruction_mask_slice(sub)[-1]
+        expected = _inside_obstructions(sub, sub.cell_centered)
+        np.testing.assert_array_equal(blocked, expected, err_msg=f"{slice_id} in {sub.mesh.id}")
+
+
+@pytest.mark.parametrize("slice_id", SLICE_IDS)
+def test_obstruction_mask_contains_every_placeholder(sim, slice_id):
+    # Everything FDS did not compute lies inside an obstruction or on its faces
+    for sub in sim.slices.get_by_id(slice_id).subslices:
+        obstructions = ~sub.mesh.get_obstruction_mask_slice(sub)[-1]
+        placeholders = ~sub.mesh.get_obstruction_mask_slice(sub, mode="placeholders")[-1]
+        assert not (placeholders & ~obstructions).any()
+
+
+def test_unknown_mask_mode_is_rejected(sim):
+    with pytest.raises(ValueError, match="mode"):
+        sim.meshes[0].get_obstruction_mask([0.0], mode="solid")
 
 
 @pytest.mark.parametrize(
@@ -99,9 +146,9 @@ def test_to_global_coordinates_of_cell_centred_slices_are_the_cell_centres(sim):
 
 
 @pytest.mark.parametrize("slice_id", ["z04", "z04_cc", "vol", "vol_cc"])
-def test_to_global_masked_hides_exactly_the_placeholder_values(sim, slice_id):
+def test_to_global_with_placeholder_mask_hides_exactly_the_placeholder_values(sim, slice_id):
     slc = sim.slices.get_by_id(slice_id)
-    values = slc.to_global(masked=True, fill=np.nan)[-1]
+    values = slc.to_global(masked=True, fill=np.nan, mask="placeholders")[-1]
     raw = slc.to_global()[-1]
     covered = ~np.isnan(raw)  # the global grid also spans x > 0.5, y > 1, where there is no mesh
     np.testing.assert_array_equal(np.isnan(values)[covered], (raw == PLACEHOLDER)[covered])

@@ -49,23 +49,37 @@ class Mesh:
         self._boundary_data: Dict[int, Boundary] = dict()
 
     def get_obstruction_mask(
-        self, times: Sequence[float], cell_centered=False, region: Tuple[slice, slice, slice] | None = None
+        self,
+        times: Sequence[float],
+        cell_centered=False,
+        region: Tuple[slice, slice, slice] | None = None,
+        mode: Literal["obstructions", "placeholders"] = "obstructions",
     ) -> np.ndarray:
-        """Marks all cells (or nodes) which are blocked by an obstruction, i.e. those FDS fills with a placeholder
-        (the ambient value) instead of a value of the gas.
+        """Marks all cells (or nodes) which are blocked by an obstruction.
 
-        A cell is blocked if it lies inside an obstruction. A node is blocked if all cells of this mesh around it
-        are, as FDS averages a node from the gas cells around it and Smokeview blanks a node the same way. So the
+        With ``mode="obstructions"`` (the default) the mask shows where the obstructions are: the cells inside an
+        obstruction, or the nodes inside it and on its faces. An obstruction without thickness (a thin wall) blocks
+        the one row of cells after its node, or the nodes on it.
+
+        With ``mode="placeholders"`` it marks only the values FDS fills with a placeholder (the ambient value)
+        instead of a value of the gas: the cells inside an obstruction, and the nodes where all cells of this mesh
+        around them are, as FDS averages a node from the gas cells around it (CORNER_VALUE in dump.f90). So the
         nodes on the faces of an obstruction keep their gas values, except where obstructions touch each other or
-        an obstruction ends at the edge of the mesh. The mask is only derived from &OBST input; FDS writes face
-        quantities such as velocities and solids defined with &GEOM differently.
+        an obstruction ends at the edge of the mesh. For cell-centred data both modes are the same, apart from
+        obstructions without thickness.
+
+        Both masks are derived from &OBST input only; solids defined with &GEOM are not included, and FDS writes
+        face quantities such as velocities differently.
 
         :param times: All timesteps of the simulation.
         :param region: Index ranges along x, y and z, as slices without a step, to which the mask is limited.
             The whole mesh by default.
+        :param mode: ``"obstructions"`` or ``"placeholders"``, see above.
         :returns: A 4-dimensional array with time as first and x,y,z as last dimensions, False where blocked. The
             array depends on time as obstructions may be hidden as specific points in time.
         """
+        if mode not in ("obstructions", "placeholders"):
+            raise ValueError(f"mode must be 'obstructions' or 'placeholders', not {mode!r}")
         shape = self.dimension.shape(cell_centered=cell_centered)
         if region is None:
             region = (slice(None),) * 3
@@ -74,15 +88,31 @@ class Mesh:
         # Resolve open ends and negative indices like numpy indexing does
         region = tuple(slice(*r.indices(n)[:2]) for r, n in zip(region, shape))
         region = tuple(slice(r.start, max(r.start, r.stop)) for r in region)
+        times = np.asarray(times, dtype=float)
 
-        # The cells needed: those of the region, or for nodes the cells on both sides of each node
+        if mode == "obstructions":
+            mask = np.ones((len(times),) + tuple(r.stop - r.start for r in region), dtype=bool)
+            for obst in self.obstructions:
+                for subobst in obst.get_subobstructions(self):
+                    blocked = list()
+                    for dim, r in zip(("x", "y", "z"), region):
+                        low, high = subobst.bound_indices[dim]  # nodes of the faces
+                        # Cells low..high-1 (at least one), or nodes low..high
+                        high = max(high, low + 1) if cell_centered else high + 1
+                        blocked.append(slice(max(low, r.start) - r.start, max(min(high, r.stop) - r.start, 0)))
+                    if any(b.stop <= b.start for b in blocked):
+                        continue  # none in the region
+                    visible = self._time_indices(times, subobst.get_visible_times(times))
+                    mask[(visible,) + tuple(blocked)] = False
+            return mask
+
+        # Placeholders: the cells needed are those of the region, or for nodes the cells on both sides of each node
         n_cells = self.dimension.shape(cell_centered=True)
         offset = 0 if cell_centered else 1
         window = tuple(slice(r.start - offset, r.stop) for r in region)
         inside = tuple(slice(max(w.start, 0), min(w.stop, n)) for w, n in zip(window, n_cells))
         solid = np.zeros((len(times),) + tuple(max(c.stop - c.start, 0) for c in inside), dtype=bool)
 
-        times = np.asarray(times, dtype=float)
         for obst in self.obstructions:
             for subobst in obst.get_subobstructions(self):
                 cells = list()
@@ -117,9 +147,9 @@ class Mesh:
         idx = np.clip(np.searchsorted(times, selected), 1, len(times) - 1)
         return idx - (np.abs(times[idx - 1] - selected) <= np.abs(times[idx] - selected))
 
-    def get_obstruction_mask_slice(self, subslice):
+    def get_obstruction_mask_slice(self, subslice, mode: Literal["obstructions", "placeholders"] = "obstructions"):
         """Marks the cells, or nodes, of a single subslice which are blocked by an obstruction, by the rules of
-        :meth:`get_obstruction_mask`.
+        :meth:`get_obstruction_mask` for the given mode.
 
         :returns: A 4-dimensional array with time as first and x,y,z as last dimensions, matching the shape of the
             subslice's data. The array depends on time as obstructions may be hidden at specific points in time.
@@ -127,7 +157,7 @@ class Mesh:
         """
         ranges = subslice.index_ranges()
         region = tuple(ranges[dim] for dim in ("x", "y", "z"))
-        return self.get_obstruction_mask(subslice.times, cell_centered=subslice.cell_centered, region=region)
+        return self.get_obstruction_mask(subslice.times, cell_centered=subslice.cell_centered, region=region, mode=mode)
 
     def coordinate_to_index(
         self,
