@@ -1,0 +1,94 @@
+name: FDS Nightly Check
+
+# Early warning for changes in the FDS development version: runs tests/cases/fds_inputs/*.fds through the
+# latest FDS nightly build (firemodels/test_bundles, release FDS_TEST) and the tests against that output.
+#
+# Nightly builds are not supported by fdsreader and may contain unfinished changes, so this run never fails
+# and sends no notifications. The result is in the run's summary, with a warning if something broke.
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 7 * * 1"  # Every Monday 07:00 UTC, after the FDS release check
+  pull_request:
+    paths:
+      - .github/workflows/fds_nightly.yml
+
+jobs:
+  nightly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Download FDS nightly
+        id: download
+        continue-on-error: true
+        run: |
+          ASSET=$(gh api repos/firemodels/test_bundles/releases/tags/FDS_TEST \
+            --jq '.assets[] | select(.name | test("_nightly_lnx\\.sh$")) | "\(.name) \(.browser_download_url)"' | head -n1)
+          if [ -z "$ASSET" ]; then
+            echo "No Linux nightly installer found in firemodels/test_bundles (FDS_TEST)" >&2
+            exit 1
+          fi
+          NAME=${ASSET%% *}
+          echo "build=${NAME%%_SMV*}" >> $GITHUB_OUTPUT
+          wget -q "${ASSET##* }" -O fds_install.sh
+          chmod +x fds_install.sh
+          printf '\n%s\nyes\n' "$HOME/fds" | ./fds_install.sh
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Run test simulations
+        id: simulations
+        if: steps.download.outcome == 'success'
+        continue-on-error: true
+        run: |
+          source $HOME/fds/bin/FDS6VARS.sh
+          # See fds_compat.yml: keep the bundled Intel MPI runtime on shared memory in the container
+          export FI_PROVIDER=tcp
+          export I_MPI_FABRICS=shm
+          FDS=$HOME/fds/bin/fds_openmp
+          for input in tests/cases/fds_inputs/*.fds; do
+            name=$(basename "$input" .fds)
+            mkdir -p /tmp/fds_out/$name
+            cd /tmp/fds_out/$name
+            timeout 600 $FDS "$GITHUB_WORKSPACE/$input" > run.log 2>&1 || echo "$name" >> /tmp/fds_failed.txt
+            cd $GITHUB_WORKSPACE
+          done
+          test ! -s /tmp/fds_failed.txt
+      - name: Run fdsreader tests against the nightly output
+        id: tests
+        if: steps.download.outcome == 'success'
+        continue-on-error: true
+        run: |
+          pip install ".[dev]"
+          cd tests/cases && for f in *.tgz; do tar -xzf "$f"; done
+          cd ../..
+          FDS_FRESH_OUTPUT_DIR=/tmp/fds_out pytest tests/ -q -rfE
+      - name: Summary
+        if: always()
+        run: |
+          BUILD="${{ steps.download.outputs.build }}"
+          {
+            echo "## FDS nightly check"
+            echo
+            echo "| Step | Result |"
+            echo "|---|---|"
+            echo "| Download and install ${BUILD:-the nightly build} | ${{ steps.download.outcome }} |"
+            echo "| FDS runs of tests/cases/fds_inputs | ${{ steps.simulations.outcome }} |"
+            echo "| fdsreader tests against the nightly output | ${{ steps.tests.outcome }} |"
+            if [ -s /tmp/fds_failed.txt ]; then
+              echo
+              echo "FDS did not finish: $(tr '\n' ' ' < /tmp/fds_failed.txt)"
+            fi
+            echo
+            echo "Nightly builds may contain unfinished changes; a failure here is a hint to look at the FDS"
+            echo "development version before its next release, not necessarily a bug in fdsreader."
+          } >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.download.outcome }}" != "success" ] || [ "${{ steps.simulations.outcome }}" != "success" ] || [ "${{ steps.tests.outcome }}" != "success" ]; then
+            echo "::warning title=FDS nightly check::Something failed with ${BUILD:-the FDS nightly build}, see the summary"
+          fi
