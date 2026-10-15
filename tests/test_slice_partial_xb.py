@@ -1,4 +1,5 @@
-"""Slices defined with XB that cover only part of their mesh (slcf_partial_fds611, FDS 6.11.1).
+"""Slices defined with XB that cover only part of their mesh (slcf_partial_fds611, FDS 6.11.1; input in
+tests/cases/fds_inputs/slcf_partial.fds).
 
 The case has three meshes along x: M1 (0..1) and M2 (1..2) with 0.1 m cells and M3 (2..3) with 0.2 m cells,
 obstructions at x 0.6..0.9 and 2.4..2.8 (y 0.4..0.6), and in the same planes full reference slices and slices
@@ -7,6 +8,7 @@ cell-centred, plus a 2D slice inside M1 only. FDS writes the same values into bo
 equal the matching section of the full one, and the raw data of each mesh.
 """
 
+import os
 from pathlib import Path
 
 import numpy as np
@@ -17,13 +19,20 @@ from fdsreader import Simulation, settings
 CASES_DIR = Path(__file__).parent / "cases"
 PARTIAL_IDS = ["z_part", "z_part_cc", "vol_part", "vol_part_cc", "z_part_m1"]
 
+# The FDS compatibility workflow runs tests/cases/fds_inputs/slcf_partial.fds through the newest FDS release
+# and points FDS_FRESH_OUTPUT_DIR at the output, so the same checks run against that release too.
+_CASES = [CASES_DIR / "slcf_partial_fds611"]
+_FRESH = Path(os.environ.get("FDS_FRESH_OUTPUT_DIR") or "/nonexistent") / "slcf_partial"
+if _FRESH.is_dir():
+    _CASES.append(_FRESH)
 
-@pytest.fixture(scope="module")
-def sim():
+
+@pytest.fixture(scope="module", params=_CASES, ids=lambda case: "fresh" if case == _FRESH else "fds611")
+def sim(request):
     original = settings.ENABLE_CACHING
     settings.ENABLE_CACHING = False
     try:
-        yield Simulation(str(CASES_DIR / "slcf_partial_fds611"))
+        yield Simulation(str(request.param))
     finally:
         settings.ENABLE_CACHING = original
 
