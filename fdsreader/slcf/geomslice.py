@@ -167,6 +167,7 @@ class GeomSlice(NumpyArrayMixin):
     _handled_functions = _HANDLED_FUNCTIONS
     _HANDLED_FUNCTIONS[np.mean] = NumpyArrayMixin.mean
     _HANDLED_FUNCTIONS[np.std] = NumpyArrayMixin.std
+    _global_array_hint = "use the 'data', 'vertices' and 'faces' properties, which combine all meshes."
 
     def _array_subitems(self):
         return self._subgeomslices.values()

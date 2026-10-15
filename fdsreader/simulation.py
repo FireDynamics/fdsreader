@@ -53,6 +53,32 @@ def _wall_times_to_utc(stamps: Sequence[str]) -> np.ndarray:
     return np.array(utc, dtype="datetime64[ms]")
 
 
+class StepData(dict):
+    """The columns of CHID_steps.csv by name, see :attr:`Simulation.steps`.
+
+    The key ``"Time Step"`` holds the wall-clock times for compatibility with earlier versions
+    and warns once when used: in the FDS User Guide the column ``Time Step`` is the iteration
+    number, available here as ``"Step"``, and the wall-clock time is ``"Wall Time"``.
+    """
+
+    _warned = False
+
+    def __getitem__(self, key):
+        if key == "Time Step" and not StepData._warned:
+            StepData._warned = True
+            warnings.warn(
+                'steps["Time Step"] holds the wall-clock time, not the time step number. Use '
+                'steps["Wall Time"] for the time and steps["Step"] for the number; "Time Step" will '
+                "become the number, as in the FDS User Guide, in a future release.",
+                FutureWarning,
+                stacklevel=2,
+            )
+        return super().__getitem__(key)
+
+    def get(self, key, default=None):
+        return self[key] if key in self else default
+
+
 class Simulation:
     """Master class managing all data for a given simulation.
 
@@ -80,7 +106,10 @@ class Simulation:
     :ivar geom_data: All geometry data by quantity combined into a :class:`GeometryCollection`.
     :ivar cpu: Dictionary mapping .csv header keys to numpy arrays containing cpu data.
     :ivar hrr: Dictionary mapping .csv header keys to numpy arrays containing hrr data.
-    :ivar steps: Dictionary mapping .csv header keys to numpy arrays containing steps data.
+    :ivar steps: The time step data of CHID_steps.csv as a :class:`StepData` dictionary:
+        ``"Step"`` (iteration number), ``"Wall Time"`` (date and time, UTC), ``"Step Size"`` and
+        ``"Simulation Time"`` (s), and ``"CPU Time"`` (s since FDS started). ``"Time Step"`` still
+        holds the wall-clock time, but warns: it will become the iteration number.
     :ivar ctrl: Dictionary mapping control (&CTRL) names to numpy arrays of their state over time.
         Only set if the simulation has a CTRL csv export.
     :ivar mass: Dictionary mapping species names to numpy arrays of their mass history. Only set
@@ -1236,15 +1265,17 @@ class Simulation:
         return self._transform_csv_data(keys, values)
 
     @log_error("csv")
-    def _load_step_data(self, file_path: str) -> Dict[str, np.ndarray]:
+    def _load_step_data(self, file_path: str) -> "StepData":
         with open(file_path) as infile:
             infile.readline()
             keys = [name.replace('"', "").replace("\n", "").strip() for name in infile.readline().split(",")][2:]
-        wall_times = np.loadtxt(file_path, dtype=str, delimiter=",", ndmin=1, usecols=1, skiprows=2)
-        timesteps = _wall_times_to_utc(wall_times)
+        steps = np.loadtxt(file_path, dtype=int, delimiter=",", ndmin=1, usecols=0, skiprows=2)
+        wall_times = _wall_times_to_utc(np.loadtxt(file_path, dtype=str, delimiter=",", ndmin=1, usecols=1, skiprows=2))
         float_values = np.loadtxt(file_path, delimiter=",", usecols=range(2, len(keys) + 2), ndmin=2, skiprows=2)
-        data = self._transform_csv_data(keys, float_values)
-        data["Time Step"] = timesteps
+        data = StepData(self._transform_csv_data(keys, float_values))
+        data["Step"] = steps
+        data["Wall Time"] = wall_times
+        data["Time Step"] = wall_times  # kept for compatibility, see StepData
         return data
 
     @log_error("csv")
