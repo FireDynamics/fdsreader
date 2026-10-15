@@ -16,14 +16,7 @@ from fdsreader.explorer import notebook  # noqa: E402
 from fdsreader.explorer.notebook import NotebookExplorer, SimulationBrowser, explore  # noqa: E402
 
 # plt.show() into an Output widget has nothing to show on the Agg backend
-pytestmark = pytest.mark.filterwarnings("ignore:FigureCanvasAgg is non-interactive")
-
-
-@pytest.fixture(autouse=True)
-def _agg_and_close():
-    plt.switch_backend("Agg")
-    yield
-    plt.close("all")
+pytestmark = [pytest.mark.usefixtures("agg"), pytest.mark.filterwarnings("ignore:FigureCanvasAgg is non-interactive")]
 
 
 @pytest.fixture

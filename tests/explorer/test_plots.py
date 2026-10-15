@@ -9,12 +9,7 @@ import fdsreader  # noqa: E402
 from fdsreader.explorer.data import list_devices  # noqa: E402
 from fdsreader.explorer.plots import plot_device, plot_series, plot_slice  # noqa: E402
 
-
-@pytest.fixture(autouse=True)
-def _agg_and_close():
-    plt.switch_backend("Agg")
-    yield
-    plt.close("all")
+pytestmark = pytest.mark.usefixtures("agg")
 
 
 def test_nothing_selected():

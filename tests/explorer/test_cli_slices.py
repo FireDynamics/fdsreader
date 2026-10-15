@@ -11,23 +11,17 @@ import shutil
 import sys
 
 import pytest
+from explorer_helpers import run
 from fds_cases import CASES_DIR
 
 import fdsreader.explorer
 from fdsreader.explorer import cli, tui
-from fdsreader.explorer.cli import main
 
 
-@pytest.fixture
-def steckler(tmp_path):
-    return shutil.copytree(CASES_DIR / "steckler_data", tmp_path / "steckler")
-
-
-def run(capsys, *argv):
-    """Run the CLI and return (exit status, stdout, stderr)."""
-    status = main([str(a) for a in argv])
-    captured = capsys.readouterr()
-    return status, captured.out, captured.err
+@pytest.fixture(scope="module")
+def steckler(tmp_path_factory):
+    # One copy for the module: the tests only read it, and the pickle cache is off
+    return shutil.copytree(CASES_DIR / "steckler_data", tmp_path_factory.mktemp("cli") / "steckler")
 
 
 def test_overview_and_list_count_the_slice(steckler, capsys):
@@ -74,19 +68,46 @@ def test_json_with_a_slice(steckler, capsys):
 
 
 @pytest.mark.parametrize("suffix", [".png", ".pdf"])
-def test_save_a_picture_of_slice_and_curve(steckler, tmp_path, capsys, suffix):
-    pytest.importorskip("matplotlib")
+def test_save_a_picture_of_slice_and_curve(steckler, tmp_path, capsys, suffix, monkeypatch):
+    counts = _axes_when_saved(monkeypatch)
     target = tmp_path / f"view{suffix}"
     status, out, _ = run(capsys, steckler, "--slice", "0", "--curve", "HRR", "--save", target, "--render", "filled")
     assert status == 0 and out.strip() == f"wrote {target}"
     assert target.stat().st_size > 0
+    assert counts == [2]
 
 
-def test_save_a_picture_of_curves_only(tiny_case, tmp_path, capsys):
-    pytest.importorskip("matplotlib")
+def _axes_when_saved(monkeypatch):
+    """The number of axes of each figure the CLI saves, excluding colour bars."""
+    figure = pytest.importorskip("matplotlib.figure")
+    counts = []
+    savefig = figure.Figure.savefig
+
+    def counting(fig, *args, **kwargs):
+        counts.append(sum(1 for ax in fig.axes if ax.get_label() != "<colorbar>"))
+        return savefig(fig, *args, **kwargs)
+
+    monkeypatch.setattr(figure.Figure, "savefig", counting)
+    return counts
+
+
+def test_save_a_picture_of_curves_only(tiny_case, tmp_path, capsys, monkeypatch):
+    counts = _axes_when_saved(monkeypatch)
     target = tmp_path / "curves.png"
     run(capsys, tiny_case, "--curve", "TC_1", "--save", target)
     assert target.stat().st_size > 0
+    assert counts == [1]  # no empty panel for a slice that is not there
+
+
+def test_saving_leaves_the_matplotlib_backend_alone(steckler, tmp_path, capsys):
+    matplotlib = pytest.importorskip("matplotlib")
+    before = matplotlib.get_backend()
+    matplotlib.use("svg")
+    try:
+        run(capsys, steckler, "--slice", "0", "--save", tmp_path / "x.png")
+        assert matplotlib.get_backend() == "svg"
+    finally:
+        matplotlib.use(before)
 
 
 def test_save_an_animation(tmp_path, capsys):
@@ -107,7 +128,6 @@ def test_an_animation_needs_a_slice(tiny_case, tmp_path, capsys):
 @pytest.mark.filterwarnings("ignore:Animation was deleted without rendering")
 def test_an_animation_that_cannot_be_written(tmp_path, capsys, monkeypatch):
     animation = pytest.importorskip("matplotlib.animation")
-    plt = pytest.importorskip("matplotlib.pyplot")
 
     def fail(*args, **kwargs):
         raise RuntimeError("no ffmpeg")
@@ -116,7 +136,6 @@ def test_an_animation_that_cannot_be_written(tmp_path, capsys, monkeypatch):
     masks = shutil.copytree(CASES_DIR / "slcf_masks_fds611", tmp_path / "masks")
     with pytest.raises(SystemExit, match="could not write"):
         run(capsys, masks, "--slice", "0", "--save", tmp_path / "x.mp4")
-    assert not plt.get_fignums()  # the figure is closed although writing failed
     gc.collect()  # the unsaved animation warns when it is collected, which belongs to this test
 
 
@@ -139,7 +158,8 @@ def test_interactive_without_curses(steckler, capsys, monkeypatch):
 
 
 def test_save_without_matplotlib(steckler, tmp_path, monkeypatch):
-    monkeypatch.setitem(sys.modules, "matplotlib", None)  # makes the import fail
+    for module in ("matplotlib", "matplotlib.figure", "matplotlib.backends.backend_agg"):
+        monkeypatch.setitem(sys.modules, module, None)  # makes the import fail
     with pytest.raises(SystemExit, match="needs matplotlib"):
         cli.save_figure([], cli.ExplorerState(), [], tmp_path / "x.png", 10, 10)
 

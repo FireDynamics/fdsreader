@@ -1,18 +1,13 @@
 """The curses side of the interactive front end, on a fake window that records what is written and plays back
 keys, so no terminal is needed."""
 
-import curses
-
 import pytest
+from explorer_helpers import FakeSim
 
-from fdsreader.explorer import tui
-from fdsreader.explorer.render import RAMP
-from fdsreader.explorer.tui import Interactive
+curses = pytest.importorskip("curses")  # not part of the standard library on Windows
 
-
-class FakeSim:
-    chid = "fake"
-    root_path = "."
+from fdsreader.explorer import tui  # noqa: E402
+from fdsreader.explorer.render import RAMP  # noqa: E402
 
 
 class FakeWindow:
@@ -49,13 +44,6 @@ class FakeWindow:
 
     def timeout(self, ms):
         self.timeouts.append(ms)
-
-
-@pytest.fixture
-def app(monkeypatch, fake_field, fake_series):
-    monkeypatch.setattr(tui, "fields_of", lambda sim: [fake_field, fake_field])
-    monkeypatch.setattr(tui, "build_series", lambda sim: fake_series)
-    return Interactive(FakeSim())
 
 
 def keys(*names):

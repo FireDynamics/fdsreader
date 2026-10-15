@@ -3,15 +3,7 @@
 import json
 
 import pytest
-
-from fdsreader.explorer.cli import main
-
-
-def run(capsys, *argv):
-    """Run the CLI and return (exit status, stdout, stderr)."""
-    status = main([str(a) for a in argv])
-    captured = capsys.readouterr()
-    return status, captured.out, captured.err
+from explorer_helpers import run
 
 
 def test_overview(tiny_case, capsys):
@@ -40,7 +32,7 @@ def test_curve_is_drawn_with_axes_and_a_legend(tiny_case, capsys):
     assert lines[0].startswith("       100 |")
     assert lines[0].rstrip().endswith("*")
     assert lines[0].split("|", 1)[1].startswith(" ")
-    assert lines[-4].startswith("        20 |*")   # and the bottom row starts at t = 0
+    assert lines[-4].startswith("        20 |*")  # and the bottom row starts at t = 0
     assert lines[-3].startswith("          +---")  # then the axis rule
     assert "t [s]" in lines[-2]
     assert lines[-1] == "  *  DEVC  TC_1 — TEMPERATURE [C]"
@@ -59,8 +51,7 @@ def test_mixed_units_are_flagged(tiny_case, capsys):
 
 def test_cursor_is_drawn_at_the_requested_time(tiny_case, capsys):
     _, without, _ = run(capsys, tiny_case, "--curve", "TC_1", "--width", "20")
-    _, with_cursor, _ = run(capsys, tiny_case, "--curve", "TC_1", "--width", "20",
-                            "--time", "5")
+    _, with_cursor, _ = run(capsys, tiny_case, "--curve", "TC_1", "--width", "20", "--time", "5")
     assert with_cursor.count("|") > without.count("|")
 
 

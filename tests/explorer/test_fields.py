@@ -40,6 +40,17 @@ def test_a_frame_equals_the_eager_global_array(case, slice_id, request):
         np.testing.assert_allclose(field.frame(t), eager[t], equal_nan=True)
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason="on nodes shared by two meshes the explorer keeps the first mesh, to_global the upper one",
+)
+def test_mesh_border_nodes_match_the_eager_global_array(masks):
+    # At x = 0.3, y = 1.0 M1 writes the placeholder of 'Under', which ends there, and M3 a gas value
+    slc = masks.slices.get_by_id("z07")
+    field = SliceField(slc)
+    np.testing.assert_allclose(field.frame(len(field.times) - 1), slc.to_global()[-1], equal_nan=True)
+
+
 def test_axes_and_coordinates(masks):
     field = SliceField(masks.slices.get_by_id("y08"))
     assert field.axes == ("x", "z")
