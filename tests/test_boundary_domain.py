@@ -10,7 +10,7 @@ import warnings
 
 import numpy as np
 import pytest
-from fds_cases import case_dirs, case_id, load
+from fds_cases import CASES_DIR, case_dirs, case_id, load
 
 CELLS = "BURNING RATE"
 NODES = "WALL TEMPERATURE"
@@ -96,3 +96,9 @@ def test_obstruction_faces_are_not_included(sim):
 def test_unknown_quantity(sim):
     with pytest.raises(KeyError):
         sim.meshes.get_global_boundary_data_arrays("VELOCITY")
+
+
+def test_a_case_without_boundary_data_gives_no_arrays():
+    sim = load(CASES_DIR / "slcf_partial_fds611")
+    assert not any(mesh.has_boundary_data for mesh in sim.meshes)
+    assert sim.meshes.get_global_boundary_data_arrays("WALL TEMPERATURE") == {}

@@ -7,8 +7,8 @@
 &SURF ID='FIRE', HRRPUA=500.0 /
 The vent splits the floor of both meshes into several patches
 &VENT XB=0.6,1.6,0.3,0.7,0.0,0.0, SURF_ID='FIRE' /
-&VENT MB='XMIN', SURF_ID='OPEN' /
-&VENT MB='ZMAX', SURF_ID='OPEN' /
+&VENT DB='XMIN', SURF_ID='OPEN' /
+&VENT DB='ZMAX', SURF_ID='OPEN' /
 An obstruction standing on the floor
 &OBST ID='Box', XB=0.2,0.4,0.6,0.8,0.0,0.2 /
 &BNDF QUANTITY='BURNING RATE', CELL_CENTERED=T /
