@@ -667,8 +667,8 @@ class NotebookExplorer:
             self._setup_fields(sim)
             return
 
-        self.summary.value = self._overview()
         self._setup_fields(sim)  # also positions the time bar
+        self.summary.value = self._overview()  # after the fields, so it can count the slices
         self._refresh_curves()
 
     def _overview(self):
