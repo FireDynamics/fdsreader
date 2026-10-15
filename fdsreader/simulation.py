@@ -77,6 +77,9 @@ class Simulation:
         swallowed during parsing. Empty when nothing went wrong.
     """
 
+    # Bump when the pickled structure of a Simulation or its data classes changes, so caches
+    # written by an older layout are parsed again instead of being loaded with missing attributes.
+    _CACHE_FORMAT = 2
     _loading = False
 
     def __new__(cls, path: str):
@@ -119,6 +122,8 @@ class Simulation:
                     valid = (
                         isinstance(sim, cls)  # Check if pickle file stores a Simulation
                         and sim.reader_version == __version__  # Check if the fdsreader version still matches
+                        # Editable installs keep a frozen __version__, so also compare the cache format
+                        and getattr(sim, "_cache_format", None) == Simulation._CACHE_FORMAT
                         and sim._hash == create_hash(smv_file_path)  # Check if the smv_file did not change
                     )
 
@@ -167,6 +172,7 @@ class Simulation:
         # Check if the file has already been instantiated via a cached pickle file
         if not hasattr(self, "_hash"):
             self.reader_version = __version__
+            self._cache_format = Simulation._CACHE_FORMAT
 
             self.smv_file_path = get_smv_file(path)
 
@@ -188,6 +194,9 @@ class Simulation:
             self._geomslices = dict()
             self.data_3d = Plot3DCollection([Plot3D(self.root_path) for _ in range(5)])
             self._smoke_3d = dict()
+            # Value ranges FDS scaled Smoke3D output to, from the HRRPUV_MINMAX and TEMP_MINMAX
+            # keywords of the .smv file (FDS 6.10 and later). Shared with every Smoke3D.
+            self._smoke3d_limits: Dict[str, Tuple[float, float]] = dict()
             self._isosurfaces = dict()
             self._particles = list()
             self._evacs = list()
@@ -205,6 +214,7 @@ class Simulation:
 
             # POST INIT (post read)
             self.out_file_path = os.path.join(self.root_path, self.chid + ".out")
+            self._read_smoke3d_ambient_temperature()
             self.ventilations: List[Ventilation] = list(self.ventilations.values())
 
             for device_id, device in self._devices.items():
@@ -290,6 +300,9 @@ class Simulation:
                         self._devices["Time"] = Device(
                             "Time", Quantity("TIME", "TIME", "s"), (0.0, 0.0, 0.0), (0.0, 0.0, 0.0)
                         )
+                elif keyword in ("HRRPUV_MINMAX", "TEMP_MINMAX"):
+                    minimum, maximum = (float(v) for v in smv_file.readline().split()[:2])
+                    self._smoke3d_limits[keyword] = (minimum, maximum)
                 elif keyword == "HRRPUVCUT":
                     self.hrrpuv_cutoff = float(smv_file.readline().strip())
                 elif keyword == "TOFFSET":
@@ -884,6 +897,7 @@ class Simulation:
         line = line.strip().split()
 
         mesh_index = int(line[1]) - 1
+        mass_extinction_coefficient = float(line[2]) if len(line) > 2 else 0.0
 
         filename = smv_file.readline().strip()
 
@@ -893,7 +907,12 @@ class Simulation:
 
         sz_file_path = os.path.join(self.root_path, filename + ".sz")
         with open(sz_file_path) as sizefile:
-            data_lines = sizefile.readlines()[1:]  # Skip the version line.
+            lines = sizefile.readlines()
+        try:
+            version = int(lines[0])
+        except (IndexError, ValueError):
+            version = 0
+        data_lines = lines[1:]
         if data_lines:
             try:
                 # Columns are: time, some int, some int, upper_bound (only the first and last
@@ -902,20 +921,45 @@ class Simulation:
                 data = np.loadtxt(data_lines, ndmin=2)
                 times = data[:, 0]
                 upper_bounds = data[:, -1]
+                # MAX_VAL is the 4th column; FDS 6.10 adds two more columns for soot
+                max_vals = data[:, 3] if data.shape[1] > 3 else upper_bounds
             except ValueError:
                 # Fall back to parsing just the first/last whitespace-separated token per line,
                 # which tolerates rows with a differing number of columns.
                 times = np.array([float(line.split()[0]) for line in data_lines])
                 upper_bounds = np.array([float(line.split()[-1]) for line in data_lines])
+                max_vals = np.array(
+                    [float(line.split()[3] if len(line.split()) > 3 else line.split()[-1]) for line in data_lines]
+                )
         else:
             times = np.array([])
             upper_bounds = np.array([])
+            max_vals = np.array([])
 
         quantity = Quantity(quantity, short_name, unit)
 
         if quantity not in self._smoke_3d:
-            self._smoke_3d[quantity] = Smoke3D(self.root_path, times, quantity)
-        self._smoke_3d[quantity]._add_subsmoke(filename, self._meshes[mesh_index], upper_bounds)
+            self._smoke_3d[quantity] = Smoke3D(self.root_path, times, quantity, limits=self._smoke3d_limits)
+        self._smoke_3d[quantity]._add_subsmoke(
+            filename, self._meshes[mesh_index], upper_bounds, version, mass_extinction_coefficient, max_vals
+        )
+
+    def _read_smoke3d_ambient_temperature(self):
+        """FDS 6.8 and 6.9 scaled Smoke3D temperatures from the ambient temperature, and only FDS
+        6.10 and later write the limits (TEMP_MINMAX) to the .smv file. For those two versions,
+        take the ambient temperature from the .out file."""
+        if not self._smoke_3d or "TEMP_MINMAX" in self._smoke3d_limits:
+            return
+        version = re.search(r"(\d+)\.(\d+)", getattr(self, "fds_version", "") or "")
+        if version is None or not (6, 8) <= (int(version.group(1)), int(version.group(2))) < (6, 10):
+            return
+        try:
+            with open(self.out_file_path, errors="replace") as out_file:
+                match = re.search(r"Ambient Temperature \(C\)\s*:?\s*(-?[\d.]+)", out_file.read())
+        except OSError:
+            return
+        if match:
+            self._smoke3d_limits["AMBIENT_TEMPERATURE"] = (float(match.group(1)), float(match.group(1)))
 
     @log_error("isof")
     def _load_isosurface(self, smv_file: TextIO, line: str):
