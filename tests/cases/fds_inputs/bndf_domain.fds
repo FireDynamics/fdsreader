@@ -1,0 +1,16 @@
+&HEAD CHID='bndf_domain', TITLE='Boundary data on the walls of the domain for fdsreader (#81)' /
+&MESH ID='West', IJK=10,10,10, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
+&MESH ID='East', IJK=5,5,5, XB=1.0,2.0,0.0,1.0,0.0,1.0 /
+&TIME T_END=2.0 /
+&DUMP NFRAMES=4, SMOKE3D=F /
+&REAC FUEL='PROPANE' /
+&SURF ID='FIRE', HRRPUA=500.0 /
+The vent splits the floor of both meshes into several patches
+&VENT XB=0.6,1.6,0.3,0.7,0.0,0.0, SURF_ID='FIRE' /
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+An obstruction standing on the floor
+&OBST ID='Box', XB=0.2,0.4,0.6,0.8,0.0,0.2 /
+&BNDF QUANTITY='BURNING RATE', CELL_CENTERED=T /
+&BNDF QUANTITY='WALL TEMPERATURE' /
+&TAIL /

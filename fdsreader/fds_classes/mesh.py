@@ -4,8 +4,8 @@ from typing import Dict, List, Sequence, Tuple, Union
 import numpy as np
 from typing_extensions import Literal
 
-from fdsreader import settings
 from fdsreader.bndf import Boundary, Patch
+from fdsreader.bndf.obstruction import _find_boundary
 from fdsreader.utils import Dimension, Extent, Quantity
 
 
@@ -228,23 +228,17 @@ class Mesh:
             for patch in patches:
                 patch._boundary_parent = self._boundary_data[bid]
 
-        if not settings.LAZY_LOAD:
-            _ = self._boundary_data[bid].data
+    def get_boundary_data(self, quantity: Union[str, Quantity]) -> Boundary:
+        """The boundary data of a quantity on the faces of this mesh that are not faces of obstructions (those belong
+        to :class:`Obstruction`), e.g. the floor of the simulation domain. With ``MB`` vents in a multi-mesh case (see
+        the FDS User Guide), FDS may also write faces between two meshes.
 
-    def get_boundary_data(self, quantity: Union[str, Quantity]):
-        if isinstance(quantity, Quantity):
-            quantity = quantity.name
-        b = next(
-            (
-                b
-                for b in self._boundary_data.values()
-                if b.quantity.name.lower() == quantity.lower() or b.quantity.short_name.lower() == quantity.lower()
-            ),
-            None,
-        )
-        if b is None:
-            raise KeyError(f"No boundary data found for quantity '{quantity}'")
-        return b
+        A face may consist of several patches with the same orientation (see :attr:`Boundary.patches`); to combine
+        them over all meshes, use :meth:`MeshCollection.get_global_boundary_data_arrays`.
+
+        :param quantity: The quantity's name or short name.
+        """
+        return _find_boundary(self._boundary_data, quantity)
 
     def __getitem__(self, dimension: Literal[0, 1, 2, "x", "y", "z"]) -> np.ndarray:
         """Get all values in given dimension.

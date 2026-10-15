@@ -535,6 +535,7 @@ tests/cases/cface_data_fds*/
 tests/cases/slcf_partial_fds*/
 tests/cases/slcf_masks_fds*/
 tests/cases/bndf_global_fds*/
+tests/cases/bndf_domain_fds*/
 
 # Pickle cache files
 *.pickle
