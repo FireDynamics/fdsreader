@@ -1,6 +1,5 @@
 import math
 import os
-import sys
 import warnings
 from typing import Dict, Literal, Optional, Tuple, Union
 
@@ -11,6 +10,7 @@ from fdsreader import settings
 from fdsreader.fds_classes import Mesh
 from fdsreader.utils import NumpyArrayMixin, Quantity
 from fdsreader.utils.data import resample_mesh_axis
+from fdsreader.utils.misc import caller_stacklevel
 
 _HANDLED_FUNCTIONS = {}
 
@@ -21,16 +21,6 @@ DEFAULT_TEMP_MINMAX = (20.0, 2000.0)  # C
 KINDS = ("gas", "hrrpuv", "temperature")
 
 _raw_codes_warned = False
-_PACKAGE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-
-def _caller_stacklevel() -> int:
-    """The stacklevel for warnings.warn that points at the first caller outside fdsreader, seen
-    from the function that calls this one."""
-    frame, level = sys._getframe(1), 1
-    while frame is not None and os.path.abspath(frame.f_code.co_filename).startswith(_PACKAGE_DIR + os.sep):
-        frame, level = frame.f_back, level + 1
-    return level
 
 
 def _warn_raw_codes():
@@ -43,7 +33,7 @@ def _warn_raw_codes():
             "to_physical() or to_global(physical=True) to convert them, see "
             "https://fdsreader.readthedocs.io/en/latest/api/smoke3d.html",
             UserWarning,
-            stacklevel=_caller_stacklevel(),
+            stacklevel=caller_stacklevel(),
         )
 
 
@@ -349,7 +339,7 @@ class Smoke3D(NumpyArrayMixin):
                 f"The .smv file has no {keyword} (written from FDS 6.10 on), assuming {default} for "
                 f"{self.quantity.name}, {source}. Pass the values set on &DUMP if they were changed.",
                 UserWarning,
-                stacklevel=_caller_stacklevel(),
+                stacklevel=caller_stacklevel(),
             )
         base = smv if smv is not None else default
         return (base[0] if low is None else low, base[1] if high is None else high)

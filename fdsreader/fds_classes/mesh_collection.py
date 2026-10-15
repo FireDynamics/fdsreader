@@ -33,15 +33,7 @@ class MeshCollection(FDSDataCollection):
 
         :param quantity: The quantity's name or short name.
         """
-        patches = list()
-        for mesh in self:
-            try:
-                patches.extend(mesh.get_boundary_data(quantity).patches)
-            except KeyError:
-                continue
-        if not patches:
-            raise KeyError(f"No boundary data on the walls of the simulation domain for quantity '{quantity}'")
-        return _global_boundary_arrays(patches)
+        return _global_boundary_arrays([mesh._boundary_data for mesh in self], quantity)
 
     def __repr__(self):
         return "MeshCollection(" + super().__repr__() + ")"

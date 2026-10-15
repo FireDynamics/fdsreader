@@ -11,6 +11,7 @@ from typing_extensions import Literal
 import fdsreader.utils.fortran_data as fdtype
 from fdsreader import settings
 from fdsreader.utils import Dimension, Extent, Quantity
+from fdsreader.utils.misc import caller_stacklevel
 
 if TYPE_CHECKING:
     from fdsreader.fds_classes import Mesh
@@ -230,14 +231,14 @@ class Boundary:
                 f"{self.quantity.name}: several patches face the same direction, Boundary.data only holds the last "
                 "of each. Use Boundary.patches, or get_global_boundary_data_arrays to combine them.",
                 UserWarning,
-                stacklevel=2,
+                stacklevel=caller_stacklevel(),
             )
         return data
 
     def vmin(self, orientation: Literal[-3, -2, -1, 0, 1, 2, 3] = 0) -> float:
         """Minimum value of all patches at any time.
 
-        :param orientation: Optionally filter by patches with a specific orientation.
+        :param orientation: Optionally filter by patches with a specific orientation; NaN if there is none.
         """
         if orientation == 0:
             curr_min = np.min(self.lower_bounds)
@@ -245,12 +246,12 @@ class Boundary:
                 return float(min(np.min(p.data) for p in self._patches))
             return float(curr_min)
         else:
-            return float(min(np.min(p.data) for p in self._patches if p.orientation == orientation))
+            return float(min((np.min(p.data) for p in self._patches if p.orientation == orientation), default=np.nan))
 
     def vmax(self, orientation: Literal[-3, -2, -1, 0, 1, 2, 3] = 0) -> float:
         """Maximum value of all patches at any time.
 
-        :param orientation: Optionally filter by patches with a specific orientation.
+        :param orientation: Optionally filter by patches with a specific orientation; NaN if there is none.
         """
         if orientation == 0:
             curr_max = np.max(self.upper_bounds)
@@ -258,7 +259,7 @@ class Boundary:
                 return float(max(np.max(p.data) for p in self._patches))
             return float(curr_max)
         else:
-            return float(max(np.max(p.data) for p in self._patches if p.orientation == orientation))
+            return float(max((np.max(p.data) for p in self._patches if p.orientation == orientation), default=np.nan))
 
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory."""
@@ -358,19 +359,7 @@ class SubObstruction:
         return len(self._boundary_data) != 0
 
     def get_data(self, quantity: Union[str, Quantity]):
-        if isinstance(quantity, Quantity):
-            quantity = quantity.name
-        b = next(
-            (
-                b
-                for b in self._boundary_data.values()
-                if b.quantity.name.lower() == quantity.lower() or b.quantity.short_name.lower() == quantity.lower()
-            ),
-            None,
-        )
-        if b is None:
-            raise KeyError(f"No boundary data found for quantity '{quantity}'")
-        return b
+        return _find_boundary(self._boundary_data, quantity)
 
     def __getitem__(self, item):
         if isinstance(item, int):
@@ -732,15 +721,9 @@ class Obstruction:
 
         :param quantity: The quantity's name or short name for which to load the global arrays.
         """
-        patches = list()
-        for subobst in self._all_subobstructions:
-            try:
-                patches.extend(subobst.get_data(quantity).patches)
-            except KeyError:
-                continue
-        if not patches and self.has_boundary_data:
-            raise KeyError(f"No boundary data found for quantity '{quantity}'")
-        return _global_boundary_arrays(patches)
+        if not self.has_boundary_data:
+            return dict()
+        return _global_boundary_arrays([subobst._boundary_data for subobst in self._all_subobstructions], quantity)
 
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory."""
@@ -756,10 +739,8 @@ class Obstruction:
 
         :param orientation: Optionally filter by patches with a specific orientation.
         """
-        if self.has_boundary_data:
-            return min(s.vmin(quantity, orientation) for s in self._all_subobstructions)
-        else:
-            return np.nan
+        values = [s.vmin(quantity, orientation) for s in self._all_subobstructions if s.has_boundary_data]
+        return float(np.nanmin(values)) if not np.isnan(values).all() else np.nan
 
     def vmax(
         self,
@@ -770,9 +751,8 @@ class Obstruction:
 
         :param orientation: Optionally filter by patches with a specific orientation.
         """
-        if self.has_boundary_data:
-            return max(s.vmax(quantity, orientation) for s in self._all_subobstructions)
-        return np.nan
+        values = [s.vmax(quantity, orientation) for s in self._all_subobstructions if s.has_boundary_data]
+        return float(np.nanmax(values)) if not np.isnan(values).all() else np.nan
 
     def get_subobstructions(self, mesh: "Mesh") -> List[SubObstruction]:
         """All parts of this obstruction in the given mesh; several OBST lines can share an ID."""
@@ -804,13 +784,40 @@ class Obstruction:
         )
 
 
-def _global_boundary_arrays(patches: List[Patch]) -> Dict[int, Union[np.ndarray, Tuple[np.ndarray, ...]]]:
-    """Combines patches into one array of shape (n_t, a, b) per orientation, or a tuple of them, one per position,
-    if the faces of an orientation lie at several positions. See :meth:`Obstruction.get_global_boundary_data_arrays`.
+def _find_boundary(boundary_data: Dict[int, Boundary], quantity: Union[str, Quantity]) -> Boundary:
+    """The boundary data of a quantity, by its name or short name, among those of a mesh or subobstruction."""
+    if isinstance(quantity, Quantity):
+        quantity = quantity.name
+    b = next(
+        (
+            b
+            for b in boundary_data.values()
+            if b.quantity.name.lower() == quantity.lower() or b.quantity.short_name.lower() == quantity.lower()
+        ),
+        None,
+    )
+    if b is None:
+        raise KeyError(f"No boundary data found for quantity '{quantity}'")
+    return b
+
+
+def _global_boundary_arrays(
+    owners_boundary_data: List[Dict[int, Boundary]], quantity: Union[str, Quantity]
+) -> Dict[int, Union[np.ndarray, Tuple[np.ndarray, ...]]]:
+    """Combines the patches of a quantity from several meshes or subobstructions into one array of shape (n_t, a, b)
+    per orientation, or a tuple of them, one per position, if the faces of an orientation lie at several positions.
+    See :meth:`Obstruction.get_global_boundary_data_arrays`. Raises KeyError if none of them has the quantity.
     """
     patches_by_orientation: Dict[int, List[Patch]] = dict()
-    for patch in patches:
-        patches_by_orientation.setdefault(patch.orientation, list()).append(patch)
+    for boundary_data in owners_boundary_data:
+        try:
+            boundary = _find_boundary(boundary_data, quantity)
+        except KeyError:
+            continue
+        for patch in boundary.patches:
+            patches_by_orientation.setdefault(patch.orientation, list()).append(patch)
+    if not patches_by_orientation:
+        raise KeyError(f"No boundary data found for quantity '{quantity}'")
 
     result = dict()
     for orientation in sorted(patches_by_orientation):

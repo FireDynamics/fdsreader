@@ -86,3 +86,11 @@ def test_export_of_a_face_at_two_heights(sim, tmp_path):
     meta = export_obst_raw(sim.obstructions.get_by_id("Table"), str(tmp_path))
     assert (tmp_path / "WALL_TEMPERATURE" / "obst-Table_quantity-WALL_TEMPERATURE.dat").stat().st_size > 0
     assert meta.endswith("obst-Table.yaml")
+
+
+def test_vmin_and_vmax_of_a_face_only_some_parts_have(sim):
+    # Only the part of 'Table' in 'Coarse' has a +x face, the part in 'Fine' ends at the mesh boundary
+    table = sim.obstructions.get_by_id("Table")
+    coarse = next(sub for sub in table._all_subobstructions if sub.mesh.id == "Coarse")
+    assert table.vmax(NODES, 1) == coarse.get_data(NODES).vmax(1)
+    assert table.vmin(NODES, 1) == coarse.get_data(NODES).vmin(1)

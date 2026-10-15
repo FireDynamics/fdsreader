@@ -32,10 +32,16 @@ def _floor_patches(sim, mesh_id, quantity):
 def test_all_patches_of_a_face_are_kept(sim):
     boundary = sim.meshes.get_by_id("West").get_boundary_data(CELLS)
     assert len([p for p in boundary.patches if p.orientation == FLOOR]) == 4
-    assert boundary.orientations == sorted(set(boundary.orientations))
+    assert boundary.orientations == [-2, 2, 3]  # x = 0 is open, x = 1 lies between the meshes, the top is open
     assert boundary.vmax(FLOOR) == max(np.max(p.data) for p in _floor_patches(sim, "West", CELLS))
-    with pytest.warns(UserWarning, match="Boundary.patches"):
+    with pytest.warns(UserWarning, match="Boundary.patches") as record:
         _ = boundary.data
+    assert record[0].filename == __file__  # points at the caller, not into fdsreader
+
+
+def test_vmin_and_vmax_of_a_missing_face_are_nan(sim):
+    boundary = sim.meshes.get_by_id("West").get_boundary_data(CELLS)
+    assert np.isnan(boundary.vmin(1)) and np.isnan(boundary.vmax(1))
 
 
 def test_obstruction_boundary_data_does_not_warn(sim):

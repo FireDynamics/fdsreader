@@ -1,7 +1,20 @@
 import logging
+import os
+import sys
 from functools import wraps
 
 from fdsreader import settings
+
+_PACKAGE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def caller_stacklevel() -> int:
+    """The stacklevel for warnings.warn that points at the first caller outside fdsreader, seen
+    from the function that calls this one."""
+    frame, level = sys._getframe(1), 1
+    while frame is not None and os.path.abspath(frame.f_code.co_filename).startswith(_PACKAGE_DIR + os.sep):
+        frame, level = frame.f_back, level + 1
+    return level
 
 
 def log_error(module):
