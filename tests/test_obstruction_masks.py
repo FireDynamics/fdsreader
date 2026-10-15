@@ -108,8 +108,8 @@ def test_obstruction_mask_contains_every_placeholder(sim, slice_id):
 
 
 # Smokeview 6.11.2 on this case, read off by hand (1 = blanked) for the areas of 0.1 m between the nodes, x 0..2 left to
-# right, the other axis from 1.0 (top) down to 0.0: the slice PBZ=0.7 seen from above and PBY=0.8 seen from the front,
-# at t = 10 s with the obstacles hidden
+# right, the other axis from 1.0 (top) down to 0.0: the slices PBZ=0.7 seen from above, PBY=0.8 seen from the front and
+# PBZ=0.4 with CELL_CENTERED=T seen from above, at t = 10 s with the obstacles hidden
 SMOKEVIEW = {
     "z07": """
         00110011000000000000
@@ -135,6 +135,19 @@ SMOKEVIEW = {
         00000000000000000000
         00000000000000000000
     """,
+    # cell-centred PBZ=0.4 (the cells z 0.4..0.5) seen from above, per cell
+    "z04_cc": """
+        00000000000000000000
+        00000000111110000000
+        00000000111110000000
+        00000000000000000000
+        00011110000000000111
+        00011110000000000111
+        00011110000000000111
+        00000000000000000000
+        00000000000000000000
+        00000000000000000000
+    """,
 }
 
 
@@ -149,6 +162,16 @@ def test_obstruction_mask_matches_smokeview(sim, slice_id, axis, node):
         sides = np.take(cells, node - 1, axis=axis) | np.take(cells, node, axis=axis)
         blanked[offset : offset + 10] = sides
     np.testing.assert_array_equal(blanked, smokeview)
+
+
+def test_masked_cell_centred_slice_matches_smokeview(sim):
+    # Through the whole path: the cell layer of the plane, its mask and to_global
+    smokeview = np.array([[int(c) for c in row] for row in SMOKEVIEW["z04_cc"].split()])[::-1].T
+    values, coords = sim.slices.get_by_id("z04_cc").to_global(masked=True, fill=np.nan, return_coordinates=True)
+    centres = np.arange(0.05, 1.0, 0.1)
+    ix = np.searchsorted(coords["x"], np.arange(0.05, 2.0, 0.1) - 1e-6)
+    iy = np.searchsorted(coords["y"], centres - 1e-6)
+    np.testing.assert_array_equal(np.isnan(values[-1][np.ix_(ix, iy)]), smokeview.astype(bool))
 
 
 def test_unknown_mask_mode_is_rejected(sim):
