@@ -123,12 +123,18 @@ def render_slice(fields, state, height, width, ramp):
 def save_figure(fields, state, series, path, height, width):
     """Write the current view to an image or an animation, using matplotlib."""
     try:
-        import matplotlib
-
-        matplotlib.use("Agg")
-        import matplotlib.pyplot as plt
+        # A figure with its own Agg canvas, rather than pyplot, leaves the backend of the process alone, e.g. when
+        # this is called from a notebook
+        from matplotlib.backends.backend_agg import FigureCanvasAgg
+        from matplotlib.figure import Figure
     except ModuleNotFoundError:
         raise SystemExit(f'{PROG}: --save needs matplotlib: pip install "fdsreader[notebook]"')
+
+    def new_figure(**kwargs):
+        fig = Figure(**kwargs)
+        FigureCanvasAgg(fig)
+        return fig
+
     from .plots import plot_series, plot_slice
 
     field = state.field(fields)
@@ -140,7 +146,8 @@ def save_figure(fields, state, series, path, height, width):
         from matplotlib import animation
 
         steps = range(0, len(field.times), max(1, len(field.times) // 120))
-        fig, ax = plt.subplots()
+        fig = new_figure()
+        ax = fig.subplots()
 
         def draw(step):
             ax.clear()
@@ -164,12 +171,11 @@ def save_figure(fields, state, series, path, height, width):
             anim.save(str(path), writer=writer)
         except Exception as exc:
             raise SystemExit(f"{PROG}: could not write {path}: {exc}")
-        plt.close(fig)
         return f"wrote {path} ({len(list(steps))} frames)"
 
-    panels = (1 if field is None else 1) + (1 if series else 0)
-    fig, axes = plt.subplots(1, max(1, panels), figsize=(7 * max(1, panels), 5.5))
-    axes = np.atleast_1d(axes)
+    panels = (0 if field is None else 1) + (1 if series else 0)
+    fig = new_figure(figsize=(7 * max(1, panels), 5.5))
+    axes = np.atleast_1d(fig.subplots(1, max(1, panels)))
     at = 0
     if field is not None:
         timestep = state.clamp(fields)
@@ -191,7 +197,6 @@ def save_figure(fields, state, series, path, height, width):
         plot_series(series, ax=axes[at], cursor_time=state.time(fields) if field is not None else None)
     fig.tight_layout()
     fig.savefig(str(path), dpi=150)
-    plt.close(fig)
     return f"wrote {path}"
 
 

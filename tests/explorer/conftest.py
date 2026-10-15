@@ -55,15 +55,12 @@ class FakeField:
         self.unit = unit
         self.times = np.linspace(0.0, 2.0, n_t)
         self.axes = ("y", "z")
-        self.coords = {"x": np.array([0.0]),
-                       "y": np.linspace(-2.0, 2.0, nx),
-                       "z": np.linspace(0.0, 8.0, ny)}
+        self.coords = {"x": np.array([0.0]), "y": np.linspace(-2.0, 2.0, nx), "z": np.linspace(0.0, 8.0, ny)}
         self.shape = (nx, ny)
         # a blob that rises and grows, so frames differ both in where the heat is and
         # in how hot it gets -- which is what makes a per-step colour scale visible
         yy, zz = np.meshgrid(self.coords["y"], self.coords["z"], indexing="ij")
-        self._frames = [20 + (150 + 180 * k) * np.exp(-(yy ** 2) - (zz - 1 - 2 * k) ** 2)
-                        for k in range(n_t)]
+        self._frames = [20 + (150 + 180 * k) * np.exp(-(yy**2) - (zz - 1 - 2 * k) ** 2) for k in range(n_t)]
 
     def frame(self, timestep):
         return self._frames[timestep]
@@ -90,12 +87,26 @@ def fake_field():
 def fake_series():
     times = np.linspace(0.0, 4.0, 21)
     return [
-        {"label": "DEVC  A — TEMPERATURE [C]", "name": "A", "times": times,
-         "values": 20 + 10 * times, "quantity": "TEMPERATURE", "unit": "C",
-         "source": "device", "device": None},
-        {"label": "DEVC  B — TEMPERATURE [C]", "name": "B", "times": times,
-         "values": 20 + 4 * times ** 2, "quantity": "TEMPERATURE", "unit": "C",
-         "source": "device", "device": None},
+        {
+            "label": "DEVC  A — TEMPERATURE [C]",
+            "name": "A",
+            "times": times,
+            "values": 20 + 10 * times,
+            "quantity": "TEMPERATURE",
+            "unit": "C",
+            "source": "device",
+            "device": None,
+        },
+        {
+            "label": "DEVC  B — TEMPERATURE [C]",
+            "name": "B",
+            "times": times,
+            "values": 20 + 4 * times**2,
+            "quantity": "TEMPERATURE",
+            "unit": "C",
+            "source": "device",
+            "device": None,
+        },
     ]
 
 
@@ -110,9 +121,7 @@ def devc_without_data(request, tmp_path):
     root = tmp_path / request.param
     root.mkdir()
     (root / "c.smv").write_text(
-        "CHID\n c\n\n"
-        "CSVF\n devc\n c_devc.csv\n\n"
-        "DEVICE\n TC % TEMPERATURE\n 1.0 0.0 1.0 0.0 0.0 1.0\n"
+        "CHID\n c\n\nCSVF\n devc\n c_devc.csv\n\nDEVICE\n TC % TEMPERATURE\n 1.0 0.0 1.0 0.0 0.0 1.0\n"
     )
     if request.param == "empty":
         (root / "c_devc.csv").write_text("")
@@ -149,3 +158,24 @@ def devc_line_case(tmp_path):
     (root / "c_devc.csv").write_text("s,C\nTime,TC\n0.0,20.0\n1.0,30.0\n2.0,45.0\n")
     (root / "c_line.csv").write_text("m,C\nHeight,LINE\n0.5,100.0\n1.5,200.0\n")
     return root
+
+
+@pytest.fixture
+def app(monkeypatch, fake_field, fake_series):
+    """An interactive application over one field shown twice and two curves."""
+    from explorer_helpers import FakeSim
+
+    from fdsreader.explorer import tui
+
+    monkeypatch.setattr(tui, "fields_of", lambda sim: [fake_field, fake_field])
+    monkeypatch.setattr(tui, "build_series", lambda sim: fake_series)
+    return tui.Interactive(FakeSim())
+
+
+@pytest.fixture
+def agg():
+    """Draw on the Agg backend, so no display is needed, and close every figure afterwards."""
+    plt = pytest.importorskip("matplotlib.pyplot")
+    plt.switch_backend("Agg")
+    yield plt
+    plt.close("all")

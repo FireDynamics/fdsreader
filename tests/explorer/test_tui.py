@@ -5,35 +5,23 @@ tested directly; only the drawing needs curses.
 """
 
 import pytest
+from explorer_helpers import FakeSim
 
 from fdsreader.explorer import tui
 from fdsreader.explorer.tui import SIDE_BY_SIDE_COLUMNS, Interactive, layout
 
 
-class FakeSim:
-    chid = "fake"
-    root_path = "."
-
-
-@pytest.fixture
-def app(monkeypatch, fake_field, fake_series):
-    """An application over one field and two curves."""
-    monkeypatch.setattr(tui, "fields_of", lambda sim: [fake_field, fake_field])
-    monkeypatch.setattr(tui, "build_series", lambda sim: fake_series)
-    return Interactive(FakeSim())
-
-
 # -- layout ---------------------------------------------------------------
 def test_wide_terminal_puts_the_panes_side_by_side():
     boxes = layout(40, SIDE_BY_SIDE_COLUMNS)
-    assert boxes["slice"][0] == boxes["curves"][0]      # same top row
-    assert boxes["curves"][1] > 0                       # curves start further right
+    assert boxes["slice"][0] == boxes["curves"][0]  # same top row
+    assert boxes["curves"][1] > 0  # curves start further right
 
 
 def test_narrow_terminal_stacks_the_panes():
     boxes = layout(40, SIDE_BY_SIDE_COLUMNS - 1)
-    assert boxes["curves"][1] == 0                      # both start at the left
-    assert boxes["curves"][0] > boxes["slice"][0]       # curves sit below
+    assert boxes["curves"][1] == 0  # both start at the left
+    assert boxes["curves"][0] > boxes["slice"][0]  # curves sit below
 
 
 @pytest.mark.parametrize("rows,cols", [(6, 20), (24, 80), (60, 200), (1, 1)])
@@ -76,7 +64,7 @@ def test_play_toggles_and_advance_stops_at_the_end(app):
     for _ in range(len(app.field.times) + 5):
         app.advance()
     assert app.state.timestep == len(app.field.times) - 1
-    assert not app.playing          # it stops rather than looping
+    assert not app.playing  # it stops rather than looping
 
 
 def test_advance_does_nothing_while_paused(app):
@@ -105,7 +93,7 @@ def test_bracket_keys_change_field_and_clamp(app):
     app.handle_key("]")
     assert app.state.field_index == 1
     app.handle_key("]")
-    assert app.state.field_index == 1          # only two fields
+    assert app.state.field_index == 1  # only two fields
     app.handle_key("[")
     app.handle_key("[")
     assert app.state.field_index == 0
@@ -133,7 +121,7 @@ def test_quit_and_help(app):
     assert app.handle_key("q") == "quit"
     assert app.handle_key("?") is None
     assert app.showing_help
-    app.handle_key("l")                        # any other key closes it again
+    app.handle_key("l")  # any other key closes it again
     assert not app.showing_help
 
 
@@ -169,7 +157,7 @@ def test_a_simulation_without_slices(monkeypatch, fake_series):
     assert app.field is None
     assert "no slice output" in app.title()
     assert "no slice" in " ".join(app.slice_text(20, 60)).lower()
-    app.handle_key("right")                    # must not raise
+    app.handle_key("right")  # must not raise
     app.advance()
 
 
@@ -182,7 +170,7 @@ def test_devices_without_data_leave_the_curve_list_empty(devc_without_data):
     assert app.series == []
     assert app.state.curves == ()
     assert "press c" in " ".join(app.curves_text(20, 60))
-    app.handle_key("c")                        # opening the picker must not raise
+    app.handle_key("c")  # opening the picker must not raise
     assert app.curve_choices() == []
 
 
@@ -195,8 +183,29 @@ def test_a_simulation_with_nothing_in_it_still_draws(simulation_with_nothing):
     assert app.field is None
     assert app.current_time is None if hasattr(app, "current_time") else True
     # every key, on a simulation with nothing to show
-    for key in ("right", "left", "h", "l", "pgup", "pgdn", "<", ">", "home", "end",
-                " ", "+", "-", "g", "s", "[", "]", "f", "c", "?", "q"):
+    for key in (
+        "right",
+        "left",
+        "h",
+        "l",
+        "pgup",
+        "pgdn",
+        "<",
+        ">",
+        "home",
+        "end",
+        " ",
+        "+",
+        "-",
+        "g",
+        "s",
+        "[",
+        "]",
+        "f",
+        "c",
+        "?",
+        "q",
+    ):
         app.handle_key(key)
     app.advance()
     assert any(line.strip() for line in app.slice_text(20, 60))

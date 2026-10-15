@@ -667,9 +667,10 @@ class NotebookExplorer:
             self._setup_fields(sim)
             return
 
-        self.summary.value = self._overview()
-        self._setup_fields(sim)  # also positions the time bar
-        self._refresh_curves()
+        self._setup_fields(sim)  # also positions the time bar, and draws the curves when there is a slice
+        self.summary.value = self._overview()  # after the fields, so it can count the slices
+        if not self.fields:
+            self._refresh_curves()
 
     def _overview(self):
         """Short HTML summary: what is in this simulation, at a glance."""
