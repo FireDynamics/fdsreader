@@ -56,9 +56,7 @@ def export_obst_raw(obst: Obstruction, output_dir: str, ordering: Literal["C", "
             }
         )
 
-    def worker(
-        quantity: str, faces: Dict[int, Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]], vmin: float, vmax: float
-    ):
+    def worker(quantity: str, faces: Dict[int, Union[np.ndarray, Tuple[np.ndarray, ...]]], vmin: float, vmax: float):
         # Abort if no useful data is available
         if vmax <= 0:
             return
@@ -76,10 +74,12 @@ def export_obst_raw(obst: Obstruction, output_dir: str, ordering: Literal["C", "
 
         with open(os.path.join(output_dir, quantity_name, filename), "wb") as rawfile:
             for face in faces.values():  # face for each orientation
-                for d in (face * out["ScaleFactor"]).astype(np.uint8):
-                    if ordering == "F":
-                        d = d.T
-                    d.tofile(rawfile)
+                # A face lying at several positions (see get_global_boundary_data_arrays) is written part by part
+                for part in face if isinstance(face, tuple) else (face,):
+                    for d in (part * out["ScaleFactor"]).astype(np.uint8):
+                        if ordering == "F":
+                            d = d.T
+                        d.tofile(rawfile)
 
         with lock:
             meta["Quantities"].append(out)
