@@ -63,7 +63,7 @@ class SubSlice:
             # mesh with only a single cell along this axis leaves just one coordinate afterwards.
             if cell_centered:
                 co = co[:-1] + np.diff(co) / 2
-            coords[dim] = co[extent_index_range(self.mesh.coordinates[dim], self.extent[dim], cell_centered)].copy()
+            coords[dim] = co[extent_index_range(co, self.extent[dim])].copy()
 
         return coords
 
@@ -571,12 +571,12 @@ class Slice(NumpyArrayMixin):
         for subslices in subslice_sets:
             coord_min = {"x": math.inf, "y": math.inf, "z": math.inf}
             coord_max = {"x": -math.inf, "y": -math.inf, "z": -math.inf}
+            # The nodes each subslice covers: a slice defined with XB may cover only part of its mesh
+            nodes = {mesh: slc.get_coordinates(ignore_cell_centered=True) for mesh, slc in subslices.items()}
             for dim in ("x", "y", "z"):
-                for slc in subslices.values():
-                    co = slc.mesh.coordinates[dim]
-                    co = co[np.where(np.logical_and(co >= slc.extent[dim][0], co <= slc.extent[dim][1]))]
-                    coord_min[dim] = min(co[0], coord_min[dim])
-                    coord_max[dim] = max(co[-1], coord_max[dim])
+                for mesh_nodes in nodes.values():
+                    coord_min[dim] = min(mesh_nodes[dim][0], coord_min[dim])
+                    coord_max[dim] = max(mesh_nodes[dim][-1], coord_max[dim])
 
             # The global grid will use the finest mesh as base and duplicate values of the coarser
             # meshes. Therefore, we first find the finest mesh and calculate the step size in each
@@ -606,7 +606,7 @@ class Slice(NumpyArrayMixin):
 
             grid = np.full((self.n_t, steps["x"], steps["y"], steps["z"]), np.nan)
 
-            def place(slc: SubSlice):
+            def place(mesh: str, slc: SubSlice):
                 """Maps a subslice onto the global grid, keeping the node rows on all of its upper faces.
 
                 :returns: The data (masked if requested), the obstruction mask (None if not masked), the region of
@@ -618,8 +618,7 @@ class Slice(NumpyArrayMixin):
                 )
                 mask = slc.mesh.get_obstruction_mask_slice(slc) if masked else None
 
-                # The nodes the subslice covers: a slice defined with XB may cover only part of its mesh
-                nodes = slc.get_coordinates(ignore_cell_centered=True)
+                slc_nodes = nodes[mesh]
                 start_idx = dict()
                 end_idx = dict()
                 inner_axes = list()
@@ -634,8 +633,8 @@ class Slice(NumpyArrayMixin):
                         1,
                     )
 
-                    start_idx[dim] = int(round((nodes[dim][0] - coord_min[dim]) / step_sizes_min[dim]))
-                    end_idx[dim] = int(round((nodes[dim][-1] - coord_min[dim]) / step_sizes_min[dim]))
+                    start_idx[dim] = int(round((slc_nodes[dim][0] - coord_min[dim]) / step_sizes_min[dim]))
+                    end_idx[dim] = int(round((slc_nodes[dim][-1] - coord_min[dim]) / step_sizes_min[dim]))
 
                     if self.cell_centered:
                         if n_repeat > 1:
@@ -645,7 +644,7 @@ class Slice(NumpyArrayMixin):
                         continue
 
                     end_idx[dim] += 1
-                    if not np.isclose(nodes[dim][-1], coord_max[dim]):
+                    if not np.isclose(slc_nodes[dim][-1], coord_max[dim]):
                         inner_axes.append(axis)
                     slc_data = resample_mesh_axis(slc_data, axis + 1, n_repeat, keep_last=True)
                     if masked:
@@ -664,8 +663,8 @@ class Slice(NumpyArrayMixin):
             # simulation space, which were left to a neighbouring mesh (node-based slices only)
             written = None if self.cell_centered else np.zeros(grid.shape[1:], dtype=bool)
             inner_faces = list()
-            for slc in subslices.values():
-                slc_data, mask, region, inner_axes = place(slc)
+            for mesh, slc in subslices.items():
+                slc_data, mask, region, inner_axes = place(mesh, slc)
 
                 # The node row on an upper face inside the simulation space coincides with the first row of the
                 # neighbouring mesh, which supplies it, so it is left out here. A copy of it is kept for the case

@@ -49,27 +49,36 @@ class Mesh:
 
         self._boundary_data: Dict[int, Boundary] = dict()
 
-    def get_obstruction_mask(self, times: Sequence[float], cell_centered=False) -> np.ndarray:
+    def get_obstruction_mask(
+        self, times: Sequence[float], cell_centered=False, region: Tuple[slice, slice, slice] | None = None
+    ) -> np.ndarray:
         """Marks all cells which are blocked by an obstruction.
 
         :param times: All timesteps of the simulation.
+        :param region: Index ranges along x, y and z (with explicit start and stop) to which the mask is limited.
+            The whole mesh by default.
         :returns: A 4-dimensional array with time as first and x,y,z as last dimensions. The array
             depends on time as obstructions may be hidden as specific points in time.
         """
-        shape = self.dimension.shape(cell_centered=cell_centered)
-        mask = np.ones((len(times), shape[0], shape[1], shape[2]), dtype=bool)
+        if region is None:
+            region = tuple(slice(0, n) for n in self.dimension.shape(cell_centered=cell_centered))
+        mask = np.ones((len(times),) + tuple(r.stop - r.start for r in region), dtype=bool)
         c = 1 if cell_centered else 0
 
         for obst in self.obstructions:
             subobst = obst[self]
-            x1, x2 = subobst.bound_indices["x"]
-            y1, y2 = subobst.bound_indices["y"]
-            z1, z2 = subobst.bound_indices["z"]
+            blocked = list()
+            for dim, r in zip(("x", "y", "z"), region):
+                low, high = subobst.bound_indices[dim]
+                high = max(high + c, low + 1)
+                blocked.append(slice(max(low, r.start) - r.start, min(high, r.stop) - r.start))
+            if any(b.stop <= b.start for b in blocked):
+                continue  # the obstruction lies outside of the region
             t_idx = 0
             for t in subobst.get_visible_times(times):
                 while not np.isclose(t, times[t_idx]):
                     t_idx += 1
-                mask[t_idx, x1 : max(x2 + c, x1 + 1), y1 : max(y2 + c, y1 + 1), z1 : max(z2 + c, z1 + 1)] = False
+                mask[(t_idx,) + tuple(blocked)] = False
         return mask
 
     def get_obstruction_mask_slice(self, subslice):
@@ -81,17 +90,15 @@ class Mesh:
         """
         orientation = subslice.orientation
         cell_centered = subslice.cell_centered
-        mask = self.get_obstruction_mask(subslice.times, cell_centered=cell_centered)
-        crop = [slice(None)] * 4
-        if orientation != 0:  # a 3D slice has no plane to cut out
-            value = subslice.extent[orientation][0]
-            slc_index = self.coordinate_to_index((value,), dimension=(orientation,), cell_centered=cell_centered)[0]
-            crop[orientation] = slice(slc_index, slc_index + 1)
-        # A slice defined with XB may cover only part of the mesh
+        region = list()
         for axis, dim in enumerate(("x", "y", "z"), start=1):
-            if axis != orientation:
-                crop[axis] = extent_index_range(self.coordinates[dim], subslice.extent[dim], cell_centered)
-        return mask[tuple(crop)]
+            if axis == orientation:
+                value = subslice.extent[orientation][0]
+                slc_index = self.coordinate_to_index((value,), dimension=(orientation,), cell_centered=cell_centered)[0]
+                region.append(slice(slc_index, slc_index + 1))
+            else:  # a slice defined with XB may cover only part of the mesh
+                region.append(extent_index_range(self.coordinates[dim], subslice.extent[dim], cell_centered))
+        return self.get_obstruction_mask(subslice.times, cell_centered=cell_centered, region=tuple(region))
 
     def coordinate_to_index(
         self,
