@@ -1,5 +1,6 @@
 from typing import List, Tuple, Union
 
+import numpy as np
 from typing_extensions import Literal
 
 
@@ -100,3 +101,19 @@ class Extent:
         :param reduced: Whether to leave out empty extents or not.
         """
         return list(self.as_tuple(reduced))
+
+
+def extent_index_range(coordinates: np.ndarray, bounds: Tuple[float, float], cell_centered=False) -> slice:
+    """Indices of the nodes (or, if cell_centered, the cells) within the bounds along one axis of a mesh.
+    If there are none, the index of the one nearest to the lower bound.
+
+    :param coordinates: The node coordinates of the mesh along the axis.
+    :param bounds: Lower and upper bound along the axis, e.g. ``extent["x"]``.
+    """
+    if cell_centered:
+        coordinates = coordinates[:-1] + np.diff(coordinates) / 2
+    inside = np.flatnonzero((coordinates >= bounds[0]) & (coordinates <= bounds[1]))
+    if inside.size == 0:
+        nearest = int(np.argmin(np.abs(coordinates - bounds[0])))
+        return slice(nearest, nearest + 1)
+    return slice(int(inside[0]), int(inside[-1]) + 1)

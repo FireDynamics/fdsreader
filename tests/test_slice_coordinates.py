@@ -63,17 +63,14 @@ def test_slice_get_coordinates_cell_centered_oriented():
     assert coords["y"] == pytest.approx([1.95])
 
 
-def test_slice_get_coordinates_empty_dim_fallback_uses_mesh_object(monkeypatch):
-    """Regression test: the "no coordinates found" fallback in Slice.get_coordinates()
-    (fdsreader/slcf/slice.py) had the same self._subslices.keys()/values() mix-up as
-    GitHub issue #118 and would raise AttributeError: 'str' object has no attribute
-    'coordinates' if it were ever triggered, e.g. if a subslice's coordinates for a
-    dimension ended up not overlapping the slice's extent at all.
+def test_slice_get_coordinates_extent_outside_the_mesh_falls_back_to_nearest_node():
+    """Regression test: a subslice whose extent does not overlap its mesh's coordinates along an axis used to
+    leave Slice.get_coordinates() without coordinates there, and its own fallback had the same
+    self._subslices.keys()/values() mix-up as GitHub issue #118 and an IndexError one past the array end.
+    SubSlice.get_coordinates() now falls back to the nearest node itself (extent_index_range), so the slice
+    gets that node.
 
-    The extent's x-coordinate (5.0) is placed beyond the mesh's last x-coordinate
-    (3.0) on purpose: this drives np.searchsorted's index to mesh_coords.size, which
-    also exercised a second, independent bug in the same fallback (it incremented the
-    index instead of decrementing it, causing an IndexError one past the array end)."""
+    The extent's x-coordinate (5.0) lies beyond the mesh's last x-coordinate (3.0) on purpose."""
     mesh = SimpleNamespace(
         id="mesh1",
         coordinates={
@@ -87,16 +84,7 @@ def test_slice_get_coordinates_empty_dim_fallback_uses_mesh_object(monkeypatch):
     slc.cell_centered = False
     slc.orientation = 0  # 3D slice: every dimension goes through the general branch
     slc.extent = Extent(5, 5, 0, 4, 0, 3)
-    subslice = SubSlice(slc, "", None, slc.extent, mesh)
-    slc._subslices = {mesh.id: subslice}
-
-    # Simulate the "no overlapping coordinate found" case for the x dimension, which
-    # is what forces Slice.get_coordinates() into its buggy fallback branch.
-    monkeypatch.setattr(
-        subslice,
-        "get_coordinates",
-        lambda ignore_cell_centered=False: {"x": np.array([]), "y": np.array([2.0]), "z": np.array([1.0])},
-    )
+    slc._subslices = {mesh.id: SubSlice(slc, "", None, slc.extent, mesh)}
 
     coords = slc.get_coordinates()
     # The nearest available mesh coordinate is the last one (3.0), not an out-of-bounds index.

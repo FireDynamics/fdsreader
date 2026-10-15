@@ -12,6 +12,7 @@ from fdsreader import settings
 from fdsreader.fds_classes import Mesh
 from fdsreader.utils import Dimension, Extent, NumpyArrayMixin, Quantity
 from fdsreader.utils.data import resample_mesh_axis
+from fdsreader.utils.extent import extent_index_range
 
 _HANDLED_FUNCTIONS = {}
 
@@ -53,20 +54,16 @@ class SubSlice:
 
         :param ignore_cell_centered: Whether to shift the coordinates when the slice is cell_centered or not.
         """
-        # orientation = ('x', 'y', 'z')[self.orientation - 1] if self.orientation != 0 else ''
-        # coords = {'x': set(), 'y': set(), 'z': set()}
+        cell_centered = self.cell_centered and not ignore_cell_centered
         coords: Dict[Literal["x", "y", "z"], np.ndarray] = {}
         for dim in ("x", "y", "z"):
-            co = self.mesh.coordinates[dim].copy()
+            co = self.mesh.coordinates[dim]
             # In case the slice is cell-centered, we will shift the coordinates by half a cell
             # and remove the last coordinate. Compute the per-cell offset before trimming, since a
             # mesh with only a single cell along this axis leaves just one coordinate afterwards.
-            if self.cell_centered and not ignore_cell_centered:
+            if cell_centered:
                 co = co[:-1] + np.diff(co) / 2
-
-            coords[dim] = co[np.where(np.logical_and(co >= self.extent[dim][0], co <= self.extent[dim][1]))]
-            if coords[dim].size == 0:
-                coords[dim] = np.array([co[np.argmin(np.abs(co - self.extent[dim][0]))]])
+            coords[dim] = co[extent_index_range(co, self.extent[dim])].copy()
 
         return coords
 
@@ -381,24 +378,8 @@ class Slice(NumpyArrayMixin):
             # (sometimes only 6 decimal places, e.g. 1.0 and 1.000001)
             diff = coords[dim][1:] - coords[dim][:-1]
             coords[dim] = np.concatenate((coords[dim][:1], coords[dim][1:][diff > 0.000002]), axis=0)
-
-            if len(coords[dim]) == 0:
-                slice_coordinate = self.extent[dim][0]
-                nearest_coordinate = np.inf
-                for subslice in self._subslices.values():
-                    mesh_coords = subslice.mesh.coordinates[dim]
-                    idx = np.searchsorted(mesh_coords, slice_coordinate, side="left")
-                    if idx > 0 and (
-                        idx == mesh_coords.size
-                        or math.fabs(slice_coordinate - mesh_coords[idx - 1])
-                        < math.fabs(slice_coordinate - mesh_coords[idx])
-                    ):
-                        idx = idx - 1
-                    if math.fabs(mesh_coords[idx] - slice_coordinate) < math.fabs(
-                        nearest_coordinate - slice_coordinate
-                    ):
-                        nearest_coordinate = mesh_coords[idx]
-                coords[dim] = np.array([nearest_coordinate])
+            # Every subslice has at least one coordinate on each axis (SubSlice.get_coordinates falls back to the
+            # nearest one), so this is only empty for a slice without subslices
 
         return coords
 
@@ -574,12 +555,12 @@ class Slice(NumpyArrayMixin):
         for subslices in subslice_sets:
             coord_min = {"x": math.inf, "y": math.inf, "z": math.inf}
             coord_max = {"x": -math.inf, "y": -math.inf, "z": -math.inf}
+            # The nodes each subslice covers: a slice defined with XB may cover only part of its mesh
+            nodes = {mesh: slc.get_coordinates(ignore_cell_centered=True) for mesh, slc in subslices.items()}
             for dim in ("x", "y", "z"):
-                for slc in subslices.values():
-                    co = slc.mesh.coordinates[dim]
-                    co = co[np.where(np.logical_and(co >= slc.extent[dim][0], co <= slc.extent[dim][1]))]
-                    coord_min[dim] = min(co[0], coord_min[dim])
-                    coord_max[dim] = max(co[-1], coord_max[dim])
+                for mesh_nodes in nodes.values():
+                    coord_min[dim] = min(mesh_nodes[dim][0], coord_min[dim])
+                    coord_max[dim] = max(mesh_nodes[dim][-1], coord_max[dim])
 
             # The global grid will use the finest mesh as base and duplicate values of the coarser
             # meshes. Therefore, we first find the finest mesh and calculate the step size in each
@@ -591,14 +572,12 @@ class Slice(NumpyArrayMixin):
             }
             step_sizes_max = {"x": 0, "y": 0, "z": 0}
             steps = dict()
-            global_max = {"x": -math.inf, "y": -math.inf, "z": -math.inf}
 
             for dim in ("x", "y", "z"):
                 for sslc in subslices.values():
                     step_size = sslc.mesh.coordinates[dim][1] - sslc.mesh.coordinates[dim][0]
                     step_sizes_min[dim] = min(step_size, step_sizes_min[dim])
                     step_sizes_max[dim] = max(step_size, step_sizes_max[dim])
-                    global_max[dim] = max(sslc.mesh.coordinates[dim][-1], global_max[dim])
 
             for dim in ("x", "y", "z"):
                 if step_sizes_min[dim] == 0:
@@ -611,7 +590,7 @@ class Slice(NumpyArrayMixin):
 
             grid = np.full((self.n_t, steps["x"], steps["y"], steps["z"]), np.nan)
 
-            def place(slc: SubSlice):
+            def place(mesh: str, slc: SubSlice):
                 """Maps a subslice onto the global grid, keeping the node rows on all of its upper faces.
 
                 :returns: The data (masked if requested), the obstruction mask (None if not masked), the region of
@@ -623,6 +602,7 @@ class Slice(NumpyArrayMixin):
                 )
                 mask = slc.mesh.get_obstruction_mask_slice(slc) if masked else None
 
+                slc_nodes = nodes[mesh]
                 start_idx = dict()
                 end_idx = dict()
                 inner_axes = list()
@@ -637,8 +617,8 @@ class Slice(NumpyArrayMixin):
                         1,
                     )
 
-                    start_idx[dim] = int(round((slc.mesh.coordinates[dim][0] - coord_min[dim]) / step_sizes_min[dim]))
-                    end_idx[dim] = int(round((slc.mesh.coordinates[dim][-1] - coord_min[dim]) / step_sizes_min[dim]))
+                    start_idx[dim] = int(round((slc_nodes[dim][0] - coord_min[dim]) / step_sizes_min[dim]))
+                    end_idx[dim] = int(round((slc_nodes[dim][-1] - coord_min[dim]) / step_sizes_min[dim]))
 
                     if self.cell_centered:
                         if n_repeat > 1:
@@ -648,7 +628,7 @@ class Slice(NumpyArrayMixin):
                         continue
 
                     end_idx[dim] += 1
-                    if not np.isclose(slc.mesh.coordinates[dim][-1], global_max[dim]):
+                    if not np.isclose(slc_nodes[dim][-1], coord_max[dim]):
                         inner_axes.append(axis)
                     slc_data = resample_mesh_axis(slc_data, axis + 1, n_repeat, keep_last=True)
                     if masked:
@@ -667,8 +647,8 @@ class Slice(NumpyArrayMixin):
             # simulation space, which were left to a neighbouring mesh (node-based slices only)
             written = None if self.cell_centered else np.zeros(grid.shape[1:], dtype=bool)
             inner_faces = list()
-            for slc in subslices.values():
-                slc_data, mask, region, inner_axes = place(slc)
+            for mesh, slc in subslices.items():
+                slc_data, mask, region, inner_axes = place(mesh, slc)
 
                 # The node row on an upper face inside the simulation space coincides with the first row of the
                 # neighbouring mesh, which supplies it, so it is left out here. A copy of it is kept for the case

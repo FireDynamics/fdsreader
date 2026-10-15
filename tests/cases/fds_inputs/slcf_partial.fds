@@ -1,0 +1,30 @@
+&HEAD CHID='partial', TITLE='Partial XB slices for fdsreader' /
+&MESH ID='M0', IJK=5,5,5, XB=-1.0,0.0,0.0,1.0,0.0,1.0 /
+&MESH ID='M1', IJK=10,10,10, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
+&MESH ID='M2', IJK=10,10,10, XB=1.0,2.0,0.0,1.0,0.0,1.0 /
+&MESH ID='M3', IJK=5,5,5, XB=2.0,3.0,0.0,1.0,0.0,1.0 /
+&TIME T_END=2.0 /
+&DUMP DT_SLCF=0.5 /
+&REAC FUEL='PROPANE', SOOT_YIELD=0.01 /
+&SURF ID='FIRE', HRRPUA=500.0 /
+&OBST ID='Box', XB=0.6,0.9,0.4,0.6,0.0,0.5 /
+&OBST ID='Coarse', XB=2.4,2.8,0.4,0.6,0.0,0.6 /
+&VENT XB=1.2,1.4,0.4,0.6,0.0,0.0, SURF_ID='FIRE' /
+&OBST ID='Front', XB=-0.6,-0.2,0.4,0.6,0.0,0.6 /
+&VENT MB='XMIN', SURF_ID='OPEN' / &VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+full reference slices
+&SLCF PBZ=0.4, QUANTITY='TEMPERATURE' /
+&SLCF PBZ=0.4, QUANTITY='TEMPERATURE', CELL_CENTERED=T /
+&SLCF XB=-1.0,3.0,0.0,1.0,0.0,1.0, QUANTITY='TEMPERATURE' /
+&SLCF XB=-1.0,3.0,0.0,1.0,0.0,1.0, QUANTITY='TEMPERATURE', CELL_CENTERED=T /
+
+partial slices over all four meshes (M0 and M3 have 0.2 m cells)
+&SLCF XB=-0.6,2.6,0.2,0.8,0.4,0.4, QUANTITY='TEMPERATURE', ID='z_part' /
+&SLCF XB=-0.6,2.6,0.2,0.8,0.4,0.4, QUANTITY='TEMPERATURE', CELL_CENTERED=T, ID='z_part_cc' /
+&SLCF XB=-0.6,2.6,0.2,0.8,0.2,0.6, QUANTITY='TEMPERATURE', ID='vol_part' /
+&SLCF XB=-0.6,2.6,0.2,0.8,0.2,0.6, QUANTITY='TEMPERATURE', CELL_CENTERED=T, ID='vol_part_cc' /
+partial slice in one mesh only
+&SLCF XB=0.2,0.8,0.0,1.0,0.4,0.4, QUANTITY='TEMPERATURE', ID='z_part_m1' /
+&TAIL /
