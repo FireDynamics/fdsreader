@@ -1,7 +1,6 @@
 """Regression tests for small crashes and warnings found while writing the example notebooks."""
 
 import os
-import sys
 import warnings
 from pathlib import Path
 
@@ -13,9 +12,6 @@ from fdsreader.evac import EvacCollection
 from fdsreader.simulation import _wall_times_to_utc
 
 CASES_DIR = Path(__file__).parent / "cases"
-
-# datetime.fromisoformat accepts every ISO 8601 offset only from Python 3.11 on
-_NEEDS_PY311 = pytest.mark.skipif(sys.version_info < (3, 11), reason="fromisoformat needs Python 3.11")
 
 
 @pytest.mark.parametrize("case", ["bndf_data", "bndf_data_fds6100"])
@@ -63,9 +59,9 @@ def test_steps_load_without_timezone_warning(monkeypatch):
         ("2024-03-14T09:39:53.199-05:30", "2024-03-14T15:09:53.199"),
         (" 2024-03-14T09:39:53.199", "2024-03-14T09:39:53.199"),
         ("2024-03-14", "2024-03-14T00:00:00.000"),
-        pytest.param("2024-03-14T09:39:53.199+0100", "2024-03-14T08:39:53.199", marks=_NEEDS_PY311),
-        pytest.param("2024-03-14T09:39:53.199+01", "2024-03-14T08:39:53.199", marks=_NEEDS_PY311),
-        pytest.param("2024-03-14T09:39:53.199Z", "2024-03-14T09:39:53.199", marks=_NEEDS_PY311),
+        ("2024-03-14T09:39:53.199+0100", "2024-03-14T08:39:53.199"),
+        ("2024-03-14T09:39:53.199+01", "2024-03-14T08:39:53.199"),
+        ("2024-03-14T09:39:53.199Z", "2024-03-14T09:39:53.199"),
     ],
 )
 def test_wall_times_to_utc(stamp, utc):
