@@ -53,7 +53,7 @@ def test_steps_load_without_timezone_warning(monkeypatch):
         warnings.simplefilter("error")
         steps = Simulation(str(CASES_DIR / "steckler_data")).steps
     # The wall-clock times are written with an offset of +01:00 and stored as UTC
-    assert steps["Time Step"][0] == np.datetime64("2024-03-14T08:39:53.199")
+    assert steps["Wall Time"][0] == np.datetime64("2024-03-14T08:39:53.199")
 
 
 @pytest.mark.parametrize(

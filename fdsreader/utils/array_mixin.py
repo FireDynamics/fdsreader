@@ -36,6 +36,9 @@ class NumpyArrayMixin(np.lib.mixins.NDArrayOperatorsMixin):
     #: (see class docstring). Left as an empty dict here only as a safe default.
     _handled_functions: Dict[Any, Any] = {}
 
+    #: How to get one array of all subitems, for the error message of :meth:`__array__`.
+    _global_array_hint = "use the 'to_global' method and use the returned numpy-array explicitly."
+
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
         if cls._handled_functions is NumpyArrayMixin._handled_functions:
@@ -76,7 +79,7 @@ class NumpyArrayMixin(np.lib.mixins.NDArrayOperatorsMixin):
         raise TypeError(
             f"{name}s can not be converted to numpy arrays, but they support all typical numpy"
             " operations such as np.multiply. If a 'global' array containing all subitems is"
-            " required, use the 'to_global' method and use the returned numpy-array explicitly."
+            f" required, {self._global_array_hint}"
         )
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
