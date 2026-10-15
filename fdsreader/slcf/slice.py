@@ -462,7 +462,9 @@ class Slice(NumpyArrayMixin):
                     indices.extend((slice(shape[0]), slice(shape[1])))
                 else:
                     indices.extend((slice(shape[0]), slice(shape[1]), slice(shape[2])))
-                    indices[slice_dim] = slice(cut_index[0], cut_index[0] + 1, 1)
+                    # The data of a slice defined with XB starts at its own first node or cell, not the mesh's
+                    local_index = cut_index[0] - subslc.index_ranges()[slice_direction].start
+                    indices[slice_dim] = slice(local_index, local_index + 1, 1)
 
                 subslc._data = np.squeeze(subslc.data[tuple(indices)], axis=slice_dim)
                 for direction in subslc.vector_filenames.keys():
@@ -470,10 +472,16 @@ class Slice(NumpyArrayMixin):
                         subslc.vector_data[direction][tuple(indices)], axis=slice_dim
                     )
 
-                # Change 3D extent to 2D one
+                # Change 3D extent to 2D one, and the node indices as FDS writes them for a plane (for a
+                # cell-centred plane the node above the cell, see SubSlice.index_ranges)
                 new_extent = subslc.extent.as_list(reduced=False)
                 new_extent[(slice_dim - 1) * 2 : slice_dim * 2] = (cut_value, cut_value)
                 subslc.extent = Extent(*new_extent)
+                if subslc.bound_indices is not None:
+                    plane = cut_index[0] + (1 if self.cell_centered else 0)
+                    bounds = list(subslc.bound_indices)
+                    bounds[(slice_dim - 1) * 2 : slice_dim * 2] = (plane, plane)
+                    subslc.bound_indices = tuple(bounds)
             else:
                 to_remove.append(mesh_id)
 

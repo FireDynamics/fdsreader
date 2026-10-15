@@ -289,7 +289,6 @@ class Simulation:
             # (also when Evac classes were registered but their data could not be loaded)
             if not isinstance(self._evacs, EvacCollection):
                 self.evacs = EvacCollection((), "", ())
-            self._mark_exterior_faces(self._meshes)
             self.meshes = MeshCollection(self._meshes)
             del (
                 self._geom_data,
@@ -319,29 +318,6 @@ class Simulation:
                 FutureWarning,
                 stacklevel=2,
             )
-
-    @staticmethod
-    def _mark_exterior_faces(meshes: List[Mesh]):
-        """Marks the faces of each mesh that no other mesh adjoins, i.e. that lie on the outside of the domain."""
-        eps = 1e-6
-        for mesh in meshes:
-            faces = dict()
-            for dim in ("x", "y", "z"):
-                others = [o for o in meshes if o is not mesh]
-                # Meshes that overlap this one on the two other axes
-                others = [
-                    o
-                    for o in others
-                    if all(
-                        o.extent[d][0] < mesh.extent[d][1] - eps and o.extent[d][1] > mesh.extent[d][0] + eps
-                        for d in ("x", "y", "z")
-                        if d != dim
-                    )
-                ]
-                below = any(abs(o.extent[dim][1] - mesh.extent[dim][0]) < eps for o in others)
-                above = any(abs(o.extent[dim][0] - mesh.extent[dim][1]) < eps for o in others)
-                faces[dim] = (not below, not above)
-            mesh.exterior_faces = faces
 
     def parse_smv_file(self):
         # Global device list in registration order — used to resolve DEVICE_ACT indices.

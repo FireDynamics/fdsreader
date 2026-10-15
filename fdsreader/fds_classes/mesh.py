@@ -48,18 +48,17 @@ class Mesh:
 
         self._boundary_data: Dict[int, Boundary] = dict()
 
-        # Whether the lower and upper face along each axis lie on the outside of the simulated domain, i.e. no
-        # other mesh adjoins them; set by the Simulation once all meshes are known
-        self.exterior_faces: Dict[str, Tuple[bool, bool]] = {dim: (True, True) for dim in ("x", "y", "z")}
-
     def get_obstruction_mask(
         self, times: Sequence[float], cell_centered=False, region: Tuple[slice, slice, slice] | None = None
     ) -> np.ndarray:
         """Marks all cells (or nodes) which are blocked by an obstruction, i.e. those FDS fills with a placeholder
-        instead of a value of the gas: the cells inside an obstruction, and the nodes inside it but not on its faces,
-        whose values FDS averages from the gas next to the obstruction. Nodes on a face at the edge of the mesh are
-        blocked too if there is no gas beyond: the obstruction continues into the neighbouring mesh, or the face
-        lies on the outside of the simulated domain.
+        (the ambient value) instead of a value of the gas.
+
+        A cell is blocked if it lies inside an obstruction. A node is blocked if all cells of this mesh around it
+        are, as FDS averages a node from the gas cells around it and Smokeview blanks a node the same way. So the
+        nodes on the faces of an obstruction keep their gas values, except where obstructions touch each other or
+        an obstruction ends at the edge of the mesh. The mask is only derived from &OBST input; FDS writes face
+        quantities such as velocities and solids defined with &GEOM differently.
 
         :param times: All timesteps of the simulation.
         :param region: Index ranges along x, y and z, as slices without a step, to which the mask is limited.
@@ -75,32 +74,41 @@ class Mesh:
         # Resolve open ends and negative indices like numpy indexing does
         region = tuple(slice(*r.indices(n)[:2]) for r, n in zip(region, shape))
         region = tuple(slice(r.start, max(r.start, r.stop)) for r in region)
-        mask = np.ones((len(times),) + tuple(r.stop - r.start for r in region), dtype=bool)
 
+        # The cells needed: those of the region, or for nodes the cells on both sides of each node. Cells outside
+        # the mesh are left out of a node's neighbourhood, i.e. count as solid.
+        n_cells = self.dimension.shape(cell_centered=True)
+        offset = 0 if cell_centered else 1
+        window = tuple(slice(r.start - offset, r.stop) for r in region)
+        solid = np.zeros((len(times),) + tuple(w.stop - w.start for w in window), dtype=bool)
+        for w, axis in zip(window, range(3)):
+            outside = [slice(None)] * 4
+            for low, high in ((w.start, 0), (n_cells[axis], w.stop)):
+                if high > low:
+                    outside[axis + 1] = slice(low - w.start, high - w.start)
+                    solid[tuple(outside)] = True
+
+        times = np.asarray(times)
         for obst in self.obstructions:
-            subobst = obst[self]
-            blocked = list()
-            for dim, r in zip(("x", "y", "z"), region):
-                low, high = subobst.bound_indices[dim]  # nodes of the obstruction's faces
-                if not cell_centered:
-                    # Only nodes inside the obstruction. A face on the edge of the mesh has no gas beyond it if the
-                    # obstruction continues into the neighbouring mesh or there is no neighbouring mesh.
-                    co = self.coordinates[dim]
-                    bounds = obst.bounding_box[dim]
-                    exterior_low, exterior_high = self.exterior_faces[dim]
-                    if not (low == 0 and (exterior_low or bounds[0] < co[0] - 1e-6)):
-                        low += 1
-                    if high == len(co) - 1 and (exterior_high or bounds[1] > co[-1] + 1e-6):
-                        high += 1
-                blocked.append(slice(max(low, r.start) - r.start, min(high, r.stop) - r.start))
-            if any(b.stop <= b.start for b in blocked):
-                continue  # the obstruction lies outside of the region, or has no blocked cells or nodes
-            t_idx = 0
-            for t in subobst.get_visible_times(times):
-                while not np.isclose(t, times[t_idx]):
-                    t_idx += 1
-                mask[(t_idx,) + tuple(blocked)] = False
-        return mask
+            for subobst in obst.get_subobstructions(self):
+                cells = list()
+                for dim, w in zip(("x", "y", "z"), window):
+                    low, high = subobst.bound_indices[dim]  # nodes of the faces: cells low..high-1
+                    cells.append(slice(max(low, w.start) - w.start, max(min(high, w.stop) - w.start, 0)))
+                if any(c.stop <= c.start for c in cells):
+                    continue  # no cells, or none in the region
+                for t in subobst.get_visible_times(times):
+                    solid[(int(np.argmin(np.abs(times - t))),) + tuple(cells)] = True
+
+        if cell_centered:
+            return ~solid
+        # A node is blocked if all (up to 8) cells around it are solid
+        nodes = np.ones((len(times),) + tuple(r.stop - r.start for r in region), dtype=bool)
+        for dx in (0, 1):
+            for dy in (0, 1):
+                for dz in (0, 1):
+                    nodes &= solid[:, dx : dx + nodes.shape[1], dy : dy + nodes.shape[2], dz : dz + nodes.shape[3]]
+        return ~nodes
 
     def get_obstruction_mask_slice(self, subslice):
         """Marks all cells of a single subslice which are blocked by an obstruction.

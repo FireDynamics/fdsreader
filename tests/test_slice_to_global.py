@@ -184,14 +184,12 @@ class FakeObstruction:
     def __init__(self, mesh, x, y, z):
         self._sub = {mesh: self}
         self.bound_indices = {"x": x, "y": y, "z": z}
-        co = mesh.coordinates
-        self.bounding_box = {
-            dim: (float(co[dim][max(lo, 0)]), float(co[dim][min(hi, len(co[dim]) - 1)]))
-            for dim, (lo, hi) in self.bound_indices.items()
-        }
 
     def __getitem__(self, mesh):
         return self._sub[mesh]
+
+    def get_subobstructions(self, mesh):
+        return [self._sub[mesh]] if mesh in self._sub else []
 
     def get_visible_times(self, times):
         return times
@@ -199,20 +197,19 @@ class FakeObstruction:
 
 def _add_obstruction(slc, mesh_id, x, y):
     """Puts an obstruction around the nodes x = (first, last), y = (first, last) of the given mesh at the slice
-    height z = 1 (node index 1). Its faces lie one node further out, as only nodes inside an obstruction are
-    masked; the mesh's faces are treated as adjoining other meshes, so its edge nodes are not masked for that."""
+    height z = 1 (node index 1). Its faces lie one node further out, as a node is masked only if all cells of
+    the mesh around it are solid."""
     mesh = slc._subslices[mesh_id].mesh
-    mesh.exterior_faces = {dim: (False, False) for dim in "xyz"}
     mesh.obstructions.append(FakeObstruction(mesh, (x[0] - 1, x[1] + 1), (y[0] - 1, y[1] + 1), (0, 2)))
 
 
 def test_to_global_masks_a_recovered_upper_face_node():
     slc = BoxSlice([box + (0.25,) for box in L_SHAPE])
-    _add_obstruction(slc, "M1", x=(4, 4), y=(1, 1))  # B's right face at x = 1, y = 1.25: no neighbour supplies it
+    _add_obstruction(slc, "M1", x=(4, 4), y=(2, 2))  # B's right face at x = 1, y = 1.5: no neighbour supplies it
     grid = np.asarray(slc.to_global(masked=True, fill=np.nan))[0]
 
     (X, Y), inside = _union_grid(L_SHAPE, 0.25)
-    obstructed = np.isclose(X, 1.0) & np.isclose(Y, 1.25)
+    obstructed = np.isclose(X, 1.0) & np.isclose(Y, 1.5)
     assert np.isnan(grid[obstructed]).all()
     np.testing.assert_allclose(grid[inside & ~obstructed], (X + 10 * Y)[inside & ~obstructed])
 
@@ -271,14 +268,15 @@ def test_to_global_repeats_values_of_a_coarse_cell_centred_mesh():
 
 
 def test_to_global_masks_a_recovered_face_node_of_a_coarse_mesh():
-    # C has twice the cell size; an obstruction on its coarse node x = 1.5, y = 1 (top face, no neighbour above)
-    # covers the fine nodes x = 1.5 and x = 1.75 once C's values are repeated onto the global grid
+    # C has twice the cell size and two cells along x; an obstruction around its coarse node x = 1.5, y = 1 (top
+    # face, no neighbour above) fills both, so it touches C's edges and blocks C's whole top row x = 1 .. 2, which
+    # covers the fine nodes x = 1 .. 2 once C's values are repeated onto the global grid
     slc = BoxSlice([L_SHAPE[0] + (0.25,), L_SHAPE[1] + (0.25,), L_SHAPE[2] + (0.5,)])
     _add_obstruction(slc, "M2", x=(1, 1), y=(2, 2))
     grid = np.asarray(slc.to_global(masked=True, fill=np.nan))[0]
 
     (X, Y), inside = _union_grid(L_SHAPE, 0.25)
-    obstructed = np.isclose(Y, 1.0) & (np.isclose(X, 1.5) | np.isclose(X, 1.75))
+    obstructed = np.isclose(Y, 1.0) & (X >= 1.0)
     assert np.isnan(grid[obstructed]).all()
     assert not np.isnan(grid[inside & ~obstructed]).any()
     top_of_c = np.isclose(Y, 1.0) & (X > 1.0) & ~obstructed

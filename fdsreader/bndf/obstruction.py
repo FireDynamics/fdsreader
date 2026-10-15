@@ -887,6 +887,10 @@ class Obstruction:
             return max(s.vmax(quantity, orientation) for s in self._all_subobstructions)
         return np.nan
 
+    def get_subobstructions(self, mesh: "Mesh") -> List[SubObstruction]:
+        """All parts of this obstruction in the given mesh; several OBST lines can share an ID."""
+        return list(self._subobstructions.get(mesh.id, []))
+
     def __getitem__(self, key: Union[int, str, "Mesh"]):
         """Gets either the nth :class:`SubObstruction` or the (first) one with the given mesh-id."""
 
