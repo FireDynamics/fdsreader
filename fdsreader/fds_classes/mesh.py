@@ -75,30 +75,28 @@ class Mesh:
         region = tuple(slice(*r.indices(n)[:2]) for r, n in zip(region, shape))
         region = tuple(slice(r.start, max(r.start, r.stop)) for r in region)
 
-        # The cells needed: those of the region, or for nodes the cells on both sides of each node. Cells outside
-        # the mesh are left out of a node's neighbourhood, i.e. count as solid.
+        # The cells needed: those of the region, or for nodes the cells on both sides of each node
         n_cells = self.dimension.shape(cell_centered=True)
         offset = 0 if cell_centered else 1
         window = tuple(slice(r.start - offset, r.stop) for r in region)
-        solid = np.zeros((len(times),) + tuple(w.stop - w.start for w in window), dtype=bool)
-        for w, axis in zip(window, range(3)):
-            outside = [slice(None)] * 4
-            for low, high in ((w.start, 0), (n_cells[axis], w.stop)):
-                if high > low:
-                    outside[axis + 1] = slice(low - w.start, high - w.start)
-                    solid[tuple(outside)] = True
+        inside = tuple(slice(max(w.start, 0), min(w.stop, n)) for w, n in zip(window, n_cells))
+        solid = np.zeros((len(times),) + tuple(max(c.stop - c.start, 0) for c in inside), dtype=bool)
 
-        times = np.asarray(times)
+        times = np.asarray(times, dtype=float)
         for obst in self.obstructions:
             for subobst in obst.get_subobstructions(self):
                 cells = list()
-                for dim, w in zip(("x", "y", "z"), window):
+                for dim, c in zip(("x", "y", "z"), inside):
                     low, high = subobst.bound_indices[dim]  # nodes of the faces: cells low..high-1
-                    cells.append(slice(max(low, w.start) - w.start, max(min(high, w.stop) - w.start, 0)))
+                    cells.append(slice(max(low, c.start) - c.start, max(min(high, c.stop) - c.start, 0)))
                 if any(c.stop <= c.start for c in cells):
                     continue  # no cells, or none in the region
-                for t in subobst.get_visible_times(times):
-                    solid[(int(np.argmin(np.abs(times - t))),) + tuple(cells)] = True
+                visible = self._time_indices(times, subobst.get_visible_times(times))
+                solid[(visible,) + tuple(cells)] = True
+
+        # Cells outside the mesh are left out of a node's neighbourhood, i.e. count as solid
+        padding = [(0, 0)] + [(c.start - w.start, w.stop - c.stop) for c, w in zip(inside, window)]
+        solid = np.pad(solid, padding, constant_values=True)
 
         if cell_centered:
             return ~solid
@@ -110,8 +108,18 @@ class Mesh:
                     nodes &= solid[:, dx : dx + nodes.shape[1], dy : dy + nodes.shape[2], dz : dz + nodes.shape[3]]
         return ~nodes
 
+    @staticmethod
+    def _time_indices(times: np.ndarray, selected: Sequence[float]) -> np.ndarray:
+        """Indices of the given times (a subset of times) in the sorted array times."""
+        selected = np.asarray(selected, dtype=float)
+        if len(times) < 2 or selected.size == 0:
+            return np.zeros(selected.size, dtype=int)
+        idx = np.clip(np.searchsorted(times, selected), 1, len(times) - 1)
+        return idx - (np.abs(times[idx - 1] - selected) <= np.abs(times[idx] - selected))
+
     def get_obstruction_mask_slice(self, subslice):
-        """Marks all cells of a single subslice which are blocked by an obstruction.
+        """Marks the cells, or nodes, of a single subslice which are blocked by an obstruction, by the rules of
+        :meth:`get_obstruction_mask`.
 
         :returns: A 4-dimensional array with time as first and x,y,z as last dimensions, matching the shape of the
             subslice's data. The array depends on time as obstructions may be hidden at specific points in time.

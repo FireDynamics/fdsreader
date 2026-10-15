@@ -11,33 +11,17 @@ cells of its mesh around it are solid (CORNER_VALUE in dump.f90; Smokeview blank
 fire no gas cell or node is at exactly 20 C, so the mask must block exactly the placeholder values.
 """
 
-import os
-from pathlib import Path
-
 import numpy as np
 import pytest
+from fds_cases import CASES_DIR, case_dirs, case_id, load
 
-from fdsreader import Simulation, settings
-
-CASES_DIR = Path(__file__).parent / "cases"
 SLICE_IDS = ["vol", "vol_cc", "z04", "z04_cc", "z045_cc", "z02", "z02_cc", "z07", "x05_cc", "y08"]
 PLACEHOLDER = 20.0
 
-# As in test_slice_partial_xb.py: also run against the output of the newest FDS release in the compatibility workflow
-_CASES = [CASES_DIR / "slcf_masks_fds611"]
-_FRESH = Path(os.environ.get("FDS_FRESH_OUTPUT_DIR") or "/nonexistent") / "slcf_masks"
-if _FRESH.is_dir():
-    _CASES.append(_FRESH)
 
-
-@pytest.fixture(scope="module", params=_CASES, ids=lambda case: "fresh" if case == _FRESH else "fds611")
+@pytest.fixture(scope="module", params=case_dirs("slcf_masks_fds611", "slcf_masks"), ids=case_id)
 def sim(request):
-    original = settings.ENABLE_CACHING
-    settings.ENABLE_CACHING = False
-    try:
-        yield Simulation(str(request.param))
-    finally:
-        settings.ENABLE_CACHING = original
+    return load(request.param)
 
 
 def _mesh(sim, mesh_id):
@@ -138,14 +122,32 @@ def test_2d_cut_of_a_3d_slice_equals_the_2d_slice(sim, volume_id, plane_id, valu
 
 def test_2d_cut_of_a_partial_3d_slice():
     # The data of a slice defined with XB starts at its own first node, not at the mesh's
-    original = settings.ENABLE_CACHING
-    settings.ENABLE_CACHING = False
-    try:
-        sim = Simulation(str(CASES_DIR / "slcf_partial_fds611"))
-    finally:
-        settings.ENABLE_CACHING = original
+    sim = load(CASES_DIR / "slcf_partial_fds611")
     volume, plane = sim.slices.get_by_id("vol_part"), sim.slices.get_by_id("z_part")
     cut = volume.get_2d_slice_from_3d("z", 0.4).to_global(masked=True, fill=np.nan)
     reference = plane.to_global(masked=True, fill=np.nan)
     for i, j in _shared_frames(plane, volume):
         np.testing.assert_array_equal(cut[j], reference[i])
+
+
+def test_2d_cut_of_a_cell_centred_slice_on_a_node_takes_the_cell_above(sim):
+    # Like FDS for &SLCF PBZ=0.4, CELL_CENTERED=T: the cell from 0.4 to 0.5
+    volume, plane = sim.slices.get_by_id("vol_cc"), sim.slices.get_by_id("z04_cc")
+    cut_slice = volume.get_2d_slice_from_3d("z", 0.4)
+    cut, coords = cut_slice.to_global(return_coordinates=True)
+    reference = plane.to_global()
+    for i, j in _shared_frames(plane, volume):
+        np.testing.assert_array_equal(cut[j], reference[i])
+    assert coords["z"] == pytest.approx([0.45])
+    for sub in cut_slice.subslices:
+        assert sub.dimension.z == 1
+        assert sub.data.shape[1:] == sub.dimension.shape(cell_centered=True)[:2]
+
+
+def test_time_indices_of_visible_times():
+    from fdsreader.fds_classes.mesh import Mesh
+
+    times = np.array([0.0, 1.0, 2.0, 3.0])
+    assert list(Mesh._time_indices(times, [0.0, 2.0, 3.0])) == [0, 2, 3]
+    assert list(Mesh._time_indices(times, [])) == []
+    assert list(Mesh._time_indices(np.array([5.0]), [5.0])) == [0]

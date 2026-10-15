@@ -9,33 +9,16 @@ plus a 2D slice inside M1 only. FDS writes the same values into both, so each pa
 matching section of the full one, and the raw data of each mesh.
 """
 
-import os
-from pathlib import Path
-
 import numpy as np
 import pytest
+from fds_cases import case_dirs, case_id, load
 
-from fdsreader import Simulation, settings
-
-CASES_DIR = Path(__file__).parent / "cases"
 PARTIAL_IDS = ["z_part", "z_part_cc", "vol_part", "vol_part_cc", "z_part_m1"]
 
-# The FDS compatibility workflow runs tests/cases/fds_inputs/slcf_partial.fds through the newest FDS release
-# and points FDS_FRESH_OUTPUT_DIR at the output, so the same checks run against that release too.
-_CASES = [CASES_DIR / "slcf_partial_fds611"]
-_FRESH = Path(os.environ.get("FDS_FRESH_OUTPUT_DIR") or "/nonexistent") / "slcf_partial"
-if _FRESH.is_dir():
-    _CASES.append(_FRESH)
 
-
-@pytest.fixture(scope="module", params=_CASES, ids=lambda case: "fresh" if case == _FRESH else "fds611")
+@pytest.fixture(scope="module", params=case_dirs("slcf_partial_fds611", "slcf_partial"), ids=case_id)
 def sim(request):
-    original = settings.ENABLE_CACHING
-    settings.ENABLE_CACHING = False
-    try:
-        yield Simulation(str(request.param))
-    finally:
-        settings.ENABLE_CACHING = original
+    return load(request.param)
 
 
 def _full_slice(sim, partial):

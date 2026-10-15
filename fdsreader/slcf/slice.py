@@ -451,6 +451,14 @@ class Slice(NumpyArrayMixin):
             # Check if the new slice cuts through the subslice
             cut_index = mesh.coordinate_to_index((value,), (slice_direction,), cell_centered=self.cell_centered)
             cut_value = mesh.get_nearest_coordinate((value,), (slice_direction,), cell_centered=self.cell_centered)[0]
+            if self.cell_centered:
+                # A value on a node lies between two cells: take the cell above it, as FDS does for a plane
+                # written with e.g. PBZ (and the last cell at the upper end of the mesh)
+                co = mesh.coordinates[slice_direction]
+                node = int(np.argmin(np.abs(co - value)))
+                if np.isclose(co[node], value, rtol=0, atol=1e-6 * max(1.0, abs(value))):
+                    cut_index = (min(node, len(co) - 2),)
+                    cut_value = (co[cut_index[0]] + co[cut_index[0] + 1]) / 2
             if (
                 mesh.coordinates[slice_direction][0] <= value <= mesh.coordinates[slice_direction][-1]
                 and subslc.extent[slice_dim][0] <= cut_value <= subslc.extent[slice_dim][1]
@@ -482,6 +490,9 @@ class Slice(NumpyArrayMixin):
                     bounds = list(subslc.bound_indices)
                     bounds[(slice_dim - 1) * 2 : slice_dim * 2] = (plane, plane)
                     subslc.bound_indices = tuple(bounds)
+                sizes = [subslc.dimension.x, subslc.dimension.y, subslc.dimension.z]
+                sizes[slice_dim - 1] = 1
+                subslc.dimension = Dimension(*sizes)
             else:
                 to_remove.append(mesh_id)
 
