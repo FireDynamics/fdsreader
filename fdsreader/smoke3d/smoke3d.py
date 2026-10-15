@@ -392,6 +392,7 @@ class Smoke3D(NumpyArrayMixin):
         temp_min: float | None = None,
         temp_max: float | None = None,
         kind: Literal["gas", "hrrpuv", "temperature"] | None = None,
+        mask: Literal["obstructions", "placeholders"] = "obstructions",
     ) -> Union[np.ndarray, tuple]:
         """Creates a global numpy ndarray from all subsmokes.
 
@@ -406,6 +407,9 @@ class Smoke3D(NumpyArrayMixin):
         :param temp_min: Overrides ``TEMP_MIN_SMV``, see :meth:`SubSmoke3D.to_physical`.
         :param temp_max: Overrides ``TEMP_MAX_SMV``, see :meth:`SubSmoke3D.to_physical`.
         :param kind: Overrides :attr:`kind`, see :meth:`SubSmoke3D.to_physical`.
+        :param mask: Which obstruction mask to apply with ``masked=True``: ``"obstructions"`` (default) hides
+            everything inside an obstruction and on its faces, ``"placeholders"`` only the values FDS did not
+            compute but filled with the ambient value; see :meth:`Mesh.get_obstruction_mask`.
         :returns: The global array, followed by the saturation mask if ``return_saturated`` and the
             coordinates if ``return_coordinates``.
         """
@@ -470,7 +474,7 @@ class Smoke3D(NumpyArrayMixin):
             else:
                 subsmoke_data = subsmoke._codes().copy()
             if masked:
-                mask = subsmoke.mesh.get_obstruction_mask(self.times)
+                mesh_mask = subsmoke.mesh.get_obstruction_mask(self.times, mode=mask)
 
             start_idx = {
                 dim: int(round((subsmoke.mesh.coordinates[dim][0] - coord_min[dim]) / step_sizes_min[dim]))
@@ -495,14 +499,14 @@ class Smoke3D(NumpyArrayMixin):
                 if return_saturated:
                     subsmoke_saturated = resample_mesh_axis(subsmoke_saturated, axis + 1, n_repeat, keep_last)
                 if masked:
-                    mask = resample_mesh_axis(mask, axis + 1, n_repeat, keep_last)
+                    mesh_mask = resample_mesh_axis(mesh_mask, axis + 1, n_repeat, keep_last)
 
             # If the slice should be masked, we set all cells at which an obstruction is in the
             # simulation space to the fill value set by the user
             if masked:
-                subsmoke_data = np.where(mask, subsmoke_data, fill)
+                subsmoke_data = np.where(mesh_mask, subsmoke_data, fill)
                 if return_saturated:
-                    subsmoke_saturated = subsmoke_saturated & mask
+                    subsmoke_saturated = subsmoke_saturated & mesh_mask
 
             region = (
                 slice(None),
@@ -542,6 +546,7 @@ class Smoke3D(NumpyArrayMixin):
         temp_min: float | None = None,
         temp_max: float | None = None,
         kind: Literal["gas", "hrrpuv", "temperature"] | None = None,
+        mask: Literal["obstructions", "placeholders"] = "obstructions",
     ):
         """Physical values of all meshes on one grid; the same as ``to_global(physical=True)``.
         See :meth:`SubSmoke3D.to_physical` for the conversion and its limits."""
@@ -555,6 +560,7 @@ class Smoke3D(NumpyArrayMixin):
             temp_min=temp_min,
             temp_max=temp_max,
             kind=kind,
+            mask=mask,
         )
 
     def __getitem__(self, mesh: Mesh):

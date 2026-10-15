@@ -1,0 +1,45 @@
+&HEAD CHID='masks', TITLE='Obstruction masks for fdsreader (#132)' /
+&MESH ID='M1', IJK=10,10,10, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
+&MESH ID='M2', IJK=10,10,10, XB=1.0,2.0,0.0,1.0,0.0,1.0 /
+&MESH ID='M3', IJK=5,10,10, XB=0.0,0.5,1.0,2.0,0.0,1.0 /
+&TIME T_END=10.0 /
+&DUMP DT_SLCF=5.0, SMOKE3D=F /
+&REAC FUEL='PROPANE' /
+&SURF ID='FIRE', HRRPUA=1000.0 /
+&VENT XB=0.1,1.9,0.1,0.9,0.0,0.0, SURF_ID='FIRE' /
+&VENT XB=0.1,0.4,1.1,1.9,0.0,0.0, SURF_ID='FIRE' /
+&VENT MB='XMIN', SURF_ID='OPEN' / &VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+Inside one mesh, across the mesh boundary, and up to the outside of the domain
+&OBST ID='Box', XB=0.3,0.7,0.3,0.6,0.2,0.6 /
+&OBST ID='Across', XB=0.8,1.3,0.7,0.9,0.2,0.6 /
+&OBST ID='Span', XB=1.7,2.0,0.3,0.6,0.2,0.6 /
+Two obstructions sharing a face
+&OBST ID='Left', XB=1.2,1.4,0.1,0.3,0.6,0.9 /
+&OBST ID='Right', XB=1.4,1.6,0.1,0.3,0.6,0.9 /
+Ends at the mesh boundary x = 1 with gas beyond in M2
+&OBST ID='Ends', XB=0.8,1.0,0.1,0.2,0.6,0.9 /
+Two obstructions with the same ID in one mesh
+&OBST ID='Twin', XB=0.1,0.2,0.7,0.9,0.6,0.8 /
+&OBST ID='Twin', XB=0.4,0.5,0.7,0.9,0.6,0.8 /
+Hole in an obstruction
+&OBST ID='Holey', XB=1.6,1.9,0.6,0.9,0.6,0.9 /
+&HOLE XB=1.7,1.8,0.6,0.9,0.7,0.8 /
+At y = 1 where M3 adjoins M1 only for x < 0.5: inside the domain and at its outside
+&OBST ID='Under', XB=0.2,0.4,0.8,1.0,0.6,0.8 /
+&OBST ID='Outside', XB=0.6,0.8,0.8,1.0,0.6,0.8 /
+
+3D slices
+&SLCF XB=0.0,2.0,0.0,2.0,0.0,1.0, QUANTITY='TEMPERATURE', ID='vol' /
+&SLCF XB=0.0,2.0,0.0,2.0,0.0,1.0, QUANTITY='TEMPERATURE', CELL_CENTERED=T, ID='vol_cc' /
+2D slices through the obstructions and on their faces
+&SLCF PBZ=0.4, QUANTITY='TEMPERATURE', ID='z04' /
+&SLCF PBZ=0.4, QUANTITY='TEMPERATURE', CELL_CENTERED=T, ID='z04_cc' /
+&SLCF PBZ=0.45, QUANTITY='TEMPERATURE', CELL_CENTERED=T, ID='z045_cc' /
+&SLCF PBZ=0.2, QUANTITY='TEMPERATURE', ID='z02' /
+&SLCF PBZ=0.2, QUANTITY='TEMPERATURE', CELL_CENTERED=T, ID='z02_cc' /
+&SLCF PBZ=0.7, QUANTITY='TEMPERATURE', ID='z07' /
+&SLCF PBX=0.5, QUANTITY='TEMPERATURE', CELL_CENTERED=T, ID='x05_cc' /
+&SLCF PBY=0.8, QUANTITY='TEMPERATURE', ID='y08' /
+&TAIL /

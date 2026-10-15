@@ -37,11 +37,21 @@ class SubSlice:
 
     _offset = 3 * fdtype.new((("c", 30),)).itemsize + fdtype.new((("i", 6),)).itemsize
 
-    def __init__(self, parent_slc, filename: str, dimension: Dimension, extent: Extent, mesh: Mesh):
+    def __init__(
+        self,
+        parent_slc,
+        filename: str,
+        dimension: Dimension,
+        extent: Extent,
+        mesh: Mesh,
+        bound_indices: Tuple[int, int, int, int, int, int] | None = None,
+    ):
         self._parent_slice = parent_slc
         self.mesh = mesh
         self.dimension = dimension
         self.extent = extent
+        # Node indices i1, i2, j1, j2, k1, k2 of the slice in its mesh, as in the .smv file
+        self.bound_indices = bound_indices
 
         self.filename = filename
 
@@ -55,6 +65,7 @@ class SubSlice:
         :param ignore_cell_centered: Whether to shift the coordinates when the slice is cell_centered or not.
         """
         cell_centered = self.cell_centered and not ignore_cell_centered
+        ranges = self.index_ranges(cell_centered)
         coords: Dict[Literal["x", "y", "z"], np.ndarray] = {}
         for dim in ("x", "y", "z"):
             co = self.mesh.coordinates[dim]
@@ -63,9 +74,33 @@ class SubSlice:
             # mesh with only a single cell along this axis leaves just one coordinate afterwards.
             if cell_centered:
                 co = co[:-1] + np.diff(co) / 2
-            coords[dim] = co[extent_index_range(co, self.extent[dim])].copy()
+            coords[dim] = co[ranges[dim]].copy()
 
         return coords
+
+    def index_ranges(self, cell_centered: bool | None = None) -> Dict[Literal["x", "y", "z"], slice]:
+        """Indices of the nodes, or of the cells, of the mesh that this subslice covers along each axis.
+
+        FDS writes a cell-centred slice ``SLCC ... i1 i2`` for the cells between nodes i1 and i2, and a
+        cell-centred plane ``SLCC ... k k`` for the cell below node k.
+
+        :param cell_centered: Whether to give cells or nodes; by default as the slice is written.
+        """
+        if cell_centered is None:
+            cell_centered = self.cell_centered
+        ranges = dict()
+        for axis, dim in enumerate(("x", "y", "z")):
+            if self.bound_indices is None:  # not read from an .smv file
+                ranges[dim] = extent_index_range(self.mesh.coordinates[dim], self.extent[dim], cell_centered)
+                continue
+            low, high = self.bound_indices[2 * axis], self.bound_indices[2 * axis + 1]
+            if not cell_centered:
+                ranges[dim] = slice(low, high + 1)
+            elif high > low:
+                ranges[dim] = slice(low, high)
+            else:
+                ranges[dim] = slice(max(low - 1, 0), max(low, 1))
+        return ranges
 
     @property
     def shape(self) -> Tuple[int, int]:
@@ -213,7 +248,12 @@ class Slice(NumpyArrayMixin):
             if mesh_data["mesh"].id not in self._subslices:
                 self.quantity = Quantity(mesh_data["quantity"], mesh_data["short_name"], mesh_data["unit"])
                 self._subslices[mesh_data["mesh"].id] = SubSlice(
-                    self, mesh_data["filename"], mesh_data["dimension"], mesh_data["extent"], mesh_data["mesh"]
+                    self,
+                    mesh_data["filename"],
+                    mesh_data["dimension"],
+                    mesh_data["extent"],
+                    mesh_data["mesh"],
+                    mesh_data.get("bound_indices"),
                 )
 
             if "-VELOCITY" in mesh_data["quantity"]:
@@ -359,14 +399,8 @@ class Slice(NumpyArrayMixin):
         coords = {"x": list(), "y": list(), "z": list()}
         for dim in ("x", "y", "z"):
             if orientation == dim:
-                coord = self.extent[dim][0]
-                if self.cell_centered and not ignore_cell_centered:
-                    mesh = next(iter(self._subslices.values())).mesh
-                    mesh_co = mesh.coordinates[dim]
-                    idx = int(np.argmin(np.abs(mesh_co - coord)))
-                    if idx > 0:
-                        coord = (float(mesh_co[idx - 1]) + float(mesh_co[idx])) / 2
-                coords[dim] = np.array([coord])
+                first = next(iter(self._subslices.values()))
+                coords[dim] = first.get_coordinates(ignore_cell_centered)[dim][:1]
                 continue
             for slc in self._subslices.values():
                 co = slc.get_coordinates(ignore_cell_centered)[dim]
@@ -417,6 +451,14 @@ class Slice(NumpyArrayMixin):
             # Check if the new slice cuts through the subslice
             cut_index = mesh.coordinate_to_index((value,), (slice_direction,), cell_centered=self.cell_centered)
             cut_value = mesh.get_nearest_coordinate((value,), (slice_direction,), cell_centered=self.cell_centered)[0]
+            if self.cell_centered:
+                # A value on a node lies between two cells: take the cell above it, as FDS does for a plane
+                # written with e.g. PBZ (and the last cell at the upper end of the mesh)
+                co = mesh.coordinates[slice_direction]
+                node = int(np.argmin(np.abs(co - value)))
+                if np.isclose(co[node], value, rtol=0, atol=1e-6 * max(1.0, abs(value))):
+                    cut_index = (min(node, len(co) - 2),)
+                    cut_value = (co[cut_index[0]] + co[cut_index[0] + 1]) / 2
             if (
                 mesh.coordinates[slice_direction][0] <= value <= mesh.coordinates[slice_direction][-1]
                 and subslc.extent[slice_dim][0] <= cut_value <= subslc.extent[slice_dim][1]
@@ -428,7 +470,9 @@ class Slice(NumpyArrayMixin):
                     indices.extend((slice(shape[0]), slice(shape[1])))
                 else:
                     indices.extend((slice(shape[0]), slice(shape[1]), slice(shape[2])))
-                    indices[slice_dim] = slice(cut_index[0], cut_index[0] + 1, 1)
+                    # The data of a slice defined with XB starts at its own first node or cell, not the mesh's
+                    local_index = cut_index[0] - subslc.index_ranges()[slice_direction].start
+                    indices[slice_dim] = slice(local_index, local_index + 1, 1)
 
                 subslc._data = np.squeeze(subslc.data[tuple(indices)], axis=slice_dim)
                 for direction in subslc.vector_filenames.keys():
@@ -436,10 +480,19 @@ class Slice(NumpyArrayMixin):
                         subslc.vector_data[direction][tuple(indices)], axis=slice_dim
                     )
 
-                # Change 3D extent to 2D one
+                # Change 3D extent to 2D one, and the node indices as FDS writes them for a plane (for a
+                # cell-centred plane the node above the cell, see SubSlice.index_ranges)
                 new_extent = subslc.extent.as_list(reduced=False)
                 new_extent[(slice_dim - 1) * 2 : slice_dim * 2] = (cut_value, cut_value)
                 subslc.extent = Extent(*new_extent)
+                if subslc.bound_indices is not None:
+                    plane = cut_index[0] + (1 if self.cell_centered else 0)
+                    bounds = list(subslc.bound_indices)
+                    bounds[(slice_dim - 1) * 2 : slice_dim * 2] = (plane, plane)
+                    subslc.bound_indices = tuple(bounds)
+                sizes = [subslc.dimension.x, subslc.dimension.y, subslc.dimension.z]
+                sizes[slice_dim - 1] = 1
+                subslc.dimension = Dimension(*sizes)
             else:
                 to_remove.append(mesh_id)
 
@@ -504,7 +557,11 @@ class Slice(NumpyArrayMixin):
         return slices_cart
 
     def to_global(
-        self, masked: bool = False, fill: float = 0, return_coordinates: bool = False
+        self,
+        masked: bool = False,
+        fill: float = 0,
+        return_coordinates: bool = False,
+        mask: Literal["obstructions", "placeholders"] = "obstructions",
     ) -> Union[
         np.ndarray,
         Tuple[np.ndarray, np.ndarray],
@@ -529,6 +586,9 @@ class Slice(NumpyArrayMixin):
         :param masked: Whether to apply the obstruction mask to the slice or not.
         :param fill: The fill value to use for masked slice entries. Only used when masked=True.
         :param return_coordinates: If true, return the matching coordinate for each value on the generated grid.
+        :param mask: Which obstruction mask to apply with ``masked=True``: ``"obstructions"`` (default) hides
+            everything inside an obstruction and on its faces, ``"placeholders"`` only the values FDS did not
+            compute but filled with the ambient value; see :meth:`Mesh.get_obstruction_mask`.
         """
         if len(self._subslices) == 0:
             if return_coordinates:
@@ -600,7 +660,7 @@ class Slice(NumpyArrayMixin):
                 slc_data = (
                     slc.data.copy() if slc.orientation == 0 else np.expand_dims(slc.data.copy(), axis=slc.orientation)
                 )
-                mask = slc.mesh.get_obstruction_mask_slice(slc) if masked else None
+                slc_mask = slc.mesh.get_obstruction_mask_slice(slc, mode=mask) if masked else None
 
                 slc_nodes = nodes[mesh]
                 start_idx = dict()
@@ -624,7 +684,7 @@ class Slice(NumpyArrayMixin):
                         if n_repeat > 1:
                             slc_data = np.repeat(slc_data, n_repeat, axis=axis + 1)
                             if masked:
-                                mask = np.repeat(mask, n_repeat, axis=axis + 1)
+                                slc_mask = np.repeat(slc_mask, n_repeat, axis=axis + 1)
                         continue
 
                     end_idx[dim] += 1
@@ -632,23 +692,23 @@ class Slice(NumpyArrayMixin):
                         inner_axes.append(axis)
                     slc_data = resample_mesh_axis(slc_data, axis + 1, n_repeat, keep_last=True)
                     if masked:
-                        mask = resample_mesh_axis(mask, axis + 1, n_repeat, keep_last=True)
+                        slc_mask = resample_mesh_axis(slc_mask, axis + 1, n_repeat, keep_last=True)
 
                 region = tuple(slice(start_idx[dim], end_idx[dim]) for dim in ("x", "y", "z"))
                 shape = (self.n_t,) + tuple(end_idx[dim] - start_idx[dim] for dim in ("x", "y", "z"))
                 # If the slice should be masked, we set all cells at which an obstruction is in the
                 # simulation space to the fill value set by the user
                 if masked:
-                    mask = mask.reshape(shape)
-                    slc_data = np.where(mask, slc_data.reshape(shape), fill)
-                return slc_data.reshape(shape), mask, region, inner_axes
+                    slc_mask = slc_mask.reshape(shape)
+                    slc_data = np.where(slc_mask, slc_data.reshape(shape), fill)
+                return slc_data.reshape(shape), slc_mask, region, inner_axes
 
             # Grid nodes some subslice has written, and the node rows of upper faces that lie inside the
             # simulation space, which were left to a neighbouring mesh (node-based slices only)
             written = None if self.cell_centered else np.zeros(grid.shape[1:], dtype=bool)
             inner_faces = list()
             for mesh, slc in subslices.items():
-                slc_data, mask, region, inner_axes = place(mesh, slc)
+                slc_data, slc_mask, region, inner_axes = place(mesh, slc)
 
                 # The node row on an upper face inside the simulation space coincides with the first row of the
                 # neighbouring mesh, which supplies it, so it is left out here. A copy of it is kept for the case
@@ -656,14 +716,14 @@ class Slice(NumpyArrayMixin):
                 for axis in inner_axes:
                     last = region[axis].stop - 1
                     face_region = tuple(slice(last, last + 1) if a == axis else r for a, r in enumerate(region))
-                    face_mask = None if mask is None else np.take(mask, [-1], axis=axis + 1)
+                    face_mask = None if slc_mask is None else np.take(slc_mask, [-1], axis=axis + 1)
                     inner_faces.append((np.take(slc_data, [-1], axis=axis + 1), face_mask, face_region))
 
                     region = tuple(slice(r.start, last) if a == axis else r for a, r in enumerate(region))
                     without_face = (slice(None),) * (axis + 1) + (slice(None, -1),)
                     slc_data = slc_data[without_face]
-                    if mask is not None:
-                        mask = mask[without_face]
+                    if slc_mask is not None:
+                        slc_mask = slc_mask[without_face]
 
                 grid[(slice(None),) + region] = slc_data
                 if written is not None:
@@ -688,8 +748,18 @@ class Slice(NumpyArrayMixin):
 
             if return_coordinates:
                 coordinates = dict()
+                first = next(iter(subslices.values()))
                 for dim_index, dim in enumerate(("x", "y", "z")):
-                    coordinates[dim] = np.linspace(coord_min[dim], coord_max[dim], grid.shape[dim_index + 1])
+                    if self.cell_centered and dim_index == self.orientation - 1:
+                        # The cell layer of the plane, see SubSlice.index_ranges
+                        coordinates[dim] = first.get_coordinates()[dim][:1]
+                    elif self.cell_centered:
+                        half = step_sizes_min[dim] / 2
+                        coordinates[dim] = np.linspace(
+                            coord_min[dim] + half, coord_max[dim] - half, grid.shape[dim_index + 1]
+                        )
+                    else:
+                        coordinates[dim] = np.linspace(coord_min[dim], coord_max[dim], grid.shape[dim_index + 1])
 
             # Remove dimension corresponding to orientation for 2D slices
             if self.orientation != 0:

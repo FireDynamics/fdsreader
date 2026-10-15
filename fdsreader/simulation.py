@@ -120,7 +120,7 @@ class Simulation:
 
     # Bump when the pickled structure of a Simulation or its data classes changes, so caches
     # written by an older layout are parsed again instead of being loaded with missing attributes.
-    _CACHE_FORMAT = 3
+    _CACHE_FORMAT = 4
     _loading = False
 
     def __new__(cls, path: str):
@@ -711,6 +711,7 @@ class Simulation:
             {
                 "dimension": dimension,
                 "extent": extent,
+                "bound_indices": tuple(bound_indices),
                 "mesh": mesh,
                 "filename": filename,
                 "quantity": quantity,
