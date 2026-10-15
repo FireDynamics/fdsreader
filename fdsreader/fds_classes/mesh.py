@@ -58,8 +58,10 @@ class Mesh:
         """Marks all cells (or nodes) which are blocked by an obstruction.
 
         With ``mode="obstructions"`` (the default) the mask shows where the obstructions are: the cells inside an
-        obstruction, or the nodes inside it and on its faces, like Smokeview blanks a slice. An obstruction without
-        thickness (a thin wall) blocks the nodes on it but no cells, as no cell lies inside it.
+        obstruction, or the nodes inside it and on its faces. An obstruction without thickness (a thin wall) blocks
+        the nodes on it but no cells, as no cell lies inside it. For cell-centred data this is what Smokeview blanks;
+        for nodes Smokeview blanks the areas between them next to solid cells, so a gas cell between two
+        obstructions one cell apart has all its nodes masked here but is shown in Smokeview.
 
         With ``mode="placeholders"`` it marks only the values FDS fills with a placeholder (the ambient value)
         instead of a value of the gas: the cells inside an obstruction, and the nodes where all cells of this mesh
@@ -91,18 +93,8 @@ class Mesh:
 
         if mode == "obstructions":
             mask = np.ones((len(times),) + tuple(r.stop - r.start for r in region), dtype=bool)
-            for obst in self.obstructions:
-                for subobst in obst.get_subobstructions(self):
-                    blocked = list()
-                    for dim, r in zip(("x", "y", "z"), region):
-                        low, high = subobst.bound_indices[dim]  # nodes of the faces
-                        # Cells low..high-1, or nodes low..high
-                        high = high if cell_centered else high + 1
-                        blocked.append(slice(max(low, r.start) - r.start, max(min(high, r.stop) - r.start, 0)))
-                    if any(b.stop <= b.start for b in blocked):
-                        continue  # none in the region
-                    visible = self._time_indices(times, subobst.get_visible_times(times))
-                    mask[(visible,) + tuple(blocked)] = False
+            for visible, blocked in self._obstruction_parts(times, region, nodes=not cell_centered):
+                mask[(visible,) + blocked] = False
             return mask
 
         # Placeholders: the cells needed are those of the region, or for nodes the cells on both sides of each node
@@ -112,16 +104,8 @@ class Mesh:
         inside = tuple(slice(max(w.start, 0), min(w.stop, n)) for w, n in zip(window, n_cells))
         solid = np.zeros((len(times),) + tuple(max(c.stop - c.start, 0) for c in inside), dtype=bool)
 
-        for obst in self.obstructions:
-            for subobst in obst.get_subobstructions(self):
-                cells = list()
-                for dim, c in zip(("x", "y", "z"), inside):
-                    low, high = subobst.bound_indices[dim]  # nodes of the faces: cells low..high-1
-                    cells.append(slice(max(low, c.start) - c.start, max(min(high, c.stop) - c.start, 0)))
-                if any(c.stop <= c.start for c in cells):
-                    continue  # no cells, or none in the region
-                visible = self._time_indices(times, subobst.get_visible_times(times))
-                solid[(visible,) + tuple(cells)] = True
+        for visible, cells in self._obstruction_parts(times, inside, nodes=False):
+            solid[(visible,) + cells] = True
 
         # Cells outside the mesh are left out of a node's neighbourhood, i.e. count as solid
         padding = [(0, 0)] + [(c.start - w.start, w.stop - c.stop) for c, w in zip(inside, window)]
@@ -136,6 +120,21 @@ class Mesh:
                 for dz in (0, 1):
                     nodes &= solid[:, dx : dx + nodes.shape[1], dy : dy + nodes.shape[2], dz : dz + nodes.shape[3]]
         return ~nodes
+
+    def _obstruction_parts(self, times: np.ndarray, window: Tuple[slice, slice, slice], nodes: bool):
+        """The parts of all obstructions in this mesh that lie in the window (index ranges along x, y, z): for each,
+        the indices of the times it is visible at and its cells (low..high-1 between the nodes of its faces) or
+        nodes (low..high), relative to the window."""
+        for obst in self.obstructions:
+            for subobst in obst.get_subobstructions(self):
+                ranges = list()
+                for dim, w in zip(("x", "y", "z"), window):
+                    low, high = subobst.bound_indices[dim]
+                    high = high + 1 if nodes else high
+                    ranges.append(slice(max(low, w.start) - w.start, max(min(high, w.stop) - w.start, 0)))
+                if any(r.stop <= r.start for r in ranges):
+                    continue  # none in the window, or no cells (an obstruction without thickness)
+                yield self._time_indices(times, subobst.get_visible_times(times)), tuple(ranges)
 
     @staticmethod
     def _time_indices(times: np.ndarray, selected: Sequence[float]) -> np.ndarray:

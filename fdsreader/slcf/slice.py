@@ -590,7 +590,6 @@ class Slice(NumpyArrayMixin):
             everything inside an obstruction and on its faces, ``"placeholders"`` only the values FDS did not
             compute but filled with the ambient value; see :meth:`Mesh.get_obstruction_mask`.
         """
-        mask_mode = mask  # the local name mask is used for the mask arrays below
         if len(self._subslices) == 0:
             if return_coordinates:
                 return np.array([]), {d: np.array([]) for d in ("x", "y", "z")}
@@ -661,7 +660,7 @@ class Slice(NumpyArrayMixin):
                 slc_data = (
                     slc.data.copy() if slc.orientation == 0 else np.expand_dims(slc.data.copy(), axis=slc.orientation)
                 )
-                mask = slc.mesh.get_obstruction_mask_slice(slc, mode=mask_mode) if masked else None
+                slc_mask = slc.mesh.get_obstruction_mask_slice(slc, mode=mask) if masked else None
 
                 slc_nodes = nodes[mesh]
                 start_idx = dict()
@@ -685,7 +684,7 @@ class Slice(NumpyArrayMixin):
                         if n_repeat > 1:
                             slc_data = np.repeat(slc_data, n_repeat, axis=axis + 1)
                             if masked:
-                                mask = np.repeat(mask, n_repeat, axis=axis + 1)
+                                slc_mask = np.repeat(slc_mask, n_repeat, axis=axis + 1)
                         continue
 
                     end_idx[dim] += 1
@@ -693,23 +692,23 @@ class Slice(NumpyArrayMixin):
                         inner_axes.append(axis)
                     slc_data = resample_mesh_axis(slc_data, axis + 1, n_repeat, keep_last=True)
                     if masked:
-                        mask = resample_mesh_axis(mask, axis + 1, n_repeat, keep_last=True)
+                        slc_mask = resample_mesh_axis(slc_mask, axis + 1, n_repeat, keep_last=True)
 
                 region = tuple(slice(start_idx[dim], end_idx[dim]) for dim in ("x", "y", "z"))
                 shape = (self.n_t,) + tuple(end_idx[dim] - start_idx[dim] for dim in ("x", "y", "z"))
                 # If the slice should be masked, we set all cells at which an obstruction is in the
                 # simulation space to the fill value set by the user
                 if masked:
-                    mask = mask.reshape(shape)
-                    slc_data = np.where(mask, slc_data.reshape(shape), fill)
-                return slc_data.reshape(shape), mask, region, inner_axes
+                    slc_mask = slc_mask.reshape(shape)
+                    slc_data = np.where(slc_mask, slc_data.reshape(shape), fill)
+                return slc_data.reshape(shape), slc_mask, region, inner_axes
 
             # Grid nodes some subslice has written, and the node rows of upper faces that lie inside the
             # simulation space, which were left to a neighbouring mesh (node-based slices only)
             written = None if self.cell_centered else np.zeros(grid.shape[1:], dtype=bool)
             inner_faces = list()
             for mesh, slc in subslices.items():
-                slc_data, mask, region, inner_axes = place(mesh, slc)
+                slc_data, slc_mask, region, inner_axes = place(mesh, slc)
 
                 # The node row on an upper face inside the simulation space coincides with the first row of the
                 # neighbouring mesh, which supplies it, so it is left out here. A copy of it is kept for the case
@@ -717,14 +716,14 @@ class Slice(NumpyArrayMixin):
                 for axis in inner_axes:
                     last = region[axis].stop - 1
                     face_region = tuple(slice(last, last + 1) if a == axis else r for a, r in enumerate(region))
-                    face_mask = None if mask is None else np.take(mask, [-1], axis=axis + 1)
+                    face_mask = None if slc_mask is None else np.take(slc_mask, [-1], axis=axis + 1)
                     inner_faces.append((np.take(slc_data, [-1], axis=axis + 1), face_mask, face_region))
 
                     region = tuple(slice(r.start, last) if a == axis else r for a, r in enumerate(region))
                     without_face = (slice(None),) * (axis + 1) + (slice(None, -1),)
                     slc_data = slc_data[without_face]
-                    if mask is not None:
-                        mask = mask[without_face]
+                    if slc_mask is not None:
+                        slc_mask = slc_mask[without_face]
 
                 grid[(slice(None),) + region] = slc_data
                 if written is not None:

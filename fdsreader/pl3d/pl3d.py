@@ -126,7 +126,6 @@ class Plot3D(NumpyArrayMixin):
             everything inside an obstruction and on its faces, ``"placeholders"`` only the values FDS did not
             compute but filled with the ambient value; see :meth:`Mesh.get_obstruction_mask`.
         """
-        mask_mode = mask  # the local name mask is used for the mask arrays below
         if len(self._subplots) == 0:
             if return_coordinates:
                 return np.array([]), {d: np.array([]) for d in ("x", "y", "z")}
@@ -176,7 +175,7 @@ class Plot3D(NumpyArrayMixin):
         for subplot in self._subplots.values():
             subplot_data = self._data_on_global_times(subplot)
             if masked:
-                mask = subplot.mesh.get_obstruction_mask(self.times, mode=mask_mode)
+                mesh_mask = subplot.mesh.get_obstruction_mask(self.times, mode=mask)
 
             start_idx = {
                 dim: int(round((subplot.mesh.coordinates[dim][0] - coord_min[dim]) / step_sizes_min[dim]))
@@ -199,12 +198,12 @@ class Plot3D(NumpyArrayMixin):
                     end_idx[dim] += 1
                 subplot_data = resample_mesh_axis(subplot_data, axis + 1, n_repeat, keep_last)
                 if masked:
-                    mask = resample_mesh_axis(mask, axis + 1, n_repeat, keep_last)
+                    mesh_mask = resample_mesh_axis(mesh_mask, axis + 1, n_repeat, keep_last)
 
             # If the slice should be masked, we set all cells at which an obstruction is in the
             # simulation space to the fill value set by the user
             if masked:
-                subplot_data = np.where(mask, subplot_data, fill)
+                subplot_data = np.where(mesh_mask, subplot_data, fill)
 
             grid[:, start_idx["x"] : end_idx["x"], start_idx["y"] : end_idx["y"], start_idx["z"] : end_idx["z"]] = (
                 subplot_data.reshape(
