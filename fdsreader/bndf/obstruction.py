@@ -92,7 +92,8 @@ class Patch:
             if self.cell_centered and not ignore_cell_centered:
                 co = co[:-1] + np.diff(co) / 2
 
-            coords[dim] = co[np.where(np.logical_and(co >= self.extent[dim][0], co <= self.extent[dim][1]))]
+            tol = _tolerance(self.mesh.coordinates[dim])
+            coords[dim] = co[(co >= self.extent[dim][0] - tol) & (co <= self.extent[dim][1] + tol)]
             if coords[dim].size == 0:
                 coords[dim] = np.array([co[np.argmin(np.abs(co - self.extent[dim][0]))]])
 
@@ -696,163 +697,47 @@ class Obstruction:
 
     def get_global_boundary_data_arrays(
         self, quantity: Union[str, Quantity]
-    ) -> Dict[int, Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]]:
+    ) -> Dict[int, Union[np.ndarray, Tuple[np.ndarray, ...]]]:
         """Creates a global numpy ndarray from all subobstruction's boundary data for each orientation.
+
+        Each array has the shape (n_t, a, b), where a and b are the two axes of the face in the order x, y, z (e.g. y
+        and z for the orientations -1 and 1). The grid uses the finest cell size of the meshes the obstruction spans;
+        values of coarser meshes are repeated, and points not covered by any patch are NaN. The grid is uniform, so
+        on stretched meshes values are placed at the nearest grid point below their node. Frames a mesh did not write
+        are NaN as well.
+
+        If the face lies at different positions in different meshes, e.g. because the obstruction spans meshes with
+        different cell sizes and FDS snaps its bounds to each grid, the orientation maps to a tuple with one array per
+        position, ordered by position.
 
         :param quantity: The quantity's name or short name for which to load the global arrays.
         """
-        if not self.has_boundary_data:
-            return dict()
+        patches_by_orientation: Dict[int, List[Patch]] = dict()
         for subobst in self._all_subobstructions:
-            if subobst.has_boundary_data:
-                cell_centered = next(iter(subobst._boundary_data.values())).cell_centered
+            try:
+                boundary = subobst.get_data(quantity)
+            except KeyError:
+                continue
+            for orientation, patch in boundary.data.items():
+                patches_by_orientation.setdefault(orientation, list()).append(patch)
+        if not patches_by_orientation and self.has_boundary_data:
+            raise KeyError(f"No boundary data found for quantity '{quantity}'")
 
         result = dict()
-        for orientation_int in self.orientations:
-            subobst_sets = [list(), list()]
-            dim = ["x", "y", "z"][abs(orientation_int) - 1]
-            random_subobst = next(
-                (subobst for subobst in self._all_subobstructions if orientation_int in subobst.get_coordinates()),
-                None,
-            )
-            if random_subobst is None:
-                raise KeyError(f"No sub-obstruction found for orientation {orientation_int}")
-            base_coord = random_subobst.get_coordinates(ignore_cell_centered=False)[orientation_int][dim][0]
-
-            for subobst in self._all_subobstructions:
-                if not subobst.has_boundary_data:
-                    continue
-                coords = subobst.get_coordinates(ignore_cell_centered=False)
-                if orientation_int not in coords:
-                    continue
-                if coords[orientation_int][dim][0] == base_coord:
-                    subobst_sets[0].append(subobst)
+        for orientation in sorted(patches_by_orientation):
+            normal = ("x", "y", "z")[abs(orientation) - 1]
+            levels: List[Tuple[float, List[Patch]]] = list()
+            for patch in patches_by_orientation[orientation]:
+                position = patch.extent[normal][0]
+                tol = _tolerance(patch.mesh.coordinates[normal])
+                level = next((lvl for lvl in levels if abs(lvl[0] - position) <= tol), None)
+                if level is None:
+                    levels.append((position, [patch]))
                 else:
-                    subobst_sets[1].append(subobst)
-            if len(subobst_sets[1]) == 0:
-                subobst_sets.pop(1)
-
-            first_result_grid = None
-            for subobsts in subobst_sets:
-                coord_min = {"x": math.inf, "y": math.inf, "z": math.inf}
-                coord_max = {"x": -math.inf, "y": -math.inf, "z": -math.inf}
-                for dim in ("x", "y", "z"):
-                    for subobst in subobsts:
-                        patch_extent = subobst.get_data(quantity).data[orientation_int].extent
-                        co = subobst.get_coordinates(ignore_cell_centered=True)[orientation_int][dim]
-                        co = co[
-                            np.where(
-                                np.logical_and(
-                                    co >= patch_extent[dim][0],
-                                    co <= patch_extent[dim][1],
-                                )
-                            )
-                        ]
-                        coord_min[dim] = min(co[0], coord_min[dim])
-                        coord_max[dim] = max(co[-1], coord_max[dim])
-
-                # The global grid will use the finest mesh as base and duplicate values of the coarser meshes
-                # Therefore we first find the finest mesh and calculate the step size in each dimension
-                step_sizes_min = {
-                    "x": coord_max["x"] - coord_min["x"],
-                    "y": coord_max["y"] - coord_min["y"],
-                    "z": coord_max["z"] - coord_min["z"],
-                }
-                step_sizes_max = {"x": 0, "y": 0, "z": 0}
-                steps = dict()
-                global_max = {"x": -math.inf, "y": -math.inf, "z": -math.inf}
-
-                for dim in ("x", "y", "z"):
-                    for subobst in subobsts:
-                        subobst_coords = subobst.get_coordinates(ignore_cell_centered=True)[orientation_int]
-                        if len(subobst_coords[dim]) <= 1:
-                            step_size = 0
-                        else:
-                            step_size = subobst_coords[dim][1] - subobst_coords[dim][0]
-                        step_sizes_min[dim] = min(step_size, step_sizes_min[dim])
-                        step_sizes_max[dim] = max(step_size, step_sizes_max[dim])
-                        global_max[dim] = max(subobst_coords[dim][-1], global_max[dim])
-
-                for dim in ("x", "y", "z"):
-                    if step_sizes_min[dim] == 0:
-                        step_sizes_min[dim] = math.inf
-                        steps[dim] = 1
-                    else:
-                        steps[dim] = max(int(round((coord_max[dim] - coord_min[dim]) / step_sizes_min[dim])), 1) + (
-                            0 if cell_centered else 1
-                        )
-
-                grid = np.full((self.n_t(count_duplicates=False), steps["x"], steps["y"], steps["z"]), np.nan)
-
-                start_coordinates = {"x": coord_min["x"], "y": coord_min["y"], "z": coord_min["z"]}
-                start_idx = dict()
-                end_idx = dict()
-                for subobst in subobsts:
-                    patch_data = np.expand_dims(
-                        subobst.get_data(quantity).data[orientation_int].data, axis=abs(orientation_int)
-                    )
-                    subobst_coords = subobst.get_coordinates(ignore_cell_centered=True)[orientation_int]
-                    for axis in (0, 1, 2):
-                        dim = ("x", "y", "z")[axis]
-                        if axis == abs(orientation_int) - 1:
-                            start_idx[dim] = 0
-                            end_idx[dim] = 1
-                            continue
-                        n_repeat = max(
-                            int(round((subobst_coords[dim][1] - subobst_coords[dim][0]) / step_sizes_min[dim])), 1
-                        )
-
-                        start_idx[dim] = int(
-                            round((subobst_coords[dim][0] - start_coordinates[dim]) / step_sizes_min[dim])
-                        )
-                        end_idx[dim] = int(
-                            round((subobst_coords[dim][-1] - start_coordinates[dim]) / step_sizes_min[dim])
-                        )
-
-                        # We ignore border points unless they are actually on the border of the simulation space as all
-                        # other border points actually appear twice, as the subobstructions overlap. This only
-                        # applies for face_centered data, as cell_centered data will not overlap.
-                        if not cell_centered:
-                            if axis != abs(orientation_int) - 1:
-                                reduced_shape = list(patch_data.shape)
-                                reduced_shape[axis + 1] -= 1
-                                reduced_data_slices = tuple(slice(s) for s in reduced_shape)
-                                patch_data = patch_data[reduced_data_slices]
-
-                            # Temporarily save border points to add them back to the array again later
-                            if subobst_coords[dim][-1] == global_max[dim]:
-                                end_idx[dim] += 1
-                                temp_data_slices = [slice(s) for s in patch_data.shape]
-                                temp_data_slices[axis + 1] = slice(patch_data.shape[axis + 1] - 1, None)
-                                temp_data = patch_data[tuple(temp_data_slices)]
-
-                        if n_repeat > 1:
-                            patch_data = np.repeat(patch_data, n_repeat, axis=axis + 1)
-
-                        # Add border points back again if needed
-                        if not cell_centered and subobst_coords[dim][-1] == global_max[dim]:
-                            patch_data = np.concatenate((patch_data, temp_data), axis=axis + 1)
-
-                    grid[
-                        :, start_idx["x"] : end_idx["x"], start_idx["y"] : end_idx["y"], start_idx["z"] : end_idx["z"]
-                    ] = patch_data.reshape(
-                        (
-                            self.n_t(count_duplicates=False),
-                            end_idx["x"] - start_idx["x"],
-                            end_idx["y"] - start_idx["y"],
-                            end_idx["z"] - start_idx["z"],
-                        )
-                    )
-
-                # Remove empty dimensions, but make sure to note remove the time dimension if there is only a single
-                # timestep
-                grid = np.squeeze(grid)
-                if len(grid.shape) == 2:
-                    grid = grid[np.newaxis, :, :]
-                if first_result_grid is not None:
-                    result[orientation_int] = (first_result_grid, grid)
-                else:
-                    result[orientation_int] = grid
+                    level[1].append(patch)
+            levels.sort(key=lambda lvl: lvl[0])
+            grids = tuple(_global_patch_grid(level_patches, normal) for _, level_patches in levels)
+            result[orientation] = grids[0] if len(grids) == 1 else grids
         return result
 
     def clear_cache(self):
@@ -915,3 +800,53 @@ class Obstruction:
             + (f", Quantities={[q.short_name for q in self.quantities]}" if self.has_boundary_data else "")
             + ")"
         )
+
+
+def _tolerance(coordinates: np.ndarray) -> float:
+    """Tolerance for comparing positions on a grid: a thousandth of its smallest cell."""
+    return 1e-3 * float(np.min(np.diff(coordinates))) if coordinates.size > 1 else 1e-6
+
+
+def _global_patch_grid(patches: List[Patch], normal: Literal["x", "y", "z"]) -> np.ndarray:
+    """Combines patches lying in one plane into one array of shape (n_t, a, b) on the finest grid of the patches."""
+    cell_centered = patches[0].cell_centered
+    axes = [dim for dim in ("x", "y", "z") if dim != normal]
+    nodes = {dim: [patch.get_coordinates(ignore_cell_centered=True)[dim] for patch in patches] for dim in axes}
+
+    positions = dict()
+    for dim in axes:
+        lower = min(n[0] for n in nodes[dim])
+        upper = max(n[-1] for n in nodes[dim])
+        steps = [np.min(np.diff(n)) for n in nodes[dim] if n.size > 1]
+        step = min(steps) if steps else 0.0
+        n_nodes = int(round((upper - lower) / step)) + 1 if step > 0 else 1
+        positions[dim] = lower + step * np.arange(n_nodes)
+        if cell_centered:
+            positions[dim] = positions[dim][:-1] + step / 2
+
+    n_t = max(patch.data.shape[0] for patch in patches)
+    grid = np.full((n_t,) + tuple(positions[dim].size for dim in axes), np.nan)
+    # On a node shared by two patches, the patch further up in x, y and z wins, as each is written after those below
+    order = sorted(range(len(patches)), key=lambda i: tuple(nodes[dim][i][0] for dim in axes))
+    for i in order:
+        patch = patches[i]
+        global_indices = list()
+        patch_indices = list()
+        for dim in axes:
+            patch_nodes = nodes[dim][i]
+            tol = _tolerance(patch_nodes)
+            pos = positions[dim]
+            if cell_centered:
+                inside = (pos > patch_nodes[0]) & (pos < patch_nodes[-1])
+                n_values = patch_nodes.size - 1
+            else:
+                inside = (pos >= patch_nodes[0] - tol) & (pos <= patch_nodes[-1] + tol)
+                n_values = patch_nodes.size
+            # Each point of the global grid takes the value of the patch's cell it lies in, or of the patch's last
+            # node at or below it, so values of coarser meshes are repeated
+            idx = np.searchsorted(patch_nodes, pos[inside] + tol, side="right") - 1
+            global_indices.append(np.flatnonzero(inside))
+            patch_indices.append(np.clip(idx, 0, n_values - 1))
+        data = patch.data
+        grid[(slice(data.shape[0]),) + np.ix_(*global_indices)] = data[(slice(None),) + np.ix_(*patch_indices)]
+    return grid

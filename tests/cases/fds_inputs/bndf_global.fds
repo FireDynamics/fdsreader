@@ -1,0 +1,19 @@
+&HEAD CHID='bndf_global', TITLE='Global boundary data arrays for fdsreader' /
+&MESH ID='Fine', IJK=10,10,10, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
+&MESH ID='Coarse', IJK=5,5,5, XB=1.0,2.0,0.0,1.0,0.0,1.0 /
+&TIME T_END=2.0 /
+&DUMP DT_BNDF=0.5, SMOKE3D=F /
+&REAC FUEL='PROPANE' /
+&SURF ID='FIRE', HRRPUA=500.0 /
+&VENT XB=0.1,0.5,0.1,0.9,0.0,0.0, SURF_ID='FIRE' /
+&VENT MB='XMIN', SURF_ID='OPEN' / &VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+Across both meshes: the top at z = 0.53 snaps to 0.5 in 'Fine' and to 0.6 in 'Coarse'
+&OBST ID='Table', XB=0.6,1.4,0.2,0.8,0.0,0.53 /
+One cell wide in x
+&OBST ID='Strip', XB=0.2,0.3,0.2,0.8,0.0,0.3 /
+
+&BNDF QUANTITY='WALL TEMPERATURE' /
+&BNDF QUANTITY='NET HEAT FLUX', CELL_CENTERED=T /
+&TAIL /
