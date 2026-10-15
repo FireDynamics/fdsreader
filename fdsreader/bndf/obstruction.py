@@ -92,7 +92,8 @@ class Patch:
             if self.cell_centered and not ignore_cell_centered:
                 co = co[:-1] + np.diff(co) / 2
 
-            coords[dim] = co[np.where(np.logical_and(co >= self.extent[dim][0], co <= self.extent[dim][1]))]
+            tol = _tolerance(self.mesh.coordinates[dim])
+            coords[dim] = co[(co >= self.extent[dim][0] - tol) & (co <= self.extent[dim][1] + tol)]
             if coords[dim].size == 0:
                 coords[dim] = np.array([co[np.argmin(np.abs(co - self.extent[dim][0]))]])
 
@@ -701,7 +702,9 @@ class Obstruction:
 
         Each array has the shape (n_t, a, b), where a and b are the two axes of the face in the order x, y, z (e.g. y
         and z for the orientations -1 and 1). The grid uses the finest cell size of the meshes the obstruction spans;
-        values of coarser meshes are repeated, and points not covered by any patch are NaN.
+        values of coarser meshes are repeated, and points not covered by any patch are NaN. The grid is uniform, so
+        on stretched meshes values are placed at the nearest grid point below their node. Frames a mesh did not write
+        are NaN as well.
 
         If the face lies at different positions in different meshes, e.g. because the obstruction spans meshes with
         different cell sizes and FDS snaps its bounds to each grid, the orientation maps to a tuple with one array per
@@ -711,8 +714,6 @@ class Obstruction:
         """
         patches_by_orientation: Dict[int, List[Patch]] = dict()
         for subobst in self._all_subobstructions:
-            if not subobst.has_boundary_data:
-                continue
             try:
                 boundary = subobst.get_data(quantity)
             except KeyError:
@@ -723,17 +724,19 @@ class Obstruction:
             raise KeyError(f"No boundary data found for quantity '{quantity}'")
 
         result = dict()
-        for orientation, patches in patches_by_orientation.items():
+        for orientation in sorted(patches_by_orientation):
             normal = ("x", "y", "z")[abs(orientation) - 1]
             levels: List[Tuple[float, List[Patch]]] = list()
-            for patch in patches:
+            for patch in patches_by_orientation[orientation]:
                 position = patch.extent[normal][0]
-                level = next((lvl for lvl in levels if math.isclose(lvl[0], position, abs_tol=1e-5)), None)
+                tol = _tolerance(patch.mesh.coordinates[normal])
+                level = next((lvl for lvl in levels if abs(lvl[0] - position) <= tol), None)
                 if level is None:
                     levels.append((position, [patch]))
                 else:
                     level[1].append(patch)
-            grids = tuple(_global_patch_grid(level_patches, normal) for _, level_patches in sorted(levels))
+            levels.sort(key=lambda lvl: lvl[0])
+            grids = tuple(_global_patch_grid(level_patches, normal) for _, level_patches in levels)
             result[orientation] = grids[0] if len(grids) == 1 else grids
         return result
 
@@ -799,19 +802,16 @@ class Obstruction:
         )
 
 
-def _patch_nodes(patch: Patch, dim: Literal["x", "y", "z"]) -> np.ndarray:
-    """The mesh nodes a patch spans along one axis."""
-    co = patch.mesh.coordinates[dim]
-    lower, upper = patch.extent[dim]
-    tol = 1e-3 * float(np.min(np.diff(co))) if co.size > 1 else 1e-6
-    return co[(co >= lower - tol) & (co <= upper + tol)]
+def _tolerance(coordinates: np.ndarray) -> float:
+    """Tolerance for comparing positions on a grid: a thousandth of its smallest cell."""
+    return 1e-3 * float(np.min(np.diff(coordinates))) if coordinates.size > 1 else 1e-6
 
 
 def _global_patch_grid(patches: List[Patch], normal: Literal["x", "y", "z"]) -> np.ndarray:
     """Combines patches lying in one plane into one array of shape (n_t, a, b) on the finest grid of the patches."""
     cell_centered = patches[0].cell_centered
     axes = [dim for dim in ("x", "y", "z") if dim != normal]
-    nodes = {dim: [_patch_nodes(patch, dim) for patch in patches] for dim in axes}
+    nodes = {dim: [patch.get_coordinates(ignore_cell_centered=True)[dim] for patch in patches] for dim in axes}
 
     positions = dict()
     for dim in axes:
@@ -824,7 +824,7 @@ def _global_patch_grid(patches: List[Patch], normal: Literal["x", "y", "z"]) -> 
         if cell_centered:
             positions[dim] = positions[dim][:-1] + step / 2
 
-    n_t = patches[0].data.shape[0]
+    n_t = max(patch.data.shape[0] for patch in patches)
     grid = np.full((n_t,) + tuple(positions[dim].size for dim in axes), np.nan)
     # On a node shared by two patches, the patch further up in x, y and z wins, as each is written after those below
     order = sorted(range(len(patches)), key=lambda i: tuple(nodes[dim][i][0] for dim in axes))
@@ -834,7 +834,7 @@ def _global_patch_grid(patches: List[Patch], normal: Literal["x", "y", "z"]) -> 
         patch_indices = list()
         for dim in axes:
             patch_nodes = nodes[dim][i]
-            tol = 1e-3 * (np.min(np.diff(patch_nodes)) if patch_nodes.size > 1 else 1.0)
+            tol = _tolerance(patch_nodes)
             pos = positions[dim]
             if cell_centered:
                 inside = (pos > patch_nodes[0]) & (pos < patch_nodes[-1])
@@ -847,5 +847,6 @@ def _global_patch_grid(patches: List[Patch], normal: Literal["x", "y", "z"]) -> 
             idx = np.searchsorted(patch_nodes, pos[inside] + tol, side="right") - 1
             global_indices.append(np.flatnonzero(inside))
             patch_indices.append(np.clip(idx, 0, n_values - 1))
-        grid[(slice(None),) + np.ix_(*global_indices)] = patch.data[(slice(None),) + np.ix_(*patch_indices)]
+        data = patch.data
+        grid[(slice(data.shape[0]),) + np.ix_(*global_indices)] = data[(slice(None),) + np.ix_(*patch_indices)]
     return grid

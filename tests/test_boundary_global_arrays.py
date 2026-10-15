@@ -71,7 +71,7 @@ def test_coarse_values_are_repeated_on_the_finest_grid(sim):
 def test_node_based_and_cell_centred_quantities_on_one_obstruction(sim):
     table = sim.obstructions.get_by_id("Table")
     for quantity in (NODES, CELLS):
-        assert set(table.get_global_boundary_data_arrays(quantity)) == {-2, -1, 1, 2, 3}  # no face on the floor
+        assert list(table.get_global_boundary_data_arrays(quantity)) == [-2, -1, 1, 2, 3]  # no face on the floor
 
 
 def test_unknown_quantity(sim):
