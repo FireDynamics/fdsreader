@@ -107,30 +107,47 @@ def test_obstruction_mask_contains_every_placeholder(sim, slice_id):
         assert not (placeholders & ~obstructions).any()
 
 
-# Smokeview 6.11.2 on this case: the slice PBZ=0.7 at t = 10 s seen from above with the obstacles hidden, read off by
-# hand (1 = blanked) for the areas of 0.1 m between the nodes, x 0..2 left to right, y from 1.0 (top) down to 0.0
-SMOKEVIEW_Z07 = """
-00110011000000000000
-01111011000000001110
-01001000000000001110
-00000000000000001110
-00000000000000000000
-00000000000000000000
-00000000000000000000
-00000000000011110000
-00000000110011110000
-00000000000000000000
-"""
+# Smokeview 6.11.2 on this case, read off by hand (1 = blanked) for the areas of 0.1 m between the nodes, x 0..2 left to
+# right, the other axis from 1.0 (top) down to 0.0: the slice PBZ=0.7 seen from above and PBY=0.8 seen from the front,
+# at t = 10 s with the obstacles hidden
+SMOKEVIEW = {
+    "z07": """
+        00110011000000000000
+        01111011000000001110
+        01001000000000001110
+        00000000000000001110
+        00000000000000000000
+        00000000000000000000
+        00000000000000000000
+        00000000000011110000
+        00000000110011110000
+        00000000000000000000
+    """,
+    "y08": """
+        00000000000000000000
+        00000000000000001110
+        01111011000000001010
+        01111011000000001110
+        00000000111110000000
+        00000000111110000000
+        00000000111110000000
+        00000000111110000000
+        00000000000000000000
+        00000000000000000000
+    """,
+}
 
 
-def test_obstruction_mask_matches_smokeview(sim):
-    # Smokeview blanks an area of the plane z = 0.7 (node 7) if a cell next to it, below or above, is solid
-    smokeview = np.array([[int(c) for c in row] for row in SMOKEVIEW_Z07.split()])[::-1].T  # (x, y)
-    times = sim.slices.get_by_id("z07").times
+@pytest.mark.parametrize("slice_id, axis, node", [("z07", 2, 7), ("y08", 1, 8)])
+def test_obstruction_mask_matches_smokeview(sim, slice_id, axis, node):
+    # Smokeview blanks an area of the plane if a cell next to it, on either side, is solid
+    smokeview = np.array([[int(c) for c in row] for row in SMOKEVIEW[slice_id].split()])[::-1].T
+    times = sim.slices.get_by_id(slice_id).times
     blanked = np.zeros((20, 10), dtype=int)
     for mesh, offset in ((_mesh(sim, "M1"), 0), (_mesh(sim, "M2"), 10)):
         cells = ~mesh.get_obstruction_mask(times, cell_centered=True)[-1]
-        blanked[offset : offset + 10] = cells[:, :, 6] | cells[:, :, 7]
+        sides = np.take(cells, node - 1, axis=axis) | np.take(cells, node, axis=axis)
+        blanked[offset : offset + 10] = sides
     np.testing.assert_array_equal(blanked, smokeview)
 
 
