@@ -58,15 +58,14 @@ class Mesh:
         """Marks all cells (or nodes) which are blocked by an obstruction.
 
         With ``mode="obstructions"`` (the default) the mask shows where the obstructions are: the cells inside an
-        obstruction, or the nodes inside it and on its faces. An obstruction without thickness (a thin wall) blocks
-        the one row of cells after its node, or the nodes on it.
+        obstruction, or the nodes inside it and on its faces, like Smokeview blanks a slice. An obstruction without
+        thickness (a thin wall) blocks the nodes on it but no cells, as no cell lies inside it.
 
         With ``mode="placeholders"`` it marks only the values FDS fills with a placeholder (the ambient value)
         instead of a value of the gas: the cells inside an obstruction, and the nodes where all cells of this mesh
         around them are, as FDS averages a node from the gas cells around it (CORNER_VALUE in dump.f90). So the
         nodes on the faces of an obstruction keep their gas values, except where obstructions touch each other or
-        an obstruction ends at the edge of the mesh. For cell-centred data both modes are the same, apart from
-        obstructions without thickness.
+        an obstruction ends at the edge of the mesh. For cell-centred data both modes are the same.
 
         Both masks are derived from &OBST input only; solids defined with &GEOM are not included, and FDS writes
         face quantities such as velocities differently.
@@ -97,8 +96,8 @@ class Mesh:
                     blocked = list()
                     for dim, r in zip(("x", "y", "z"), region):
                         low, high = subobst.bound_indices[dim]  # nodes of the faces
-                        # Cells low..high-1 (at least one), or nodes low..high
-                        high = max(high, low + 1) if cell_centered else high + 1
+                        # Cells low..high-1, or nodes low..high
+                        high = high if cell_centered else high + 1
                         blocked.append(slice(max(low, r.start) - r.start, max(min(high, r.stop) - r.start, 0)))
                     if any(b.stop <= b.start for b in blocked):
                         continue  # none in the region

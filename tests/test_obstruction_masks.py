@@ -74,8 +74,7 @@ def test_placeholder_nodes_where_obstructions_touch_or_meet_the_mesh_edge(sim):
 
 def _inside_obstructions(sub, cell_centered):
     """Expected obstruction mask of a subslice from the coordinates of the obstructions in the .smv file: the cells
-    whose centre lies inside an obstruction (for one without thickness, the cells right after it), or the nodes
-    inside or on it."""
+    whose centre lies inside an obstruction, or the nodes inside or on it."""
     coords = sub.get_coordinates()
     grids = np.meshgrid(*(coords[dim] for dim in "xyz"), indexing="ij")
     spacing = {dim: np.diff(sub.mesh.coordinates[dim]).min() for dim in "xyz"}
@@ -86,10 +85,7 @@ def _inside_obstructions(sub, cell_centered):
             for grid, dim in zip(grids, "xyz"):
                 low, high = subobst.extent[dim]
                 tol = 1e-4 * spacing[dim]
-                if cell_centered and high - low < tol:  # without thickness: the cell after it
-                    inside &= (grid > low) & (grid < low + spacing[dim])
-                else:
-                    inside &= (grid > low - tol) & (grid < high + tol)
+                inside &= (grid > low - tol) & (grid < high + tol)
             blocked |= inside
     return blocked
 
@@ -109,6 +105,33 @@ def test_obstruction_mask_contains_every_placeholder(sim, slice_id):
         obstructions = ~sub.mesh.get_obstruction_mask_slice(sub)[-1]
         placeholders = ~sub.mesh.get_obstruction_mask_slice(sub, mode="placeholders")[-1]
         assert not (placeholders & ~obstructions).any()
+
+
+# Smokeview 6.11.2 on this case: the slice PBZ=0.7 at t = 10 s seen from above with the obstacles hidden, read off by
+# hand (1 = blanked) for the areas of 0.1 m between the nodes, x 0..2 left to right, y from 1.0 (top) down to 0.0
+SMOKEVIEW_Z07 = """
+00110011000000000000
+01111011000000001110
+01001000000000001110
+00000000000000001110
+00000000000000000000
+00000000000000000000
+00000000000000000000
+00000000000011110000
+00000000110011110000
+00000000000000000000
+"""
+
+
+def test_obstruction_mask_matches_smokeview(sim):
+    # Smokeview blanks an area of the plane z = 0.7 (node 7) if a cell next to it, below or above, is solid
+    smokeview = np.array([[int(c) for c in row] for row in SMOKEVIEW_Z07.split()])[::-1].T  # (x, y)
+    times = sim.slices.get_by_id("z07").times
+    blanked = np.zeros((20, 10), dtype=int)
+    for mesh, offset in ((_mesh(sim, "M1"), 0), (_mesh(sim, "M2"), 10)):
+        cells = ~mesh.get_obstruction_mask(times, cell_centered=True)[-1]
+        blanked[offset : offset + 10] = cells[:, :, 6] | cells[:, :, 7]
+    np.testing.assert_array_equal(blanked, smokeview)
 
 
 def test_unknown_mask_mode_is_rejected(sim):
