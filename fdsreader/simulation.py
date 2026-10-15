@@ -5,6 +5,7 @@ import os
 import pickle
 import re
 import warnings
+from datetime import datetime, timezone
 from typing import AnyStr, Dict, List, Sequence, TextIO, Tuple, Union
 
 import numpy as np
@@ -39,6 +40,17 @@ def _plot3d_time(label: str, filename: str) -> float:
     seconds, hundredths = match.groups()
     sign = -1 if seconds.startswith("-") else 1
     return sign * (abs(int(seconds)) + int(hundredths) / 100)
+
+
+def _wall_times_to_utc(stamps: Sequence[str]) -> np.ndarray:
+    """Parse the wall-clock time stamps of CHID_steps.csv as UTC, as numpy did before it
+    deprecated time zone offsets (and warned on every load)."""
+    utc = []
+    for stamp in stamps:
+        time = datetime.fromisoformat(stamp.strip())
+        # Without an offset the stamp stays as written; astimezone would assume the local time zone
+        utc.append(time.astimezone(timezone.utc).replace(tzinfo=None) if time.tzinfo else time)
+    return np.array(utc, dtype="datetime64[ms]")
 
 
 class Simulation:
@@ -245,7 +257,8 @@ class Simulation:
                 self.particles = self._particles
                 self.particles._post_init()
             # If no evacs are simulates, initialize empty data container for consistency
-            if len(self._evacs) == 0:
+            # (also when Evac classes were registered but their data could not be loaded)
+            if not isinstance(self._evacs, EvacCollection):
                 self.evacs = EvacCollection((), "", ())
             self.meshes = MeshCollection(self._meshes)
             del (
@@ -268,6 +281,14 @@ class Simulation:
                 self._hash = create_hash(self.smv_file_path)
                 with open(Simulation._get_pickle_filename(self.root_path, self.chid), "wb") as pickle_file:
                     pickle.dump(self, pickle_file, protocol=4)
+
+        if len(self.evacs) > 0:
+            warnings.warn(
+                "FDS+Evac has been removed from FDS, and fdsreader's evacuation support is deprecated: "
+                "it is no longer tested and may be removed in a future release.",
+                FutureWarning,
+                stacklevel=2,
+            )
 
     def parse_smv_file(self):
         # Global device list in registration order — used to resolve DEVICE_ACT indices.
@@ -1219,9 +1240,8 @@ class Simulation:
         with open(file_path) as infile:
             infile.readline()
             keys = [name.replace('"', "").replace("\n", "").strip() for name in infile.readline().split(",")][2:]
-        timesteps = np.loadtxt(
-            file_path, dtype=np.dtype("datetime64[ms]"), delimiter=",", ndmin=1, usecols=1, skiprows=2
-        )
+        wall_times = np.loadtxt(file_path, dtype=str, delimiter=",", ndmin=1, usecols=1, skiprows=2)
+        timesteps = _wall_times_to_utc(wall_times)
         float_values = np.loadtxt(file_path, delimiter=",", usecols=range(2, len(keys) + 2), ndmin=2, skiprows=2)
         data = self._transform_csv_data(keys, float_values)
         data["Time Step"] = timesteps

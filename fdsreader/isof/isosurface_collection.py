@@ -14,7 +14,7 @@ class IsosurfaceCollection(FDSDataCollection):
 
     @property
     def quantities(self) -> List[Quantity]:
-        return list({iso.name for iso in self})
+        return list({iso.quantity for iso in self})
 
     def filter_by_quantity(self, quantity: Union[str, Quantity]):
         """Filters all isosurfaces by a specific quantity."""

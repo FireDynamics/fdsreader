@@ -34,7 +34,9 @@ def export_slcf_raw(slc: Slice, output_dir: str, ordering: Literal["C", "F"] = "
         "Quantity": slc.quantity.name,
     }
 
-    filename_base = ("slice" + ("2D-" if slc2d else "3D-") + slc.id.lower()).replace(" ", "_").replace(".", "-")
+    # Slices without an ID are named after their first .sf file, which is unique per slice
+    name = slc.id or os.path.splitext(min(subslice.filename for subslice in slc.subslices))[0]
+    filename_base = ("slice" + ("2D-" if slc2d else "3D-") + name.lower()).replace(" ", "_").replace(".", "-")
     # Create all requested directories if they don't exist yet
     Path(os.path.join(output_dir, filename_base + "-data")).mkdir(parents=True, exist_ok=True)
 
