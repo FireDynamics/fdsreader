@@ -324,24 +324,33 @@ class SubObstruction:
         return []
 
     def get_coordinates(
-        self, ignore_cell_centered: bool = False
+        self, ignore_cell_centered: bool = False, quantity: Union[str, Quantity, None] = None
     ) -> Dict[int, Dict[Literal["x", "y", "z"], np.ndarray]]:
         """Returns a dictionary containing a numpy ndarray with coordinates for each dimension.
         For cell-centered boundary data, the coordinates can be adjusted to represent cell-centered coordinates.
 
         :param ignore_cell_centered: Whether to shift the coordinates when the bndf is cell_centered or not.
+        :param quantity: The quantity whose data the coordinates belong to; node-based and cell-centred quantities have
+            different coordinates. Defaults to the first quantity loaded.
         """
         if self.has_boundary_data:
-            return {
-                patch.orientation: patch.get_coordinates(ignore_cell_centered)
-                for patch in next(iter(self._boundary_data.values())).patches
-            }
+            boundary = next(iter(self._boundary_data.values())) if quantity is None else self.get_data(quantity)
+            return {patch.orientation: patch.get_coordinates(ignore_cell_centered) for patch in boundary.patches}
         return {}
 
-    def get_nearest_index(self, dimension: Literal["x", "y", "z"], orientation: int, value: float) -> int:
-        """Get the nearest mesh coordinate index in a specific dimension for a specific orientation."""
+    def get_nearest_index(
+        self,
+        dimension: Literal["x", "y", "z"],
+        orientation: int,
+        value: float,
+        quantity: Union[str, Quantity, None] = None,
+    ) -> int:
+        """Get the nearest mesh coordinate index in a specific dimension for a specific orientation.
+
+        :param quantity: The quantity whose data the index refers to, see :meth:`get_coordinates`.
+        """
         if self.has_boundary_data:
-            coords = self.get_coordinates()[orientation][dimension]
+            coords = self.get_coordinates(quantity=quantity)[orientation][dimension]
             idx = np.searchsorted(coords, value, side="left")
             if idx > 0 and (idx == coords.size or math.fabs(value - coords[idx - 1]) < math.fabs(value - coords[idx])):
                 return idx - 1
@@ -531,12 +540,14 @@ class Obstruction:
         return np.array([])
 
     def get_coordinates(
-        self, ignore_cell_centered: bool = False
+        self, ignore_cell_centered: bool = False, quantity: Union[str, Quantity, None] = None
     ) -> Dict[int, Dict[Literal["x", "y", "z"], np.ndarray]]:
         """Returns a dictionary containing a numpy ndarray with coordinates for each dimension.
         For cell-centered boundary data, the coordinates can be adjusted to represent cell-centered coordinates.
 
         :param ignore_cell_centered: Whether to shift the coordinates when the bndf is cell_centered or not.
+        :param quantity: The quantity whose data the coordinates belong to; node-based and cell-centred quantities have
+            different coordinates. Defaults to the first quantity loaded for each part of the obstruction.
         """
         if self.has_boundary_data:
             all_coords = dict()
@@ -550,7 +561,10 @@ class Obstruction:
                         continue
                     min_delta = math.inf
                     for subobst in self._all_subobstructions:
-                        subobst_coords = subobst.get_coordinates(ignore_cell_centered)
+                        try:
+                            subobst_coords = subobst.get_coordinates(ignore_cell_centered, quantity)
+                        except KeyError:  # this part has no data for the quantity
+                            continue
                         if orientation_int not in subobst_coords:
                             continue
                         co = subobst_coords[orientation_int][dim]
@@ -591,10 +605,19 @@ class Obstruction:
             return all_coords
         return dict()
 
-    def get_nearest_index(self, dimension: Literal["x", "y", "z"], orientation: int, value: float) -> int:
-        """Get the nearest mesh coordinate index in a specific dimension for a specific orientation."""
+    def get_nearest_index(
+        self,
+        dimension: Literal["x", "y", "z"],
+        orientation: int,
+        value: float,
+        quantity: Union[str, Quantity, None] = None,
+    ) -> int:
+        """Get the nearest mesh coordinate index in a specific dimension for a specific orientation.
+
+        :param quantity: The quantity whose data the index refers to, see :meth:`get_coordinates`.
+        """
         if self.has_boundary_data:
-            coords = self.get_coordinates()[orientation][dimension]
+            coords = self.get_coordinates(quantity=quantity)[orientation][dimension]
             idx = np.searchsorted(coords, value, side="left")
             if idx > 0 and (idx == coords.size or math.fabs(value - coords[idx - 1]) < math.fabs(value - coords[idx])):
                 return idx - 1
@@ -734,8 +757,9 @@ class Obstruction:
 
         :param orientation: Optionally filter by patches with a specific orientation.
         """
-        values = [s.vmin(quantity, orientation) for s in self._all_subobstructions if s.has_boundary_data]
-        return min((v for v in values if not np.isnan(v)), default=np.nan)
+        return min(
+            (v for v in self._part_values(quantity, lambda b: b.vmin(orientation)) if not np.isnan(v)), default=np.nan
+        )
 
     def vmax(
         self,
@@ -746,8 +770,22 @@ class Obstruction:
 
         :param orientation: Optionally filter by patches with a specific orientation.
         """
-        values = [s.vmax(quantity, orientation) for s in self._all_subobstructions if s.has_boundary_data]
-        return max((v for v in values if not np.isnan(v)), default=np.nan)
+        return max(
+            (v for v in self._part_values(quantity, lambda b: b.vmax(orientation)) if not np.isnan(v)), default=np.nan
+        )
+
+    def _part_values(self, quantity: Union[str, Quantity], value: Callable[[Boundary], float]) -> List[float]:
+        """A value of the boundary data of each part that has the quantity. Raises KeyError if no part has it, but
+        the obstruction has boundary data."""
+        values = list()
+        for subobst in self._all_subobstructions:
+            try:
+                values.append(value(subobst.get_data(quantity)))
+            except KeyError:
+                continue
+        if not values and self.has_boundary_data:
+            raise KeyError(f"No boundary data found for quantity '{quantity}'")
+        return values
 
     def get_subobstructions(self, mesh: "Mesh") -> List[SubObstruction]:
         """All parts of this obstruction in the given mesh; several OBST lines can share an ID."""
@@ -810,6 +848,10 @@ def _global_boundary_arrays(
             patches_by_orientation.setdefault(patch.orientation, list()).append(patch)
     if not patches_by_orientation:
         raise KeyError(f"No boundary data found for quantity '{quantity}'")
+    if len({patch.cell_centered for patches in patches_by_orientation.values() for patch in patches}) > 1:
+        raise ValueError(
+            f"'{quantity}' is written node-based in some meshes and cell-centred in others, which cannot be combined"
+        )
 
     result = dict()
     for orientation in sorted(patches_by_orientation):

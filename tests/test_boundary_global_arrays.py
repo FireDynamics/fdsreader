@@ -94,3 +94,36 @@ def test_vmin_and_vmax_of_a_face_only_some_parts_have(sim):
     coarse = next(sub for sub in table._all_subobstructions if sub.mesh.id == "Coarse")
     assert table.vmax(NODES, 1) == coarse.get_data(NODES).vmax(1)
     assert table.vmin(NODES, 1) == coarse.get_data(NODES).vmin(1)
+
+
+def test_coordinates_of_a_chosen_quantity(sim):
+    # The -x face of 'Table' at x = 0.6 spans y 0.2..0.8: 7 nodes, or 6 cell centres
+    fine = next(sub for sub in sim.obstructions.get_by_id("Table")._all_subobstructions if sub.mesh.id == "Fine")
+    np.testing.assert_allclose(fine.get_coordinates(quantity=NODES)[-1]["y"], np.linspace(0.2, 0.8, 7), atol=1e-6)
+    np.testing.assert_allclose(fine.get_coordinates(quantity=CELLS)[-1]["y"], np.linspace(0.25, 0.75, 6), atol=1e-6)
+    assert fine.get_nearest_index("y", -1, 0.75, quantity=CELLS) == 5
+
+
+def test_boundary_data_of_one_orientation(sim):
+    assert list(sim.obstructions.get_by_id("Table").get_boundary_data(NODES, 1)) == ["Coarse"]
+
+
+def test_parts_without_the_quantity_are_skipped(sim):
+    table = load(sim.root_path).obstructions.get_by_id("Table")  # a fresh copy, as the test removes data
+    fine = next(sub for sub in table._all_subobstructions if sub.mesh.id == "Fine")
+    coarse = next(sub for sub in table._all_subobstructions if sub.mesh.id == "Coarse")
+    bid = next(bid for bid, b in fine._boundary_data.items() if b.quantity == NODES)
+    del fine._boundary_data[bid]
+    assert table.vmax(NODES) == coarse.get_data(NODES).vmax()
+    np.testing.assert_array_equal(table.get_global_boundary_data_arrays(NODES)[1], coarse.get_data(NODES).data[1].data)
+    with pytest.raises(KeyError):
+        table.vmax("VELOCITY")
+
+
+def test_node_based_and_cell_centred_patches_are_not_combined(sim):
+    table = load(sim.root_path).obstructions.get_by_id("Table")  # a fresh copy, as the test changes the patches
+    coarse = next(sub for sub in table._all_subobstructions if sub.mesh.id == "Coarse")
+    for patch in coarse.get_data(NODES).patches:
+        patch.cell_centered = True
+    with pytest.raises(ValueError, match="node-based"):
+        table.get_global_boundary_data_arrays(NODES)

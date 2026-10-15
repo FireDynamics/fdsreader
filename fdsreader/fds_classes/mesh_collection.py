@@ -31,8 +31,11 @@ class MeshCollection(FDSDataCollection):
         per mesh face; with ``MB`` vents in a multi-mesh case (see the FDS User Guide), it may also write faces
         between two meshes, which then appear as further positions.
 
-        :param quantity: The quantity's name or short name.
+        :param quantity: The quantity's name or short name. Raises KeyError if no mesh has data for it, and returns an
+            empty dict if there are no such data at all, like for an obstruction without boundary data.
         """
+        if not any(mesh.has_boundary_data for mesh in self):
+            return dict()
         return _global_boundary_arrays([mesh.get_boundary_data for mesh in self], quantity)
 
     def __repr__(self):

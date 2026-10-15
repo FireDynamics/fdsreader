@@ -228,6 +228,11 @@ class Mesh:
             for patch in patches:
                 patch._boundary_parent = self._boundary_data[bid]
 
+    @property
+    def has_boundary_data(self) -> bool:
+        """Whether boundary data has been output on the faces of this mesh, see :meth:`get_boundary_data`."""
+        return len(self._boundary_data) != 0
+
     def get_boundary_data(self, quantity: Union[str, Quantity]) -> Boundary:
         """The boundary data of a quantity on the faces of this mesh that are not faces of obstructions (those belong
         to :class:`Obstruction`), e.g. the floor of the simulation domain. With ``MB`` vents in a multi-mesh case (see
