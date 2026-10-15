@@ -7,6 +7,7 @@ from typing_extensions import Literal
 from fdsreader import settings
 from fdsreader.bndf import Boundary, Patch
 from fdsreader.utils import Dimension, Extent, Quantity
+from fdsreader.utils.extent import extent_index_range
 
 
 class Mesh:
@@ -74,25 +75,23 @@ class Mesh:
     def get_obstruction_mask_slice(self, subslice):
         """Marks all cells of a single subslice which are blocked by an obstruction.
 
-        :returns: A 4-dimensional array with time as first and x,y,z as last dimensions.
-            The array depends on time as obstructions may be hidden at specific points in time.
-            For a 2D slice the axis of its orientation has length 1, for a 3D slice it is the mask of the
-            whole mesh.
+        :returns: A 4-dimensional array with time as first and x,y,z as last dimensions, matching the shape of the
+            subslice's data. The array depends on time as obstructions may be hidden at specific points in time.
+            For a 2D slice the axis of its orientation has length 1.
         """
         orientation = subslice.orientation
         cell_centered = subslice.cell_centered
-        if orientation == 0:
-            # A 3D slice has no plane to cut out; indexing with orientation 0 would cut the time axis instead
-            return self.get_obstruction_mask(subslice.times, cell_centered=cell_centered)
-        value = subslice.extent[orientation][0]
-
-        slc_index = self.coordinate_to_index((value,), dimension=(orientation,), cell_centered=cell_centered)[0]
-
-        mask_indices = [slice(None)] * 4
-        mask_indices[orientation] = slice(slc_index, slc_index + 1, 1)
-        mask_indices = tuple(mask_indices)
-
-        return self.get_obstruction_mask(subslice.times, cell_centered=cell_centered)[mask_indices]
+        mask = self.get_obstruction_mask(subslice.times, cell_centered=cell_centered)
+        crop = [slice(None)] * 4
+        if orientation != 0:  # a 3D slice has no plane to cut out
+            value = subslice.extent[orientation][0]
+            slc_index = self.coordinate_to_index((value,), dimension=(orientation,), cell_centered=cell_centered)[0]
+            crop[orientation] = slice(slc_index, slc_index + 1)
+        # A slice defined with XB may cover only part of the mesh
+        for axis, dim in enumerate(("x", "y", "z"), start=1):
+            if axis != orientation:
+                crop[axis] = extent_index_range(self.coordinates[dim], subslice.extent[dim], cell_centered)
+        return mask[tuple(crop)]
 
     def coordinate_to_index(
         self,
