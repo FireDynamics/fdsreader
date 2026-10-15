@@ -1,6 +1,10 @@
-from typing import Iterable
+from typing import Dict, Iterable, Tuple, Union
 
+import numpy as np
+
+from fdsreader.bndf.obstruction import _global_boundary_arrays
 from fdsreader.fds_classes import Mesh
+from fdsreader.utils import Quantity
 from fdsreader.utils.data import FDSDataCollection
 
 
@@ -15,6 +19,29 @@ class MeshCollection(FDSDataCollection):
     def get_by_id(self, mesh_id: str):
         """Get the mesh with corresponding id if it exists."""
         return next((mesh for mesh in self if mesh.id == mesh_id), None)
+
+    def get_global_boundary_data_arrays(
+        self, quantity: Union[str, Quantity]
+    ) -> Dict[int, Union[np.ndarray, Tuple[np.ndarray, ...]]]:
+        """Combines the boundary data on the walls of the simulation domain, e.g. the floor, over all meshes into one
+        array per orientation (-3=-z, -2=-y, -1=-x, 1=x, 2=y, 3=z; 3 is the floor, facing +z).
+
+        Faces of obstructions are not included, see :meth:`Obstruction.get_global_boundary_data_arrays`, which also
+        describes the shape of the arrays and when an orientation maps to a tuple of arrays. FDS writes these data
+        per mesh face; with ``MB`` vents in a multi-mesh case (see the FDS User Guide), it may also write faces
+        between two meshes, which then appear as further positions.
+
+        :param quantity: The quantity's name or short name.
+        """
+        patches = list()
+        for mesh in self:
+            try:
+                patches.extend(mesh.get_boundary_data(quantity).patches)
+            except KeyError:
+                continue
+        if not patches:
+            raise KeyError(f"No boundary data on the walls of the simulation domain for quantity '{quantity}'")
+        return _global_boundary_arrays(patches)
 
     def __repr__(self):
         return "MeshCollection(" + super().__repr__() + ")"

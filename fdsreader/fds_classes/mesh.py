@@ -229,9 +229,18 @@ class Mesh:
                 patch._boundary_parent = self._boundary_data[bid]
 
         if not settings.LAZY_LOAD:
-            _ = self._boundary_data[bid].data
+            for patch in patches:
+                _ = patch.data
 
-    def get_boundary_data(self, quantity: Union[str, Quantity]):
+    def get_boundary_data(self, quantity: Union[str, Quantity]) -> Boundary:
+        """The boundary data of a quantity on the faces of this mesh that are walls of the simulation domain, e.g.
+        the floor, rather than faces of obstructions (those belong to :class:`Obstruction`).
+
+        A face may consist of several patches with the same orientation (see :attr:`Boundary.patches`); to combine
+        them over all meshes, use :meth:`MeshCollection.get_global_boundary_data_arrays`.
+
+        :param quantity: The quantity's name or short name.
+        """
         if isinstance(quantity, Quantity):
             quantity = quantity.name
         b = next(

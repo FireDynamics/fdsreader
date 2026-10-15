@@ -1,5 +1,6 @@
 import math
 import os
+import warnings
 
 # Unfortunately, this is necessary due to a cyclic reference. "Mesh" is only needed for static type hints anyway
 from typing import TYPE_CHECKING, Dict, List, Sequence, Tuple, Union
@@ -196,9 +197,15 @@ class Boundary:
         return self._patches[0].n_t(count_duplicates=count_duplicates)
 
     @property
+    def patches(self) -> List[Patch]:
+        """All patches, in the order FDS wrote them. A face of the simulation domain may consist of several patches
+        with the same orientation, e.g. where a vent begins."""
+        return list(self._patches)
+
+    @property
     def orientations(self):
         """Return all orientations for which there is data available."""
-        return [p.orientation for p in self._patches]
+        return sorted({p.orientation for p in self._patches})
 
     def get_nearest_timestep(self, time: float) -> int:
         """Calculates the nearest timestep for which data has been output for this obstruction."""
@@ -212,8 +219,20 @@ class Boundary:
 
     @property
     def data(self) -> Dict[int, Patch]:
-        """The :class:`Patch` in each direction (-3=-z, -2=-y, -1=-x, 1=x, 2=y, 3=y)."""
-        return {p.orientation: p for p in self._patches}
+        """The :class:`Patch` in each direction (-3=-z, -2=-y, -1=-x, 1=x, 2=y, 3=z).
+
+        A face of the simulation domain may consist of several patches with the same orientation; this only holds
+        the last of them and warns. Use :attr:`patches` or ``get_global_boundary_data_arrays`` for those faces.
+        """
+        data = {p.orientation: p for p in self._patches}
+        if len(data) < len(self._patches):
+            warnings.warn(
+                f"{self.quantity.name}: several patches face the same direction, Boundary.data only holds the last "
+                "of each. Use Boundary.patches, or get_global_boundary_data_arrays to combine them.",
+                UserWarning,
+                stacklevel=2,
+            )
+        return data
 
     def vmin(self, orientation: Literal[-3, -2, -1, 0, 1, 2, 3] = 0) -> float:
         """Minimum value of all patches at any time.
@@ -226,7 +245,7 @@ class Boundary:
                 return float(min(np.min(p.data) for p in self._patches))
             return float(curr_min)
         else:
-            return float(np.min(self.data[orientation].data))
+            return float(min(np.min(p.data) for p in self._patches if p.orientation == orientation))
 
     def vmax(self, orientation: Literal[-3, -2, -1, 0, 1, 2, 3] = 0) -> float:
         """Maximum value of all patches at any time.
@@ -239,7 +258,7 @@ class Boundary:
                 return float(max(np.max(p.data) for p in self._patches))
             return float(curr_max)
         else:
-            return float(np.max(self.data[orientation].data))
+            return float(max(np.max(p.data) for p in self._patches if p.orientation == orientation))
 
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory."""
@@ -298,7 +317,8 @@ class SubObstruction:
                 patch._boundary_parent = self._boundary_data[bid]
 
         if not settings.LAZY_LOAD:
-            _ = self._boundary_data[bid].data
+            for patch in patches:
+                _ = patch.data
 
     @property
     def orientations(self):
@@ -712,33 +732,15 @@ class Obstruction:
 
         :param quantity: The quantity's name or short name for which to load the global arrays.
         """
-        patches_by_orientation: Dict[int, List[Patch]] = dict()
+        patches = list()
         for subobst in self._all_subobstructions:
             try:
-                boundary = subobst.get_data(quantity)
+                patches.extend(subobst.get_data(quantity).patches)
             except KeyError:
                 continue
-            for orientation, patch in boundary.data.items():
-                patches_by_orientation.setdefault(orientation, list()).append(patch)
-        if not patches_by_orientation and self.has_boundary_data:
+        if not patches and self.has_boundary_data:
             raise KeyError(f"No boundary data found for quantity '{quantity}'")
-
-        result = dict()
-        for orientation in sorted(patches_by_orientation):
-            normal = ("x", "y", "z")[abs(orientation) - 1]
-            levels: List[Tuple[float, List[Patch]]] = list()
-            for patch in patches_by_orientation[orientation]:
-                position = patch.extent[normal][0]
-                tol = _tolerance(patch.mesh.coordinates[normal])
-                level = next((lvl for lvl in levels if abs(lvl[0] - position) <= tol), None)
-                if level is None:
-                    levels.append((position, [patch]))
-                else:
-                    level[1].append(patch)
-            levels.sort(key=lambda lvl: lvl[0])
-            grids = tuple(_global_patch_grid(level_patches, normal) for _, level_patches in levels)
-            result[orientation] = grids[0] if len(grids) == 1 else grids
-        return result
+        return _global_boundary_arrays(patches)
 
     def clear_cache(self):
         """Remove all data from the internal cache that has been loaded so far to free memory."""
@@ -800,6 +802,32 @@ class Obstruction:
             + (f", Quantities={[q.short_name for q in self.quantities]}" if self.has_boundary_data else "")
             + ")"
         )
+
+
+def _global_boundary_arrays(patches: List[Patch]) -> Dict[int, Union[np.ndarray, Tuple[np.ndarray, ...]]]:
+    """Combines patches into one array of shape (n_t, a, b) per orientation, or a tuple of them, one per position,
+    if the faces of an orientation lie at several positions. See :meth:`Obstruction.get_global_boundary_data_arrays`.
+    """
+    patches_by_orientation: Dict[int, List[Patch]] = dict()
+    for patch in patches:
+        patches_by_orientation.setdefault(patch.orientation, list()).append(patch)
+
+    result = dict()
+    for orientation in sorted(patches_by_orientation):
+        normal = ("x", "y", "z")[abs(orientation) - 1]
+        levels: List[Tuple[float, List[Patch]]] = list()
+        for patch in patches_by_orientation[orientation]:
+            position = patch.extent[normal][0]
+            tol = _tolerance(patch.mesh.coordinates[normal])
+            level = next((lvl for lvl in levels if abs(lvl[0] - position) <= tol), None)
+            if level is None:
+                levels.append((position, [patch]))
+            else:
+                level[1].append(patch)
+        levels.sort(key=lambda lvl: lvl[0])
+        grids = tuple(_global_patch_grid(level_patches, normal) for _, level_patches in levels)
+        result[orientation] = grids[0] if len(grids) == 1 else grids
+    return result
 
 
 def _tolerance(coordinates: np.ndarray) -> float:
