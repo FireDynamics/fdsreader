@@ -164,7 +164,8 @@ def save_figure(fields, state, series, path, height, width):
             anim.save(str(path), writer=writer)
         except Exception as exc:
             raise SystemExit(f"{PROG}: could not write {path}: {exc}")
-        plt.close(fig)
+        finally:
+            plt.close(fig)
         return f"wrote {path} ({len(list(steps))} frames)"
 
     panels = (1 if field is None else 1) + (1 if series else 0)
