@@ -144,7 +144,11 @@ def test_obstruction_mask_of_a_region_equals_the_cropped_mask_of_the_mesh(sim):
         assert region[0].start > 0
         mask = mesh.get_obstruction_mask(subslice.times, region=region)
         np.testing.assert_array_equal(mask, full[(slice(None),) + region])
-        assert (~mask).any() and mask.any()
+        # The cells inside each obstruction are blocked (a thin one may have no nodes inside it)
+        full_cells = mesh.get_obstruction_mask(subslice.times, cell_centered=True)
+        cells = mesh.get_obstruction_mask(subslice.times, cell_centered=True, region=region)
+        np.testing.assert_array_equal(cells, full_cells[(slice(None),) + region])
+        assert (~cells).any() and cells.any()
         meshes_with_obstruction += 1
     assert meshes_with_obstruction == 3  # M0, M1 and M3
 

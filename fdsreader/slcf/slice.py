@@ -37,11 +37,21 @@ class SubSlice:
 
     _offset = 3 * fdtype.new((("c", 30),)).itemsize + fdtype.new((("i", 6),)).itemsize
 
-    def __init__(self, parent_slc, filename: str, dimension: Dimension, extent: Extent, mesh: Mesh):
+    def __init__(
+        self,
+        parent_slc,
+        filename: str,
+        dimension: Dimension,
+        extent: Extent,
+        mesh: Mesh,
+        bound_indices: Tuple[int, int, int, int, int, int] | None = None,
+    ):
         self._parent_slice = parent_slc
         self.mesh = mesh
         self.dimension = dimension
         self.extent = extent
+        # Node indices i1, i2, j1, j2, k1, k2 of the slice in its mesh, as in the .smv file
+        self.bound_indices = bound_indices
 
         self.filename = filename
 
@@ -55,6 +65,7 @@ class SubSlice:
         :param ignore_cell_centered: Whether to shift the coordinates when the slice is cell_centered or not.
         """
         cell_centered = self.cell_centered and not ignore_cell_centered
+        ranges = self.index_ranges(cell_centered)
         coords: Dict[Literal["x", "y", "z"], np.ndarray] = {}
         for dim in ("x", "y", "z"):
             co = self.mesh.coordinates[dim]
@@ -63,9 +74,33 @@ class SubSlice:
             # mesh with only a single cell along this axis leaves just one coordinate afterwards.
             if cell_centered:
                 co = co[:-1] + np.diff(co) / 2
-            coords[dim] = co[extent_index_range(co, self.extent[dim])].copy()
+            coords[dim] = co[ranges[dim]].copy()
 
         return coords
+
+    def index_ranges(self, cell_centered: bool | None = None) -> Dict[Literal["x", "y", "z"], slice]:
+        """Indices of the nodes, or of the cells, of the mesh that this subslice covers along each axis.
+
+        FDS writes a cell-centred slice ``SLCC ... i1 i2`` for the cells between nodes i1 and i2, and a
+        cell-centred plane ``SLCC ... k k`` for the cell below node k.
+
+        :param cell_centered: Whether to give cells or nodes; by default as the slice is written.
+        """
+        if cell_centered is None:
+            cell_centered = self.cell_centered
+        ranges = dict()
+        for axis, dim in enumerate(("x", "y", "z")):
+            if self.bound_indices is None:  # not read from an .smv file
+                ranges[dim] = extent_index_range(self.mesh.coordinates[dim], self.extent[dim], cell_centered)
+                continue
+            low, high = self.bound_indices[2 * axis], self.bound_indices[2 * axis + 1]
+            if not cell_centered:
+                ranges[dim] = slice(low, high + 1)
+            elif high > low:
+                ranges[dim] = slice(low, high)
+            else:
+                ranges[dim] = slice(max(low - 1, 0), max(low, 1))
+        return ranges
 
     @property
     def shape(self) -> Tuple[int, int]:
@@ -213,7 +248,12 @@ class Slice(NumpyArrayMixin):
             if mesh_data["mesh"].id not in self._subslices:
                 self.quantity = Quantity(mesh_data["quantity"], mesh_data["short_name"], mesh_data["unit"])
                 self._subslices[mesh_data["mesh"].id] = SubSlice(
-                    self, mesh_data["filename"], mesh_data["dimension"], mesh_data["extent"], mesh_data["mesh"]
+                    self,
+                    mesh_data["filename"],
+                    mesh_data["dimension"],
+                    mesh_data["extent"],
+                    mesh_data["mesh"],
+                    mesh_data.get("bound_indices"),
                 )
 
             if "-VELOCITY" in mesh_data["quantity"]:
@@ -359,14 +399,8 @@ class Slice(NumpyArrayMixin):
         coords = {"x": list(), "y": list(), "z": list()}
         for dim in ("x", "y", "z"):
             if orientation == dim:
-                coord = self.extent[dim][0]
-                if self.cell_centered and not ignore_cell_centered:
-                    mesh = next(iter(self._subslices.values())).mesh
-                    mesh_co = mesh.coordinates[dim]
-                    idx = int(np.argmin(np.abs(mesh_co - coord)))
-                    if idx > 0:
-                        coord = (float(mesh_co[idx - 1]) + float(mesh_co[idx])) / 2
-                coords[dim] = np.array([coord])
+                first = next(iter(self._subslices.values()))
+                coords[dim] = first.get_coordinates(ignore_cell_centered)[dim][:1]
                 continue
             for slc in self._subslices.values():
                 co = slc.get_coordinates(ignore_cell_centered)[dim]
@@ -688,8 +722,18 @@ class Slice(NumpyArrayMixin):
 
             if return_coordinates:
                 coordinates = dict()
+                first = next(iter(subslices.values()))
                 for dim_index, dim in enumerate(("x", "y", "z")):
-                    coordinates[dim] = np.linspace(coord_min[dim], coord_max[dim], grid.shape[dim_index + 1])
+                    if self.cell_centered and dim_index == self.orientation - 1:
+                        # The cell layer of the plane, see SubSlice.index_ranges
+                        coordinates[dim] = first.get_coordinates()[dim][:1]
+                    elif self.cell_centered:
+                        half = step_sizes_min[dim] / 2
+                        coordinates[dim] = np.linspace(
+                            coord_min[dim] + half, coord_max[dim] - half, grid.shape[dim_index + 1]
+                        )
+                    else:
+                        coordinates[dim] = np.linspace(coord_min[dim], coord_max[dim], grid.shape[dim_index + 1])
 
             # Remove dimension corresponding to orientation for 2D slices
             if self.orientation != 0:

@@ -179,11 +179,16 @@ def test_to_global_fills_every_node_of_a_3d_slice_with_a_step_in_height():
 
 
 class FakeObstruction:
-    """Obstruction visible at all times, covering the given node index ranges of one mesh."""
+    """Obstruction visible at all times, between the given node indices (its faces) of one mesh."""
 
     def __init__(self, mesh, x, y, z):
         self._sub = {mesh: self}
         self.bound_indices = {"x": x, "y": y, "z": z}
+        co = mesh.coordinates
+        self.bounding_box = {
+            dim: (float(co[dim][max(lo, 0)]), float(co[dim][min(hi, len(co[dim]) - 1)]))
+            for dim, (lo, hi) in self.bound_indices.items()
+        }
 
     def __getitem__(self, mesh):
         return self._sub[mesh]
@@ -193,14 +198,17 @@ class FakeObstruction:
 
 
 def _add_obstruction(slc, mesh_id, x, y):
-    """Puts an obstruction on a node of the given mesh at the slice height z = 1 (node index 1)."""
+    """Puts an obstruction around the nodes x = (first, last), y = (first, last) of the given mesh at the slice
+    height z = 1 (node index 1). Its faces lie one node further out, as only nodes inside an obstruction are
+    masked; the mesh's faces are treated as adjoining other meshes, so its edge nodes are not masked for that."""
     mesh = slc._subslices[mesh_id].mesh
-    mesh.obstructions.append(FakeObstruction(mesh, x, y, (1, 2)))
+    mesh.exterior_faces = {dim: (False, False) for dim in "xyz"}
+    mesh.obstructions.append(FakeObstruction(mesh, (x[0] - 1, x[1] + 1), (y[0] - 1, y[1] + 1), (0, 2)))
 
 
 def test_to_global_masks_a_recovered_upper_face_node():
     slc = BoxSlice([box + (0.25,) for box in L_SHAPE])
-    _add_obstruction(slc, "M1", x=(4, 5), y=(1, 2))  # B's right face at x = 1, y = 1.25: no neighbour supplies it
+    _add_obstruction(slc, "M1", x=(4, 4), y=(1, 1))  # B's right face at x = 1, y = 1.25: no neighbour supplies it
     grid = np.asarray(slc.to_global(masked=True, fill=np.nan))[0]
 
     (X, Y), inside = _union_grid(L_SHAPE, 0.25)
@@ -214,7 +222,7 @@ def test_to_global_masks_a_recovered_node_if_any_supplying_mesh_masks_it(order):
     # Corner x = 1, y = 1 lies on upper faces of A, B and C, so pass 2 supplies it; only B has the obstruction
     boxes = [L_SHAPE[i] for i in order]
     slc = BoxSlice([box + (0.25,) for box in boxes])
-    _add_obstruction(slc, f"M{order.index(1)}", x=(4, 5), y=(0, 1))
+    _add_obstruction(slc, f"M{order.index(1)}", x=(4, 4), y=(0, 0))
     grid = np.asarray(slc.to_global(masked=True, fill=np.nan))[0]
 
     (X, Y), inside = _union_grid(L_SHAPE, 0.25)
@@ -266,7 +274,7 @@ def test_to_global_masks_a_recovered_face_node_of_a_coarse_mesh():
     # C has twice the cell size; an obstruction on its coarse node x = 1.5, y = 1 (top face, no neighbour above)
     # covers the fine nodes x = 1.5 and x = 1.75 once C's values are repeated onto the global grid
     slc = BoxSlice([L_SHAPE[0] + (0.25,), L_SHAPE[1] + (0.25,), L_SHAPE[2] + (0.5,)])
-    _add_obstruction(slc, "M2", x=(1, 2), y=(2, 3))
+    _add_obstruction(slc, "M2", x=(1, 1), y=(2, 2))
     grid = np.asarray(slc.to_global(masked=True, fill=np.nan))[0]
 
     (X, Y), inside = _union_grid(L_SHAPE, 0.25)

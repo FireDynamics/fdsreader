@@ -7,7 +7,6 @@ from typing_extensions import Literal
 from fdsreader import settings
 from fdsreader.bndf import Boundary, Patch
 from fdsreader.utils import Dimension, Extent, Quantity
-from fdsreader.utils.extent import extent_index_range
 
 
 class Mesh:
@@ -49,16 +48,24 @@ class Mesh:
 
         self._boundary_data: Dict[int, Boundary] = dict()
 
+        # Whether the lower and upper face along each axis lie on the outside of the simulated domain, i.e. no
+        # other mesh adjoins them; set by the Simulation once all meshes are known
+        self.exterior_faces: Dict[str, Tuple[bool, bool]] = {dim: (True, True) for dim in ("x", "y", "z")}
+
     def get_obstruction_mask(
         self, times: Sequence[float], cell_centered=False, region: Tuple[slice, slice, slice] | None = None
     ) -> np.ndarray:
-        """Marks all cells which are blocked by an obstruction.
+        """Marks all cells (or nodes) which are blocked by an obstruction, i.e. those FDS fills with a placeholder
+        instead of a value of the gas: the cells inside an obstruction, and the nodes inside it but not on its faces,
+        whose values FDS averages from the gas next to the obstruction. Nodes on a face at the edge of the mesh are
+        blocked too if there is no gas beyond: the obstruction continues into the neighbouring mesh, or the face
+        lies on the outside of the simulated domain.
 
         :param times: All timesteps of the simulation.
         :param region: Index ranges along x, y and z, as slices without a step, to which the mask is limited.
             The whole mesh by default.
-        :returns: A 4-dimensional array with time as first and x,y,z as last dimensions. The array
-            depends on time as obstructions may be hidden as specific points in time.
+        :returns: A 4-dimensional array with time as first and x,y,z as last dimensions, False where blocked. The
+            array depends on time as obstructions may be hidden as specific points in time.
         """
         shape = self.dimension.shape(cell_centered=cell_centered)
         if region is None:
@@ -69,17 +76,25 @@ class Mesh:
         region = tuple(slice(*r.indices(n)[:2]) for r, n in zip(region, shape))
         region = tuple(slice(r.start, max(r.start, r.stop)) for r in region)
         mask = np.ones((len(times),) + tuple(r.stop - r.start for r in region), dtype=bool)
-        c = 1 if cell_centered else 0
 
         for obst in self.obstructions:
             subobst = obst[self]
             blocked = list()
             for dim, r in zip(("x", "y", "z"), region):
-                low, high = subobst.bound_indices[dim]
-                high = max(high + c, low + 1)
+                low, high = subobst.bound_indices[dim]  # nodes of the obstruction's faces
+                if not cell_centered:
+                    # Only nodes inside the obstruction. A face on the edge of the mesh has no gas beyond it if the
+                    # obstruction continues into the neighbouring mesh or there is no neighbouring mesh.
+                    co = self.coordinates[dim]
+                    bounds = obst.bounding_box[dim]
+                    exterior_low, exterior_high = self.exterior_faces[dim]
+                    if not (low == 0 and (exterior_low or bounds[0] < co[0] - 1e-6)):
+                        low += 1
+                    if high == len(co) - 1 and (exterior_high or bounds[1] > co[-1] + 1e-6):
+                        high += 1
                 blocked.append(slice(max(low, r.start) - r.start, min(high, r.stop) - r.start))
             if any(b.stop <= b.start for b in blocked):
-                continue  # the obstruction lies outside of the region
+                continue  # the obstruction lies outside of the region, or has no blocked cells or nodes
             t_idx = 0
             for t in subobst.get_visible_times(times):
                 while not np.isclose(t, times[t_idx]):
@@ -94,17 +109,9 @@ class Mesh:
             subslice's data. The array depends on time as obstructions may be hidden at specific points in time.
             For a 2D slice the axis of its orientation has length 1.
         """
-        orientation = subslice.orientation
-        cell_centered = subslice.cell_centered
-        region = list()
-        for axis, dim in enumerate(("x", "y", "z"), start=1):
-            if axis == orientation:
-                value = subslice.extent[orientation][0]
-                slc_index = self.coordinate_to_index((value,), dimension=(orientation,), cell_centered=cell_centered)[0]
-                region.append(slice(slc_index, slc_index + 1))
-            else:  # a slice defined with XB may cover only part of the mesh
-                region.append(extent_index_range(self.coordinates[dim], subslice.extent[dim], cell_centered))
-        return self.get_obstruction_mask(subslice.times, cell_centered=cell_centered, region=tuple(region))
+        ranges = subslice.index_ranges()
+        region = tuple(ranges[dim] for dim in ("x", "y", "z"))
+        return self.get_obstruction_mask(subslice.times, cell_centered=subslice.cell_centered, region=region)
 
     def coordinate_to_index(
         self,
