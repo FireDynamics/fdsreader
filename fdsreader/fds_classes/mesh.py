@@ -55,13 +55,19 @@ class Mesh:
         """Marks all cells which are blocked by an obstruction.
 
         :param times: All timesteps of the simulation.
-        :param region: Index ranges along x, y and z (with explicit start and stop) to which the mask is limited.
+        :param region: Index ranges along x, y and z, as slices without a step, to which the mask is limited.
             The whole mesh by default.
         :returns: A 4-dimensional array with time as first and x,y,z as last dimensions. The array
             depends on time as obstructions may be hidden as specific points in time.
         """
+        shape = self.dimension.shape(cell_centered=cell_centered)
         if region is None:
-            region = tuple(slice(0, n) for n in self.dimension.shape(cell_centered=cell_centered))
+            region = (slice(None),) * 3
+        if any(r.step not in (None, 1) for r in region):
+            raise ValueError(f"The region must not have a step, got {region}")
+        # Resolve open ends and negative indices like numpy indexing does
+        region = tuple(slice(*r.indices(n)[:2]) for r, n in zip(region, shape))
+        region = tuple(slice(r.start, max(r.start, r.stop)) for r in region)
         mask = np.ones((len(times),) + tuple(r.stop - r.start for r in region), dtype=bool)
         c = 1 if cell_centered else 0
 

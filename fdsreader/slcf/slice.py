@@ -378,24 +378,8 @@ class Slice(NumpyArrayMixin):
             # (sometimes only 6 decimal places, e.g. 1.0 and 1.000001)
             diff = coords[dim][1:] - coords[dim][:-1]
             coords[dim] = np.concatenate((coords[dim][:1], coords[dim][1:][diff > 0.000002]), axis=0)
-
-            if len(coords[dim]) == 0:
-                slice_coordinate = self.extent[dim][0]
-                nearest_coordinate = np.inf
-                for subslice in self._subslices.values():
-                    mesh_coords = subslice.mesh.coordinates[dim]
-                    idx = np.searchsorted(mesh_coords, slice_coordinate, side="left")
-                    if idx > 0 and (
-                        idx == mesh_coords.size
-                        or math.fabs(slice_coordinate - mesh_coords[idx - 1])
-                        < math.fabs(slice_coordinate - mesh_coords[idx])
-                    ):
-                        idx = idx - 1
-                    if math.fabs(mesh_coords[idx] - slice_coordinate) < math.fabs(
-                        nearest_coordinate - slice_coordinate
-                    ):
-                        nearest_coordinate = mesh_coords[idx]
-                coords[dim] = np.array([nearest_coordinate])
+            # Every subslice has at least one coordinate on each axis (SubSlice.get_coordinates falls back to the
+            # nearest one), so this is only empty for a slice without subslices
 
         return coords
 
