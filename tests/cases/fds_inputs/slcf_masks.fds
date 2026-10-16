@@ -8,8 +8,9 @@
 &SURF ID='FIRE', HRRPUA=1000.0 /
 &VENT XB=0.1,1.9,0.1,0.9,0.0,0.0, SURF_ID='FIRE' /
 &VENT XB=0.1,0.4,1.1,1.9,0.0,0.0, SURF_ID='FIRE' /
-&VENT MB='XMIN', SURF_ID='OPEN' / &VENT MB='XMAX', SURF_ID='OPEN' /
-&VENT MB='ZMAX', SURF_ID='OPEN' /
+&VENT DB='XMIN', SURF_ID='OPEN' /
+&VENT DB='XMAX', SURF_ID='OPEN' /
+&VENT DB='ZMAX', SURF_ID='OPEN' /
 
 Inside one mesh, across the mesh boundary, and up to the outside of the domain
 &OBST ID='Box', XB=0.3,0.7,0.3,0.6,0.2,0.6 /
