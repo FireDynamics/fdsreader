@@ -16,7 +16,7 @@ jobs:
       run_compat: ${{ steps.check.outputs.run_compat }}
       fds_version: ${{ steps.check.outputs.fds_version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - id: check
         run: |
           if [ -n "${{ inputs.fds_version }}" ]; then
@@ -41,10 +41,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           lfs: true
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
       - name: Download FDS
