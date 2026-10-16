@@ -3,7 +3,6 @@ import os
 import pickle
 import warnings
 from datetime import datetime, timezone
-from types import MappingProxyType
 from typing import AnyStr, Dict, List, Sequence, TextIO, Tuple, Union
 
 import numpy as np
@@ -304,24 +303,22 @@ class Simulation(SimulationLoaderMixin):
 
     # The .smv keywords and the methods that read what follows them, checked in this order: a keyword that is not
     # matched exactly is matched by the first entry it starts with ("prefix") or contains ("contains").
-    _EXACT_KEYWORDS = MappingProxyType(
-        {
-            "VERSION": "_read_version",
-            "FDSVERSION": "_read_version",
-            "CHID": "_read_chid",
-            "TITLE": "_read_title",
-            "TIMES": "_read_times",
-            "CSVF": "_read_csvf",
-            "HRRPUV_MINMAX": "_read_smoke3d_limits",
-            "TEMP_MINMAX": "_read_smoke3d_limits",
-            "HRRPUVCUT": "_read_hrrpuv_cutoff",
-            "TOFFSET": "_read_texture_origin",
-            "CLASS_OF_PARTICLES": "_read_particle_class",
-            "CLASS_OF_HUMANS": "_read_evac_class",
-            "SURFACE": "_read_surface",
-            "DEVICE": "_read_device",
-        }
-    )
+    _EXACT_KEYWORDS = {
+        "VERSION": "_read_version",
+        "FDSVERSION": "_read_version",
+        "CHID": "_read_chid",
+        "TITLE": "_read_title",
+        "TIMES": "_read_times",
+        "CSVF": "_read_csvf",
+        "HRRPUV_MINMAX": "_read_smoke3d_limits",
+        "TEMP_MINMAX": "_read_smoke3d_limits",
+        "HRRPUVCUT": "_read_hrrpuv_cutoff",
+        "TOFFSET": "_read_texture_origin",
+        "CLASS_OF_PARTICLES": "_read_particle_class",
+        "CLASS_OF_HUMANS": "_read_evac_class",
+        "SURFACE": "_read_surface",
+        "DEVICE": "_read_device",
+    }
     _KEYWORD_PATTERNS = (
         ("prefix", "GEOM", "_load_geoms"),
         ("prefix", "GRID", "_read_mesh"),
