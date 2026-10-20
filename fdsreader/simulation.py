@@ -5,7 +5,7 @@ import os
 import pickle
 import re
 import warnings
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import AnyStr, Dict, List, Sequence, TextIO, Tuple, Union
 
 import numpy as np
@@ -49,7 +49,7 @@ def _wall_times_to_utc(stamps: Sequence[str]) -> np.ndarray:
     for stamp in stamps:
         time = datetime.fromisoformat(stamp.strip())
         # Without an offset the stamp stays as written; astimezone would assume the local time zone
-        utc.append(time.astimezone(timezone.utc).replace(tzinfo=None) if time.tzinfo else time)
+        utc.append(time.astimezone(UTC).replace(tzinfo=None) if time.tzinfo else time)
     return np.array(utc, dtype="datetime64[ms]")
 
 

@@ -26,7 +26,7 @@ The Jupyter [explorer](https://fdsreader.readthedocs.io/en/latest/guide/explorer
 `pip install "fdsreader[notebook]"`. Its command line counterpart needs nothing beyond
 numpy and is always installed.
 
-fdsreader needs Python 3.10 or newer and reads output of FDS 6.7.5 and later; it is tested
+fdsreader needs Python 3.11 or newer and reads output of FDS 6.7.5 and later; it is tested
 against the latest FDS release. For complex geometry (`&GEOM`) from FDS 6.10 or newer, use fdsreader 1.12.1 or
 later. Details are in the [compatibility table](https://fdsreader.readthedocs.io/en/latest/guide/compatibility.html);
 if something does not read correctly, please [open an issue](https://github.com/FireDynamics/fdsreader/issues).
