@@ -78,7 +78,7 @@ jobs:
           done
       - name: Install fdsreader and run tests
         run: |
-          pip install ".[dev]"
+          pip install ".[dev,export,notebook]"
           cd tests/cases && for f in *.tgz; do tar -xzvf "$f"; done
           cd ../..
           FDS_FRESH_OUTPUT_DIR=/tmp/fds_out pytest tests/ -v

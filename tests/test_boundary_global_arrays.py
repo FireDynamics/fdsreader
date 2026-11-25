@@ -81,6 +81,9 @@ def test_unknown_quantity(sim):
 
 @pytest.mark.filterwarnings("ignore:invalid value encountered in cast:RuntimeWarning")
 def test_export_of_a_face_at_two_heights(sim, tmp_path):
+    pytest.importorskip("multiprocess")
+    pytest.importorskip("pathos")
+    pytest.importorskip("yaml")
     from fdsreader.export import export_obst_raw
 
     meta = export_obst_raw(sim.obstructions.get_by_id("Table"), str(tmp_path))
